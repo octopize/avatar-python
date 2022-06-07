@@ -29,6 +29,7 @@ doc-build:  # Build the docs
 
 lci: test-integration
 	poetry run blacken-docs docs/tutorial.md
+.PHONY: lci
 
 .DEFAULT_GOAL := help
 help: Makefile
