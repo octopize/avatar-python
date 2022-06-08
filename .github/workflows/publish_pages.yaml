@@ -12,6 +12,21 @@ jobs:
       with:
         python-version: 3.9
 
+    - name: Load cached Poetry installation
+      uses: actions/cache@v2
+      with:
+        path: ~/.local  # the path depends on the OS
+        key: poetry-1  # increment to reset cache
+
+    # will not install if it's already there (see previous cache step)
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.1.12
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
+
     # install deps (use cache if poetry.lock did not change)
     - name: Load cached venv
       id: cached-poetry-dependencies
@@ -21,9 +36,8 @@ jobs:
         key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
 
     - name: Install dependencies
-      uses: abatilo/actions-poetry@v2.1.4
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root\
+      run: poetry install --no-interaction
 
     - name: Build documentation
       run: |
