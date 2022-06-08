@@ -39,6 +39,10 @@ jobs:
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
 
+    - name: Install pandoc
+      run: |
+        sudo apt-get -y install--no-install-recommends pandoc
+
     - name: Build documentation
       run: |
         mkdir gh-pages
