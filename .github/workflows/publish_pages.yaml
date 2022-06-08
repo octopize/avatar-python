@@ -41,7 +41,7 @@ jobs:
 
     - name: Install pandoc
       run: |
-        sudo apt-get -y install--no-install-recommends pandoc
+        sudo apt-get -y install --no-install-recommends pandoc
 
     - name: Build documentation
       run: |
