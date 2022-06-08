@@ -2,12 +2,12 @@ import os
 
 from avatars.client import ApiClient
 from avatars.models import (
-    PatchDataset,
     ColumnDetail,
     ColumnType,
     DatasetResponse,
     JobCreate,
     JobParameters,
+    PatchDataset,
 )
 
 

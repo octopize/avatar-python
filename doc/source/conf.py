@@ -13,13 +13,16 @@
 import os
 import sys
 from typing import Optional
-sys.path.insert(0, os.path.abspath('../../avatars/'))  # Source code dir relative to this file
+
+sys.path.insert(
+    0, os.path.abspath("../../avatars/")
+)  # Source code dir relative to this file
 
 # -- Project information -----------------------------------------------------
 
-project = 'avatars'
-copyright = '2022, Octopize'
-author = 'Octopize'
+project = "avatars"
+copyright = "2022, Octopize"
+author = "Octopize"
 
 
 # -- General configuration ---------------------------------------------------
@@ -29,12 +32,12 @@ author = 'Octopize'
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
-    'sphinx.ext.napoleon',
+    "sphinx.ext.napoleon",
 ]
 
-autodoc_default_options  = {
-    "exclude-members" : "get_health_db, get_health_task, default_encoder, login",
-    "undoc-members" : True # weird, have to add this so that the avatars.client module is documented
+autodoc_default_options = {
+    "exclude-members": "get_health_db, get_health_task, default_encoder, login",
+    "undoc-members": True,  # weird, have to add this so that the avatars.client module is documented
 }
 autodoc_typehints_format = "short"
 # autodoc_typehints_format is not applied to attributes:
@@ -42,7 +45,7 @@ autodoc_typehints_format = "short"
 python_use_unqualified_type_names = True
 
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -55,8 +58,8 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'furo'
-html_static_path = ['_static']
+html_theme = "furo"
+html_static_path = ["_static"]
 
 
 def modify_class_signature(app, what, name, obj, options, signature, return_annotation):
@@ -67,10 +70,11 @@ def modify_class_signature(app, what, name, obj, options, signature, return_anno
     be in line with the designed use of the API.
     """
 
-    if signature and "client: ApiClient" in  signature :
+    if signature and "client: ApiClient" in signature:
         signature = "()"
 
     return (signature, return_annotation)
+
 
 def autodoc_skip_member(app, what, name, obj, skip, options) -> Optional[bool]:
     # Skip avatars.api.Auth
@@ -80,5 +84,5 @@ def autodoc_skip_member(app, what, name, obj, skip, options) -> Optional[bool]:
 
 
 def setup(app):
-    app.connect('autodoc-process-signature', modify_class_signature)
-    app.connect('autodoc-skip-member', autodoc_skip_member)
+    app.connect("autodoc-process-signature", modify_class_signature)
+    app.connect("autodoc-skip-member", autodoc_skip_member)

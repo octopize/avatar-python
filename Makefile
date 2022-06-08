@@ -27,9 +27,18 @@ doc-build:  # Build the docs
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)
 .PHONY: doc-build
 
-lci: test-integration
-	poetry run blacken-docs docs/tutorial.md
+lci: lint-fix lint test-integration doc-build
 .PHONY: lci
+
+lint-fix:
+	poetry run black avatars/ bin doc/source
+	poetry run blacken-docs docs/tutorial.md
+	poetry run isort avatars/ bin doc/source
+.PHONY: lint-fix
+
+lint:
+	poetry run bandit -r .
+.PHONY: lint
 
 .DEFAULT_GOAL := help
 help: Makefile
