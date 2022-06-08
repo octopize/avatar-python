@@ -13,7 +13,7 @@ test-integration: ## Do a simple integration test
 	poetry run python ./bin/markdowncode.py ./docs/tutorial.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
-DOC_OUTPUT_DIR := doc/build/html
+DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment variable. Uses in github actions
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
@@ -21,7 +21,6 @@ doc: doc-build  ## Build and open the docs
 .PHONY: doc
 
 doc-build:  # Build the docs
-	rm -rf $(DOC_OUTPUT_DIR)
 	pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
 	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)

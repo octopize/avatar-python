@@ -70,10 +70,12 @@ This is all you need to run and evaluate an avatarization:
 
    dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "rb"))
 
-   job = client.jobs.create_job(JobCreate(
-       dataset_id=dataset.id,
-       parameters=JobParameters(k=20),
-   ))
+   job = client.jobs.create_job(
+       JobCreate(
+           dataset_id=dataset.id,
+           parameters=JobParameters(k=20),
+       )
+   )
 
    job = client.jobs.get_job(job.id)
 

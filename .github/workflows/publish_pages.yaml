@@ -1,0 +1,38 @@
+on:
+  push:
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      # with:
+      #   fetch-depth: 0
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+
+    # install deps (use cache if poetry.lock did not change)
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      uses: abatilo/actions-poetry@v2.1.4
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root\
+
+    - name: Build documentation
+      run: |
+        mkdir gh-pages
+        touch gh-pages/.nojekyll
+        DOC_OUTPUT_DIR=gh-pages make doc-build
+
+    - name: Deploy documentation
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-pages
+        folder: gh-pages
