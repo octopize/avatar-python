@@ -1,3 +1,5 @@
+name: Publish documentation
+
 on:
   push:
     tags:
