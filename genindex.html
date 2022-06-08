@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+
+<html class="no-js">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><link href="#" rel="index" title="Index"/><link href="search.html" rel="search" title="Search"/>
+<meta content="sphinx-4.5.0, furo 2022.06.04.1" name="generator"><title>Index - avatars documentation</title>
+<link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
+<link href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" rel="stylesheet" type="text/css"/>
+<link href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" rel="stylesheet" type="text/css"/>
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-half" viewbox="0 0 24 24">
+<title>Auto light/dark mode</title>
+<svg class="icon-tabler-shadow" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M13 12h5"></path>
+<path d="M13 15h4"></path>
+<path d="M13 18h1"></path>
+<path d="M13 9h4"></path>
+<path d="M13 6h1"></path>
+</svg>
+</symbol>
+</svg>
+<input class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation">
+<div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+<div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<div class="visually-hidden">Toggle site navigation sidebar</div>
+<i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+</label>
+</div>
+<div class="header-center">
+<a href="index.html"><div class="brand">avatars  documentation</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+<span class="sidebar-brand-text">avatars  documentation</span>
+</a><form action="search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="client_and_api.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="theme-toggle-container theme-toggle-content">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+<article role="main">
+<section class="genindex-section">
+<h1 id="index">Index</h1>
+<div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#K"><strong>K</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#V"><strong>V</strong></a></div>
+</section>
+<section class="genindex-section" id="A">
+<h2>A</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.LoginResponse.access_token">access_token (avatars.models.LoginResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.UserRole.admin">admin (avatars.models.UserRole attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.DatasetResponse.analysis_duration">analysis_duration (avatars.models.DatasetResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.DatasetResponse.analysis_status">analysis_status (avatars.models.DatasetResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.AnalysisStatus">AnalysisStatus (class in avatars.models)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Datasets.analyze_dataset">analyze_dataset() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.client.ApiClient">ApiClient (class in avatars.client)</a>
+</li>
+<li><a href="client_and_api.html#avatars.client.ApiClient.authenticate">authenticate() (avatars.client.ApiClient method)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.AvatarizationResultResponse">AvatarizationResultResponse (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.Projections.avatars">avatars (avatars.models.Projections attribute)</a>
+</li>
+<li>
+    avatars.api
+
+        <ul>
+<li><a href="client_and_api.html#module-avatars.api">module</a>
+</li>
+</ul></li>
+<li>
+    avatars.client
+
+        <ul>
+<li><a href="client_and_api.html#module-avatars.client">module</a>
+</li>
+</ul></li>
+<li>
+    avatars.models
+
+        <ul>
+<li><a href="models.html#module-avatars.models">module</a>
+</li>
+</ul></li>
+<li><a href="models.html#avatars.models.AvatarizationResultResponse.avatars_dataset">avatars_dataset (avatars.models.AvatarizationResultResponse attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="B">
+<h2>B</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnType.bool">bool (avatars.models.ColumnType attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="C">
+<h2>C</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnType.category">category (avatars.models.ColumnType attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.Login.client_id">client_id (avatars.models.Login attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.Login.client_secret">client_secret (avatars.models.Login attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.JobParameters.column_weights">column_weights (avatars.models.JobParameters attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ColumnDetail">ColumnDetail (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.DatasetResponse.columns">columns (avatars.models.DatasetResponse attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.PatchDataset.columns">(avatars.models.PatchDataset attribute)</a>
+</li>
+</ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnType">ColumnType (class in avatars.models)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Datasets.create_dataset">create_dataset() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Jobs.create_job">create_job() (avatars.api.Jobs method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Users.create_user">create_user() (avatars.api.Users method)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateDataset">CreateDataset (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateUser">CreateUser (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="D">
+<h2>D</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobCreate.dataset_id">dataset_id (avatars.models.JobCreate attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.JobResponse.dataset_id">(avatars.models.JobResponse attribute)</a>
+</li>
+</ul></li>
+<li><a href="models.html#avatars.models.DatasetResponse">DatasetResponse (class in avatars.models)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Datasets">Datasets (class in avatars.api)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.HTTPValidationError.detail">detail (avatars.models.HTTPValidationError attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.AnalysisStatus.done">done (avatars.models.AnalysisStatus attribute)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Datasets.download_dataset">download_dataset() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="models.html#avatars.models.DatasetResponse.download_url">download_url (avatars.models.DatasetResponse attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="E">
+<h2>E</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ExplainedVariance">ExplainedVariance (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="F">
+<h2>F</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobStatus.failure">failure (avatars.models.JobStatus attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateDataset.file">file (avatars.models.CreateDataset attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="client_and_api.html#avatars.api.Users.find_users">find_users() (avatars.api.Users method)</a>
+</li>
+<li><a href="models.html#avatars.models.ColumnType.float">float (avatars.models.ColumnType attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="G">
+<h2>G</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="client_and_api.html#avatars.api.Datasets.get_dataset">get_dataset() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Datasets.get_dataset_correlations">get_dataset_correlations() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Metrics.get_explained_variance">get_explained_variance() (avatars.api.Metrics method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Health.get_health">get_health() (avatars.api.Health method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Jobs.get_job">get_job() (avatars.api.Jobs method)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="client_and_api.html#avatars.api.Metrics.get_job_projections">get_job_projections() (avatars.api.Metrics method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Users.get_me">get_me() (avatars.api.Users method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Users.get_user">get_user() (avatars.api.Users method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Metrics.get_variable_contributions">get_variable_contributions() (avatars.api.Metrics method)</a>
+</li>
+<li><a href="models.html#avatars.models.Login.grant_type">grant_type (avatars.models.Login attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="H">
+<h2>H</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.DatasetResponse.hash">hash (avatars.models.DatasetResponse attribute)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Health">Health (class in avatars.api)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.SecurityMetrics.hidden_rate">hidden_rate (avatars.models.SecurityMetrics attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.HTTPValidationError">HTTPValidationError (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="I">
+<h2>I</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.DatasetResponse.id">id (avatars.models.DatasetResponse attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.JobResponse.id">(avatars.models.JobResponse attribute)</a>
+</li>
+</ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnType.int">int (avatars.models.ColumnType attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="J">
+<h2>J</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobCreate">JobCreate (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.JobParameters">JobParameters (class in avatars.models)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobResponse">JobResponse (class in avatars.models)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Jobs">Jobs (class in avatars.api)</a>
+</li>
+<li><a href="models.html#avatars.models.JobStatus">JobStatus (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="K">
+<h2>K</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobParameters.k">k (avatars.models.JobParameters attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobParameters.k_impute">k_impute (avatars.models.JobParameters attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="L">
+<h2>L</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnDetail.label">label (avatars.models.ColumnDetail attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ValidationError.loc">loc (avatars.models.ValidationError attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.SecurityMetrics.local_cloaking">local_cloaking (avatars.models.SecurityMetrics attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.Login">Login (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.LoginResponse">LoginResponse (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="M">
+<h2>M</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.AvatarizationResultResponse.metrics">metrics (avatars.models.AvatarizationResultResponse attribute)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Metrics">Metrics (class in avatars.api)</a>
+</li>
+<li>
+    module
+
+        <ul>
+<li><a href="client_and_api.html#module-avatars.api">avatars.api</a>
+</li>
+<li><a href="client_and_api.html#module-avatars.client">avatars.client</a>
+</li>
+<li><a href="models.html#module-avatars.models">avatars.models</a>
+</li>
+</ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ValidationError.msg">msg (avatars.models.ValidationError attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="N">
+<h2>N</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.DatasetResponse.name">name (avatars.models.DatasetResponse attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.DatasetResponse.nb_lines">nb_lines (avatars.models.DatasetResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.JobParameters.ncp">ncp (avatars.models.JobParameters attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="P">
+<h2>P</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobCreate.parameters">parameters (avatars.models.JobCreate attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateUser.password">password (avatars.models.CreateUser attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.Login.password">(avatars.models.Login attribute)</a>
+</li>
+</ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="client_and_api.html#avatars.api.Datasets.patch_dataset">patch_dataset() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="models.html#avatars.models.PatchDataset">PatchDataset (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.JobStatus.pending">pending (avatars.models.JobStatus attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.Projections">Projections (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="R">
+<h2>R</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ExplainedVariance.ratio">ratio (avatars.models.ExplainedVariance attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ExplainedVariance.raw">raw (avatars.models.ExplainedVariance attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.Projections.records">records (avatars.models.Projections attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="client_and_api.html#avatars.client.ApiClient.request">request() (avatars.client.ApiClient method)</a>
+</li>
+<li><a href="models.html#avatars.models.JobResponse.result">result (avatars.models.JobResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateUser.role">role (avatars.models.CreateUser attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="S">
+<h2>S</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.Login.scope">scope (avatars.models.Login attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.SecurityMetrics">SecurityMetrics (class in avatars.models)</a>
+</li>
+<li><a href="models.html#avatars.models.JobParameters.seed">seed (avatars.models.JobParameters attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.AnalysisStatus.started">started (avatars.models.AnalysisStatus attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.JobStatus.started">(avatars.models.JobStatus attribute)</a>
+</li>
+</ul></li>
+<li><a href="models.html#avatars.models.JobResponse.status">status (avatars.models.JobResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.JobStatus.success">success (avatars.models.JobStatus attribute)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="T">
+<h2>T</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.LoginResponse.token_type">token_type (avatars.models.LoginResponse attribute)</a>
+</li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnDetail.type">type (avatars.models.ColumnDetail attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ValidationError.type">(avatars.models.ValidationError attribute)</a>
+</li>
+</ul></li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="U">
+<h2>U</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobStatus.unknown">unknown (avatars.models.JobStatus attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.UserRole.user">user (avatars.models.UserRole attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateUser.username">username (avatars.models.CreateUser attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.Login.username">(avatars.models.Login attribute)</a>
+</li>
+</ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.UserRole">UserRole (class in avatars.models)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Users">Users (class in avatars.api)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+<section class="genindex-section" id="V">
+<h2>V</h2>
+<table class="indextable genindextable" style="width: 100%"><tr>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ValidationError">ValidationError (class in avatars.models)</a>
+</li>
+</ul></td>
+</tr></table>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2022, Octopize
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+<div class="icons">
+</div>
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer no-toc">
+</aside>
+</div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+<script src="_static/jquery.js"></script>
+<script src="_static/underscore.js"></script>
+<script src="_static/doctools.js"></script>
+<script src="_static/scripts/furo.js"></script>
+</body>
+</html>
