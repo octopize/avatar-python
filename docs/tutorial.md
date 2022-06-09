@@ -9,10 +9,10 @@ You can refer to [the official installation guide](https://python-poetry.org/doc
 
 ## Installation
 
-In the root of the project, you can then simply run
+Install the package by pointing to the .whl file (replace path below).
 
 ```bash
-make install
+pip install "~/Downloads/avatars-0.X.X-py3-none-any.whl"
 ```
 
 to install the project dependencies.
