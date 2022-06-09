@@ -1,16 +1,36 @@
 # This file has been generated - DO NOT MODIFY
 
+from collections.abc import Mapping, Sequence
 from enum import Enum
 from io import BytesIO
 from json import loads as json_loads
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import httpx
 from pydantic import BaseModel
 
 from avatars.api import Auth, Datasets, Health, Jobs, Metrics, Users
 from avatars.models import Login
+
+
+def get_nested_value(
+    obj: Union[Mapping, Sequence], key: str, default: Any = None
+) -> Any:
+    """
+    Return value from (possibly) nested key in JSON dictionary.
+    """
+
+    if isinstance(obj, Sequence):
+        for item in obj:
+            return get_nested_value(item, key)
+
+    if isinstance(obj, Mapping):
+        if key in obj:
+            return obj[key]
+        return get_nested_value(list(obj.values()), key)
+
+    return default
 
 
 def default_encoder(obj: Any) -> Any:
@@ -92,7 +112,9 @@ class ApiClient:
             if "auth" in str(result.json()):
                 raise Exception("You are not authenticated.")
 
-            error_msg = result.json()["detail"][0]["msg"]
+            error_msg = get_nested_value(
+                result.json(), "message", default="Unknwon error"
+            )
             raise Exception(f"Got error in HTTP request: {method} {url}. {error_msg}")
 
         if result.headers["content-type"] == "application/json":
