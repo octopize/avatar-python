@@ -2,8 +2,9 @@ name: Publish documentation
 
 on:
   push:
-    tags:
-      - "*.*.*"
+    branches: [ $default-branch ]
+    paths:
+      - 'doc/source/**.rst'
 jobs:
   build-docs:
     runs-on: ubuntu-latest
