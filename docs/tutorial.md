@@ -81,6 +81,8 @@ dataset = client.datasets.download_dataset(job.result.avatars_dataset.id)
 
 You can pass the data to `create_dataset()` directly as a file handle.
 
+#### Using CSV files
+
 ```python
 # Using a context manager
 with open("fixtures/iris.csv", "r") as f:
@@ -88,6 +90,28 @@ with open("fixtures/iris.csv", "r") as f:
 
 # Inline
 dataset = client.datasets.create_dataset(request=open("fixtures/iris.csv", "r"))
+```
+
+#### With `pandas` dataframes
+
+If you are using `pandas`, and want to manipulate the dataframe before sending it to the engine,
+here's how you should proceed.
+
+```python
+import pandas as pd
+
+df = pd.read_csv("fixtures/iris.csv")
+
+# ... do some modifications on the dataset
+
+import io
+
+##  Convert pandas dataframe in a readable format for the engine
+buffer = io.BytesIO()  # The buffer will store the content of the dataframe
+df.to_csv(buffer, index=False)
+buffer.seek(0)
+
+dataset = client.datasets.create_dataset(buffer)
 ```
 
 ### Set parameters
