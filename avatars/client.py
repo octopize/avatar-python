@@ -10,6 +10,7 @@ import httpx
 from pydantic import BaseModel
 
 from avatars.api import Auth, Datasets, Health, Jobs, Metrics, Users
+from avatars.models import Login
 
 
 def default_encoder(obj: Any) -> Any:
@@ -17,8 +18,6 @@ def default_encoder(obj: Any) -> Any:
         return obj.value
     return str(obj)  # default
 
-
-from avatars.models import Login
 
 DEFAULT_TIMEOUT = 5
 
