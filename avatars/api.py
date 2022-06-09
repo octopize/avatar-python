@@ -3,6 +3,8 @@
 
 from io import BytesIO
 
+from tenacity import retry, retry_if_result, stop_after_delay, wait_fixed
+
 from avatars.models import (
     CreateDataset,
     CreateUser,
@@ -16,7 +18,6 @@ from avatars.models import (
     PatchDataset,
     Projections,
 )
-from tenacity import retry, retry_if_result, stop_after_delay, wait_fixed
 
 
 def _is_job_still_running(response):

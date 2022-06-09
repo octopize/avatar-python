@@ -7,8 +7,9 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import httpx
-from avatars.api import Auth, Datasets, Health, Jobs, Metrics, Users
 from pydantic import BaseModel
+
+from avatars.api import Auth, Datasets, Health, Jobs, Metrics, Users
 
 
 def default_encoder(obj: Any) -> Any:
