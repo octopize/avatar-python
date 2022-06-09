@@ -6,7 +6,7 @@ authors = ["Octopize <help@octopize.io>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 httpx = "^0.23.0"
 tenacity = "^8.0.1"
 pydantic = "^1.9.0"
