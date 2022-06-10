@@ -21,16 +21,14 @@ def get_nested_value(
     """
     Return value from (possibly) nested key in JSON dictionary.
     """
-
-    if isinstance(obj, Sequence):
+    if isinstance(obj, Sequence) and not isinstance(obj, str):
         for item in obj:
-            return get_nested_value(item, key)
+            return get_nested_value(item, key, default=default)
 
     if isinstance(obj, Mapping):
         if key in obj:
             return obj[key]
-        return get_nested_value(list(obj.values()), key)
-
+        return get_nested_value(list(obj.values()), key, default=default)
     return default
 
 
@@ -114,9 +112,11 @@ class ApiClient:
                 raise Exception("You are not authenticated.")
 
             error_msg = get_nested_value(
-                result.json(), "message", default="Unknown error"
+                result.json(), "message", default="Internal error"
             )
-            raise Exception(f"Got error in HTTP request: {method} {url}. {error_msg}")
+            raise Exception(
+                f"Got error in HTTP request {method} {url}. {result.status_code} {error_msg}"
+            )
 
         if result.headers["content-type"] == "application/json":
             return result.json()
