@@ -47,7 +47,7 @@ and authenticating:
 
    import os
 
-   # Change this to your actual server endpoint.
+   # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
    client = ApiClient(base_url=os.environ.get("BASE_URL"))
    client.authenticate(username="username", password="strong_password")
 
