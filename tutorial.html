@@ -181,8 +181,8 @@ guide</a> to install it.</p>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
-<p>In the root of the project, you can then simply run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make install
+<p>Install the package by pointing to the .whl file (replace path below).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">"~/Downloads/avatars-0.X.X-py3-none-any.whl"</span>
 </pre></div>
 </div>
 <p>to install the project dependencies.</p>
@@ -205,7 +205,7 @@ guide</a> to install it.</p>
 and authenticating:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 
-<span class="c1"># Change this to your actual server endpoint.</span>
+<span class="c1"># Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span>
 <span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">"strong_password"</span><span class="p">)</span>
 
@@ -245,8 +245,8 @@ and authenticating:</p>
 </section>
 <section id="avatarization-step-by-step">
 <h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this headline">#</a></h2>
-<section id="import-dataset">
-<h3>Import dataset<a class="headerlink" href="#import-dataset" title="Permalink to this headline">#</a></h3>
+<section id="manipulate-datasets">
+<h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this headline">#</a></h3>
 <p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.</p>
 <section id="using-csv-files">
 <h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this headline">#</a></h4>
@@ -277,6 +277,12 @@ sending it to the engine, here’s how you should proceed.</p>
 <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The data is received as a byte encoded string. If you want to read it
+into a pandas DataFrame, you can do it like this</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
@@ -394,7 +400,7 @@ main docs for details about each metric):</p>
 <li><a class="reference internal" href="#preliminary-steps">Preliminary steps</a></li>
 <li><a class="reference internal" href="#quickstart">Quickstart</a></li>
 <li><a class="reference internal" href="#avatarization-step-by-step">Avatarization step by step</a><ul>
-<li><a class="reference internal" href="#import-dataset">Import dataset</a><ul>
+<li><a class="reference internal" href="#manipulate-datasets">Manipulate datasets</a><ul>
 <li><a class="reference internal" href="#using-csv-files">Using CSV files</a></li>
 <li><a class="reference internal" href="#with-pandas-dataframes">With <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes</a></li>
 </ul>
