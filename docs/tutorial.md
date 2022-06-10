@@ -9,10 +9,10 @@ You can refer to [the official installation guide](https://python-poetry.org/doc
 
 ## Installation
 
-In the root of the project, you can then simply run
+Install the package by pointing to the .whl file (replace path below).
 
 ```bash
-make install
+pip install "~/Downloads/avatars-0.X.X-py3-none-any.whl"
 ```
 
 to install the project dependencies.
@@ -37,7 +37,7 @@ The only remaining step before using the API is setting the API endpoint and aut
 ```python
 import os
 
-# Change this to your actual server endpoint.
+# Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=os.environ.get("BASE_URL"))
 client.authenticate(username="username", password="strong_password")
 
