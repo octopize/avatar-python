@@ -114,7 +114,7 @@ class ApiClient:
                 raise Exception("You are not authenticated.")
 
             error_msg = get_nested_value(
-                result.json(), "message", default="Unknwon error"
+                result.json(), "message", default="Unknown error"
             )
             raise Exception(f"Got error in HTTP request: {method} {url}. {error_msg}")
 
