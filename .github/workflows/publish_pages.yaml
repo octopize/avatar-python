@@ -3,7 +3,7 @@ name: Publish documentation
 on:
   workflow_dispatch:
   push:
-    branches: [ $default-branch ]
+    branches: [ main ]
     paths:
       - 'doc/source/**'
 jobs:
