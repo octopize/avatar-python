@@ -88,8 +88,8 @@ This is all you need to run and evaluate an avatarization:
 Avatarization step by step
 --------------------------
 
-Import dataset
-~~~~~~~~~~~~~~
+Manipulate datasets
+~~~~~~~~~~~~~~~~~~~
 
 You can pass the data to ``create_dataset()`` directly as a file handle.
 
@@ -127,6 +127,14 @@ sending it to the engine, here’s how you should proceed.
    buffer.seek(0)
 
    dataset = client.datasets.create_dataset(buffer)
+
+The data is received as a byte encoded string. If you want to read it
+into a pandas DataFrame, you can do it like this
+
+.. code:: python
+
+   data = client.datasets.download_dataset(id=dataset.id)
+   dataframe = pd.read_csv(io.BytesIO(data))
 
 Set parameters
 ~~~~~~~~~~~~~~
