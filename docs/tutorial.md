@@ -68,7 +68,7 @@ job = client.jobs.create_job(
 
 job = client.jobs.get_job(job.id)
 
-metrics = job.result.metrics
+metrics = job.result.privacy_metrics
 print(f"got privacy metrics : {metrics}")
 
 # Download the avatars
@@ -160,7 +160,7 @@ job = client.jobs.get_job(id=job.id)
 # Once the avatarization is finished, you can retrieve the results of the avatarization,
 # most notably the privacy metrics
 result = job.result
-print(f"got metrics : {result.metrics}")
+print(f"got metrics : {result.privacy_metrics}")
 # For the full response, checkout the JobResponse class in models.py
 
 # You will also be able to manipulate the avatarized dataset.
@@ -181,6 +181,6 @@ print(avatars_df.head())
 You can retrieve the privacy metrics from the result object (see our main docs for details about each metric):
 
 ```python
-print(result.metrics.hidden_rate)
-print(result.metrics.local_cloaking)
+print(result.privacy_metrics.hidden_rate)
+print(result.privacy_metrics.local_cloaking)
 ```
