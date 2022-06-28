@@ -24,3 +24,7 @@ git tag $VERSION
 # 4. Push
 git push && git push --tags
 ```
+
+## Updating the documentation
+
+The documentation is automatically published to Github Pages using a [Github Action](./../.github/workflows/publish_pages.yaml).
