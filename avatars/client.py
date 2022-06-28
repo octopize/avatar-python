@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.2.8
+# API Version : 0.3.4
 
 from collections.abc import Mapping, Sequence
 from enum import Enum
@@ -21,6 +21,7 @@ def get_nested_value(
     """
     Return value from (possibly) nested key in JSON dictionary.
     """
+
     if isinstance(obj, Sequence) and not isinstance(obj, str):
         for item in obj:
             return get_nested_value(item, key, default=default)
@@ -29,6 +30,7 @@ def get_nested_value(
         if key in obj:
             return obj[key]
         return get_nested_value(list(obj.values()), key, default=default)
+
     return default
 
 
@@ -115,7 +117,7 @@ class ApiClient:
                 result.json(), "message", default="Internal error"
             )
             raise Exception(
-                f"Got error in HTTP request {method} {url}. {result.status_code} {error_msg}"
+                f"Got error in HTTP request: {method} {url}. {result.status_code} {error_msg}"
             )
 
         if result.headers["content-type"] == "application/json":
