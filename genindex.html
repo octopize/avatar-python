@@ -254,6 +254,8 @@
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ColumnType">ColumnType (class in avatars.models)</a>
 </li>
+<li><a href="models.html#avatars.models.SignalMetrics.correlation_difference_ratio">correlation_difference_ratio (avatars.models.SignalMetrics attribute)</a>
+</li>
 <li><a href="client_and_api.html#avatars.api.Datasets.create_dataset">create_dataset() (avatars.api.Datasets method)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Jobs.create_job">create_job() (avatars.api.Jobs method)</a>
@@ -296,10 +298,6 @@
 <section class="genindex-section" id="E">
 <h2>E</h2>
 <table class="indextable genindextable" style="width: 100%"><tr>
-<td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.JobResponse.error_message">error_message (avatars.models.JobResponse attribute)</a>
-</li>
-</ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ExplainedVariance">ExplainedVariance (class in avatars.models)</a>
 </li>
@@ -362,9 +360,13 @@
 </li>
 <li><a href="client_and_api.html#avatars.api.Health">Health (class in avatars.api)</a>
 </li>
+<li><a href="models.html#avatars.models.SignalMetrics.hellinger_mean">hellinger_mean (avatars.models.SignalMetrics attribute)</a>
+</li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.SecurityMetrics.hidden_rate">hidden_rate (avatars.models.SecurityMetrics attribute)</a>
+<li><a href="models.html#avatars.models.SignalMetrics.hellinger_std">hellinger_std (avatars.models.SignalMetrics attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.PrivacyMetrics.hidden_rate">hidden_rate (avatars.models.PrivacyMetrics attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.HTTPValidationError">HTTPValidationError (class in avatars.models)</a>
 </li>
@@ -429,7 +431,7 @@
 </li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.SecurityMetrics.local_cloaking">local_cloaking (avatars.models.SecurityMetrics attribute)</a>
+<li><a href="models.html#avatars.models.PrivacyMetrics.local_cloaking">local_cloaking (avatars.models.PrivacyMetrics attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.Login">Login (class in avatars.models)</a>
 </li>
@@ -442,8 +444,6 @@
 <h2>M</h2>
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.AvatarizationResultResponse.metrics">metrics (avatars.models.AvatarizationResultResponse attribute)</a>
-</li>
 <li><a href="client_and_api.html#avatars.api.Metrics">Metrics (class in avatars.api)</a>
 </li>
 <li>
@@ -490,13 +490,17 @@
 <li><a href="models.html#avatars.models.Login.password">(avatars.models.Login attribute)</a>
 </li>
 </ul></li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="client_and_api.html#avatars.api.Datasets.patch_dataset">patch_dataset() (avatars.api.Datasets method)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.PatchDataset">PatchDataset (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.JobStatus.pending">pending (avatars.models.JobStatus attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.AvatarizationResultResponse.privacy_metrics">privacy_metrics (avatars.models.AvatarizationResultResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.PrivacyMetrics">PrivacyMetrics (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.Projections">Projections (class in avatars.models)</a>
 </li>
@@ -530,9 +534,11 @@
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.Login.scope">scope (avatars.models.Login attribute)</a>
 </li>
-<li><a href="models.html#avatars.models.SecurityMetrics">SecurityMetrics (class in avatars.models)</a>
-</li>
 <li><a href="models.html#avatars.models.JobParameters.seed">seed (avatars.models.JobParameters attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.AvatarizationResultResponse.signal_metrics">signal_metrics (avatars.models.AvatarizationResultResponse attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.SignalMetrics">SignalMetrics (class in avatars.models)</a>
 </li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>

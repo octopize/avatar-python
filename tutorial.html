@@ -235,7 +235,7 @@ and authenticating:</p>
 
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
-<span class="n">metrics</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">metrics</span>
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got privacy metrics : </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># Download the avatars</span>
@@ -325,7 +325,7 @@ import from <code class="docutils literal notranslate"><span class="pre">avatars
 <span class="c1"># Once the avatarization is finished, you can retrieve the results of the avatarization,</span>
 <span class="c1"># most notably the privacy metrics</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got metrics : </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got metrics : </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="c1"># For the full response, checkout the JobResponse class in models.py</span>
 
 <span class="c1"># You will also be able to manipulate the avatarized dataset.</span>
@@ -346,8 +346,8 @@ import from <code class="docutils literal notranslate"><span class="pre">avatars
 <h3>Evaluate privacy and utility<a class="headerlink" href="#evaluate-privacy-and-utility" title="Permalink to this headline">#</a></h3>
 <p>You can retrieve the privacy metrics from the result object (see our
 main docs for details about each metric):</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">hidden_rate</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">local_cloaking</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="o">.</span><span class="n">hidden_rate</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="o">.</span><span class="n">local_cloaking</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

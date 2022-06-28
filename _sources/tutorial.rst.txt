@@ -79,7 +79,7 @@ This is all you need to run and evaluate an avatarization:
 
    job = client.jobs.get_job(job.id)
 
-   metrics = job.result.metrics
+   metrics = job.result.privacy_metrics
    print(f"got privacy metrics : {metrics}")
 
    # Download the avatars
@@ -179,7 +179,7 @@ Run avatarization
    # Once the avatarization is finished, you can retrieve the results of the avatarization,
    # most notably the privacy metrics
    result = job.result
-   print(f"got metrics : {result.metrics}")
+   print(f"got metrics : {result.privacy_metrics}")
    # For the full response, checkout the JobResponse class in models.py
 
    # You will also be able to manipulate the avatarized dataset.
@@ -202,5 +202,5 @@ main docs for details about each metric):
 
 .. code:: python
 
-   print(result.metrics.hidden_rate)
-   print(result.metrics.local_cloaking)
+   print(result.privacy_metrics.hidden_rate)
+   print(result.privacy_metrics.local_cloaking)
