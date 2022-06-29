@@ -2,10 +2,9 @@
 
 This Python client communicates with the avatarization engine. For more information about the concepts and avatarization, check out our main docs.
 
-## System prerequisites
+## Documentation
 
-We are using [poetry](https://python-poetry.org/) for managing our dependencies.
-You can refer to [the official installation guide](https://python-poetry.org/docs/#installation) to install it.
+The full documentation for the Python client is available here: https://python.docs.octopize.io/
 
 ## Installation
 
@@ -13,6 +12,8 @@ Install the package by pointing to the .whl file (replace path below).
 
 ```bash
 pip install "~/Downloads/avatars-0.X.X-py3-none-any.whl"
+# or, if you're using poetry (recommended)
+poetry add "~/Downloads/avatars-0.X.X-py3-none-any.whl"
 ```
 
 to install the project dependencies.
