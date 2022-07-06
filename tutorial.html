@@ -173,16 +173,17 @@
 <p>This Python client communicates with the avatarization engine. For more
 information about the concepts and avatarization, check out our main
 docs.</p>
-<section id="system-prerequisites">
-<h2>System prerequisites<a class="headerlink" href="#system-prerequisites" title="Permalink to this headline">#</a></h2>
-<p>We are using <a class="reference external" href="https://python-poetry.org/">poetry</a> for managing our
-dependencies. You can refer to <a class="reference external" href="https://python-poetry.org/docs/#installation">the official installation
-guide</a> to install it.</p>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">#</a></h2>
+<p>The full documentation for the Python client is available here:
+<a class="reference external" href="https://python.docs.octopize.io/">https://python.docs.octopize.io/</a></p>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
 <p>Install the package by pointing to the .whl file (replace path below).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">"~/Downloads/avatars-0.X.X-py3-none-any.whl"</span>
+<span class="c1"># or, if you're using poetry (recommended)</span>
+poetry add <span class="s2">"~/Downloads/avatars-0.X.X-py3-none-any.whl"</span>
 </pre></div>
 </div>
 <p>to install the project dependencies.</p>
@@ -224,7 +225,7 @@ and authenticating:</p>
 <span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span>
 <span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">"strong_password"</span><span class="p">)</span>
 
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">"fixtures/iris.csv"</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">))</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">"fixtures/iris.csv"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">))</span>
 
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span>
     <span class="n">JobCreate</span><span class="p">(</span>
@@ -247,15 +248,20 @@ and authenticating:</p>
 <h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this headline">#</a></h2>
 <section id="manipulate-datasets">
 <h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this headline">#</a></h3>
-<p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.</p>
+<p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.
+The file can be opened as bytes (<code class="docutils literal notranslate"><span class="pre">"rb"</span></code>) or as string <code class="docutils literal notranslate"><span class="pre">"r"</span></code> with
+<code class="docutils literal notranslate"><span class="pre">utf-8</span></code> encoding.</p>
 <section id="using-csv-files">
 <h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this headline">#</a></h4>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Using a context manager</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"fixtures/iris.csv"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">"fixtures/iris.csv"</span>
+
+<span class="c1"># Using a context manager</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
 
 <span class="c1"># Inline</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s2">"fixtures/iris.csv"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">))</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">))</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
@@ -272,17 +278,17 @@ sending it to the engine, here’s how you should proceed.</p>
 <span class="kn">import</span> <span class="nn">io</span>
 
 <span class="c1">##  Convert pandas dataframe in a readable format for the engine</span>
-<span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>  <span class="c1"># The buffer will store the content of the dataframe</span>
+<span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>  <span class="c1"># The buffer will store the content of the dataframe</span>
 <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The data is received as a byte encoded string. If you want to read it
-into a pandas DataFrame, you can do it like this</p>
+<p>The data is received as a string. If you want to read it into a pandas
+DataFrame, you can do it like this</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-<span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
@@ -334,10 +340,10 @@ import from <code class="docutils literal notranslate"><span class="pre">avatars
 <span class="n">avatars_dataset_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span>
 <span class="n">avatars_dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">avatars_dataset_id</span><span class="p">)</span>
 
-<span class="c1"># The returned dataset is a bytes-encoded CSV file</span>
-<span class="c1"># We'll use pandas to get the data into a dataframe and io.BytesIO to</span>
-<span class="c1"># transform the bytes into something understandable for pandas</span>
-<span class="n">avatars_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">avatars_dataset</span><span class="p">))</span>
+<span class="c1"># The returned dataset is a CSV file as string.</span>
+<span class="c1"># We'll use pandas to get the data into a dataframe and io.StringIO to</span>
+<span class="c1"># transform the string into something understandable for pandas</span>
+<span class="n">avatars_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">avatars_dataset</span><span class="p">))</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">avatars_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
@@ -394,7 +400,7 @@ main docs for details about each metric):</p>
 <div class="toc-tree">
 <ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
-<li><a class="reference internal" href="#system-prerequisites">System prerequisites</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#loading-the-library">Loading the library</a></li>
 <li><a class="reference internal" href="#preliminary-steps">Preliminary steps</a></li>
