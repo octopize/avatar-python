@@ -1,8 +1,9 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.3.5
+# API Version : 0.3.6
 
 
-from io import BytesIO
+from io import BytesIO, StringIO
+from typing import Union
 
 from tenacity import retry, retry_if_result, stop_after_delay, wait_fixed
 
@@ -49,7 +50,7 @@ class Datasets:
 
     def create_dataset(
         self,
-        request: BytesIO,
+        request: Union[StringIO, BytesIO],
     ) -> DatasetResponse:
         """Create a dataset from file upload.
 

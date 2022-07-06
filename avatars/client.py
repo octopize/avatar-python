@@ -1,18 +1,25 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.3.5
+# API Version : 0.3.6
 
+import sys
 from collections.abc import Mapping, Sequence
 from enum import Enum
-from io import BytesIO
+from io import BytesIO, StringIO
 from json import loads as json_loads
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import httpx
 from pydantic import BaseModel
 
 from avatars.api import Auth, Datasets, Health, Jobs, Metrics, Users
 from avatars.models import Login
+
+MAX_FILE_LENGTH = 1024 * 1024 * 1024
+
+
+class FileTooLarge(Exception):
+    pass
 
 
 def get_nested_value(
@@ -70,7 +77,7 @@ class ApiClient:
         params: Optional[Dict[str, Any]] = None,
         json: Optional[BaseModel] = None,
         form_data: Optional[BaseModel] = None,
-        file: Optional[BytesIO] = None,
+        file: Optional[Union[StringIO, BytesIO]] = None,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
         **kwargs: Dict[str, Any],
     ) -> Any:
@@ -87,15 +94,7 @@ class ApiClient:
         json_arg = json_loads(json.json(encoder=default_encoder)) if json else None
         form_data_arg = form_data.dict() if form_data else None
 
-        filename: str
-        try:
-            filename = str(Path(file.name).name)  # get basename only
-        except AttributeError:
-            # file is a memory buffer, not an actual file
-            filename = "file.csv"
-        # The dictionary key must be 'file' and you MUST pass in a filename
-        # else there is a request ValidationError on the server side
-        files_arg = {"file": (filename, file, "text/csv")} if file else None
+        files_arg = self._get_file_argument(file)
 
         with httpx.Client(timeout=timeout, base_url=self.base_url) as client:
             result = client.request(
@@ -123,4 +122,28 @@ class ApiClient:
         if result.headers["content-type"] == "application/json":
             return result.json()
         else:
-            return result.content
+            return result.text
+
+    def _get_file_argument(
+        self, file: Optional[Union[StringIO, BytesIO]]
+    ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
+
+        if not file:
+            return
+
+        filename = str(Path(file.name).name) if hasattr(file, "name") else "file.csv"
+
+        content = file.read(MAX_FILE_LENGTH)
+
+        if sys.getsizeof(content) >= MAX_FILE_LENGTH:
+            raise FileTooLarge(
+                f"The file size must not exceed {MAX_FILE_LENGTH / 1024 :.0f} MB."
+            )
+
+        encoded_content = (
+            content if isinstance(content, bytes) else content.encode("utf-8")
+        )
+
+        # The dictionary key must be 'file' and you MUST pass in a filename
+        # else there is a request ValidationError on the server side
+        return {"file": (filename, encoded_content, "text/csv")}
