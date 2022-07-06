@@ -20,8 +20,6 @@ to install the project dependencies.
 
 ## Loading the library
 
----
-
 Once installed, load the library:
 
 ```python
