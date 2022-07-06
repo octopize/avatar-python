@@ -5,12 +5,11 @@ This Python client communicates with the avatarization engine. For more
 information about the concepts and avatarization, check out our main
 docs.
 
-System prerequisites
---------------------
+Documentation
+-------------
 
-We are using `poetry <https://python-poetry.org/>`__ for managing our
-dependencies. You can refer to `the official installation
-guide <https://python-poetry.org/docs/#installation>`__ to install it.
+The full documentation for the Python client is available here:
+https://python.docs.octopize.io/
 
 Installation
 ------------
@@ -20,6 +19,8 @@ Install the package by pointing to the .whl file (replace path below).
 .. code:: bash
 
    pip install "~/Downloads/avatars-0.X.X-py3-none-any.whl"
+   # or, if you're using poetry (recommended)
+   poetry add "~/Downloads/avatars-0.X.X-py3-none-any.whl"
 
 to install the project dependencies.
 
@@ -95,20 +96,22 @@ Manipulate datasets
 
 You can pass the data to ``create_dataset()`` directly as a file handle.
 The file can be opened as bytes (``"rb"``) or as string ``"r"`` with
-``utf-8`` encoding. #### Using CSV files
+``utf-8`` encoding.
+
+Using CSV files
+^^^^^^^^^^^^^^^
 
 .. code:: python
 
+   filename = "fixtures/iris.csv"
+
    # Using a context manager
-   with open("fixtures/iris.csv", "r") as f:
+   with open(filename, "r") as f:
        dataset = client.datasets.create_dataset(request=f)
 
    # Inline
-   dataset = client.datasets.create_dataset(request=open("fixtures/iris.csv", "r"))
-   dataset = client.datasets.create_dataset(
-       request=open("fixtures/iris.csv", "r", encoding="utf-8")
-   )
-   dataset = client.datasets.create_dataset(request=open("fixtures/iris.csv", "rb"))
+   dataset = client.datasets.create_dataset(request=open(filename, "r"))
+   dataset = client.datasets.create_dataset(request=open(filename, "rb"))
 
 With ``pandas`` dataframes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -193,7 +196,7 @@ Run avatarization
    avatars_dataset_id = result.avatars_dataset.id
    avatars_dataset = client.datasets.download_dataset(id=avatars_dataset_id)
 
-   # The returned dataset is a string-encoded CSV file
+   # The returned dataset is a CSV file as string.
    # We'll use pandas to get the data into a dataframe and io.StringIO to
    # transform the string into something understandable for pandas
    avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
