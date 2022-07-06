@@ -5,7 +5,13 @@
 from io import BytesIO, StringIO
 from typing import Union
 
-from tenacity import retry, retry_if_result, stop_after_delay, wait_fixed
+from tenacity import (
+    Retrying,
+    retry,
+    retry_if_result,
+    stop_after_delay,
+    wait_exponential,
+)
 
 from avatars.models import (
     CreateDataset,
@@ -21,9 +27,19 @@ from avatars.models import (
     Projections,
 )
 
+DEFAULT_TIMEOUT = 60
 
-def _is_job_still_running(response):
+
+class JobNotFinished(Exception):
+    pass
+
+
+def _is_job_still_running(response) -> bool:
     return response.status in (JobStatus.pending, JobStatus.started)
+
+
+def _raise_custom_retry_error(retry_state) -> None:
+    raise JobNotFinished("The job is not yet finished. Call get_job again to retry.")
 
 
 class Auth:
@@ -39,6 +55,7 @@ class Auth:
             "method": "post",
             "url": f"/login",
         }
+
         return LoginResponse(
             **self.client.request(**kwargs, verify_auth=False, form_data=request)
         )
@@ -60,6 +77,7 @@ class Datasets:
             "method": "post",
             "url": f"/datasets",
         }
+
         return DatasetResponse(**self.client.request(**kwargs, file=request))
 
     def get_dataset(
@@ -71,6 +89,7 @@ class Datasets:
             "method": "get",
             "url": f"/datasets/{id}",
         }
+
         return DatasetResponse(**self.client.request(**kwargs))
 
     def patch_dataset(
@@ -83,6 +102,7 @@ class Datasets:
             "method": "patch",
             "url": f"/datasets/{id}",
         }
+
         return DatasetResponse(**self.client.request(**kwargs, json=request))
 
     def analyze_dataset(
@@ -94,6 +114,7 @@ class Datasets:
             "method": "post",
             "url": f"/datasets/{id}/analyze",
         }
+
         return DatasetResponse(**self.client.request(**kwargs))
 
     def get_dataset_correlations(
@@ -166,22 +187,30 @@ class Jobs:
             "method": "post",
             "url": f"/jobs",
         }
+
         return JobResponse(**self.client.request(**kwargs, json=request))
 
-    @retry(
-        stop=stop_after_delay(60),
-        wait=wait_fixed(1),
-        retry=retry_if_result(_is_job_still_running),
-    )
     def get_job(
         self,
         id: str,
+        timeout: int = DEFAULT_TIMEOUT,
     ) -> JobResponse:
         kwargs = {
             "method": "get",
             "url": f"/jobs/{id}",
         }
-        return JobResponse(**self.client.request(**kwargs))
+
+        retryer = Retrying(
+            stop=stop_after_delay(timeout),
+            wait=wait_exponential(multiplier=1, min=1, max=10),
+            retry_error_callback=_raise_custom_retry_error,
+            retry=retry_if_result(_is_job_still_running),
+        )
+
+        def get(**kwargs):
+            return JobResponse(**self.client.request(**kwargs))
+
+        return retryer(get, **kwargs)
 
 
 class Metrics:
@@ -197,6 +226,7 @@ class Metrics:
             "method": "get",
             "url": f"/projections/{job_id}",
         }
+
         return Projections(**self.client.request(**kwargs))
 
     def get_variable_contributions(
@@ -224,6 +254,7 @@ class Metrics:
             "method": "get",
             "url": f"/variance/{job_id}",
         }
+
         return ExplainedVariance(**self.client.request(**kwargs))
 
 
