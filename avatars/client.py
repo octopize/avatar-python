@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.3.6
+# API Version : 0.3.7
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -137,7 +137,7 @@ class ApiClient:
 
         if sys.getsizeof(content) >= MAX_FILE_LENGTH:
             raise FileTooLarge(
-                f"The file size must not exceed {MAX_FILE_LENGTH / 1024 :.0f} MB."
+                f"The file size must not exceed{MAX_FILE_LENGTH / 1024 : .0f} MB."
             )
 
         encoded_content = (
