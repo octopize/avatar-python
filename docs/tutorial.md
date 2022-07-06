@@ -58,7 +58,7 @@ import os
 client = ApiClient(base_url=os.environ.get("BASE_URL"))
 client.authenticate(username="username", password="strong_password")
 
-dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "rb"))
+dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
 
 job = client.jobs.create_job(
     JobCreate(
@@ -81,16 +81,20 @@ dataset = client.datasets.download_dataset(job.result.avatars_dataset.id)
 ### Manipulate datasets
 
 You can pass the data to `create_dataset()` directly as a file handle.
+The file can be opened as bytes (`"rb"`) or as string `"r"` with `utf-8` encoding.
 
 #### Using CSV files
 
 ```python
+filename = "fixtures/iris.csv"
+
 # Using a context manager
-with open("fixtures/iris.csv", "r") as f:
+with open(filename, "r") as f:
     dataset = client.datasets.create_dataset(request=f)
 
 # Inline
-dataset = client.datasets.create_dataset(request=open("fixtures/iris.csv", "r"))
+dataset = client.datasets.create_dataset(request=open(filename, "r"))
+dataset = client.datasets.create_dataset(request=open(filename, "rb"))
 ```
 
 #### With `pandas` dataframes
@@ -108,19 +112,19 @@ df = pd.read_csv("fixtures/iris.csv")
 import io
 
 ##  Convert pandas dataframe in a readable format for the engine
-buffer = io.BytesIO()  # The buffer will store the content of the dataframe
+buffer = io.StringIO()  # The buffer will store the content of the dataframe
 df.to_csv(buffer, index=False)
 buffer.seek(0)
 
 dataset = client.datasets.create_dataset(buffer)
 ```
 
-The data is received as a byte encoded string.
+The data is received as a string.
 If you want to read it into a pandas DataFrame, you can do it like this
 
 ```python
 data = client.datasets.download_dataset(id=dataset.id)
-dataframe = pd.read_csv(io.BytesIO(data))
+dataframe = pd.read_csv(io.StringIO(data))
 ```
 
 ### Set parameters
@@ -170,10 +174,10 @@ print(f"got metrics : {result.privacy_metrics}")
 avatars_dataset_id = result.avatars_dataset.id
 avatars_dataset = client.datasets.download_dataset(id=avatars_dataset_id)
 
-# The returned dataset is a bytes-encoded CSV file
-# We'll use pandas to get the data into a dataframe and io.BytesIO to
-# transform the bytes into something understandable for pandas
-avatars_df = pd.read_csv(io.BytesIO(avatars_dataset))
+# The returned dataset is a CSV file as string.
+# We'll use pandas to get the data into a dataframe and io.StringIO to
+# transform the string into something understandable for pandas
+avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
 print(avatars_df.head())
 ```
 
