@@ -145,12 +145,14 @@ from avatars.models import JobParameters
 parameters = JobParameters(k=5, ncp=7, seed=42)
 ```
 
-### Run avatarization
+### Launch a job
+
+One job corresponds to one avatarization.
 
 ```python
-# Pass the parameters and the dataset id to the JobCreate object...
 from avatars.models import JobCreate
 
+# Pass the parameters and the dataset id to the JobCreate object...
 job_create = JobCreate(dataset_id=dataset.id, parameters=parameters)
 
 # ... and launch the avatarization by passing the JobCreate object to the create_job method
@@ -161,7 +163,31 @@ job = client.jobs.create_job(request=job_create)
 # This call will block until the job is done or a timeout is expired.
 # You can call this function as often as you want.
 job = client.jobs.get_job(id=job.id)
+```
 
+#### Retry mechanism
+
+The `get_job` function periodically queries the avatarization engine to check if a given job is finished.
+This call will block until a given timeout has expired, and then return.
+After that timeout, if the job is not finished, it will raise an exception. However, the job is still running on the server. You can call `get_job` again, as many times as needed.
+If the job is finished, the call finishes too.
+
+You can modify this timeout by passing the `timeout` keyword to `get_job`.
+
+```python
+# Will periodically retry for 10 seconds
+job = client.jobs.get_job(id=job.id, timeout=10)
+```
+
+Sometimes, the job can fail. You can inspect the `Job` instance to see the status using `job.status`.
+
+```python
+print(job.status) # prints "JobStatus.success"
+```
+
+### Retrieving results
+
+```python
 # Once the avatarization is finished, you can retrieve the results of the avatarization,
 # most notably the privacy metrics
 result = job.result
