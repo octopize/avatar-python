@@ -312,11 +312,12 @@ import from <code class="docutils literal notranslate"><span class="pre">avatars
 </pre></div>
 </div>
 </section>
-<section id="run-avatarization">
-<h3>Run avatarization<a class="headerlink" href="#run-avatarization" title="Permalink to this headline">#</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pass the parameters and the dataset id to the JobCreate object...</span>
-<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span>
+<section id="launch-a-job">
+<h3>Launch a job<a class="headerlink" href="#launch-a-job" title="Permalink to this headline">#</a></h3>
+<p>One job corresponds to one avatarization.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span>
 
+<span class="c1"># Pass the parameters and the dataset id to the JobCreate object...</span>
 <span class="n">job_create</span> <span class="o">=</span> <span class="n">JobCreate</span><span class="p">(</span><span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
 
 <span class="c1"># ... and launch the avatarization by passing the JobCreate object to the create_job method</span>
@@ -327,8 +328,32 @@ import from <code class="docutils literal notranslate"><span class="pre">avatars
 <span class="c1"># This call will block until the job is done or a timeout is expired.</span>
 <span class="c1"># You can call this function as often as you want.</span>
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-
-<span class="c1"># Once the avatarization is finished, you can retrieve the results of the avatarization,</span>
+</pre></div>
+</div>
+<section id="retry-mechanism">
+<h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this headline">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">get_job</span></code> function periodically queries the avatarization engine
+to check if a given job is finished. This call will block until a given
+timeout has expired, and then return. After that timeout, if the job is
+not finished, it will raise an exception. However, the job is still
+running on the server. You can call <code class="docutils literal notranslate"><span class="pre">get_job</span></code> again, as many times as
+needed. If the job is finished, the call finishes too.</p>
+<p>You can modify this timeout by passing the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword to
+<code class="docutils literal notranslate"><span class="pre">get_job</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry for 10 seconds</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sometimes, the job can fail. You can inspect the <code class="docutils literal notranslate"><span class="pre">Job</span></code> instance to see
+the status using <code class="docutils literal notranslate"><span class="pre">job.status</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span> <span class="c1"># prints "JobStatus.success"</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="retrieving-results">
+<h3>Retrieving results<a class="headerlink" href="#retrieving-results" title="Permalink to this headline">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Once the avatarization is finished, you can retrieve the results of the avatarization,</span>
 <span class="c1"># most notably the privacy metrics</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got metrics : </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -412,7 +437,11 @@ main docs for details about each metric):</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#set-parameters">Set parameters</a></li>
-<li><a class="reference internal" href="#run-avatarization">Run avatarization</a></li>
+<li><a class="reference internal" href="#launch-a-job">Launch a job</a><ul>
+<li><a class="reference internal" href="#retry-mechanism">Retry mechanism</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#retrieving-results">Retrieving results</a></li>
 <li><a class="reference internal" href="#evaluate-privacy-and-utility">Evaluate privacy and utility</a></li>
 </ul>
 </li>
