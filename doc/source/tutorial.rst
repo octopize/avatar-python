@@ -63,7 +63,7 @@ This is all you need to run and evaluate an avatarization:
 .. code:: python
 
    from avatars.client import ApiClient
-   from avatars.models import JobCreate, JobParameters
+   from avatars.models import JobCreate, AvatarizationParameters
    import os
 
    client = ApiClient(base_url=os.environ.get("BASE_URL"))
@@ -74,12 +74,13 @@ This is all you need to run and evaluate an avatarization:
    job = client.jobs.create_job(
        JobCreate(
            dataset_id=dataset.id,
-           parameters=JobParameters(k=20),
+           parameters=AvatarizationParameters(k=20),
        )
    )
+   print(f"got job id: {job.id}")
 
    job = client.jobs.get_job(job.id)
-
+   print(job.result)
    metrics = job.result.privacy_metrics
    print(f"got privacy metrics : {metrics}")
 
@@ -154,14 +155,14 @@ description for each parameter is available in our main docs.
 -  ``k_impute``: default=5.
 -  ``seed``: default=NULL.
 
-These can all be set using the ``JobParameters`` object that you can
-import from ``avatars.models`` like so
+These can all be set using the ``AvatarizationParameters`` object that
+you can import from ``avatars.models`` like so
 
 .. code:: python
 
-   from avatars.models import JobParameters
+   from avatars.models import AvatarizationParameters
 
-   parameters = JobParameters(k=5, ncp=7, seed=42)
+   parameters = AvatarizationParameters(k=5, ncp=7, seed=42)
 
 Launch a job
 ~~~~~~~~~~~~
@@ -207,7 +208,18 @@ the status using ``job.status``.
 
 .. code:: python
 
-   print(job.status) # prints "JobStatus.success"
+   print(job.status)  # prints "JobStatus.success"
+
+Note that there is also the ``per_request_timeout`` keyword that is
+available. It specifies the timeout for one single request to the
+engine, while the ``timeout`` keyword is the global timeout that the
+method is allowed to take. In other methods, only ``timeout`` is
+available as only a single call is made.
+
+.. code:: python
+
+   # Will periodically retry for 10 seconds, and each request can take 2 seconds.
+   job = client.jobs.get_job(id=job.id, per_request_timeout=2, timeout=10)
 
 Retrieving results
 ~~~~~~~~~~~~~~~~~~
