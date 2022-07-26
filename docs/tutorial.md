@@ -176,7 +176,7 @@ If the job is finished, the call finishes too.
 You can modify this timeout by passing the `timeout` keyword to `get_job`.
 
 ```python
-# Will periodically retry for 10 seconds
+# Will periodically retry until 10 seconds have passed
 job = client.jobs.get_job(id=job.id, timeout=10)
 ```
 

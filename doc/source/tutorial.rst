@@ -200,7 +200,7 @@ You can modify this timeout by passing the ``timeout`` keyword to
 
 .. code:: python
 
-   # Will periodically retry for 10 seconds
+   # Will periodically retry until 10 seconds have passed
    job = client.jobs.get_job(id=job.id, timeout=10)
 
 Sometimes, the job can fail. You can inspect the ``Job`` instance to see
