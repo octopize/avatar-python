@@ -36,7 +36,7 @@ extensions = [
 ]
 
 autodoc_default_options = {
-    "exclude-members": "get_health_db, get_health_task, default_encoder, login",
+    "exclude-members": "get_health_db, get_health_task, login",
     "undoc-members": True,  # weird, have to add this so that the avatars.client module is documented
 }
 autodoc_typehints_format = "short"
@@ -66,7 +66,7 @@ def modify_class_signature(app, what, name, obj, options, signature, return_anno
     """Remove attribute 'client: ApiClient' from modified classnames.
 
     Using bin/modify_class_names.py, and this method here, we modify
-    'avatars.api.Health(client: ApiClient)' into 'avatars,ApiClient.health' to
+    'avatars.api.Health(client: ApiClient)' into 'avatars.ApiClient.health' to
     be in line with the designed use of the API.
     """
 

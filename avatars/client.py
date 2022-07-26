@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.3.7
+# API Version : 0.3.11
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -12,7 +12,16 @@ from typing import Any, Dict, Optional, Tuple, Union
 import httpx
 from pydantic import BaseModel
 
-from avatars.api import Auth, Datasets, Health, Jobs, Metrics, Users
+from avatars.api import (
+    DEFAULT_TIMEOUT,
+    Auth,
+    Datasets,
+    Health,
+    Jobs,
+    Metrics,
+    Stats,
+    Users,
+)
 from avatars.models import Login
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024
@@ -22,7 +31,7 @@ class FileTooLarge(Exception):
     pass
 
 
-def get_nested_value(
+def _get_nested_value(
     obj: Union[Mapping, Sequence], key: str, default: Any = None
 ) -> Any:
     """
@@ -31,27 +40,24 @@ def get_nested_value(
 
     if isinstance(obj, Sequence) and not isinstance(obj, str):
         for item in obj:
-            return get_nested_value(item, key, default=default)
+            return _get_nested_value(item, key, default=default)
 
     if isinstance(obj, Mapping):
         if key in obj:
             return obj[key]
-        return get_nested_value(list(obj.values()), key, default=default)
+        return _get_nested_value(list(obj.values()), key, default=default)
 
     return default
 
 
-def default_encoder(obj: Any) -> Any:
+def _default_encoder(obj: Any) -> Any:
     if isinstance(obj, Enum):
         return obj.value
     return str(obj)  # default
 
 
-DEFAULT_TIMEOUT = 5
-
-
 class ApiClient:
-    def __init__(self, base_url: str) -> None:
+    def __init__(self, base_url: str, timeout: Optional[int] = DEFAULT_TIMEOUT) -> None:
         self.base_url = base_url
 
         self.auth = Auth(self)
@@ -59,13 +65,18 @@ class ApiClient:
         self.health = Health(self)
         self.jobs = Jobs(self)
         self.metrics = Metrics(self)
+        self.stats = Stats(self)
         self.users = Users(self)
 
+        self.timeout = timeout
         self._headers = {"User-Agent": "avatar-python"}
 
-    def authenticate(self, username: str, password: str) -> None:
+    def authenticate(
+        self, username: str, password: str, timeout: Optional[int] = None
+    ) -> None:
         result = self.auth.login(
             Login(username=username, password=password),
+            timeout=timeout or self.timeout,
         )
         self._headers["Authorization"] = f"Bearer {result.access_token}"
 
@@ -78,7 +89,7 @@ class ApiClient:
         json: Optional[BaseModel] = None,
         form_data: Optional[BaseModel] = None,
         file: Optional[Union[StringIO, BytesIO]] = None,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = None,
         **kwargs: Dict[str, Any],
     ) -> Any:
         """Request the API."""
@@ -91,12 +102,14 @@ class ApiClient:
 
         # Custom encoder because UUID is not JSON serializable by httpx
         # and Enums need their value to be sent, e.g. 'int' instead of 'ColumnType.int'
-        json_arg = json_loads(json.json(encoder=default_encoder)) if json else None
+        json_arg = json_loads(json.json(encoder=_default_encoder)) if json else None
         form_data_arg = form_data.dict() if form_data else None
 
         files_arg = self._get_file_argument(file)
 
-        with httpx.Client(timeout=timeout, base_url=self.base_url) as client:
+        with httpx.Client(
+            timeout=timeout or self.timeout, base_url=self.base_url
+        ) as client:
             result = client.request(
                 method,
                 url,
@@ -112,7 +125,7 @@ class ApiClient:
             if "auth" in str(result.json()):
                 raise Exception("You are not authenticated.")
 
-            error_msg = get_nested_value(
+            error_msg = _get_nested_value(
                 result.json(), "message", default="Internal error"
             )
             raise Exception(
