@@ -3,13 +3,7 @@ Tutorial
 
 This Python client communicates with the avatarization engine. For more
 information about the concepts and avatarization, check out our main
-docs.
-
-Documentation
--------------
-
-The full documentation for the Python client is available here:
-https://python.docs.octopize.io/
+docs at https://docs.octopize.io.
 
 Installation
 ------------
