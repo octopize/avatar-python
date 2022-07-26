@@ -219,7 +219,7 @@ and authenticating:</p>
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">#</a></h2>
 <p>This is all you need to run and evaluate an avatarization:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
-<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span><span class="p">,</span> <span class="n">JobParameters</span>
+<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span>
@@ -230,12 +230,13 @@ and authenticating:</p>
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span>
     <span class="n">JobCreate</span><span class="p">(</span>
         <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="n">parameters</span><span class="o">=</span><span class="n">JobParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got job id: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got privacy metrics : </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -304,11 +305,11 @@ description for each parameter is available in our main docs.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">k_impute</span></code>: default=5.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">seed</span></code>: default=NULL.</p></li>
 </ul>
-<p>These can all be set using the <code class="docutils literal notranslate"><span class="pre">JobParameters</span></code> object that you can
-import from <code class="docutils literal notranslate"><span class="pre">avatars.models</span></code> like so</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobParameters</span>
+<p>These can all be set using the <code class="docutils literal notranslate"><span class="pre">AvatarizationParameters</span></code> object that
+you can import from <code class="docutils literal notranslate"><span class="pre">avatars.models</span></code> like so</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationParameters</span>
 
-<span class="n">parameters</span> <span class="o">=</span> <span class="n">JobParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ncp</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">parameters</span> <span class="o">=</span> <span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ncp</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -340,13 +341,22 @@ running on the server. You can call <code class="docutils literal notranslate"><
 needed. If the job is finished, the call finishes too.</p>
 <p>You can modify this timeout by passing the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword to
 <code class="docutils literal notranslate"><span class="pre">get_job</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry for 10 seconds</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry until 10 seconds have passed</span>
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Sometimes, the job can fail. You can inspect the <code class="docutils literal notranslate"><span class="pre">Job</span></code> instance to see
 the status using <code class="docutils literal notranslate"><span class="pre">job.status</span></code>.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span> <span class="c1"># prints "JobStatus.success"</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>  <span class="c1"># prints "JobStatus.success"</span>
+</pre></div>
+</div>
+<p>Note that there is also the <code class="docutils literal notranslate"><span class="pre">per_request_timeout</span></code> keyword that is
+available. It specifies the timeout for one single request to the
+engine, while the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword is the global timeout that the
+method is allowed to take. In other methods, only <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is
+available as only a single call is made.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry for 10 seconds, and each request can take 2 seconds.</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">per_request_timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
