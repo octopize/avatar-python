@@ -302,6 +302,16 @@ description for each parameter is available in our main docs.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">k</span></code> (required)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">column_weights</span></code>: default=1 for each variable</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ncp</span></code>: default=5.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">imputation</span></code>: imputation parameters type of
+<code class="docutils literal notranslate"><span class="pre">ImputationParameters</span></code>.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code>: number of neighbors for the knn imputation. default=5</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code>: method used for the imputation with <code class="docutils literal notranslate"><span class="pre">ImputeMethod</span></code>,
+default=<code class="docutils literal notranslate"><span class="pre">ImputeMethod.knn</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">training_fraction</span></code>: the fraction of the dataset used to train
+the knn imputer. default=1</p></li>
+</ul>
+</li>
 <li><p><code class="docutils literal notranslate"><span class="pre">k_impute</span></code>: default=5.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">seed</span></code>: default=NULL.</p></li>
 </ul>
