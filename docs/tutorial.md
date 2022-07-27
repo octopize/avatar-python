@@ -137,7 +137,6 @@ Here’s the list of parameters you can use for avatarization. The description f
   - `method`: method used for the imputation with `ImputeMethod`, default=`ImputeMethod.knn`)
   - `training_fraction`: the fraction of the dataset used to train the knn imputer. default=1
 
-- `k_impute`: default=5.
 - `seed`: default=NULL.
 
 These can all be set using the `AvatarizationParameters` object that you can import from `avatars.models` like so
