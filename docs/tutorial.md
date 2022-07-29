@@ -231,7 +231,7 @@ print(result.privacy_metrics.local_cloaking)
 You can evaluate your avatarization on different criteria: 
 
 - univariate 
-- bi-variate
+- bivariate
 - multivariate
   
 See [here](https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb) a jupyter notebook example to evaluate the quality of an avatarization. 
