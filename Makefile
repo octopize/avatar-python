@@ -6,7 +6,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 install:  ## Install the stack
-	poetry install --no-dev --extras "pandas"
+	poetry install --extras "pandas"
 .PHONY: install
 
 test-integration: ## Do a simple integration test
@@ -17,7 +17,7 @@ DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment vari
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
-	python -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
+	poetry run python -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
 .PHONY: doc
 
 doc-build:  # Build the docs
