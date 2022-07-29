@@ -234,4 +234,4 @@ You can evaluate your avatarization on different criteria:
 - bi-variate
 - multivariate
   
-Download a :download:`jupyter notebook <../../docs/evaluate_quality.ipynb>` example to evaluate the quality of an avatarization. 
+See [here](https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb) a jupyter notebook example to evaluate the quality of an avatarization. 
