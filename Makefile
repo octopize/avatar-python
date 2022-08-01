@@ -17,7 +17,7 @@ DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment vari
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
-	poetry run python -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
+	python -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
 .PHONY: doc
 
 doc-build:  # Build the docs
