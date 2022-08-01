@@ -6,7 +6,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 install:  ## Install the stack
-	poetry install --no-dev --extras "pandas"
+	poetry install --extras "pandas"
 .PHONY: install
 
 test-integration: ## Do a simple integration test

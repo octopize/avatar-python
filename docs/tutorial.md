@@ -217,7 +217,7 @@ avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
 print(avatars_df.head())
 ```
 
-### Evaluate privacy and utility
+### Evaluate privacy
 
 You can retrieve the privacy metrics from the result object (see our main docs for details about each metric):
 
@@ -225,3 +225,13 @@ You can retrieve the privacy metrics from the result object (see our main docs f
 print(result.privacy_metrics.hidden_rate)
 print(result.privacy_metrics.local_cloaking)
 ```
+
+### Evaluate utility 
+
+You can evaluate your avatarization on different criteria: 
+
+- univariate 
+- bivariate
+- multivariate
+  
+See [here](https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb) a jupyter notebook example to evaluate the quality of an avatarization. 
