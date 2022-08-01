@@ -307,7 +307,6 @@ default=<code class="docutils literal notranslate"><span class="pre">ImputeMetho
 the knn imputer. default=1</p></li>
 </ul>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">k_impute</span></code>: default=5.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">seed</span></code>: default=NULL.</p></li>
 </ul>
 <p>These can all be set using the <code class="docutils literal notranslate"><span class="pre">AvatarizationParameters</span></code> object that
@@ -388,14 +387,26 @@ available as only a single call is made.</p>
 </pre></div>
 </div>
 </section>
-<section id="evaluate-privacy-and-utility">
-<h3>Evaluate privacy and utility<a class="headerlink" href="#evaluate-privacy-and-utility" title="Permalink to this headline">#</a></h3>
+<section id="evaluate-privacy">
+<h3>Evaluate privacy<a class="headerlink" href="#evaluate-privacy" title="Permalink to this headline">#</a></h3>
 <p>You can retrieve the privacy metrics from the result object (see our
 main docs for details about each metric):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="o">.</span><span class="n">hidden_rate</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="o">.</span><span class="n">local_cloaking</span><span class="p">)</span>
 </pre></div>
 </div>
+</section>
+<section id="evaluate-utility">
+<h3>Evaluate utility<a class="headerlink" href="#evaluate-utility" title="Permalink to this headline">#</a></h3>
+<p>You can evaluate your avatarization on different criteria:</p>
+<ul class="simple">
+<li><p>univariate</p></li>
+<li><p>bivariate</p></li>
+<li><p>multivariate</p></li>
+</ul>
+<p>See
+<a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb">here</a>
+a jupyter notebook example to evaluate the quality of an avatarization.</p>
 </section>
 </section>
 </section>
@@ -456,7 +467,8 @@ main docs for details about each metric):</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#retrieving-results">Retrieving results</a></li>
-<li><a class="reference internal" href="#evaluate-privacy-and-utility">Evaluate privacy and utility</a></li>
+<li><a class="reference internal" href="#evaluate-privacy">Evaluate privacy</a></li>
+<li><a class="reference internal" href="#evaluate-utility">Evaluate utility</a></li>
 </ul>
 </li>
 </ul>
