@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.0
+# API Version : 0.4.3
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -19,6 +19,7 @@ from avatars.api import (
     Health,
     Jobs,
     Metrics,
+    Reports,
     Stats,
     Users,
 )
@@ -65,6 +66,7 @@ class ApiClient:
         self.health = Health(self)
         self.jobs = Jobs(self)
         self.metrics = Metrics(self)
+        self.reports = Reports(self)
         self.stats = Stats(self)
         self.users = Users(self)
 

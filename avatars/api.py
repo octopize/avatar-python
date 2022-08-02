@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.0
+# API Version : 0.4.3
 
 
 import itertools
@@ -21,14 +21,12 @@ from avatars.models import (
     LoginResponse,
     PatchDataset,
     Projections,
+    Report,
+    ReportCreate,
 )
 
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
-
-
-class JobNotFinished(Exception):
-    pass
 
 
 class Auth:
@@ -165,6 +163,18 @@ class Health:
         }
         return self.client.request(**kwargs, timeout=timeout)
 
+    def get_health_config(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        """Verify server health."""
+        kwargs = {
+            "method": "get",
+            "url": f"/health/config",
+        }
+        return self.client.request(**kwargs, timeout=timeout)
+
     def get_health_task(
         self,
         *,
@@ -221,6 +231,12 @@ class Jobs:
             "url": f"/jobs/{id}",
         }
 
+        def print_response(job_response: Job) -> None:
+            if not job_response.current_progress:
+                return
+            message = f"[{response.current_progress.created_at.time()}] Status: {response.status}, current_step: {response.current_progress.name}"
+            print("\033[K" + message, end="\r")
+
         retry_timeout = timeout or DEFAULT_RETRY_TIMEOUT
 
         start = time.time()
@@ -236,7 +252,10 @@ class Jobs:
             timeout = per_request_timeout  # to pass to client.request
             response = Job(**self.client.request(**kwargs, timeout=timeout))
             if not response.status in (JobStatus.pending, JobStatus.started):
+                print_response(response)
                 return response
+            else:
+                print_response(response)
 
             # Sleep, but not longer than timeout.
             time_to_sleep = min(next(sleep_interval), retry_timeout - current)
@@ -244,9 +263,7 @@ class Jobs:
 
             current = time.time() - start
 
-        raise JobNotFinished(
-            "The job is not yet finished. Call get_job again to retry."
-        )
+        return response
 
 
 class Metrics:
@@ -298,6 +315,38 @@ class Metrics:
         }
 
         return ExplainedVariance(**self.client.request(**kwargs, timeout=timeout))
+
+
+class Reports:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def create_report(
+        self,
+        request: ReportCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report."""
+        kwargs = {
+            "method": "post",
+            "url": f"/reports",
+        }
+
+        return Report(**self.client.request(**kwargs, json=request, timeout=timeout))
+
+    def download_report(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        """Download a report."""
+        kwargs = {
+            "method": "get",
+            "url": f"/reports/{id}/download",
+        }
+        return self.client.request(**kwargs, timeout=timeout)
 
 
 class Stats:
