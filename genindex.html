@@ -258,20 +258,25 @@
 </ul></li>
 <li><a href="models.html#avatars.models.ColumnType">ColumnType (class in avatars.models)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.JobProgress.completion_rate_100">completion_rate_100 (avatars.models.JobProgress attribute)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.SignalMetrics.correlation_difference_ratio">correlation_difference_ratio (avatars.models.SignalMetrics attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Datasets.create_dataset">create_dataset() (avatars.api.Datasets method)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Jobs.create_job">create_job() (avatars.api.Jobs method)</a>
 </li>
+<li><a href="client_and_api.html#avatars.api.Reports.create_report">create_report() (avatars.api.Reports method)</a>
+</li>
 <li><a href="client_and_api.html#avatars.api.Users.create_user">create_user() (avatars.api.Users method)</a>
 </li>
 <li><a href="models.html#avatars.models.JobProgress.created_at">created_at (avatars.models.JobProgress attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.Report.created_at">(avatars.models.Report attribute)</a>
 </li>
+</ul></li>
 <li><a href="models.html#avatars.models.CreateDataset">CreateDataset (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.CreateUser">CreateUser (class in avatars.models)</a>
@@ -294,18 +299,23 @@
 </li>
 <li><a href="client_and_api.html#avatars.api.Datasets">Datasets (class in avatars.api)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ColumnType.datetime">datetime (avatars.models.ColumnType attribute)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.HTTPValidationError.detail">detail (avatars.models.HTTPValidationError attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.AnalysisStatus.done">done (avatars.models.AnalysisStatus attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Datasets.download_dataset">download_dataset() (avatars.api.Datasets method)</a>
 </li>
-<li><a href="models.html#avatars.models.DatasetResponse.download_url">download_url (avatars.models.DatasetResponse attribute)</a>
+<li><a href="client_and_api.html#avatars.api.Reports.download_report">download_report() (avatars.api.Reports method)</a>
 </li>
+<li><a href="models.html#avatars.models.DatasetResponse.download_url">download_url (avatars.models.DatasetResponse attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.Report.download_url">(avatars.models.Report attribute)</a>
+</li>
+</ul></li>
 </ul></td>
 </tr></table>
 </section>
@@ -357,6 +367,8 @@
 </li>
 <li><a href="client_and_api.html#avatars.api.Health.get_health">get_health() (avatars.api.Health method)</a>
 </li>
+<li><a href="client_and_api.html#avatars.api.Health.get_health_config">get_health_config() (avatars.api.Health method)</a>
+</li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="client_and_api.html#avatars.api.Jobs.get_job">get_job() (avatars.api.Jobs method)</a>
@@ -403,11 +415,13 @@
 <ul>
 <li><a href="models.html#avatars.models.Job.id">(avatars.models.Job attribute)</a>
 </li>
-</ul></li>
-<li><a href="models.html#avatars.models.AvatarizationParameters.imputation">imputation (avatars.models.AvatarizationParameters attribute)</a>
+<li><a href="models.html#avatars.models.Report.id">(avatars.models.Report attribute)</a>
 </li>
+</ul></li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.AvatarizationParameters.imputation">imputation (avatars.models.AvatarizationParameters attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.ImputationParameters">ImputationParameters (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.ImputeMethod">ImputeMethod (class in avatars.models)</a>
@@ -423,12 +437,15 @@
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.Job">Job (class in avatars.models)</a>
 </li>
-<li><a href="models.html#avatars.models.JobCreate">JobCreate (class in avatars.models)</a>
+<li><a href="models.html#avatars.models.Report.job_id">job_id (avatars.models.Report attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ReportCreate.job_id">(avatars.models.ReportCreate attribute)</a>
 </li>
-<li><a href="client_and_api.html#avatars.api.JobNotFinished">JobNotFinished</a>
-</li>
+</ul></li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobCreate">JobCreate (class in avatars.models)</a>
+</li>
 <li><a href="models.html#avatars.models.JobProgress">JobProgress (class in avatars.models)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Jobs">Jobs (class in avatars.api)</a>
@@ -563,8 +580,14 @@
 </li>
 <li><a href="models.html#avatars.models.Projections.records">records (avatars.models.Projections attribute)</a>
 </li>
+<li><a href="models.html#avatars.models.Report">Report (class in avatars.models)</a>
+</li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ReportCreate">ReportCreate (class in avatars.models)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Reports">Reports (class in avatars.api)</a>
+</li>
 <li><a href="client_and_api.html#avatars.client.ApiClient.request">request() (avatars.client.ApiClient method)</a>
 </li>
 <li><a href="models.html#avatars.models.Job.result">result (avatars.models.Job attribute)</a>
@@ -610,10 +633,12 @@
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.LoginResponse.token_type">token_type (avatars.models.LoginResponse attribute)</a>
 </li>
-<li><a href="models.html#avatars.models.ImputationParameters.training_fraction">training_fraction (avatars.models.ImputationParameters attribute)</a>
+<li><a href="models.html#avatars.models.Job.traceback">traceback (avatars.models.Job attribute)</a>
 </li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ImputationParameters.training_fraction">training_fraction (avatars.models.ImputationParameters attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.ColumnDetail.type">type (avatars.models.ColumnDetail attribute)</a>
 <ul>
 <li><a href="models.html#avatars.models.ValidationError.type">(avatars.models.ValidationError attribute)</a>
@@ -629,6 +654,8 @@
 <li><a href="models.html#avatars.models.JobStatus.unknown">unknown (avatars.models.JobStatus attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.UserRole.user">user (avatars.models.UserRole attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.Report.user_id">user_id (avatars.models.Report attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.CreateUser.username">username (avatars.models.CreateUser attribute)</a>
 <ul>

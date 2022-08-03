@@ -192,10 +192,9 @@ Retry mechanism
 
 The ``get_job`` function periodically queries the avatarization engine
 to check if a given job is finished. This call will block until a given
-timeout has expired, and then return. After that timeout, if the job is
-not finished, it will raise an exception. However, the job is still
-running on the server. You can call ``get_job`` again, as many times as
-needed. If the job is finished, the call finishes too.
+timeout has expired, and then return. However, the job is still running
+on the server. You can call ``get_job`` again, as many times as needed.
+If the job is finished, the call finishes too.
 
 You can modify this timeout by passing the ``timeout`` keyword to
 ``get_job``.

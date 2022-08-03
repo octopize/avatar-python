@@ -339,10 +339,9 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 <h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this headline">#</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">get_job</span></code> function periodically queries the avatarization engine
 to check if a given job is finished. This call will block until a given
-timeout has expired, and then return. After that timeout, if the job is
-not finished, it will raise an exception. However, the job is still
-running on the server. You can call <code class="docutils literal notranslate"><span class="pre">get_job</span></code> again, as many times as
-needed. If the job is finished, the call finishes too.</p>
+timeout has expired, and then return. However, the job is still running
+on the server. You can call <code class="docutils literal notranslate"><span class="pre">get_job</span></code> again, as many times as needed.
+If the job is finished, the call finishes too.</p>
 <p>You can modify this timeout by passing the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword to
 <code class="docutils literal notranslate"><span class="pre">get_job</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry until 10 seconds have passed</span>
