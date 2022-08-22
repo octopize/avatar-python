@@ -108,7 +108,7 @@ df = pd.read_csv("fixtures/iris.csv")
 
 import io
 
-##  Convert pandas dataframe in a readable format for the engine
+# Convert pandas dataframe in a readable format for the engine
 buffer = io.StringIO()  # The buffer will store the content of the dataframe
 df.to_csv(buffer, index=False)
 buffer.seek(0)
@@ -226,12 +226,12 @@ print(result.privacy_metrics.hidden_rate)
 print(result.privacy_metrics.local_cloaking)
 ```
 
-### Evaluate utility 
+### Evaluate utility
 
-You can evaluate your avatarization on different criteria: 
+You can evaluate your avatarization on different criteria:
 
-- univariate 
+- univariate
 - bivariate
 - multivariate
-  
-See [here](https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb) a jupyter notebook example to evaluate the quality of an avatarization. 
+
+See [here](https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb) a jupyter notebook example to evaluate the quality of an avatarization.
