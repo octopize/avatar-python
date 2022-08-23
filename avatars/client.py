@@ -19,6 +19,7 @@ from avatars.api import (
     Health,
     Jobs,
     Metrics,
+    PandasIntegration,
     Reports,
     Stats,
     Users,
@@ -69,6 +70,7 @@ class ApiClient:
         self.reports = Reports(self)
         self.stats = Stats(self)
         self.users = Users(self)
+        self.pandas = PandasIntegration(self)
 
         self.timeout = timeout
         self._headers = {"User-Agent": "avatar-python"}

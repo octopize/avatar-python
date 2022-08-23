@@ -137,6 +137,23 @@ DataFrame, you can do it like this
    data = client.datasets.download_dataset(id=dataset.id)
    dataframe = pd.read_csv(io.StringIO(data))
 
+Alternative way with pandas dataframe
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note that this method will keep the dtypes of your dataframe.
+
+.. code:: python
+
+   df = pd.read_csv("fixtures/iris.csv")
+
+   # ... do some modifications on the dataset and on dtypes
+
+   dataset = client.pandas.upload_dataframe(df)
+
+   # ... perform the avatarization
+
+   df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
+
+
 Set parameters
 ~~~~~~~~~~~~~~
 

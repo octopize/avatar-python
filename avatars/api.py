@@ -5,11 +5,13 @@
 import itertools
 import time
 from io import BytesIO, StringIO
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from avatars import client
 from avatars.models import (
     ClusterStats,
+    ColumnDetail,
+    ColumnType,
     CreateDataset,
     CreateUser,
     DatasetResponse,
@@ -25,8 +27,26 @@ from avatars.models import (
     ReportCreate,
 )
 
+if TYPE_CHECKING:
+    import pandas as pd
+
+
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
+
+
+def to_common_type(s: str) -> Optional[ColumnType]:
+    if "float" in s:
+        return ColumnType.float
+    if "int" in s:
+        return ColumnType.int
+    if "bool" in s:
+        return ColumnType.bool
+    if "datetime" in s:
+        return ColumnType.datetime
+    if "object" in s:
+        return ColumnType.category
+    return None
 
 
 class Auth:
@@ -422,6 +442,44 @@ class Users:
             "url": f"/users/{username}",
         }
         return self.client.request(**kwargs, timeout=timeout)
+
+
+class PandasIntegration:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def upload_dataframe(
+        self, request: "pd.DataFrame", *, timeout: Optional[int] = DEFAULT_TIMEOUT
+    ) -> None:
+        buffer = StringIO()
+        request.to_csv(buffer, index=False)
+        buffer.seek(0)
+
+        dataset = self.client.datasets.create_dataset(buffer, timeout=timeout)
+        df_types = request.dtypes
+        self.client.datasets.patch_dataset(
+            id=dataset.id,
+            request=PatchDataset(
+                columns=[
+                    ColumnDetail(type=to_common_type(str(e)), label=i)
+                    for i, e in zip(df_types.index, df_types)
+                ]
+            ),
+        )
+
+        return dataset
+
+    def download_dataframe(self, id: str, *, timeout: Optional[int] = DEFAULT_TIMEOUT):
+        import pandas as pd
+
+        dataset_info = self.client.datasets.get_dataset(id, timeout=timeout)
+        dataset = self.client.datasets.download_dataset(id, timeout=timeout)
+        dataset_io = StringIO(dataset)
+        dataset_io.seek(0)
+        df = pd.read_csv(
+            dataset_io, dtype={c.label: c.type.value for c in dataset_info.columns}
+        )
+        return df
 
 
 # This file has been generated - DO NOT MODIFY
