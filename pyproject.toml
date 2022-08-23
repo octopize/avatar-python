@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "avatars"
-version = "0.1.8"
+version = "0.1.10"
 description = "Python Interface for Octopize's Avatarization Engine"
 authors = ["Octopize <help@octopize.io>"]
 license = "Apache-2.0"
