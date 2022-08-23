@@ -244,25 +244,18 @@ and authenticating:</p>
 <h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this headline">#</a></h2>
 <section id="manipulate-datasets">
 <h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this headline">#</a></h3>
-<p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.
-The file can be opened as bytes (<code class="docutils literal notranslate"><span class="pre">"rb"</span></code>) or as string <code class="docutils literal notranslate"><span class="pre">"r"</span></code> with
-<code class="docutils literal notranslate"><span class="pre">utf-8</span></code> encoding.</p>
+<p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.</p>
 <section id="using-csv-files">
 <h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this headline">#</a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">"fixtures/iris.csv"</span>
 
-<span class="c1"># Using a context manager</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
-
-<span class="c1"># Inline</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">))</span>
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">))</span>
 </pre></div>
 </div>
 </section>
-<section id="with-pandas-dataframes">
-<h4>With <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes<a class="headerlink" href="#with-pandas-dataframes" title="Permalink to this headline">#</a></h4>
+<section id="using-pandas-dataframes">
+<h4>Using <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes<a class="headerlink" href="#using-pandas-dataframes" title="Permalink to this headline">#</a></h4>
 <p>If you are using <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, and want to manipulate the dataframe before
 sending it to the engine, here’s how you should proceed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -271,26 +264,19 @@ sending it to the engine, here’s how you should proceed.</p>
 
 <span class="c1"># ... do some modifications on the dataset</span>
 
-<span class="kn">import</span> <span class="nn">io</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-<span class="c1"># Convert pandas dataframe in a readable format for the engine</span>
-<span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>  <span class="c1"># The buffer will store the content of the dataframe</span>
-<span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>
+<span class="c1"># ... run the avatarization</span>
 </pre></div>
 </div>
-<p>The data is received as a string. If you want to read it into a pandas
-DataFrame, you can do it like this</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-<span class="n">dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<p>Then receive the generated avatars as a pandas DataFrame:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">avatars_df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas</span><span class="o">.</span><span class="n">download_dataframe</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 </section>
-<section id="set-parameters">
-<h3>Set parameters<a class="headerlink" href="#set-parameters" title="Permalink to this headline">#</a></h3>
+<section id="setting-the-avatarization-parameters">
+<h3>Setting the avatarization parameters<a class="headerlink" href="#setting-the-avatarization-parameters" title="Permalink to this headline">#</a></h3>
 <p>Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.</p>
 <ul class="simple">
@@ -457,10 +443,10 @@ a jupyter notebook example to evaluate the quality of an avatarization.</p>
 <li><a class="reference internal" href="#avatarization-step-by-step">Avatarization step by step</a><ul>
 <li><a class="reference internal" href="#manipulate-datasets">Manipulate datasets</a><ul>
 <li><a class="reference internal" href="#using-csv-files">Using CSV files</a></li>
-<li><a class="reference internal" href="#with-pandas-dataframes">With <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes</a></li>
+<li><a class="reference internal" href="#using-pandas-dataframes">Using <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#set-parameters">Set parameters</a></li>
+<li><a class="reference internal" href="#setting-the-avatarization-parameters">Setting the avatarization parameters</a></li>
 <li><a class="reference internal" href="#launch-a-job">Launch a job</a><ul>
 <li><a class="reference internal" href="#retry-mechanism">Retry mechanism</a></li>
 </ul>
