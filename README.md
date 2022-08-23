@@ -11,3 +11,7 @@ This software is made available through the Apache License 2.0
 ## Contact
 
 help@octopize.io
+
+## Releasing
+
+See internal docs.

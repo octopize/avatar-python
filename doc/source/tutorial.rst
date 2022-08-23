@@ -88,8 +88,6 @@ Manipulate datasets
 ~~~~~~~~~~~~~~~~~~~
 
 You can pass the data to ``create_dataset()`` directly as a file handle.
-The file can be opened as bytes (``"rb"``) or as string ``"r"`` with
-``utf-8`` encoding.
 
 Using CSV files
 ^^^^^^^^^^^^^^^
@@ -98,16 +96,11 @@ Using CSV files
 
    filename = "fixtures/iris.csv"
 
-   # Using a context manager
    with open(filename, "r") as f:
        dataset = client.datasets.create_dataset(request=f)
 
-   # Inline
-   dataset = client.datasets.create_dataset(request=open(filename, "r"))
-   dataset = client.datasets.create_dataset(request=open(filename, "rb"))
-
-With ``pandas`` dataframes
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using ``pandas`` dataframes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using ``pandas``, and want to manipulate the dataframe before
 sending it to the engine, here’s how you should proceed.
@@ -120,42 +113,18 @@ sending it to the engine, here’s how you should proceed.
 
    # ... do some modifications on the dataset
 
-   import io
-
-   ##  Convert pandas dataframe in a readable format for the engine
-   buffer = io.StringIO()  # The buffer will store the content of the dataframe
-   df.to_csv(buffer, index=False)
-   buffer.seek(0)
-
-   dataset = client.datasets.create_dataset(buffer)
-
-The data is received as a string. If you want to read it into a pandas
-DataFrame, you can do it like this
-
-.. code:: python
-
-   data = client.datasets.download_dataset(id=dataset.id)
-   dataframe = pd.read_csv(io.StringIO(data))
-
-Alternative way with pandas dataframe
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Note that this method will keep the dtypes of your dataframe.
-
-.. code:: python
-
-   df = pd.read_csv("fixtures/iris.csv")
-
-   # ... do some modifications on the dataset and on dtypes
-
    dataset = client.pandas.upload_dataframe(df)
 
-   # ... perform the avatarization
+   # ... run the avatarization
 
-   df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
+Then receive the generated avatars as a pandas DataFrame:
 
+.. code:: python
 
-Set parameters
-~~~~~~~~~~~~~~
+   avatars_df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
+
+Setting the avatarization parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.
@@ -265,8 +234,8 @@ Retrieving results
    avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
    print(avatars_df.head())
 
-Evaluate privacy and utility
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Evaluate privacy
+~~~~~~~~~~~~~~~~
 
 You can retrieve the privacy metrics from the result object (see our
 main docs for details about each metric):
@@ -275,3 +244,16 @@ main docs for details about each metric):
 
    print(result.privacy_metrics.hidden_rate)
    print(result.privacy_metrics.local_cloaking)
+
+Evaluate utility
+~~~~~~~~~~~~~~~~
+
+You can evaluate your avatarization on different criteria:
+
+-  univariate
+-  bivariate
+-  multivariate
+
+See
+`here <https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb>`__
+a jupyter notebook example to evaluate the quality of an avatarization.

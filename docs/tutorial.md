@@ -78,26 +78,19 @@ dataset = client.datasets.download_dataset(job.result.avatars_dataset.id)
 ### Manipulate datasets
 
 You can pass the data to `create_dataset()` directly as a file handle.
-The file can be opened as bytes (`"rb"`) or as string `"r"` with `utf-8` encoding.
 
 #### Using CSV files
 
 ```python
 filename = "fixtures/iris.csv"
 
-# Using a context manager
 with open(filename, "r") as f:
     dataset = client.datasets.create_dataset(request=f)
-
-# Inline
-dataset = client.datasets.create_dataset(request=open(filename, "r"))
-dataset = client.datasets.create_dataset(request=open(filename, "rb"))
 ```
 
-#### With `pandas` dataframes
+#### Using `pandas` dataframes
 
-If you are using `pandas`, and want to manipulate the dataframe before sending it to the engine,
-here's how you should proceed.
+If you are using `pandas`, and want to manipulate the dataframe before sending it to the engine, here's how you should proceed.
 
 ```python
 import pandas as pd
@@ -106,25 +99,18 @@ df = pd.read_csv("fixtures/iris.csv")
 
 # ... do some modifications on the dataset
 
-import io
+dataset = client.pandas.upload_dataframe(df)
 
-# Convert pandas dataframe in a readable format for the engine
-buffer = io.StringIO()  # The buffer will store the content of the dataframe
-df.to_csv(buffer, index=False)
-buffer.seek(0)
-
-dataset = client.datasets.create_dataset(buffer)
+# ... run the avatarization
 ```
 
-The data is received as a string.
-If you want to read it into a pandas DataFrame, you can do it like this
+Then receive the generated avatars as a pandas DataFrame:
 
 ```python
-data = client.datasets.download_dataset(id=dataset.id)
-dataframe = pd.read_csv(io.StringIO(data))
+avatars_df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
 ```
 
-### Set parameters
+### Setting the avatarization parameters
 
 Here’s the list of parameters you can use for avatarization. The description for each parameter is available in our main docs.
 
