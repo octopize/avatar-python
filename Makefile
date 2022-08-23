@@ -9,6 +9,13 @@ install:  ## Install the stack
 	poetry install --extras "pandas"
 .PHONY: install
 
+test: typecheck test-integration  ## Run all the tests
+.PHONY: test
+
+typecheck:  ## Run the tests
+	poetry run mypy avatars
+.PHONY: typecheck
+
 test-integration: ## Do a simple integration test
 	poetry run python ./bin/markdowncode.py ./docs/tutorial.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
