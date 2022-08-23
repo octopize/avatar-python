@@ -122,7 +122,7 @@ sending it to the engine, here’s how you should proceed.
 
    import io
 
-   ##  Convert pandas dataframe in a readable format for the engine
+   # Convert pandas dataframe in a readable format for the engine
    buffer = io.StringIO()  # The buffer will store the content of the dataframe
    df.to_csv(buffer, index=False)
    buffer.seek(0)

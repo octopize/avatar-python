@@ -273,7 +273,7 @@ sending it to the engine, here’s how you should proceed.</p>
 
 <span class="kn">import</span> <span class="nn">io</span>
 
-<span class="c1">##  Convert pandas dataframe in a readable format for the engine</span>
+<span class="c1"># Convert pandas dataframe in a readable format for the engine</span>
 <span class="n">buffer</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>  <span class="c1"># The buffer will store the content of the dataframe</span>
 <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
