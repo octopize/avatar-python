@@ -170,45 +170,45 @@
 <article role="main">
 <section id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">#</a></h1>
-<p>This Python client communicates with the avatarization engine. For more
-information about the concepts and avatarization, check out our main
-docs at <a class="reference external" href="https://docs.octopize.io">https://docs.octopize.io</a>.</p>
+<p>This Python client communicates with the Avatar platform.</p>
+<p>For more information about the Avatar method and process, check out our
+main docs at <a class="reference external" href="https://docs.octopize.io">https://docs.octopize.io</a></p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
-<p>Install the package by pointing to the .whl file (replace path below).</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">"~/Downloads/avatars-0.X.X-py3-none-any.whl"</span>
+<p>Choose the latest version at
+<a class="reference external" href="https://github.com/octopize/avatar-python/releases">https://github.com/octopize/avatar-python/releases</a></p>
+<p>Install the package by pointing to the .whl file (replace with correct
+version below).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
 <span class="c1"># or, if you're using poetry (recommended)</span>
-poetry add <span class="s2">"~/Downloads/avatars-0.X.X-py3-none-any.whl"</span>
+poetry add https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
 </pre></div>
 </div>
-<p>to install the project dependencies.</p>
 </section>
-<section id="loading-the-library">
-<h2>Loading the library<a class="headerlink" href="#loading-the-library" title="Permalink to this headline">#</a></h2>
-<p>Once installed, load the library:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is the client that you'll be using for all of your requests</span>
+<section id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">#</a></h2>
+<p>The only remaining step before using the API is setting the endpoint and
+authenticating. We recommend using environment variables to provide the
+password.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># This is the client that you'll be using for all of your requests</span>
 <span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
 
-<span class="c1">## The following are not necessary to run avatar but are needed for this tutorial</span>
+<span class="c1"># The following are not necessary to run avatar but are used in this tutorial</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">io</span>
-</pre></div>
-</div>
-</section>
-<section id="preliminary-steps">
-<h2>Preliminary steps<a class="headerlink" href="#preliminary-steps" title="Permalink to this headline">#</a></h2>
-<p>The only remaining step before using the API is setting the API endpoint
-and authenticating:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 
 <span class="c1"># Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span>
-<span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">"strong_password"</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"AVATAR_PASSWORD, "</span><span class="n">strong_password</span><span class="s2">"))</span>
 
-<span class="c1"># Let's verify that we can connect to the API server</span>
+<span class="c1"># Verify that we can connect to the API server</span>
 <span class="n">client</span><span class="o">.</span><span class="n">health</span><span class="o">.</span><span class="n">get_health</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>The Python client library is fully type-annotated. This will let you use
+interface hints from your IDE.</p>
 </section>
 <section id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">#</a></h2>
@@ -269,10 +269,11 @@ sending it to the engine, here’s how you should proceed.</p>
 <span class="c1"># ... run the avatarization</span>
 </pre></div>
 </div>
-<p>Then receive the generated avatars as a pandas DataFrame:</p>
+<p>Then receive the generated avatars as a pandas dataframe:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">avatars_df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas</span><span class="o">.</span><span class="n">download_dataframe</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The dtypes will be copied over from the original dataframe.</p>
 </section>
 </section>
 <section id="setting-the-avatarization-parameters">
@@ -437,8 +438,7 @@ a jupyter notebook example to evaluate the quality of an avatarization.</p>
 <ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
 <li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#loading-the-library">Loading the library</a></li>
-<li><a class="reference internal" href="#preliminary-steps">Preliminary steps</a></li>
+<li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#quickstart">Quickstart</a></li>
 <li><a class="reference internal" href="#avatarization-step-by-step">Avatarization step by step</a><ul>
 <li><a class="reference internal" href="#manipulate-datasets">Manipulate datasets</a><ul>
