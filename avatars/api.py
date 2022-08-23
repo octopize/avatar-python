@@ -477,7 +477,8 @@ class PandasIntegration:
         dataset_io = StringIO(dataset)
         dataset_io.seek(0)
         df = pd.read_csv(
-            dataset_io, dtype={c.label: c.type.value for c in dataset_info.columns}
+            dataset_io,
+            dtype={c.label: c.type.value for c in dataset_info.columns or {}},
         )
         return df
 
