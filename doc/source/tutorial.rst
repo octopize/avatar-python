@@ -1,53 +1,53 @@
 Tutorial
 ========
 
-This Python client communicates with the avatarization engine. For more
-information about the concepts and avatarization, check out our main
-docs at https://docs.octopize.io.
+This Python client communicates with the Avatar platform.
+
+For more information about the Avatar method and process, check out our
+main docs at https://docs.octopize.io
 
 Installation
 ------------
 
-Install the package by pointing to the .whl file (replace path below).
+Choose the latest version at
+https://github.com/octopize/avatar-python/releases
+
+Install the package by pointing to the .whl file (replace with correct
+version below).
 
 .. code:: bash
 
-   pip install "~/Downloads/avatars-0.X.X-py3-none-any.whl"
+   pip install https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
    # or, if you're using poetry (recommended)
-   poetry add "~/Downloads/avatars-0.X.X-py3-none-any.whl"
+   poetry add https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
 
-to install the project dependencies.
+Setup
+-----
 
-Loading the library
--------------------
-
-Once installed, load the library:
-
-.. code:: python
-
-   # This is the client that you'll be using for all of your requests
-   from avatars.client import ApiClient
-
-   ## The following are not necessary to run avatar but are needed for this tutorial
-   import pandas as pd
-   import io
-
-Preliminary steps
------------------
-
-The only remaining step before using the API is setting the API endpoint
-and authenticating:
+The only remaining step before using the API is setting the endpoint and
+authenticating. We recommend using environment variables to provide the
+password.
 
 .. code:: python
 
    import os
 
+   # This is the client that you'll be using for all of your requests
+   from avatars.client import ApiClient
+
+   # The following are not necessary to run avatar but are used in this tutorial
+   import pandas as pd
+   import io
+
    # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
    client = ApiClient(base_url=os.environ.get("BASE_URL"))
-   client.authenticate(username="username", password="strong_password")
+   client.authenticate(username="username", password=os.environ.get("AVATAR_PASSWORD, "strong_password"))
 
-   # Let's verify that we can connect to the API server
+   # Verify that we can connect to the API server
    client.health.get_health()
+
+The Python client library is fully type-annotated. This will let you use
+interface hints from your IDE.
 
 Quickstart
 ----------
@@ -117,11 +117,13 @@ sending it to the engine, here’s how you should proceed.
 
    # ... run the avatarization
 
-Then receive the generated avatars as a pandas DataFrame:
+Then receive the generated avatars as a pandas dataframe:
 
 .. code:: python
 
    avatars_df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
+
+The dtypes will be copied over from the original dataframe.
 
 Setting the avatarization parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
