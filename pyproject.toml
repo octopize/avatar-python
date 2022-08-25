@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "avatars"
-version = "0.1.12"
-description = "Python Interface for Octopize's Avatarization Engine"
+# Also modify avatars/__init__.py
+version = "0.1.13"
+description = "Python client for Avatar's API"
 authors = ["Octopize <help@octopize.io>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = "^3.8"
 httpx = "^0.23.0"
-tenacity = "^8.0.1"
 pydantic = "^1.9.0"
 pandas = {version = "^1.4.2", optional = true} # for the tutorial
 

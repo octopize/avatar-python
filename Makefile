@@ -24,11 +24,12 @@ DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment vari
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
-	python -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
 .PHONY: doc
 
 doc-build:  # Build the docs
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
 	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)
 .PHONY: doc-build
