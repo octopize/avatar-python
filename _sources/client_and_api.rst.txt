@@ -1,8 +1,8 @@
 Client
 ======
 
-The ApiClient object
---------------------
+The `ApiClient` object
+----------------------
 
 The Python client acts as an interface that communicates with the avatarization engine.
 For more information about the concepts and avatarization, checkout our main docs.

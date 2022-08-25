@@ -41,7 +41,7 @@ password.
 
    # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
    client = ApiClient(base_url=os.environ.get("BASE_URL"))
-   client.authenticate(username="username", password=os.environ.get("AVATAR_PASSWORD, "strong_password"))
+   client.authenticate(username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password"))
 
    # Verify that we can connect to the API server
    client.health.get_health()
@@ -115,7 +115,13 @@ sending it to the engine, here’s how you should proceed.
 
    dataset = client.pandas.upload_dataframe(df)
 
-   # ... run the avatarization
+   job = client.jobs.create_job(
+       JobCreate(
+           dataset_id=dataset.id,
+           parameters=AvatarizationParameters(k=20),
+       )
+   )
+   job = client.jobs.get_job(job.id)
 
 Then receive the generated avatars as a pandas dataframe:
 
