@@ -3,6 +3,7 @@
 
 
 import itertools
+import logging
 import time
 from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Optional, Union
@@ -31,6 +32,8 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
 
@@ -255,7 +258,7 @@ class Jobs:
             if not job_response.current_progress:
                 return
             message = f"[{response.current_progress.created_at.time()}] Status: {response.status}, current_step: {response.current_progress.name}"
-            print("\033[K" + message, end="\r")
+            logger.info(message)
 
         retry_timeout = timeout or DEFAULT_RETRY_TIMEOUT
 
@@ -263,21 +266,20 @@ class Jobs:
         current = 0
 
         max_interval = 10
-        sleep_interval = iter(
-            min(2**i, max_interval) for i in itertools.count()
-        )  # Exponential interval, capped at max_interval
+        # Exponential interval, capped at max_interval
+        sleep_interval = iter(min(2**i, max_interval) for i in itertools.count())
 
         # Iterate while we are < retry_timeout
         while current == 0 or (current < retry_timeout):
             timeout = per_request_timeout  # to pass to client.request
             response = Job(**self.client.request(**kwargs, timeout=timeout))
-            if not response.status in (JobStatus.pending, JobStatus.started):
+            if response.status not in (JobStatus.pending, JobStatus.started):
                 print_response(response)
                 return response
-            else:
-                print_response(response)
 
-            # Sleep, but not longer than timeout.
+            print_response(response)
+
+            # Sleep, but not longer than timeout
             time_to_sleep = min(next(sleep_interval), retry_timeout - current)
             time.sleep(time_to_sleep)
 
