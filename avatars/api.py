@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.4
+# API Version : 0.4.5
 
 
 import itertools
@@ -38,7 +38,7 @@ DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
 
 
-def to_common_type(s: str) -> Optional[ColumnType]:
+def to_common_type(s: str) -> ColumnType:
     if "float" in s:
         return ColumnType.float
     if "int" in s:
@@ -47,9 +47,9 @@ def to_common_type(s: str) -> Optional[ColumnType]:
         return ColumnType.bool
     if "datetime" in s:
         return ColumnType.datetime
-    if "object" in s:
+    if "object" in s or s == "category":
         return ColumnType.category
-    return None
+    raise TypeError(f"Unknown column type: '{s}'")
 
 
 class Auth:

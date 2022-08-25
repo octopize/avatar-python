@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Handle category dtype
+
 ## 0.1.13
 
 - Remove default value for `to_categorical_threshold`
