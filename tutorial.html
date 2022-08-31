@@ -401,6 +401,26 @@ main docs for details about each metric):</p>
 <a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb">here</a>
 a jupyter notebook example to evaluate the quality of an avatarization.</p>
 </section>
+<section id="sensitive-access-the-results-unshuffled">
+<h3>⚠ Sensitive ⚠ Access the results unshuffled<a class="headerlink" href="#sensitive-access-the-results-unshuffled" title="Permalink to this headline">#</a></h3>
+<p>You might want to access the avatars dataset prior to being shuffled.
+<strong>WARNING</strong>: There is no protection at all, as the linkage between the
+unshuffled avatars dataset and the original data is obvious. <strong>This
+dataset contains sensitive data</strong>. You will need to shuffle it in order
+to make it safe.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that the order of the lines have NOT been shuffled, which means that the link</span>
+<span class="c1"># between original and avatar individuals IS OBVIOUS.</span>
+<span class="n">sensitive_unshuffled_avatars_datasets_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="o">.</span><span class="n">id</span>
+<span class="n">sensitive_unshuffled_avatars_datasets</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">sensitive_unshuffled_avatars_datasets_id</span><span class="p">)</span>
+
+<span class="c1"># The returned dataset is a CSV file as string.</span>
+<span class="c1"># We'll use pandas to get the data into a dataframe and io.StringIO to</span>
+<span class="c1"># transform the string into something understandable for pandas</span>
+<span class="n">sensitive_unshuffled_avatars_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">avatars_dataset</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">avatars_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 </article>
@@ -470,6 +490,7 @@ a jupyter notebook example to evaluate the quality of an avatarization.</p>
 <li><a class="reference internal" href="#retrieving-results">Retrieving results</a></li>
 <li><a class="reference internal" href="#evaluate-privacy">Evaluate privacy</a></li>
 <li><a class="reference internal" href="#evaluate-utility">Evaluate utility</a></li>
+<li><a class="reference internal" href="#sensitive-access-the-results-unshuffled">⚠ Sensitive ⚠ Access the results unshuffled</a></li>
 </ul>
 </li>
 </ul>
