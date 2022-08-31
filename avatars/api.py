@@ -47,7 +47,7 @@ def to_common_type(s: str) -> ColumnType:
         return ColumnType.bool
     if "datetime" in s:
         return ColumnType.datetime
-    if "object" in s or s == "category":
+    if "object" in s or s == "category" or s == "str":
         return ColumnType.category
     raise TypeError(f"Unknown column type: '{s}'")
 
