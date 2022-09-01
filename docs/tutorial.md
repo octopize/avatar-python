@@ -242,6 +242,6 @@ sensitive_unshuffled_avatars_datasets = client.datasets.download_dataset(id=sens
 # The returned dataset is a CSV file as string.
 # We'll use pandas to get the data into a dataframe and io.StringIO to
 # transform the string into something understandable for pandas
-sensitive_unshuffled_avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
+sensitive_unshuffled_avatars_df = pd.read_csv(io.StringIO(sensitive_unshuffled_avatars_datasets))
 print(avatars_df.head())
 ```
