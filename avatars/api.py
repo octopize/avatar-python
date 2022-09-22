@@ -381,7 +381,7 @@ class Users:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
-    def get_users(
+    def find_users(
         self,
         email: str,
         username: str,
