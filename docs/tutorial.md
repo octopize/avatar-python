@@ -32,7 +32,9 @@ import io
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=os.environ.get("BASE_URL"))
-client.authenticate(username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password"))
+client.authenticate(
+    username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password")
+)
 
 # Verify that we can connect to the API server
 client.health.get_health()
@@ -46,7 +48,7 @@ This is all you need to run and evaluate an avatarization:
 
 ```python
 from avatars.client import ApiClient
-from avatars.models import JobCreate, AvatarizationParameters
+from avatars.models import AvatarizationJobCreate, AvatarizationParameters
 import os
 
 client = ApiClient(base_url=os.environ.get("BASE_URL"))
@@ -55,9 +57,11 @@ client.authenticate(username="username", password="strong_password")
 dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
 
 job = client.jobs.create_job(
-    JobCreate(
-        dataset_id=dataset.id,
-        parameters=AvatarizationParameters(k=20),
+    AvatarizationJobCreate(
+        parameters=AvatarizationParameters(
+            k=20,
+            dataset_id=dataset.id,
+        ),
     )
 )
 print(f"got job id: {job.id}")
@@ -100,9 +104,11 @@ df = pd.read_csv("fixtures/iris.csv")
 dataset = client.pandas.upload_dataframe(df)
 
 job = client.jobs.create_job(
-    JobCreate(
-        dataset_id=dataset.id,
-        parameters=AvatarizationParameters(k=20),
+    AvatarizationJobCreate(
+        parameters=AvatarizationParameters(
+            k=20,
+            dataset_id=dataset.id,
+        ),
     )
 )
 job = client.jobs.get_job(job.id)
@@ -121,6 +127,7 @@ The dtypes will be copied over from the original dataframe.
 Here’s the list of parameters you can use for avatarization. The description for each parameter is available in our main docs.
 
 - `k` (required)
+- `dataset_id` (required): id of the dataset to avatarize
 - `column_weights`: default=1 for each variable
 - `ncp`: default=5.
 - `imputation`: imputation parameters type of `ImputationParameters`.
@@ -136,20 +143,20 @@ These can all be set using the `AvatarizationParameters` object that you can imp
 ```python
 from avatars.models import AvatarizationParameters
 
-parameters = AvatarizationParameters(k=5, ncp=7, seed=42)
+parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
 ```
 
-### Launch a job
+### Launch an avatarization job
 
 One job corresponds to one avatarization.
 
 ```python
-from avatars.models import JobCreate
+from avatars.models import AvatarizationJobCreate
 
-# Pass the parameters and the dataset id to the JobCreate object...
-job_create = JobCreate(dataset_id=dataset.id, parameters=parameters)
+# Pass the parameters to the AvatarizationJobCreate object...
+job_create = AvatarizationJobCreate(parameters=parameters)
 
-# ... and launch the avatarization by passing the JobCreate object to the create_job method
+# ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_job method
 # This launches the avatarization and returns immediately
 job = client.jobs.create_job(request=job_create)
 
@@ -236,12 +243,16 @@ You might want to access the avatars dataset prior to being shuffled.
 ```python
 # Note that the order of the lines have NOT been shuffled, which means that the link
 # between original and avatar individuals IS OBVIOUS.
-sensitive_unshuffled_avatars_datasets_id = result.sensitive_unshuffled_avatars_datasets.id
-sensitive_unshuffled_avatars_datasets = client.datasets.download_dataset(id=sensitive_unshuffled_avatars_datasets_id)
+sensitive_unshuffled_avatars_dataset_id = result.sensitive_unshuffled_avatars_dataset.id
+sensitive_unshuffled_avatars_dataset = client.datasets.download_dataset(
+    id=sensitive_unshuffled_avatars_dataset_id
+)
 
 # The returned dataset is a CSV file as string.
 # We'll use pandas to get the data into a dataframe and io.StringIO to
 # transform the string into something understandable for pandas
-sensitive_unshuffled_avatars_df = pd.read_csv(io.StringIO(sensitive_unshuffled_avatars_datasets))
+sensitive_unshuffled_avatars_df = pd.read_csv(
+    io.StringIO(sensitive_unshuffled_avatars_dataset)
+)
 print(avatars_df.head())
 ```
