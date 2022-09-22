@@ -5,8 +5,8 @@
 - Handle category dtype
 - Fix dtype casting of datetime columns
 - Add ability to login with email
-
-BREAKING
+- Add filtering options to `find_users`
+  BREAKING
 
 - Rename `JobCreate` to `AvatarizationJobCreate`
 - Move `JobCreate.dataset_id` to `AvatarizationParameters`
