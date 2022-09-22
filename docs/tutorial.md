@@ -146,7 +146,7 @@ from avatars.models import AvatarizationParameters
 parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
 ```
 
-### Launch a job
+### Launch an avatarization job
 
 One job corresponds to one avatarization.
 
