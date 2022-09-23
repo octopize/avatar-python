@@ -65,7 +65,6 @@ job = client.jobs.create_avatarization_job(
     )
 )
 print(f"got job id: {job.id}")
-
 job = client.jobs.get_job(job.id)
 print(job.result)
 metrics = job.result.privacy_metrics
