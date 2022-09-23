@@ -4,7 +4,27 @@ Changelog
 Unreleased
 ----------
 
+.. _unreleased-1:
+
+Unreleased
+----------
+
 -  Handle category dtype
+-  Fix dtype casting of datetime columns
+-  Add ability to login with email
+-  Add filtering options to ``find_users``
+-  Avatarizations are now called with ``create_avatarization_job`` and
+   ``AvatarizationJobCreate``. ``create_job`` and ``JobCreate`` are
+   deprecated but still work.
+-  ``dataset_id`` is now passed to ``AvatarizationParameters`` and not
+   ``AvatarizationJobCreate``.
+-  ``Job.dataset_id`` is deprecated. Use ``Job.parameters.dataset_id``
+   instead.
+
+BREAKING
+~~~~~~~~
+
+-  Remove ``get_health_config`` call.
 
 0.1.14
 ------
