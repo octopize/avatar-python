@@ -125,7 +125,6 @@ class ApiClient:
             )
 
         if result.status_code != 200:
-            # We return {'detail': 'Not authenticated'}, which is no list.
             json = result.json()
             value = json.get('detail')
             if result.status_code == 401 and isinstance(value, str) and "auth" in value :
@@ -134,12 +133,12 @@ class ApiClient:
             standard_error = _get_nested_value(json, "message")
 
             validation_error = _get_nested_value(json, "msg")
-            missing_field = _get_nested_value(json, "loc")[-1]
+            field = _get_nested_value(json, "loc")[-1]
 
             if standard_error:
                 error_msg = standard_error
             elif validation_error:
-                error_msg = f"{validation_error}: {missing_field}"
+                error_msg = f"{validation_error}: {field}"
             else:
                 error_msg = "Internal error"
 
