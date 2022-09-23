@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.10
+# API Version : 0.4.5
 
 
 import itertools
@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from avatars import client
 from avatars.models import (
-    AvatarizationJobCreate,
     ClusterStats,
     ColumnDetail,
     ColumnType,
@@ -19,6 +18,7 @@ from avatars.models import (
     DatasetResponse,
     ExplainedVariance,
     Job,
+    JobCreate,
     JobStatus,
     Login,
     LoginResponse,
@@ -174,18 +174,6 @@ class Health:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
-    def get_root(
-        self,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
-        """Verify server health."""
-        kwargs = {
-            "method": "get",
-            "url": f"/",
-        }
-        return self.client.request(**kwargs, timeout=timeout)
-
     def get_health(
         self,
         *,
@@ -195,6 +183,30 @@ class Health:
         kwargs = {
             "method": "get",
             "url": f"/health",
+        }
+        return self.client.request(**kwargs, timeout=timeout)
+
+    def get_health_config(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        """Verify server health."""
+        kwargs = {
+            "method": "get",
+            "url": f"/health/config",
+        }
+        return self.client.request(**kwargs, timeout=timeout)
+
+    def get_health_task(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        """Verify async task health."""
+        kwargs = {
+            "method": "get",
+            "url": f"/health/task",
         }
         return self.client.request(**kwargs, timeout=timeout)
 
@@ -217,7 +229,7 @@ class Jobs:
 
     def create_job(
         self,
-        request: AvatarizationJobCreate,
+        request: JobCreate,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Job:
@@ -383,22 +395,12 @@ class Users:
 
     def find_users(
         self,
-        email: str,
-        username: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> None:
-        """Get users, optionally filtering them by username or email.
-
-        This endpoint is protected with rate limiting.
-        """
         kwargs = {
             "method": "get",
             "url": f"/users",
-            "params": dict(
-                email=email,
-                username=username,
-            ),
         }
         return self.client.request(**kwargs, timeout=timeout)
 
@@ -436,10 +438,7 @@ class Users:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> None:
-        """Get a user by username.
-
-        This endpoint is protected with rate limiting.
-        """
+        """Get a user."""
         kwargs = {
             "method": "get",
             "url": f"/users/{username}",
@@ -479,23 +478,10 @@ class PandasIntegration:
         dataset = self.client.datasets.download_dataset(id, timeout=timeout)
         dataset_io = StringIO(dataset)
         dataset_io.seek(0)
-
-        # We apply datetime columns separately as 'datetime' is not a valid pandas dtype
-        dtypes = {c.label: c.type.value for c in dataset_info.columns or {}}
-        datetime_columns = [
-            label for label, type in dtypes.items() if type == ColumnType.datetime.value
-        ]
-
-        # Remove datetime columns
-        keys = list(dtypes.keys())
-        for label in keys:
-            if label in datetime_columns:
-                dtypes.pop(label, None)
-
-        df = pd.read_csv(dataset_io, dtype=dtypes)
-
-        df[datetime_columns] = df[datetime_columns].astype("datetime64[ns]")
-
+        df = pd.read_csv(
+            dataset_io,
+            dtype={c.label: c.type.value for c in dataset_info.columns or {}},
+        )
         return df
 
 
