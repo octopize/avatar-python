@@ -16,7 +16,6 @@
 ### BREAKING
 
 - Remove `get_health_config` call.
-- Fix typo in `sensitive_unshuffled_avatars_dataset` variable
 
 ## 0.1.14
 
