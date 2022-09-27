@@ -138,6 +138,8 @@ class ApiClient:
 
         if result.headers["content-type"] == "application/json":
             return result.json()
+        elif result.headers["content-type"] == "application/pdf":
+            return result.content
         else:
             return result.text
 
