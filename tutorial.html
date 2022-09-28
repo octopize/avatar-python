@@ -202,7 +202,9 @@ password.</p>
 
 <span class="c1"># Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span>
-<span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"AVATAR_PASSWORD"</span><span class="p">,</span> <span class="s2">"strong_password"</span><span class="p">))</span>
+<span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span>
+    <span class="n">username</span><span class="o">=</span><span class="s2">"username"</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"AVATAR_PASSWORD"</span><span class="p">,</span> <span class="s2">"strong_password"</span><span class="p">)</span>
+<span class="p">)</span>
 
 <span class="c1"># Verify that we can connect to the API server</span>
 <span class="n">client</span><span class="o">.</span><span class="n">health</span><span class="o">.</span><span class="n">get_health</span><span class="p">()</span>
@@ -215,7 +217,7 @@ interface hints from your IDE.</p>
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">#</a></h2>
 <p>This is all you need to run and evaluate an avatarization:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
-<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
+<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationJobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span>
@@ -223,14 +225,15 @@ interface hints from your IDE.</p>
 
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">"fixtures/iris.csv"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">))</span>
 
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span>
-    <span class="n">JobCreate</span><span class="p">(</span>
-        <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
+    <span class="n">AvatarizationJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got job id: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span>
@@ -267,10 +270,12 @@ sending it to the engine, here’s how you should proceed.</p>
 
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span>
-    <span class="n">JobCreate</span><span class="p">(</span>
-        <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
+    <span class="n">AvatarizationJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
@@ -289,6 +294,7 @@ sending it to the engine, here’s how you should proceed.</p>
 description for each parameter is available in our main docs.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">k</span></code> (required)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> (required): id of the dataset to avatarize</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">column_weights</span></code>: default=1 for each variable</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ncp</span></code>: default=5.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">imputation</span></code>: imputation parameters type of
@@ -307,21 +313,21 @@ the knn imputer. default=1</p></li>
 you can import from <code class="docutils literal notranslate"><span class="pre">avatars.models</span></code> like so</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationParameters</span>
 
-<span class="n">parameters</span> <span class="o">=</span> <span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ncp</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">parameters</span> <span class="o">=</span> <span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ncp</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="launch-a-job">
-<h3>Launch a job<a class="headerlink" href="#launch-a-job" title="Permalink to this headline">#</a></h3>
+<section id="launch-an-avatarization-job">
+<h3>Launch an avatarization job<a class="headerlink" href="#launch-an-avatarization-job" title="Permalink to this headline">#</a></h3>
 <p>One job corresponds to one avatarization.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationJobCreate</span>
 
-<span class="c1"># Pass the parameters and the dataset id to the JobCreate object...</span>
-<span class="n">job_create</span> <span class="o">=</span> <span class="n">JobCreate</span><span class="p">(</span><span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+<span class="c1"># Pass the parameters to the AvatarizationJobCreate object...</span>
+<span class="n">job_create</span> <span class="o">=</span> <span class="n">AvatarizationJobCreate</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
 
-<span class="c1"># ... and launch the avatarization by passing the JobCreate object to the create_job method</span>
+<span class="c1"># ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_avatarization_job method</span>
 <span class="c1"># This launches the avatarization and returns immediately</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_job</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">job_create</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">job_create</span><span class="p">)</span>
 
 <span class="c1"># You can retrieve the result and the status of the job (if it is running, has stopped, etc...).</span>
 <span class="c1"># This call will block until the job is done or a timeout is expired.</span>
@@ -410,13 +416,19 @@ dataset contains sensitive data</strong>. You will need to shuffle it in order
 to make it safe.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that the order of the lines have NOT been shuffled, which means that the link</span>
 <span class="c1"># between original and avatar individuals IS OBVIOUS.</span>
-<span class="n">sensitive_unshuffled_avatars_datasets_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="o">.</span><span class="n">id</span>
-<span class="n">sensitive_unshuffled_avatars_datasets</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">sensitive_unshuffled_avatars_datasets_id</span><span class="p">)</span>
+<span class="n">sensitive_unshuffled_avatars_datasets_id</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="o">.</span><span class="n">id</span>
+<span class="p">)</span>
+<span class="n">sensitive_unshuffled_avatars_datasets</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span>
+    <span class="nb">id</span><span class="o">=</span><span class="n">sensitive_unshuffled_avatars_datasets_id</span>
+<span class="p">)</span>
 
 <span class="c1"># The returned dataset is a CSV file as string.</span>
 <span class="c1"># We'll use pandas to get the data into a dataframe and io.StringIO to</span>
 <span class="c1"># transform the string into something understandable for pandas</span>
-<span class="n">sensitive_unshuffled_avatars_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="p">))</span>
+<span class="n">sensitive_unshuffled_avatars_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="p">)</span>
+<span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">avatars_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
@@ -483,7 +495,7 @@ to make it safe.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#setting-the-avatarization-parameters">Setting the avatarization parameters</a></li>
-<li><a class="reference internal" href="#launch-a-job">Launch a job</a><ul>
+<li><a class="reference internal" href="#launch-an-avatarization-job">Launch an avatarization job</a><ul>
 <li><a class="reference internal" href="#retry-mechanism">Retry mechanism</a></li>
 </ul>
 </li>
