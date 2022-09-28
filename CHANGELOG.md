@@ -1,10 +1,9 @@
 # Changelog
 
-## Unreleased
-
-## Unreleased
+## 0.1.15
 
 - Handle category dtype
+- Fix download of reports
 - Fix dtype casting of datetime columns
 - Add ability to login with email
 - Add filtering options to `find_users`

@@ -1,13 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
-
-.. _unreleased-1:
-
-Unreleased
-----------
+0.1.15
+------
 
 -  Handle category dtype
 -  Fix dtype casting of datetime columns
@@ -26,12 +21,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
+.. _section-1:
+
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-1:
+.. _section-2:
 
 0.1.13
 ------
