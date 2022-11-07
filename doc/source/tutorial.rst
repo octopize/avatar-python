@@ -143,9 +143,13 @@ Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.
 
 -  ``k`` (required)
+
 -  ``dataset_id`` (required): id of the dataset to avatarize
+
 -  ``column_weights``: default=1 for each variable
+
 -  ``ncp``: default=5.
+
 -  ``imputation``: imputation parameters type of
    ``ImputationParameters``.
 
@@ -296,3 +300,31 @@ to make it safe.
        io.StringIO(sensitive_unshuffled_avatars_datasets)
    )
    print(avatars_df.head())
+
+Reset your password
+-------------------
+
+**NB**: This section is only available if the use of emails to login is
+activated in the global configuration. It is not the case by default.
+
+If you forgot your password or it you need to set one, first notify that
+you forgot it:
+
+.. code:: python
+
+   from avatars.client import apiclient
+
+   client = apiclient(base_url=os.environ.get("BASE_URL"))
+   client.forgotten_password("yourmail@mail.com")
+
+You’ll then receive a mail containing a token. This token is only valid
+once, and expires after 24 hours. Use it to reset your password:
+
+.. code:: python
+
+   from avatars.client import ApiClient
+
+   client = ApiClient(base_url=os.environ.get("BASE_URL"))
+   client.reset_password("yourmail@mail.com", "new_password", "new_password", "token-received-by-mail")
+
+You’ll receive an email confirming your password was reset.
