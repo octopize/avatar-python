@@ -125,13 +125,23 @@ class ApiClient:
             )
 
         if result.status_code != 200:
-            # We return {'detail': 'Not authenticated'}, which is no list.
-            if "auth" in str(result.json()):
+            json = result.json()
+            value = json.get('detail')
+            if result.status_code == 401 and isinstance(value, str) and "auth" in value :
                 raise Exception("You are not authenticated.")
 
-            error_msg = _get_nested_value(
-                result.json(), "message", default="Internal error"
-            )
+            standard_error = _get_nested_value(json, "message")
+
+            validation_error = _get_nested_value(json, "msg")
+            field = _get_nested_value(json, "loc")[-1]
+
+            if standard_error:
+                error_msg = standard_error
+            elif validation_error:
+                error_msg = f"{validation_error}: {field}"
+            else:
+                error_msg = "Internal error"
+
             raise Exception(
                 f"Got error in HTTP request: {method} {url}. {result.status_code} {error_msg}"
             )
