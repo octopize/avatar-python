@@ -262,7 +262,7 @@ print(avatars_df.head())
 
 **NB**: This section is only available if the use of emails to login is activated in the global configuration. It is not the case by default.
 
-If you forgot your password or it you need to set one, first notify that you forgot it:
+If you forgot your password or if you need to set one, first call the forgotten_password endpoint:
 
 ```python
 from avatars.client import ApiClient
