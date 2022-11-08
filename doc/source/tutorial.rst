@@ -312,9 +312,9 @@ forgotten_password endpoint:
 
 .. code:: python
 
-   from avatars.client import apiclient
+   from avatars.client import ApiClient
 
-   client = apiclient(base_url=os.environ.get("BASE_URL"))
+   client = ApiClient(base_url=os.environ.get("BASE_URL"))
    client.forgotten_password("yourmail@mail.com")
 
 You’ll then receive an email containing a token. This token is only
