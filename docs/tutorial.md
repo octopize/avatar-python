@@ -257,3 +257,28 @@ sensitive_unshuffled_avatars_df = pd.read_csv(
 )
 print(avatars_df.head())
 ```
+
+## Reset your password
+
+**NB**: This section is only available if the use of emails to login is activated in the global configuration. It is not the case by default.
+
+If you forgot your password or if you need to set one, first call the forgotten_password endpoint:
+
+<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --> 
+```javascript
+from avatars.client import ApiClient
+
+client = ApiClient(base_url=os.environ.get("BASE_URL"))
+client.forgotten_password("yourmail@mail.com")
+```
+
+You'll then receive an email containing a token. This token is only valid once, and expires after 24 hours. Use it to reset your password:
+
+```javascript
+from avatars.client import ApiClient
+
+client = ApiClient(base_url=os.environ.get("BASE_URL"))
+client.reset_password("yourmail@mail.com", "new_password", "new_password", "token-received-by-mail")
+```
+
+You'll receive an email confirming your password was reset.

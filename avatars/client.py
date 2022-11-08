@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.10
+# API Version : 0.4.11
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -8,6 +8,7 @@ from io import BytesIO, StringIO
 from json import loads as json_loads
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
+from uuid import UUID
 
 import httpx
 from pydantic import BaseModel
@@ -24,7 +25,7 @@ from avatars.api import (
     Stats,
     Users,
 )
-from avatars.models import Login
+from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024
 
@@ -83,6 +84,29 @@ class ApiClient:
             timeout=timeout or self.timeout,
         )
         self._headers["Authorization"] = f"Bearer {result.access_token}"
+
+    def forgotten_password(self, email: str, timeout: Optional[int] = None) -> None:
+        self.auth.forgotten_password(
+            ForgottenPasswordRequest(email=email), timeout=timeout or self.timeout
+        )
+
+    def reset_password(
+        self,
+        email: str,
+        new_password: str,
+        new_password_repeated: str,
+        token: UUID,
+        timeout: Optional[int] = None,
+    ) -> None:
+        self.auth.reset_password(
+            ResetPasswordRequest(
+                email=email,
+                new_password=new_password,
+                new_password_repeated=new_password_repeated,
+                token=token,
+            ),
+            timeout=timeout or self.timeout,
+        )
 
     def request(
         self,
