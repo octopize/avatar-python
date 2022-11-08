@@ -250,6 +250,8 @@
 </li>
 <li><a href="models.html#avatars.models.Login.client_secret">client_secret (avatars.models.Login attribute)</a>
 </li>
+<li><a href="models.html#avatars.models.PrivacyMetrics.closest_distances_ratio">closest_distances_ratio (avatars.models.PrivacyMetrics attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.ClusterStats">ClusterStats (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.AvatarizationParameters.column_weights">column_weights (avatars.models.AvatarizationParameters attribute)</a>
@@ -261,12 +263,14 @@
 <li><a href="models.html#avatars.models.PatchDataset.columns">(avatars.models.PatchDataset attribute)</a>
 </li>
 </ul></li>
-<li><a href="models.html#avatars.models.ColumnType">ColumnType (class in avatars.models)</a>
+<li><a href="models.html#avatars.models.ColumnStats">ColumnStats (class in avatars.models)</a>
 </li>
-<li><a href="models.html#avatars.models.JobProgress.completion_rate_100">completion_rate_100 (avatars.models.JobProgress attribute)</a>
+<li><a href="models.html#avatars.models.ColumnType">ColumnType (class in avatars.models)</a>
 </li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.JobProgress.completion_rate_100">completion_rate_100 (avatars.models.JobProgress attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.SignalMetrics.correlation_difference_ratio">correlation_difference_ratio (avatars.models.SignalMetrics attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Jobs.create_avatarization_job">create_avatarization_job() (avatars.api.Jobs method)</a>
@@ -308,11 +312,15 @@
 </li>
 <li><a href="client_and_api.html#avatars.api.Datasets">Datasets (class in avatars.api)</a>
 </li>
+<li><a href="models.html#avatars.models.DatasetSummary">DatasetSummary (class in avatars.models)</a>
+</li>
 <li><a href="models.html#avatars.models.ColumnType.datetime">datetime (avatars.models.ColumnType attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.HTTPValidationError.detail">detail (avatars.models.HTTPValidationError attribute)</a>
 </li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.HTTPValidationError.detail">detail (avatars.models.HTTPValidationError attribute)</a>
+<li><a href="models.html#avatars.models.PrivacyMetrics.distance_to_closest">distance_to_closest (avatars.models.PrivacyMetrics attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.AnalysisStatus.done">done (avatars.models.AnalysisStatus attribute)</a>
 </li>
@@ -327,6 +335,8 @@
 <li><a href="models.html#avatars.models.Report.download_url">(avatars.models.Report attribute)</a>
 </li>
 </ul></li>
+<li><a href="models.html#avatars.models.ColumnStats.dtype">dtype (avatars.models.ColumnStats attribute)</a>
+</li>
 </ul></td>
 </tr></table>
 </section>
@@ -335,7 +345,12 @@
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.CreateUser.email">email (avatars.models.CreateUser attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ForgottenPasswordRequest.email">(avatars.models.ForgottenPasswordRequest attribute)</a>
 </li>
+<li><a href="models.html#avatars.models.ResetPasswordRequest.email">(avatars.models.ResetPasswordRequest attribute)</a>
+</li>
+</ul></li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.Job.error_message">error_message (avatars.models.Job attribute)</a>
@@ -355,13 +370,17 @@
 </li>
 <li><a href="models.html#avatars.models.CreateDataset.file">file (avatars.models.CreateDataset attribute)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="client_and_api.html#avatars.client.FileTooLarge">FileTooLarge</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="client_and_api.html#avatars.api.Users.find_users">find_users() (avatars.api.Users method)</a>
 </li>
 <li><a href="models.html#avatars.models.ColumnType.float">float (avatars.models.ColumnType attribute)</a>
+</li>
+<li><a href="client_and_api.html#avatars.client.ApiClient.forgotten_password">forgotten_password() (avatars.client.ApiClient method)</a>
+</li>
+<li><a href="models.html#avatars.models.ForgottenPasswordRequest">ForgottenPasswordRequest (class in avatars.models)</a>
 </li>
 </ul></td>
 </tr></table>
@@ -431,15 +450,21 @@
 <li><a href="models.html#avatars.models.Report.id">(avatars.models.Report attribute)</a>
 </li>
 </ul></li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.AvatarizationParameters.imputation">imputation (avatars.models.AvatarizationParameters attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.ImputationParameters">ImputationParameters (class in avatars.models)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ImputeMethod">ImputeMethod (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.ColumnType.int">int (avatars.models.ColumnType attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.CreateUser.is_email_confirmed">is_email_confirmed (avatars.models.CreateUser attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ColumnStats.is_rare">is_rare (avatars.models.ColumnStats attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ColumnStats.is_skewed">is_skewed (avatars.models.ColumnStats attribute)</a>
 </li>
 </ul></td>
 </tr></table>
@@ -496,7 +521,10 @@
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ColumnDetail.label">label (avatars.models.ColumnDetail attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ColumnStats.label">(avatars.models.ColumnStats attribute)</a>
 </li>
+</ul></li>
 <li><a href="models.html#avatars.models.ValidationError.loc">loc (avatars.models.ValidationError attribute)</a>
 </li>
 </ul></td>
@@ -514,18 +542,31 @@
 <h2>M</h2>
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.ImputeMethod.mean">mean (avatars.models.ImputeMethod attribute)</a>
+<li><a href="models.html#avatars.models.ColumnStats.mean">mean (avatars.models.ColumnStats attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ImputeMethod.mean">(avatars.models.ImputeMethod attribute)</a>
 </li>
-<li><a href="models.html#avatars.models.ImputeMethod.median">median (avatars.models.ImputeMethod attribute)</a>
+</ul></li>
+<li><a href="models.html#avatars.models.ColumnStats.median">median (avatars.models.ColumnStats attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ImputeMethod.median">(avatars.models.ImputeMethod attribute)</a>
 </li>
+</ul></li>
 <li><a href="models.html#avatars.models.ImputationParameters.method">method (avatars.models.ImputationParameters attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Metrics">Metrics (class in avatars.api)</a>
 </li>
-<li><a href="models.html#avatars.models.ImputeMethod.mode">mode (avatars.models.ImputeMethod attribute)</a>
+<li><a href="models.html#avatars.models.ColumnStats.missing_number">missing_number (avatars.models.ColumnStats attribute)</a>
 </li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnStats.missing_proportion">missing_proportion (avatars.models.ColumnStats attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ColumnStats.mode">mode (avatars.models.ColumnStats attribute)</a>
+<ul>
+<li><a href="models.html#avatars.models.ImputeMethod.mode">(avatars.models.ImputeMethod attribute)</a>
+</li>
+</ul></li>
 <li>
     module
 
@@ -558,6 +599,10 @@
 <li><a href="models.html#avatars.models.DatasetResponse.nb_lines">nb_lines (avatars.models.DatasetResponse attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.AvatarizationParameters.ncp">ncp (avatars.models.AvatarizationParameters attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ResetPasswordRequest.new_password">new_password (avatars.models.ResetPasswordRequest attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ResetPasswordRequest.new_password_repeated">new_password_repeated (avatars.models.ResetPasswordRequest attribute)</a>
 </li>
 </ul></td>
 </tr></table>
@@ -609,13 +654,17 @@
 </li>
 <li><a href="models.html#avatars.models.Report">Report (class in avatars.models)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ReportCreate">ReportCreate (class in avatars.models)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="client_and_api.html#avatars.api.Reports">Reports (class in avatars.api)</a>
 </li>
 <li><a href="client_and_api.html#avatars.client.ApiClient.request">request() (avatars.client.ApiClient method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.client.ApiClient.reset_password">reset_password() (avatars.client.ApiClient method)</a>
+</li>
+<li><a href="models.html#avatars.models.ResetPasswordRequest">ResetPasswordRequest (class in avatars.models)</a>
 </li>
 <li><a href="models.html#avatars.models.Job.result">result (avatars.models.Job attribute)</a>
 </li>
@@ -638,13 +687,17 @@
 </li>
 <li><a href="models.html#avatars.models.SignalMetrics">SignalMetrics (class in avatars.models)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnStats.standard_deviation">standard_deviation (avatars.models.ColumnStats attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.AnalysisStatus.started">started (avatars.models.AnalysisStatus attribute)</a>
 <ul>
 <li><a href="models.html#avatars.models.JobStatus.started">(avatars.models.JobStatus attribute)</a>
 </li>
 </ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.DatasetSummary.stats">stats (avatars.models.DatasetSummary attribute)</a>
+</li>
 <li><a href="client_and_api.html#avatars.api.Stats">Stats (class in avatars.api)</a>
 </li>
 <li><a href="models.html#avatars.models.Job.status">status (avatars.models.Job attribute)</a>
@@ -652,6 +705,8 @@
 <li><a href="models.html#avatars.models.ClusterStats.status_message">status_message (avatars.models.ClusterStats attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.JobStatus.success">success (avatars.models.JobStatus attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.DatasetResponse.summary">summary (avatars.models.DatasetResponse attribute)</a>
 </li>
 </ul></td>
 </tr></table>
@@ -663,6 +718,8 @@
 <li><a href="models.html#avatars.models.AvatarizationParameters.to_categorical_threshold">to_categorical_threshold (avatars.models.AvatarizationParameters attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.to_common_type">to_common_type() (in module avatars.api)</a>
+</li>
+<li><a href="models.html#avatars.models.ResetPasswordRequest.token">token (avatars.models.ResetPasswordRequest attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.LoginResponse.token_type">token_type (avatars.models.LoginResponse attribute)</a>
 </li>
@@ -684,16 +741,20 @@
 <h2>U</h2>
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.ColumnStats.unique_number">unique_number (avatars.models.ColumnStats attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.ColumnStats.unique_proportion">unique_proportion (avatars.models.ColumnStats attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.JobStatus.unknown">unknown (avatars.models.JobStatus attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.PandasIntegration.upload_dataframe">upload_dataframe() (avatars.api.PandasIntegration method)</a>
 </li>
 <li><a href="models.html#avatars.models.UserRole.user">user (avatars.models.UserRole attribute)</a>
 </li>
-<li><a href="models.html#avatars.models.Report.user_id">user_id (avatars.models.Report attribute)</a>
-</li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.Report.user_id">user_id (avatars.models.Report attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.CreateUser.username">username (avatars.models.CreateUser attribute)</a>
 <ul>
 <li><a href="models.html#avatars.models.Login.username">(avatars.models.Login attribute)</a>

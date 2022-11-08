@@ -434,6 +434,28 @@ to make it safe.</p>
 </div>
 </section>
 </section>
+<section id="reset-your-password">
+<h2>Reset your password<a class="headerlink" href="#reset-your-password" title="Permalink to this headline">#</a></h2>
+<p><strong>NB</strong>: This section is only available if the use of emails to login is
+activated in the global configuration. It is not the case by default.</p>
+<p>If you forgot your password or if you need to set one, first call the
+forgotten_password endpoint:</p>
+<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --><div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span><span class="w"></span>
+
+<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span><span class="w"></span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">forgotten_password</span><span class="p">(</span><span class="s2">"yourmail@mail.com"</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You’ll then receive an email containing a token. This token is only
+valid once, and expires after 24 hours. Use it to reset your password:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span><span class="w"></span>
+
+<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">"BASE_URL"</span><span class="p">))</span><span class="w"></span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">reset_password</span><span class="p">(</span><span class="s2">"yourmail@mail.com"</span><span class="p">,</span><span class="w"> </span><span class="s2">"new_password"</span><span class="p">,</span><span class="w"> </span><span class="s2">"new_password"</span><span class="p">,</span><span class="w"> </span><span class="s2">"token-received-by-mail"</span><span class="p">)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>You’ll receive an email confirming your password was reset.</p>
+</section>
 </section>
 </article>
 </div>
@@ -505,6 +527,7 @@ to make it safe.</p>
 <li><a class="reference internal" href="#sensitive-access-the-results-unshuffled">⚠ Sensitive ⚠ Access the results unshuffled</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#reset-your-password">Reset your password</a></li>
 </ul>
 </li>
 </ul>
