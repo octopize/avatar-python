@@ -265,9 +265,9 @@ print(avatars_df.head())
 If you forgot your password or it you need to set one, first notify that you forgot it:
 
 ```python
-from avatars.client import apiclient
+from avatars.client import ApiClient
 
-client = apiclient(base_url=os.environ.get("BASE_URL"))
+client = ApiClient(base_url=os.environ.get("BASE_URL"))
 client.forgotten_password("yourmail@mail.com")
 ```
 
