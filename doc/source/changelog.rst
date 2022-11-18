@@ -1,6 +1,16 @@
 Changelog
 =========
 
+0.1.16
+------
+
+-  Add forgotten password endpoint
+-  Add reset password endpoint
+-  JobParameters becomes AvatarizationParameters
+-  Add DCR and NNDR to privacy metrics
+
+.. _section-1:
+
 0.1.15
 ------
 
@@ -21,14 +31,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
-.. _section-1:
+.. _section-2:
 
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-2:
+.. _section-3:
 
 0.1.13
 ------

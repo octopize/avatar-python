@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.10
+# API Version : 0.4.11
 
 
 import itertools
@@ -18,6 +18,7 @@ from avatars.models import (
     CreateUser,
     DatasetResponse,
     ExplainedVariance,
+    ForgottenPasswordRequest,
     Job,
     JobCreate,
     JobStatus,
@@ -27,6 +28,7 @@ from avatars.models import (
     Projections,
     Report,
     ReportCreate,
+    ResetPasswordRequest,
 )
 
 if TYPE_CHECKING:
@@ -73,6 +75,34 @@ class Auth:
             **self.client.request(
                 **kwargs, verify_auth=False, form_data=request, timeout=timeout
             )
+        )
+
+    def forgotten_password(
+        self,
+        request: ForgottenPasswordRequest,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        kwargs = {
+            "method": "post",
+            "url": f"/login/forgotten_password",
+        }
+        return self.client.request(
+            **kwargs, verify_auth=False, json=request, timeout=timeout
+        )
+
+    def reset_password(
+        self,
+        request: ResetPasswordRequest,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        kwargs = {
+            "method": "post",
+            "url": f"/login/reset_password",
+        }
+        return self.client.request(
+            **kwargs, verify_auth=False, json=request, timeout=timeout
         )
 
 

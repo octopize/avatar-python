@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.16
+- Add forgotten password endpoint
+- Add reset password endpoint
+- JobParameters becomes AvatarizationParameters
+- Add DCR and NNDR to privacy metrics
+
 ## 0.1.15
 
 - Handle category dtype

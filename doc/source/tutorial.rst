@@ -310,7 +310,11 @@ activated in the global configuration. It is not the case by default.
 If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:
 
-.. code:: python
+.. raw:: html
+
+   <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
+
+.. code:: javascript
 
    from avatars.client import ApiClient
 
@@ -320,7 +324,7 @@ forgotten_password endpoint:
 You’ll then receive an email containing a token. This token is only
 valid once, and expires after 24 hours. Use it to reset your password:
 
-.. code:: python
+.. code:: javascript
 
    from avatars.client import ApiClient
 
