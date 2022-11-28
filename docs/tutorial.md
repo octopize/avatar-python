@@ -6,7 +6,7 @@ For more information about the Avatar method and process, check out our main doc
 
 ## Prerequisites
 
-Avatar-python is intended to be run with Python 3.9.
+`avatars` is intended to be run with Python 3.9+.
 
 ## Installation
 

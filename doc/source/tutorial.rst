@@ -352,10 +352,6 @@ activated in the global configuration. It is not the case by default.
 If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:
 
-.. raw:: html
-
-   <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
-
 .. code:: javascript
 
    from avatars.client import ApiClient
