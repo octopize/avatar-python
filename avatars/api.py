@@ -1,39 +1,45 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.11
+# API Version : 0.4.14
 
 
 import itertools
 import logging
 import time
 from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Any, Dict, List, Optional, Protocol, Union, runtime_checkable
 
-from avatars import client
+import numpy as np
+import pandas as pd
+from pydantic import BaseModel
+
 from avatars.models import (
+    AvatarizationJob,
     AvatarizationJobCreate,
     ClusterStats,
     ColumnDetail,
     ColumnType,
     CreateDataset,
     CreateUser,
-    DatasetResponse,
+    Dataset,
     ExplainedVariance,
     ForgottenPasswordRequest,
-    Job,
-    JobCreate,
     JobStatus,
     Login,
     LoginResponse,
     PatchDataset,
+    PrivacyMetrics,
+    PrivacyMetricsJob,
+    PrivacyMetricsJobCreate,
+    PrivacyMetricsParameters,
     Projections,
     Report,
     ReportCreate,
     ResetPasswordRequest,
+    SignalMetrics,
+    SignalMetricsJob,
+    SignalMetricsJobCreate,
+    SignalMetricsParameters,
 )
-
-if TYPE_CHECKING:
-    import pandas as pd
-
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -55,6 +61,75 @@ def to_common_type(s: str) -> ColumnType:
     raise TypeError(f"Unknown column type: '{s}'")
 
 
+def get_job(
+    client: "ApiClient",
+    response_cls: Any,
+    *,
+    per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+    timeout: Optional[int] = DEFAULT_TIMEOUT,
+    **kwargs: Dict[str, Any],
+):
+    def print_response(job_response: Any) -> None:
+        if not job_response.current_progress:
+            return
+        message = f"[{response.current_progress.created_at.time()}] Status: {response.status}, current_step: {response.current_progress.name}"
+        logger.info(message)
+
+    retry_timeout = timeout or DEFAULT_RETRY_TIMEOUT
+
+    start = time.time()
+    current = 0
+
+    max_interval = 10
+    # Exponential interval, capped at max_interval
+    sleep_interval = iter(min(2**i, max_interval) for i in itertools.count())
+
+    # Iterate while we are < retry_timeout
+    while current == 0 or (current < retry_timeout):
+        timeout = per_request_timeout  # to pass to client.request
+        response = response_cls(**client.request(**kwargs, timeout=timeout))
+        if response.status not in (JobStatus.pending, JobStatus.started):
+            print_response(response)
+            return response
+
+        print_response(response)
+
+        # Sleep, but not longer than timeout
+        time_to_sleep = min(next(sleep_interval), retry_timeout - current)
+        time.sleep(time_to_sleep)
+
+        current = time.time() - start
+
+    return response
+
+
+@runtime_checkable
+class Processor(Protocol):
+    def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
+        ...
+
+    def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
+        ...
+
+
+class AvatarizationPipelineCreate(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    avatarization_job_create: AvatarizationJobCreate
+    processors: List[Processor] = []
+    df: pd.DataFrame
+
+
+class AvatarizationPipelineResult(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
+    privacy_metrics: PrivacyMetrics
+    signal_metrics: SignalMetrics
+    post_processed_avatars: pd.DataFrame
+
+
 class Auth:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
@@ -70,7 +145,6 @@ class Auth:
             "method": "post",
             "url": f"/login",
         }
-
         return LoginResponse(
             **self.client.request(
                 **kwargs, verify_auth=False, form_data=request, timeout=timeout
@@ -115,7 +189,7 @@ class Datasets:
         request: Union[StringIO, BytesIO],
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> DatasetResponse:
+    ) -> Dataset:
         """Create a dataset from file upload.
 
         The file should be in CSV format.
@@ -124,24 +198,20 @@ class Datasets:
             "method": "post",
             "url": f"/datasets",
         }
-
-        return DatasetResponse(
-            **self.client.request(**kwargs, file=request, timeout=timeout)
-        )
+        return Dataset(**self.client.request(**kwargs, file=request, timeout=timeout))
 
     def get_dataset(
         self,
         id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> DatasetResponse:
+    ) -> Dataset:
         """Get a dataset."""
         kwargs = {
             "method": "get",
             "url": f"/datasets/{id}",
         }
-
-        return DatasetResponse(**self.client.request(**kwargs, timeout=timeout))
+        return Dataset(**self.client.request(**kwargs, timeout=timeout))
 
     def patch_dataset(
         self,
@@ -149,30 +219,26 @@ class Datasets:
         id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> DatasetResponse:
+    ) -> Dataset:
         """Modify a dataset."""
         kwargs = {
             "method": "patch",
             "url": f"/datasets/{id}",
         }
-
-        return DatasetResponse(
-            **self.client.request(**kwargs, json=request, timeout=timeout)
-        )
+        return Dataset(**self.client.request(**kwargs, json=request, timeout=timeout))
 
     def analyze_dataset(
         self,
         id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> DatasetResponse:
+    ) -> Dataset:
         """Start the analysis of a dataset."""
         kwargs = {
             "method": "post",
             "url": f"/datasets/{id}/analyze",
         }
-
-        return DatasetResponse(**self.client.request(**kwargs, timeout=timeout))
+        return Dataset(**self.client.request(**kwargs, timeout=timeout))
 
     def get_dataset_correlations(
         self,
@@ -246,82 +312,110 @@ class Jobs:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
-    def create_job(
-        self,
-        request: JobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Job:
-        """Create a job.
-
-        Deprecated. Use create_avatarization_job instead.
-        """
-        kwargs = {
-            "method": "post",
-            "url": f"/jobs",
-        }
-
-        return Job(**self.client.request(**kwargs, json=request, timeout=timeout))
-
     def create_avatarization_job(
         self,
         request: AvatarizationJobCreate,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Job:
+    ) -> AvatarizationJob:
         """Create an avatarization job."""
         kwargs = {
             "method": "post",
             "url": f"/jobs/avatarization",
         }
+        return AvatarizationJob(
+            **self.client.request(**kwargs, json=request, timeout=timeout)
+        )
 
-        return Job(**self.client.request(**kwargs, json=request, timeout=timeout))
-
-    def get_job(
+    def get_avatarization_job(
         self,
         id: str,
         *,
         per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Job:
-        """Get a job."""
+    ) -> AvatarizationJob:
+        """Get an avatarization job."""
         kwargs = {
             "method": "get",
-            "url": f"/jobs/{id}",
+            "url": f"/jobs/avatarization/{id}",
         }
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationJob,
+            per_request_timeout=per_request_timeout,
+            timeout=timeout,
+            **kwargs,
+        )
 
-        def print_response(job_response: Job) -> None:
-            if not job_response.current_progress:
-                return
-            message = f"[{response.current_progress.created_at.time()}] Status: {response.status}, current_step: {response.current_progress.name}"
-            logger.info(message)
+    def create_signal_metrics_job(
+        self,
+        request: SignalMetricsJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsJob:
+        """Create a signal metrics job."""
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/signal",
+        }
+        return SignalMetricsJob(
+            **self.client.request(**kwargs, json=request, timeout=timeout)
+        )
 
-        retry_timeout = timeout or DEFAULT_RETRY_TIMEOUT
+    def create_privacy_metrics_job(
+        self,
+        request: PrivacyMetricsJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsJob:
+        """Create a privacy metrics job."""
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/privacy",
+        }
+        return PrivacyMetricsJob(
+            **self.client.request(**kwargs, json=request, timeout=timeout)
+        )
 
-        start = time.time()
-        current = 0
+    def get_signal_metrics(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsJob:
+        """Get a signal metrics job."""
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/signal",
+        }
+        return get_job(
+            client=self.client,
+            response_cls=SignalMetricsJob,
+            per_request_timeout=per_request_timeout,
+            timeout=timeout,
+            **kwargs,
+        )
 
-        max_interval = 10
-        # Exponential interval, capped at max_interval
-        sleep_interval = iter(min(2**i, max_interval) for i in itertools.count())
-
-        # Iterate while we are < retry_timeout
-        while current == 0 or (current < retry_timeout):
-            timeout = per_request_timeout  # to pass to client.request
-            response = Job(**self.client.request(**kwargs, timeout=timeout))
-            if response.status not in (JobStatus.pending, JobStatus.started):
-                print_response(response)
-                return response
-
-            print_response(response)
-
-            # Sleep, but not longer than timeout
-            time_to_sleep = min(next(sleep_interval), retry_timeout - current)
-            time.sleep(time_to_sleep)
-
-            current = time.time() - start
-
-        return response
+    def get_privacy_metrics(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsJob:
+        """Get a privacy metrics job."""
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/privacy",
+        }
+        return get_job(
+            client=self.client,
+            response_cls=PrivacyMetricsJob,
+            per_request_timeout=per_request_timeout,
+            timeout=timeout,
+            **kwargs,
+        )
 
 
 class Metrics:
@@ -339,7 +433,6 @@ class Metrics:
             "method": "get",
             "url": f"/projections/{job_id}",
         }
-
         return Projections(**self.client.request(**kwargs, timeout=timeout))
 
     def get_variable_contributions(
@@ -371,7 +464,6 @@ class Metrics:
             "method": "get",
             "url": f"/variance/{job_id}",
         }
-
         return ExplainedVariance(**self.client.request(**kwargs, timeout=timeout))
 
 
@@ -390,7 +482,6 @@ class Reports:
             "method": "post",
             "url": f"/reports",
         }
-
         return Report(**self.client.request(**kwargs, json=request, timeout=timeout))
 
     def download_report(
@@ -421,7 +512,6 @@ class Stats:
             "method": "get",
             "url": f"/stats/cluster",
         }
-
         return ClusterStats(**self.client.request(**kwargs, timeout=timeout))
 
 
@@ -545,6 +635,112 @@ class PandasIntegration:
         df[datetime_columns] = df[datetime_columns].astype("datetime64[ns]")
 
         return df
+
+
+class Pipelines:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def avatarization_pipeline_with_processors(
+        self,
+        request: AvatarizationPipelineCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationPipelineResult:
+        """Create a Pipeline of avatarization with processors."""
+
+        # Upload the dataset if needed
+        # User can either specify the dataset he already uploaded or let this pipeline upload it
+        df = request.df.copy()
+        original_dataset_id = (
+            request.avatarization_job_create.parameters.dataset_id
+            or self.client.pandas.upload_dataframe(df, timeout=timeout).id
+        )
+
+        # Pre process the dataframe and upload it
+        processors = request.processors
+        for p in processors:
+            df = p.preprocess(df)
+        dataset = self.client.pandas.upload_dataframe(df, timeout=per_request_timeout)
+
+        # Avatarize the uploaded dataframe
+        request.avatarization_job_create.parameters.dataset_id = dataset.id
+        avatarization_job = self.client.jobs.create_avatarization_job(
+            request.avatarization_job_create
+        )
+        avatarization_job = self.client.jobs.get_avatarization_job(
+            avatarization_job.id,
+            timeout=timeout,
+            per_request_timeout=per_request_timeout,
+        )
+        if avatarization_job.status != JobStatus.success:
+            raise Exception(
+                f"Got error during the avatarization job: {avatarization_job.error_message}"
+            )
+
+        # Download the dataframe, postprocess it and upload the new dataframe
+        sensitive_unshuffled_avatars = self.client.pandas.download_dataframe(
+            avatarization_job.result.sensitive_unshuffled_avatars_datasets.id,
+            timeout=timeout,
+        )
+        for p in reversed(processors):
+            sensitive_unshuffled_avatars = p.postprocess(
+                request.df, sensitive_unshuffled_avatars
+            )
+        unshuffled_dataset = self.client.pandas.upload_dataframe(
+            sensitive_unshuffled_avatars, timeout=timeout
+        )
+
+        # Calculate privacy metrics on the post processed dataset vs the original one
+        privacy_job = self.client.jobs.create_privacy_metrics_job(
+            PrivacyMetricsJobCreate(
+                parameters=PrivacyMetricsParameters(
+                    original_id=original_dataset_id,
+                    unshuffled_avatars_id=unshuffled_dataset.id,
+                )
+            ),
+            timeout=per_request_timeout,
+        )
+
+        # Calculate signal metrics
+        signal_job = self.client.jobs.create_signal_metrics_job(
+            SignalMetricsJobCreate(
+                parameters=SignalMetricsParameters(
+                    original_id=original_dataset_id, avatars_id=unshuffled_dataset.id
+                )
+            ),
+            timeout=per_request_timeout,
+        )
+
+        # Get the job results
+        signal_job = self.client.jobs.get_signal_metrics(
+            signal_job.id, timeout=timeout, per_request_timeout=per_request_timeout
+        )
+        privacy_job = self.client.jobs.get_privacy_metrics(
+            privacy_job.id, timeout=timeout, per_request_timeout=per_request_timeout
+        )
+        if signal_job.status != JobStatus.success:
+            raise Exception(
+                f"Got error during the signal metrics job: {signal_job.error_message}"
+            )
+        if privacy_job.status != JobStatus.success:
+            raise Exception(
+                f"Got error during the privacy metrics job: {privacy_job.error_message}"
+            )
+
+        # Shuffle sensitive_unshuffled_avatars for security reasons
+        random_gen = np.random.default_rng()
+        map = random_gen.permutation(sensitive_unshuffled_avatars.index.values).tolist()
+        post_processed_avatars = sensitive_unshuffled_avatars.iloc[map].reset_index(
+            drop=True
+        )
+
+        return AvatarizationPipelineResult(
+            privacy_metrics=privacy_job.result,
+            signal_metrics=signal_job.result,
+            post_processed_avatars=post_processed_avatars,
+        )
 
 
 # This file has been generated - DO NOT MODIFY

@@ -2,11 +2,11 @@ import os
 
 from avatars.client import ApiClient
 from avatars.models import (
+    AvatarizationParameters,
     ColumnDetail,
     ColumnType,
     DatasetResponse,
     JobCreate,
-    AvatarizationParameters,
     PatchDataset,
 )
 
@@ -54,7 +54,9 @@ def main():
     print(response, "\n")
 
     # All calls to Jobs
-    job_create = JobCreate(dataset_id=dataset_id, parameters=AvatarizationParameters(k=20))
+    job_create = JobCreate(
+        dataset_id=dataset_id, parameters=AvatarizationParameters(k=20)
+    )
     response = client.jobs.create_job(request=job_create)
     print(response, "\n")
     job_id = response.id

@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.11
+# API Version : 0.4.14
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -21,6 +21,7 @@ from avatars.api import (
     Jobs,
     Metrics,
     PandasIntegration,
+    Pipelines,
     Reports,
     Stats,
     Users,
@@ -72,6 +73,7 @@ class ApiClient:
         self.stats = Stats(self)
         self.users = Users(self)
         self.pandas = PandasIntegration(self)
+        self.pipelines = Pipelines(self)
 
         self.timeout = timeout
         self._headers = {"User-Agent": "avatar-python"}
@@ -150,19 +152,23 @@ class ApiClient:
 
         if result.status_code != 200:
             json = result.json()
-            value = json.get('detail')
-            if result.status_code == 401 and isinstance(value, str) and "auth" in value :
+            value = json.get("detail")
+            if (
+                result.status_code == 401
+                and isinstance(value, str)
+                and "authenticated" in value
+            ):
                 raise Exception("You are not authenticated.")
-
             standard_error = _get_nested_value(json, "message")
-
-            validation_error = _get_nested_value(json, "msg")
-            field = _get_nested_value(json, "loc")[-1]
 
             if standard_error:
                 error_msg = standard_error
-            elif validation_error:
-                error_msg = f"{validation_error}: {field}"
+            elif validation_error := _get_nested_value(json, "msg"):
+                if detailed_message := _get_nested_value(json, "loc"):
+                    field = detailed_message[-1]
+                    error_msg = f"{validation_error}: {field}"
+                else:
+                    error_msg = f"Bad Request: {validation_error}"
             else:
                 error_msg = "Internal error"
 
