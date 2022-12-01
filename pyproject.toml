@@ -18,7 +18,7 @@ toolz = ["toolz"]
 
 [tool.poetry.dev-dependencies]
 blacken-docs = "^1.12.1"
-Sphinx = "^4.0.0"
+Sphinx = "^4.5.0"
 sphinx-autodoc-typehints = "^1.18.1"
 beautifulsoup4 = "^4.11.1"
 typer = "^0.4.1"

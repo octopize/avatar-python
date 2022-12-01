@@ -36,7 +36,7 @@ extensions = [
 ]
 
 autodoc_default_options = {
-    "exclude-members": "get_health_db, get_health_task, login",
+    "exclude-members": "login, get_job, to_common_type",
     "undoc-members": True,  # weird, have to add this so that the avatars.client module is documented
 }
 autodoc_typehints_format = "short"
