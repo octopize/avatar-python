@@ -76,7 +76,7 @@ This is all you need to run and evaluate an avatarization:
        )
    )
    print(f"got job id: {job.id}")
-   job = client.jobs.get_job(job.id)
+   job = client.jobs.get_avatarization_job(job.id)
    print(job.result)
    metrics = job.result.privacy_metrics
    print(f"got privacy metrics : {metrics}")
@@ -116,7 +116,7 @@ sending it to the engine, here’s how you should proceed.
 
    # ... do some modifications on the dataset
 
-   dataset = client.pandas.upload_dataframe(df)
+   dataset = client.pandas_integration.upload_dataframe(df)
 
    job = client.jobs.create_avatarization_job(
        AvatarizationJobCreate(
@@ -126,13 +126,13 @@ sending it to the engine, here’s how you should proceed.
            ),
        )
    )
-   job = client.jobs.get_job(job.id)
+   job = client.jobs.get_avatarization_job(job.id)
 
 Then receive the generated avatars as a pandas dataframe:
 
 .. code:: python
 
-   avatars_df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
+   avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 
 The dtypes will be copied over from the original dataframe.
 
@@ -143,13 +143,9 @@ Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.
 
 -  ``k`` (required)
-
 -  ``dataset_id`` (required): id of the dataset to avatarize
-
 -  ``column_weights``: default=1 for each variable
-
 -  ``ncp``: default=5.
-
 -  ``imputation``: imputation parameters type of
    ``ImputationParameters``.
 
@@ -189,24 +185,25 @@ One job corresponds to one avatarization.
    # You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
    # This call will block until the job is done or a timeout is expired.
    # You can call this function as often as you want.
-   job = client.jobs.get_job(id=job.id)
+   job = client.jobs.get_avatarization_job(id=job.id)
 
 Retry mechanism
 ^^^^^^^^^^^^^^^
 
-The ``get_job`` function periodically queries the avatarization engine
-to check if a given job is finished. This call will block until a given
-timeout has expired, and then return. However, the job is still running
-on the server. You can call ``get_job`` again, as many times as needed.
-If the job is finished, the call finishes too.
+The ``get_avatarization_job`` function periodically queries the
+avatarization engine to check if a given job is finished. This call will
+block until a given timeout has expired, and then return. However, the
+job is still running on the server. You can call
+``get_avatarization_job`` again, as many times as needed. If the job is
+finished, the call finishes too.
 
 You can modify this timeout by passing the ``timeout`` keyword to
-``get_job``.
+``get_avatarization_job``.
 
 .. code:: python
 
    # Will periodically retry until 10 seconds have passed
-   job = client.jobs.get_job(id=job.id, timeout=10)
+   job = client.jobs.get_avatarization_job(id=job.id, timeout=10)
 
 Sometimes, the job can fail. You can inspect the ``Job`` instance to see
 the status using ``job.status``.
@@ -224,7 +221,7 @@ available as only a single call is made.
 .. code:: python
 
    # Will periodically retry for 10 seconds, and each request can take 2 seconds.
-   job = client.jobs.get_job(id=job.id, per_request_timeout=2, timeout=10)
+   job = client.jobs.get_avatarization_job(id=job.id, per_request_timeout=2, timeout=10)
 
 Retrieving results
 ~~~~~~~~~~~~~~~~~~
@@ -300,6 +297,51 @@ to make it safe.
        io.StringIO(sensitive_unshuffled_avatars_datasets)
    )
    print(avatars_df.head())
+
+Launch a whole pipeline
+-----------------------
+
+We have implemented the concept of pipelines.
+
+.. code:: python
+
+   import pandas as pd
+
+   from avatars.client import ApiClient
+   from avatars.models import (
+       AvatarizationJobCreate,
+       AvatarizationParameters,
+   )
+   from avatars.models import AvatarizationPipelineCreate
+   from avatars.processors.proportions import ProportionProcessor
+
+   df = pd.DataFrame(
+       {
+           "variable_1": [100, 150, 120, 100],
+           "variable_2": [10, 30, 30, 22],
+           "variable_3": [30, 60, 30, 35],
+           "variable_4": [60, 60, 60, 65],
+       }
+   )
+
+   dataset = client.pandas_integration.upload_dataframe(df)
+
+
+   proportion_processor = ProportionProcessor(
+       variable_names=["variable_2", "variable_3", "variable_4"],
+       reference="variable_1",
+       sum_to_one=True,
+   )
+
+   result = client.pipelines.avatarization_pipeline_with_processors(
+       AvatarizationPipelineCreate(
+           avatarization_job_create=AvatarizationJobCreate(
+               parameters=AvatarizationParameters(dataset_id=dataset.id, k=3),
+           ),
+           processors=[proportion_processor],
+           df=df,
+       )
+   )
 
 Reset your password
 -------------------

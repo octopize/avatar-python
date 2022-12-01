@@ -100,7 +100,7 @@ df = pd.read_csv("fixtures/iris.csv")
 
 # ... do some modifications on the dataset
 
-dataset = client.pandas.upload_dataframe(df)
+dataset = client.pandas_integration.upload_dataframe(df)
 
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
@@ -116,7 +116,7 @@ job = client.jobs.get_avatarization_job(job.id)
 Then receive the generated avatars as a pandas dataframe:
 
 ```python
-avatars_df = client.pandas.download_dataframe(job.result.avatars_dataset.id)
+avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 ```
 
 The dtypes will be copied over from the original dataframe.
@@ -256,6 +256,50 @@ sensitive_unshuffled_avatars_df = pd.read_csv(
     io.StringIO(sensitive_unshuffled_avatars_datasets)
 )
 print(avatars_df.head())
+```
+
+## Launch a whole pipeline
+
+We have implemented the concept of pipelines.
+
+```python
+import pandas as pd
+
+from avatars.client import ApiClient
+from avatars.models import (
+    AvatarizationJobCreate,
+    AvatarizationParameters,
+)
+from avatars.models import AvatarizationPipelineCreate
+from avatars.processors.proportions import ProportionProcessor
+
+df = pd.DataFrame(
+    {
+        "variable_1": [100, 150, 120, 100],
+        "variable_2": [10, 30, 30, 22],
+        "variable_3": [30, 60, 30, 35],
+        "variable_4": [60, 60, 60, 65],
+    }
+)
+
+dataset = client.pandas_integration.upload_dataframe(df)
+
+
+proportion_processor = ProportionProcessor(
+    variable_names=["variable_2", "variable_3", "variable_4"],
+    reference="variable_1",
+    sum_to_one=True,
+)
+
+result = client.pipelines.avatarization_pipeline_with_processors(
+    AvatarizationPipelineCreate(
+        avatarization_job_create=AvatarizationJobCreate(
+            parameters=AvatarizationParameters(dataset_id=dataset.id, k=3),
+        ),
+        processors=[proportion_processor],
+        df=df,
+    )
+)
 ```
 
 ## Reset your password
