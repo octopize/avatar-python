@@ -44,7 +44,7 @@ lint-fix:
 .PHONY: lint-fix
 
 lint:
-	poetry run bandit -r avatars
+	poetry run bandit -r avatars -c bandit.yaml
 .PHONY: lint
 
 .DEFAULT_GOAL := help

@@ -65,7 +65,7 @@ job = client.jobs.create_avatarization_job(
     )
 )
 print(f"got job id: {job.id}")
-job = client.jobs.get_job(job.id)
+job = client.jobs.get_avatarization_job(job.id)
 print(job.result)
 metrics = job.result.privacy_metrics
 print(f"got privacy metrics : {metrics}")
@@ -110,7 +110,7 @@ job = client.jobs.create_avatarization_job(
         ),
     )
 )
-job = client.jobs.get_job(job.id)
+job = client.jobs.get_avatarization_job(job.id)
 ```
 
 Then receive the generated avatars as a pandas dataframe:
@@ -162,21 +162,21 @@ job = client.jobs.create_avatarization_job(request=job_create)
 # You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
 # This call will block until the job is done or a timeout is expired.
 # You can call this function as often as you want.
-job = client.jobs.get_job(id=job.id)
+job = client.jobs.get_avatarization_job(id=job.id)
 ```
 
 #### Retry mechanism
 
-The `get_job` function periodically queries the avatarization engine to check if a given job is finished.
+The `get_avatarization_job` function periodically queries the avatarization engine to check if a given job is finished.
 This call will block until a given timeout has expired, and then return.
-However, the job is still running on the server. You can call `get_job` again, as many times as needed.
+However, the job is still running on the server. You can call `get_avatarization_job` again, as many times as needed.
 If the job is finished, the call finishes too.
 
-You can modify this timeout by passing the `timeout` keyword to `get_job`.
+You can modify this timeout by passing the `timeout` keyword to `get_avatarization_job`.
 
 ```python
 # Will periodically retry until 10 seconds have passed
-job = client.jobs.get_job(id=job.id, timeout=10)
+job = client.jobs.get_avatarization_job(id=job.id, timeout=10)
 ```
 
 Sometimes, the job can fail. You can inspect the `Job` instance to see the status using `job.status`.
@@ -190,7 +190,7 @@ In other methods, only `timeout` is available as only a single call is made.
 
 ```python
 # Will periodically retry for 10 seconds, and each request can take 2 seconds.
-job = client.jobs.get_job(id=job.id, per_request_timeout=2, timeout=10)
+job = client.jobs.get_avatarization_job(id=job.id, per_request_timeout=2, timeout=10)
 ```
 
 ### Retrieving results
@@ -264,7 +264,8 @@ print(avatars_df.head())
 
 If you forgot your password or if you need to set one, first call the forgotten_password endpoint:
 
-<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --> 
+<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
+
 ```javascript
 from avatars.client import ApiClient
 
