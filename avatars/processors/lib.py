@@ -40,5 +40,3 @@ def split_columns_types(data_frame: pd.DataFrame) -> Tuple[List[int], List[int]]
     ]
     categorical = filter(lambda x: x not in continuous, range(0, data_frame.shape[1]))
     return continuous, list(categorical)
-
-
