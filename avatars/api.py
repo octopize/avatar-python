@@ -6,15 +6,16 @@ import itertools
 import logging
 import time
 from io import BytesIO, StringIO
-from typing import Any, Dict, List, Optional, Protocol, Union, runtime_checkable
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel
 
 from avatars.models import (
     AvatarizationJob,
     AvatarizationJobCreate,
+    AvatarizationPipelineCreate,
+    AvatarizationPipelineResult,
     ClusterStats,
     ColumnDetail,
     ColumnType,
@@ -31,6 +32,7 @@ from avatars.models import (
     PrivacyMetricsJob,
     PrivacyMetricsJobCreate,
     PrivacyMetricsParameters,
+    Processor,
     Projections,
     Report,
     ReportCreate,
@@ -72,7 +74,7 @@ def get_job(
     def print_response(job_response: Any) -> None:
         if not job_response.current_progress:
             return
-        message = f"[{response.current_progress.created_at.time()}] Status: {response.status}, current_step: {response.current_progress.name}"
+        message = f"[{job_response.current_progress.created_at.time()}] Status: {job_response.status}, current_step: {job_response.current_progress.name}"
         logger.info(message)
 
     retry_timeout = timeout or DEFAULT_RETRY_TIMEOUT
@@ -101,33 +103,6 @@ def get_job(
         current = time.time() - start
 
     return response
-
-
-@runtime_checkable
-class Processor(Protocol):
-    def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        ...
-
-    def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-        ...
-
-
-class AvatarizationPipelineCreate(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    avatarization_job_create: AvatarizationJobCreate
-    processors: List[Processor] = []
-    df: pd.DataFrame
-
-
-class AvatarizationPipelineResult(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    privacy_metrics: PrivacyMetrics
-    signal_metrics: SignalMetrics
-    post_processed_avatars: pd.DataFrame
 
 
 class Auth:
@@ -655,14 +630,16 @@ class Pipelines:
         df = request.df.copy()
         original_dataset_id = (
             request.avatarization_job_create.parameters.dataset_id
-            or self.client.pandas.upload_dataframe(df, timeout=timeout).id
+            or self.client.pandas_integration.upload_dataframe(df, timeout=timeout).id
         )
 
         # Pre process the dataframe and upload it
         processors = request.processors
         for p in processors:
             df = p.preprocess(df)
-        dataset = self.client.pandas.upload_dataframe(df, timeout=per_request_timeout)
+        dataset = self.client.pandas_integration.upload_dataframe(
+            df, timeout=per_request_timeout
+        )
 
         # Avatarize the uploaded dataframe
         request.avatarization_job_create.parameters.dataset_id = dataset.id
@@ -680,15 +657,17 @@ class Pipelines:
             )
 
         # Download the dataframe, postprocess it and upload the new dataframe
-        sensitive_unshuffled_avatars = self.client.pandas.download_dataframe(
-            avatarization_job.result.sensitive_unshuffled_avatars_datasets.id,
-            timeout=timeout,
+        sensitive_unshuffled_avatars = (
+            self.client.pandas_integration.download_dataframe(
+                avatarization_job.result.sensitive_unshuffled_avatars_datasets.id,
+                timeout=timeout,
+            )
         )
         for p in reversed(processors):
             sensitive_unshuffled_avatars = p.postprocess(
                 request.df, sensitive_unshuffled_avatars
             )
-        unshuffled_dataset = self.client.pandas.upload_dataframe(
+        unshuffled_dataset = self.client.pandas_integration.upload_dataframe(
             sensitive_unshuffled_avatars, timeout=timeout
         )
 

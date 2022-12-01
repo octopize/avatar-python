@@ -72,7 +72,7 @@ class ApiClient:
         self.reports = Reports(self)
         self.stats = Stats(self)
         self.users = Users(self)
-        self.pandas = PandasIntegration(self)
+        self.pandas_integration = PandasIntegration(self)
         self.pipelines = Pipelines(self)
 
         self.timeout = timeout
