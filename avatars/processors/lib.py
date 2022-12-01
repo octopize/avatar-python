@@ -1,8 +1,7 @@
-from typing import Tuple, List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
-
 
 NUMERIC_DTYPES = [
     np.float64,

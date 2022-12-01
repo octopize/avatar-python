@@ -2,9 +2,8 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
-from toolz.dicttoolz import valfilter
-
 from lib import NUMERIC_DTYPES
+from toolz.dicttoolz import valfilter
 
 
 class PerturbationProcessor:

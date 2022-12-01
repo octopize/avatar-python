@@ -1,8 +1,7 @@
-import pytest
+from datetime import datetime
 
 import pandas as pd
-
-from datetime import datetime
+import pytest
 
 
 @pytest.fixture
