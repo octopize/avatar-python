@@ -4,6 +4,10 @@ This Python client communicates with the Avatar platform.
 
 For more information about the Avatar method and process, check out our main docs at https://docs.octopize.io
 
+## Prerequisites
+
+`avatars` is intended to be run with Python 3.9+.
+
 ## Installation
 
 Choose the latest version at https://github.com/octopize/avatar-python/releases
@@ -11,9 +15,9 @@ Choose the latest version at https://github.com/octopize/avatar-python/releases
 Install the package by pointing to the .whl file (replace with correct version below).
 
 ```bash
-pip install https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
+pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 # or, if you're using poetry (recommended)
-poetry add https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
+poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 ```
 
 ## Setup
