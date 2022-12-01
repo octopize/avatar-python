@@ -1,6 +1,24 @@
 Changelog
 =========
 
+0.2.0
+-----
+
+-  Drop support for python3.8 # BREAKING CHANGE
+-  Drop ``jobs.get_job`` and ``job.create_job``. # BREAKING CHANGE
+-  Rename ``DatasetResponse`` to ``Dataset`` # BREAKING CHANGE
+-  Rename ``client.pandas`` to ``client.pandas_integration``
+-  Add separate endpoint to compute metrics separately using
+   ``jobs.create_signal_metrics_job`` and
+   ``jobs.create_privacy_metrics_job``.
+-  Add separate endpoint to access metrics jobs using
+   ``jobs.get_signal_metrics`` and ``job.get_privacy_metrics``
+-  Add processors to pre- and post-process your data before, and after
+   avatarization for custom use-cases. These are accessible under
+   ``avatars.processors``.
+
+.. _section-1:
+
 0.1.16
 ------
 
@@ -9,7 +27,7 @@ Changelog
 -  JobParameters becomes AvatarizationParameters
 -  Add DCR and NNDR to privacy metrics
 
-.. _section-1:
+.. _section-2:
 
 0.1.15
 ------
@@ -31,14 +49,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
-.. _section-2:
+.. _section-3:
 
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-3:
+.. _section-4:
 
 0.1.13
 ------
