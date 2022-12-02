@@ -5,10 +5,10 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="light dark" name="color-scheme"/><meta content="Docutils 0.17.1: http://docutils.sourceforge.net/" name="generator">
 <link href="genindex.html" rel="index" title="Index"/><link href="search.html" rel="search" title="Search"/><link href="client_and_api.html" rel="next" title="Client"/><link href="index.html" rel="prev" title="avatars"/>
-<meta content="sphinx-4.5.0, furo 2022.06.04.1" name="generator"/>
+<meta content="sphinx-4.5.0, furo 2022.09.29" name="generator"/>
 <title>Tutorial - avatars documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
-<link href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" rel="stylesheet" type="text/css"/>
+<link href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" rel="stylesheet" type="text/css"/>
 <link href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" rel="stylesheet" type="text/css"/>
 <style>
   body {
@@ -174,15 +174,19 @@
 <p>This Python client communicates with the Avatar platform.</p>
 <p>For more information about the Avatar method and process, check out our
 main docs at <a class="reference external" href="https://docs.octopize.io">https://docs.octopize.io</a></p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">avatars</span></code> is intended to be run with Python 3.9+.</p>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
 <p>Choose the latest version at
 <a class="reference external" href="https://github.com/octopize/avatar-python/releases">https://github.com/octopize/avatar-python/releases</a></p>
 <p>Install the package by pointing to the .whl file (replace with correct
 version below).</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 <span class="c1"># or, if you're using poetry (recommended)</span>
-poetry add https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
+poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 </pre></div>
 </div>
 </section>
@@ -234,7 +238,7 @@ interface hints from your IDE.</p>
     <span class="p">)</span>
 <span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got job id: </span><span class="si">{</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
 <span class="n">metrics</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"got privacy metrics : </span><span class="si">{</span><span class="n">metrics</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -268,7 +272,7 @@ sending it to the engine, here’s how you should proceed.</p>
 
 <span class="c1"># ... do some modifications on the dataset</span>
 
-<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
 <span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
     <span class="n">AvatarizationJobCreate</span><span class="p">(</span>
@@ -278,11 +282,11 @@ sending it to the engine, here’s how you should proceed.</p>
         <span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Then receive the generated avatars as a pandas dataframe:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">avatars_df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas</span><span class="o">.</span><span class="n">download_dataframe</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">avatars_df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">download_dataframe</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The dtypes will be copied over from the original dataframe.</p>
@@ -332,20 +336,21 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 <span class="c1"># You can retrieve the result and the status of the job (if it is running, has stopped, etc...).</span>
 <span class="c1"># This call will block until the job is done or a timeout is expired.</span>
 <span class="c1"># You can call this function as often as you want.</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 </pre></div>
 </div>
 <section id="retry-mechanism">
 <h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this headline">#</a></h4>
-<p>The <code class="docutils literal notranslate"><span class="pre">get_job</span></code> function periodically queries the avatarization engine
-to check if a given job is finished. This call will block until a given
-timeout has expired, and then return. However, the job is still running
-on the server. You can call <code class="docutils literal notranslate"><span class="pre">get_job</span></code> again, as many times as needed.
-If the job is finished, the call finishes too.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">get_avatarization_job</span></code> function periodically queries the
+avatarization engine to check if a given job is finished. This call will
+block until a given timeout has expired, and then return. However, the
+job is still running on the server. You can call
+<code class="docutils literal notranslate"><span class="pre">get_avatarization_job</span></code> again, as many times as needed. If the job is
+finished, the call finishes too.</p>
 <p>You can modify this timeout by passing the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword to
-<code class="docutils literal notranslate"><span class="pre">get_job</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">get_avatarization_job</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry until 10 seconds have passed</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Sometimes, the job can fail. You can inspect the <code class="docutils literal notranslate"><span class="pre">Job</span></code> instance to see
@@ -359,7 +364,7 @@ engine, while the <code class="docutils literal notranslate"><span class="pre">t
 method is allowed to take. In other methods, only <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is
 available as only a single call is made.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will periodically retry for 10 seconds, and each request can take 2 seconds.</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">per_request_timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">per_request_timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -434,6 +439,49 @@ to make it safe.</p>
 </div>
 </section>
 </section>
+<section id="launch-a-whole-pipeline">
+<h2>Launch a whole pipeline<a class="headerlink" href="#launch-a-whole-pipeline" title="Permalink to this headline">#</a></h2>
+<p>We have implemented the concept of pipelines.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
+<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AvatarizationJobCreate</span><span class="p">,</span>
+    <span class="n">AvatarizationParameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationPipelineCreate</span>
+<span class="kn">from</span> <span class="nn">avatars.processors.proportions</span> <span class="kn">import</span> <span class="n">ProportionProcessor</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">"variable_1"</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s2">"variable_2"</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span>
+        <span class="s2">"variable_3"</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">35</span><span class="p">],</span>
+        <span class="s2">"variable_4"</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">65</span><span class="p">],</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+
+<span class="n">proportion_processor</span> <span class="o">=</span> <span class="n">ProportionProcessor</span><span class="p">(</span>
+    <span class="n">variable_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"variable_2"</span><span class="p">,</span> <span class="s2">"variable_3"</span><span class="p">,</span> <span class="s2">"variable_4"</span><span class="p">],</span>
+    <span class="n">reference</span><span class="o">=</span><span class="s2">"variable_1"</span><span class="p">,</span>
+    <span class="n">sum_to_one</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pipelines</span><span class="o">.</span><span class="n">avatarization_pipeline_with_processors</span><span class="p">(</span>
+    <span class="n">AvatarizationPipelineCreate</span><span class="p">(</span>
+        <span class="n">avatarization_job_create</span><span class="o">=</span><span class="n">AvatarizationJobCreate</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">processors</span><span class="o">=</span><span class="p">[</span><span class="n">proportion_processor</span><span class="p">],</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="reset-your-password">
 <h2>Reset your password<a class="headerlink" href="#reset-your-password" title="Permalink to this headline">#</a></h2>
 <p><strong>NB</strong>: This section is only available if the use of emails to login is
@@ -468,10 +516,10 @@ valid once, and expires after 24 hours. Use it to reset your password:</p>
 </div>
 <div class="title">Client</div>
 </div>
-<svg><use href="#svg-arrow-right"></use></svg>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
 </a>
 <a class="prev-page" href="index.html">
-<svg><use href="#svg-arrow-right"></use></svg>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
 <div class="page-info">
 <div class="context">
 <span>Previous</span>
@@ -500,13 +548,14 @@ valid once, and expires after 24 hours. Use it to reset your password:</p>
 <div class="toc-sticky toc-scroll">
 <div class="toc-title-container">
 <span class="toc-title">
-            Contents
+            On this page
           </span>
 </div>
 <div class="toc-tree-container">
 <div class="toc-tree">
 <ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#quickstart">Quickstart</a></li>
@@ -527,6 +576,7 @@ valid once, and expires after 24 hours. Use it to reset your password:</p>
 <li><a class="reference internal" href="#sensitive-access-the-results-unshuffled">⚠ Sensitive ⚠ Access the results unshuffled</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#launch-a-whole-pipeline">Launch a whole pipeline</a></li>
 <li><a class="reference internal" href="#reset-your-password">Reset your password</a></li>
 </ul>
 </li>

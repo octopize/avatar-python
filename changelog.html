@@ -5,10 +5,10 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="light dark" name="color-scheme"/><meta content="Docutils 0.17.1: http://docutils.sourceforge.net/" name="generator">
 <link href="genindex.html" rel="index" title="Index"/><link href="search.html" rel="search" title="Search"/><link href="models.html" rel="prev" title="Models"/>
-<meta content="sphinx-4.5.0, furo 2022.06.04.1" name="generator"/>
+<meta content="sphinx-4.5.0, furo 2022.09.29" name="generator"/>
 <title>Changelog - avatars documentation</title>
 <link href="_static/pygments.css" rel="stylesheet" type="text/css"/>
-<link href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" rel="stylesheet" type="text/css"/>
+<link href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" rel="stylesheet" type="text/css"/>
 <link href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" rel="stylesheet" type="text/css"/>
 <style>
   body {
@@ -172,7 +172,28 @@
 <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">#</a></h1>
 <section id="id1">
-<h2>0.1.16<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<h2>0.2.0<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<ul class="simple">
+<li><p>Drop support for python3.8 # BREAKING CHANGE</p></li>
+<li><p>Drop <code class="docutils literal notranslate"><span class="pre">jobs.get_job</span></code> and <code class="docutils literal notranslate"><span class="pre">job.create_job</span></code>. # BREAKING CHANGE</p></li>
+<li><p>Rename <code class="docutils literal notranslate"><span class="pre">DatasetResponse</span></code> to <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> # BREAKING CHANGE</p></li>
+<li><p>Rename <code class="docutils literal notranslate"><span class="pre">client.pandas</span></code> to <code class="docutils literal notranslate"><span class="pre">client.pandas_integration</span></code> # BREAKING
+CHANGE</p></li>
+<li><p>Add separate endpoint to compute metrics separately using
+<code class="docutils literal notranslate"><span class="pre">jobs.create_signal_metrics_job</span></code> and
+<code class="docutils literal notranslate"><span class="pre">jobs.create_privacy_metrics_job</span></code>.</p></li>
+<li><p>Add separate endpoint to access metrics jobs using
+<code class="docutils literal notranslate"><span class="pre">jobs.get_signal_metrics</span></code> and <code class="docutils literal notranslate"><span class="pre">job.get_privacy_metrics</span></code></p></li>
+<li><p>Add processors to pre- and post-process your data before, and after
+avatarization for custom use-cases. These are accessible under
+<code class="docutils literal notranslate"><span class="pre">avatars.processors</span></code>.</p></li>
+<li><p>Handle errors more gracefully</p></li>
+<li><p>Add ExcludeCategoricalParameters to use embedded processor on the
+server side</p></li>
+</ul>
+</section>
+<section id="section-1">
+<span id="id2"></span><h2>0.1.16<a class="headerlink" href="#section-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Add forgotten password endpoint</p></li>
 <li><p>Add reset password endpoint</p></li>
@@ -180,8 +201,8 @@
 <li><p>Add DCR and NNDR to privacy metrics</p></li>
 </ul>
 </section>
-<section id="section-1">
-<span id="id2"></span><h2>0.1.15<a class="headerlink" href="#section-1" title="Permalink to this headline">#</a></h2>
+<section id="section-2">
+<span id="id3"></span><h2>0.1.15<a class="headerlink" href="#section-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Handle category dtype</p></li>
 <li><p>Fix dtype casting of datetime columns</p></li>
@@ -202,14 +223,14 @@ instead.</p></li>
 </ul>
 </section>
 </section>
-<section id="section-2">
-<span id="id3"></span><h2>0.1.14<a class="headerlink" href="#section-2" title="Permalink to this headline">#</a></h2>
+<section id="section-3">
+<span id="id4"></span><h2>0.1.14<a class="headerlink" href="#section-3" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Give access to avatars unshuffled avatars dataset</p></li>
 </ul>
 </section>
-<section id="section-3">
-<span id="id4"></span><h2>0.1.13<a class="headerlink" href="#section-3" title="Permalink to this headline">#</a></h2>
+<section id="section-4">
+<span id="id5"></span><h2>0.1.13<a class="headerlink" href="#section-4" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Remove default value for <code class="docutils literal notranslate"><span class="pre">to_categorical_threshold</span></code></p></li>
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">logger.info</span></code> instead of <code class="docutils literal notranslate"><span class="pre">print</span></code></p></li>
@@ -221,7 +242,7 @@ instead.</p></li>
 <footer>
 <div class="related-pages">
 <a class="prev-page" href="models.html">
-<svg><use href="#svg-arrow-right"></use></svg>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
 <div class="page-info">
 <div class="context">
 <span>Previous</span>
@@ -250,20 +271,21 @@ instead.</p></li>
 <div class="toc-sticky toc-scroll">
 <div class="toc-title-container">
 <span class="toc-title">
-            Contents
+            On this page
           </span>
 </div>
 <div class="toc-tree-container">
 <div class="toc-tree">
 <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
-<li><a class="reference internal" href="#id1">0.1.16</a></li>
-<li><a class="reference internal" href="#section-1">0.1.15</a><ul>
+<li><a class="reference internal" href="#id1">0.2.0</a></li>
+<li><a class="reference internal" href="#section-1">0.1.16</a></li>
+<li><a class="reference internal" href="#section-2">0.1.15</a><ul>
 <li><a class="reference internal" href="#breaking">BREAKING</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#section-2">0.1.14</a></li>
-<li><a class="reference internal" href="#section-3">0.1.13</a></li>
+<li><a class="reference internal" href="#section-3">0.1.14</a></li>
+<li><a class="reference internal" href="#section-4">0.1.13</a></li>
 </ul>
 </li>
 </ul>
