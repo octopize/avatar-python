@@ -6,6 +6,11 @@ This Python client communicates with the Avatar platform.
 For more information about the Avatar method and process, check out our
 main docs at https://docs.octopize.io
 
+Prerequisites
+-------------
+
+``avatars`` is intended to be run with Python 3.9+.
+
 Installation
 ------------
 
@@ -17,9 +22,9 @@ version below).
 
 .. code:: bash
 
-   pip install https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
+   pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
    # or, if you're using poetry (recommended)
-   poetry add https://github.com/octopize/avatar-python/releases/download/0.1.11/avatars-0.1.11-py3-none-any.whl
+   poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 
 Setup
 -----
@@ -351,6 +356,10 @@ activated in the global configuration. It is not the case by default.
 
 If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:
+
+.. raw:: html
+
+   <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
 
 .. code:: javascript
 

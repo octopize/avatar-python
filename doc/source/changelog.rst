@@ -7,7 +7,8 @@ Changelog
 -  Drop support for python3.8 # BREAKING CHANGE
 -  Drop ``jobs.get_job`` and ``job.create_job``. # BREAKING CHANGE
 -  Rename ``DatasetResponse`` to ``Dataset`` # BREAKING CHANGE
--  Rename ``client.pandas`` to ``client.pandas_integration``
+-  Rename ``client.pandas`` to ``client.pandas_integration`` # BREAKING
+   CHANGE
 -  Add separate endpoint to compute metrics separately using
    ``jobs.create_signal_metrics_job`` and
    ``jobs.create_privacy_metrics_job``.
@@ -16,6 +17,9 @@ Changelog
 -  Add processors to pre- and post-process your data before, and after
    avatarization for custom use-cases. These are accessible under
    ``avatars.processors``.
+-  Handle errors more gracefully
+-  Add ExcludeCategoricalParameters to use embedded processor on the
+   server side
 
 .. _section-1:
 
