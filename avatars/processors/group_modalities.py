@@ -95,5 +95,5 @@ class GroupModalitiesProcessor:
 
         return df
 
-    def postprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df
+    def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
+        return dest
