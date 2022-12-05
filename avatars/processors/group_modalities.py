@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 import pandas as pd
-from lib import split_columns_types
+from avatars.processors.lib import split_columns_types
 
 
 class GroupModalitiesProcessor:

@@ -38,3 +38,15 @@ build-backend = "poetry.core.masonry.api"
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/black_compatibility.html
 profile = "black"
+
+[mypy]
+python_version = 3.9
+
+[tool.mypy]
+strict = true
+exclude = "(tmp|.venv)"
+
+[[tool.mypy.overrides]]
+module = "pandas.*"
+ignore_missing_imports = true
+
