@@ -51,7 +51,7 @@ class ProportionProcessor:
 
         # Ensure that target variables that were set to zero remain at zero
         for variable in self.variable_names:
-            zero_indices = df[df[self.variable_names[0]] == 0].index
+            zero_indices = df[df[variable] == 0].index
             if len(zero_indices) > 0:
                 sub_df.loc[zero_indices, variable] = 0
 
