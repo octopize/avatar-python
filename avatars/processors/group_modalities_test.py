@@ -9,7 +9,7 @@ def test_postprocess_noop(many_dtypes_df: pd.DataFrame) -> None:
     processor = GroupModalitiesProcessor(
         min_unique=3, global_threshold=1, new_category="other"
     )
-    pd.testing.assert_frame_equal(many_dtypes_df, processor.postprocess(many_dtypes_df))
+    pd.testing.assert_frame_equal(many_dtypes_df, processor.postprocess(many_dtypes_df, many_dtypes_df))
 
 
 def test_group_modalities_simple(many_dtypes_df: pd.DataFrame) -> None:
