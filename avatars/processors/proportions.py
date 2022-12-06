@@ -49,6 +49,12 @@ class ProportionProcessor:
         else:
             sub_df = df[self.variable_names].div(df[self.reference], axis=0)
 
+        # Ensure that target variables that were set to zero remain at zero
+        for variable in self.variable_names:
+            zero_indices = df[df[self.variable_names[0]] == 0].index
+            if len(zero_indices) > 0:
+                sub_df.loc[zero_indices, variable] = 0
+
         df = df.drop(columns=self.variable_names)
         df = pd.concat([df, sub_df], axis=1)[col_order]
         return df
