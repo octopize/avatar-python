@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.2.1
+-----
+
+-  Fix to processor taking the wrong number of arguments
+-  Make the ``toolz`` package a mandatory dependency
+-  Fix a handling of a target variable equaling zero
+
+.. _section-1:
+
 0.2.0
 -----
 
@@ -21,7 +30,7 @@ Changelog
 -  Add ExcludeCategoricalParameters to use embedded processor on the
    server side
 
-.. _section-1:
+.. _section-2:
 
 0.1.16
 ------
@@ -31,7 +40,7 @@ Changelog
 -  JobParameters becomes AvatarizationParameters
 -  Add DCR and NNDR to privacy metrics
 
-.. _section-2:
+.. _section-3:
 
 0.1.15
 ------
@@ -53,14 +62,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
-.. _section-3:
+.. _section-4:
 
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-4:
+.. _section-5:
 
 0.1.13
 ------
