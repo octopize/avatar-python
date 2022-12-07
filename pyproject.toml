@@ -46,3 +46,7 @@ exclude = "(tmp|.venv)"
 [[tool.mypy.overrides]]
 module = "pandas.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "toolz.*"
+ignore_missing_imports = true
