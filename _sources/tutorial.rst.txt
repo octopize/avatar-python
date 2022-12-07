@@ -22,9 +22,9 @@ version below).
 
 .. code:: bash
 
-   pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
+   pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
    # or, if you're using poetry (recommended)
-   poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
+   poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
 
 Setup
 -----
