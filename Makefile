@@ -6,19 +6,40 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 install:  ## Install the stack
-	poetry install --extras "pandas"
+	poetry install --sync
 .PHONY: install
+
+
+##@ Tests
+
 
 test: typecheck test-integration  ## Run all the tests
 .PHONY: test
 
-typecheck:  ## Run the tests
-	poetry run mypy --show-error-codes --pretty avatars
+typecheck:  ## Run the type checker
+	poetry run mypy avatars --show-error-codes --pretty
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
 	poetry run python ./bin/markdowncode.py ./docs/tutorial.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
+
+lci: lint-fix lint test-integration doc-build pip-requirements generate-py ## Apply the whole integration pipeline
+.PHONY: lci
+
+lint-fix: ## Fix linting
+	poetry run black avatars/ bin doc/source
+	poetry run blacken-docs docs/tutorial.md
+	poetry run isort avatars/ bin doc/source
+.PHONY: lint-fix
+
+lint: ## Lint source files
+	poetry run bandit -r avatars -c bandit.yaml
+.PHONY: lint
+
+
+##@ Doc
+
 
 DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment variable. Uses in github actions
 DOC_SOURCE_DIR := doc/source
@@ -27,7 +48,7 @@ doc: doc-build  ## Build and open the docs
 	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
 .PHONY: doc
 
-doc-build:  # Build the docs
+doc-build:  ## Build the docs
 	rm -r $(DOC_OUTPUT_DIR)
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
@@ -35,18 +56,38 @@ doc-build:  # Build the docs
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)
 .PHONY: doc-build
 
-lci: lint-fix lint test-integration doc-build
-.PHONY: lci
 
-lint-fix:
-	poetry run black avatars/ bin doc/source
-	poetry run blacken-docs docs/tutorial.md
-	poetry run isort avatars/ bin doc/source
-.PHONY: lint-fix
+##@ Tutorial
 
-lint:
-	poetry run bandit -r avatars -c bandit.yaml
-.PHONY: lint
+
+install-tutorial: ## Install the packages used for the tutorials
+	poetry install --with tutorial --sync
+.PHONY: install-tutorial
+
+TUTORIAL_REQUIREMENTS := requirements-tutorial.txt
+VENV_NAME := notebooks/env
+
+
+pip-requirements: ## Export the packages for the tutorials as a pip requirements.txt file
+	poetry export -f requirements.txt -o  $(TUTORIAL_REQUIREMENTS) --with tutorial  --with main --without dev --without-hashes
+.PHONY: pip-requirements
+
+
+pip-install-tutorial: ## Install the dependecies of the tutorial via pip
+	python3 -m venv $(VENV_NAME)
+	"$(abspath $(VENV_NAME))/bin/pip3" install -r $(TUTORIAL_REQUIREMENTS)
+	"$(abspath $(VENV_NAME))/bin/pip3" install . ## Installing the avatars package
+.PHONY: pip-install-tutorial
+
+
+notebook: pip-install-tutorial ## Start the tutorial notebooks
+	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL="http://localhost:8000" AVATAR_USERNAME="user_integration" AVATAR_PASSWORD="password_integration" jupyter notebook notebooks
+.PHONY: notebook
+
+generate-py:  ## Generate .py files from notebooks
+	poetry run jupytext notebooks/*.ipynb  --from ipynb --to py
+.PHONY: generate-py
+
 
 .DEFAULT_GOAL := help
 help: Makefile

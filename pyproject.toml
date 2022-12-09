@@ -13,7 +13,7 @@ pydantic = "^1.9.0"
 pandas = "^1.4.2"
 toolz = "^0.12.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 blacken-docs = "^1.12.1"
 Sphinx = "^4.5.0"
 sphinx-autodoc-typehints = "^1.18.1"
@@ -24,9 +24,20 @@ black = "^22.3.0"
 isort = "^5.10.1"
 bandit = "^1.7.4"
 mypy = "^0.971"
-
-[tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
+
+
+[tool.poetry.group.tutorial]
+optional = true
+
+[tool.poetry.group.tutorial.dependencies]
+seaborn = "^0.12.1"
+matplotlib = "^3.6.2"
+ipykernel = "^6.19.2"
+missingno = "^0.5.1"
+notebook = "^6.5.2"
+jupytext = "^1.14.2"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
