@@ -84,9 +84,15 @@ notebook: pip-install-tutorial ## Start the tutorial notebooks
 	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL="http://localhost:8000" AVATAR_USERNAME="user_integration" AVATAR_PASSWORD="password_integration" jupyter notebook notebooks
 .PHONY: notebook
 
+
 generate-py:  ## Generate .py files from notebooks
 	poetry run jupytext notebooks/*.ipynb  --from ipynb --to py
 .PHONY: generate-py
+
+
+test-tutorial:
+	ls notebooks/Tutorial*.py | xargs -n1 basename | xargs -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=http://localhost:8000 AVATAR_USERNAME=user_integration AVATAR_PASSWORD=password_integration $(abspath $(VENV_NAME))/bin/python {{}} > /dev/null && echo \"Succesfully ran {{}}\""
+.PHONY: test-tutorial
 
 
 .DEFAULT_GOAL := help
