@@ -36,7 +36,7 @@ class FileTooLarge(Exception):
 
 
 def _get_nested_value(
-    obj: Union[Mapping, Sequence], key: str, default: Any = None
+    obj: Union[Mapping[Any, Any], Sequence[Any]], key: str, default: Any = None
 ) -> Any:
     """
     Return value from (possibly) nested key in JSON dictionary.
@@ -124,9 +124,7 @@ class ApiClient:
     ) -> Any:
         """Request the API."""
 
-        should_verify = (
-            kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True
-        )
+        should_verify = kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True  # type: ignore
         if should_verify and "Authorization" not in self._headers:
             raise Exception("You are not authenticated.")
 
@@ -152,19 +150,19 @@ class ApiClient:
 
         if result.status_code != 200:
             json = result.json()
-            value = json.get("detail")
+            value = json.get("detail")  # type: ignore
             if (
                 result.status_code == 401
                 and isinstance(value, str)
                 and "authenticated" in value
             ):
                 raise Exception("You are not authenticated.")
-            standard_error = _get_nested_value(json, "message")
+            standard_error = _get_nested_value(json, "message")  # type: ignore
 
             if standard_error:
                 error_msg = standard_error
-            elif validation_error := _get_nested_value(json, "msg"):
-                if detailed_message := _get_nested_value(json, "loc"):
+            elif validation_error := _get_nested_value(json, "msg"):  # type: ignore
+                if detailed_message := _get_nested_value(json, "loc"):  # type: ignore
                     field = detailed_message[-1]
                     error_msg = f"{validation_error}: {field}"
                 else:
@@ -188,7 +186,7 @@ class ApiClient:
     ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
 
         if not file:
-            return
+            return None
 
         filename = str(Path(file.name).name) if hasattr(file, "name") else "file.csv"
 
