@@ -13,7 +13,7 @@ test: typecheck test-integration  ## Run all the tests
 .PHONY: test
 
 typecheck:  ## Run the tests
-	poetry run mypy avatars
+	poetry run mypy --show-error-codes --pretty avatars
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
