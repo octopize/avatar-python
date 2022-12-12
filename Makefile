@@ -59,13 +59,13 @@ doc-build:  ## Build the docs
 
 ##@ Tutorial
 
+TUTORIAL_REQUIREMENTS := requirements-tutorial.txt
+VENV_NAME := notebooks/env
+
 
 install-tutorial: ## Install the packages used for the tutorials
 	poetry install --with tutorial --sync
 .PHONY: install-tutorial
-
-TUTORIAL_REQUIREMENTS := requirements-tutorial.txt
-VENV_NAME := notebooks/env
 
 
 pip-requirements: ## Export the packages for the tutorials as a pip requirements.txt file
