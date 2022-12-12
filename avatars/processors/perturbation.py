@@ -2,7 +2,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
-from avatars.processors.lib import NUMERIC_DTYPES
+from avatars.lib.split_columns_types import NUMERIC_DTYPES
 from toolz.dicttoolz import valfilter
 
 

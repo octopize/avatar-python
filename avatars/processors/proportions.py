@@ -1,11 +1,12 @@
 from typing import List
 
 import pandas as pd
-
+import numpy as np
+from avatars.lib.saferound import saferound
 
 class ProportionProcessor:
     def __init__(
-        self, variable_names: List[str], reference: str, sum_to_one: bool = True
+        self, variable_names: List[str], reference: str, sum_to_one: bool = True, decimal_count: int = 1
     ):
         """Processor to express numeric variables as proportion of another variable.
 
@@ -15,10 +16,12 @@ class ProportionProcessor:
             reference: the variable of reference
             sum_to_one: set to True to ensure the sum of the variables sum to 1 once transformed.
                 default: True
+            decimal_count: the number of decimals postprocessed variables should have
         """
         self.variable_names = variable_names
         self.reference = reference
         self.sum_to_one = sum_to_one
+        self.decimal_count = decimal_count
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         """Transform numeric variables into proportion of another variable.
@@ -88,4 +91,11 @@ class ProportionProcessor:
             sub_df = dest[self.variable_names].mul(dest[self.reference], axis=0)
         dest = dest.drop(columns=self.variable_names)
         dest = pd.concat([dest, sub_df], axis=1)[col_order]
+
+        # Perform rounding of the postprocess variable to the expected number of decimals.
+        # We use saferounding here to force the sum of rounded variables to remain unchanged. 
+        if self.sum_to_one:
+            for i, row in enumerate(dest[self.variable_names].values):
+                if not np.any(np.isnan(row)):
+                    dest.loc[i, self.variable_names] = saferound(row, self.decimal_count)
         return dest
