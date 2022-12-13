@@ -74,7 +74,7 @@ pip-requirements: ## Export the packages for the tutorials as a pip requirements
 
 
 pip-install-tutorial: ## Install the dependecies of the tutorial via pip
-	python3 -m venv $(VENV_NAME)
+	python3.9 -m venv $(VENV_NAME)
 	"$(abspath $(VENV_NAME))/bin/pip3" install -r $(TUTORIAL_REQUIREMENTS)
 	"$(abspath $(VENV_NAME))/bin/pip3" install . ## Installing the avatars package
 .PHONY: pip-install-tutorial
@@ -91,7 +91,10 @@ generate-py:  ## Generate .py files from notebooks
 
 
 test-tutorial: ## Verify that all tutorials run without errors
-	ls notebooks/Tutorial*.py | xargs -n1 basename | xargs -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=http://localhost:8000 AVATAR_USERNAME=user_integration AVATAR_PASSWORD=password_integration $(abspath $(VENV_NAME))/bin/python {{}} > /dev/null && echo \"Succesfully ran {{}}\""
+	# ls $(abspath $(VENV_NAME))/bin/python || echo "You must install the pip venv first. Run make pip-install-tutorial." && exit 1
+	SYSTEM=$$(uname -s)
+	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
+	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=http://localhost:8000 AVATAR_USERNAME=user_integration AVATAR_PASSWORD=password_integration $(abspath $(VENV_NAME))/bin/python3.9 {{}} > /dev/null && echo \"Succesfully ran {{}}\""
 .PHONY: test-tutorial
 
 
