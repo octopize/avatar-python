@@ -91,7 +91,7 @@ generate-py:  ## Generate .py files from notebooks
 
 
 test-tutorial: ## Verify that all tutorials run without errors
-	# ls $(abspath $(VENV_NAME))/bin/python || echo "You must install the pip venv first. Run make pip-install-tutorial." && exit 1
+	ls $(abspath $(VENV_NAME))/bin/python || echo "You must install the pip venv first. Run make pip-install-tutorial." && exit 1
 	SYSTEM=$$(uname -s)
 	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
 	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=http://localhost:8000 AVATAR_USERNAME=user_integration AVATAR_PASSWORD=password_integration $(abspath $(VENV_NAME))/bin/python3.9 {{}} > /dev/null && echo \"Succesfully ran {{}}\""
