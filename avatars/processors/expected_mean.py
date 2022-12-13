@@ -63,7 +63,7 @@ class ExpectedMeanProcessor:
                 self.nogroup_value for i in range(len(working))
             ]
         cols = self.groupby_variables + self.target_variables
-        self.properties_df = get_distribution_data(
+        self.properties_df = _get_distribution_data(
             df=working[cols],
             target_variables=self.target_variables,
             groupby_variables=self.groupby_variables,
@@ -90,7 +90,7 @@ class ExpectedMeanProcessor:
             # if no groupby, create a one-modality temporary variable
             dest[self.nogroup_name] = [self.nogroup_value] * len(dest)
         cols = self.groupby_variables + self.target_variables
-        current_properties_df = get_distribution_data(
+        current_properties_df = _get_distribution_data(
             df=dest[cols],
             target_variables=self.target_variables,
             groupby_variables=self.groupby_variables,
@@ -138,7 +138,7 @@ class ExpectedMeanProcessor:
         return dest
 
 
-def get_distribution_data(
+def _get_distribution_data(
     df: pd.DataFrame,
     target_variables: List[str],
     groupby_variables: List[str],

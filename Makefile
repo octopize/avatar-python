@@ -49,7 +49,7 @@ doc: doc-build  ## Build and open the docs
 .PHONY: doc
 
 doc-build:  ## Build the docs
-	rm -r $(DOC_OUTPUT_DIR)
+	rm -rf $(DOC_OUTPUT_DIR)
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
 	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)

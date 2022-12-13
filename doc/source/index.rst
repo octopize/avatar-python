@@ -16,6 +16,7 @@ Table of contents
    Tutorial <tutorial>
    Client <client_and_api>
    Models <models>
+   Processors <processors>
    Changelog <changelog>
 
 Our main docs are at https://docs.octopize.io/
