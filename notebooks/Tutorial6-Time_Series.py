@@ -18,6 +18,9 @@
 
 # ## Connection
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # +
 import os
 

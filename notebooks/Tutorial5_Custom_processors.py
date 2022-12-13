@@ -107,12 +107,12 @@ class GroupRelationshipProcessor:
         working = df.copy()
         
         # Store frequencies for family modalities
-        family_data = working[working[variable_to_transform].isin(self.family_frequencies.keys())]
-        self.family_frequencies = (family_data[variable_to_transform].value_counts()/len(family_data)).to_dict()
+        family_data = working[working[self.variable_to_transform].isin(self.family_frequencies.keys())]
+        self.family_frequencies = (family_data[self.variable_to_transform].value_counts()/len(family_data)).to_dict()
 
         # Store frequencies for nofamily modalities
-        nofamily_data = working[working[variable_to_transform].isin(self.nofamily_frequencies.keys())]
-        self.nofamily_frequencies = (nofamily_data[variable_to_transform].value_counts()/len(nofamily_data)).to_dict()
+        nofamily_data = working[working[self.variable_to_transform].isin(self.nofamily_frequencies.keys())]
+        self.nofamily_frequencies = (nofamily_data[self.variable_to_transform].value_counts()/len(nofamily_data)).to_dict()
         
         # Replace original modality by new ones
         working[self.variable_to_transform] = ['family' if x in self.family_frequencies else 'no_family' for x in working[self.variable_to_transform]]
@@ -177,3 +177,6 @@ utility_metrics = result.signal_metrics
 print("\n*** Utility metrics ***")
 for metric in utility_metrics:
     print(metric)
+# -
+
+
