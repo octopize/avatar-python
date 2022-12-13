@@ -61,7 +61,7 @@ client.health.get_health()
 
 # We will use the `adult` dataset to demonstrate how a custom processor can be defined.
 
-df = pd.read_csv("../fixtures/adult_with_cities.csv")
+df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000)
 dataset = client.pandas_integration.upload_dataframe(df)
 print(df.shape)
 df.head()
@@ -70,22 +70,22 @@ df['relationship'].value_counts()
 
 
 # To be compatible with the avatarization pipeline, a processor must be defined following the structure:
-#
+#     
 # ```python
 # class MyCustomProcessor:
 #     def __init__(
 #         self, <some_arguments>
 #     ):
 #         ...
-#
+#     
 #     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
 #         ...
-#
+#         
 #     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
 #         ...
 # ```
 
-# We can define a simple example processor that will group some modalities together in a preprocessing step and sample from the original modalities in the postprocessing step.
+# We can define a simple example processor that will group some modalities together in a preprocessing step and sample from the original modalities on the basis of the original frequencies in the postprocessing step. 
 #
 # We can call this processor `GroupRelationshipProcessor`.
 
@@ -98,26 +98,38 @@ class GroupRelationshipProcessor:
         self, variable_to_transform: str
     ):
         self.variable_to_transform = variable_to_transform
-        self.family = ['Husband', 'Own-child', 'Wife']
-        self.nofamily = ['Not-in-family', 'Unmarried', 'Other-relative']
-
+        # Define modalities for new family and nofamily categories
+        # Initialize frequencies to None
+        self.family_frequencies = {'Husband': None, 'Own-child': None, 'Wife': None}
+        self.nofamily_frequencies = {'Not-in-family': None, 'Unmarried': None, 'Other-relative': None}
+        
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         working = df.copy()
-        working[self.variable_to_transform] = ['family' if x in self.family else 'no_family' for x in working[self.variable_to_transform]]
-        return working
+        
+        # Store frequencies for family modalities
+        family_data = working[working[variable_to_transform].isin(self.family_frequencies.keys())]
+        self.family_frequencies = (family_data[variable_to_transform].value_counts()/len(family_data)).to_dict()
 
+        # Store frequencies for nofamily modalities
+        nofamily_data = working[working[variable_to_transform].isin(self.nofamily_frequencies.keys())]
+        self.nofamily_frequencies = (nofamily_data[variable_to_transform].value_counts()/len(nofamily_data)).to_dict()
+        
+        # Replace original modality by new ones
+        working[self.variable_to_transform] = ['family' if x in self.family_frequencies else 'no_family' for x in working[self.variable_to_transform]]
+        return working
+    
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
         working = dest.copy()
-        working[self.variable_to_transform] = [np.random.choice(self.family) if x == 'family' else np.random.choice(self.nofamily) for x in working[self.variable_to_transform]]
+        
+        # Sample an old modality for each value
+        working[self.variable_to_transform] = [np.random.choice(a=list(self.family_frequencies.keys()), p=list(self.family_frequencies.values())) if x == 'family' else np.random.choice(list(self.nofamily_frequencies.keys())) for x in working[self.variable_to_transform]]
         return working
-
+        
 
 
 group_relationship_processor = GroupRelationshipProcessor(variable_to_transform = 'relationship')
 
 preprocessed_df = group_relationship_processor.preprocess(df)
-
-preprocessed_df.head()
 
 preprocessed_df['relationship'].value_counts()
 
@@ -125,7 +137,11 @@ postprocessed_df = group_relationship_processor.postprocess(df, preprocessed_df)
 
 postprocessed_df.head()
 
+# We now check that the postprocessed data contains approximatively each modality in the same proportion as in the original data
+
 postprocessed_df['relationship'].value_counts()
+
+df['relationship'].value_counts()
 
 # ## Use custom processor  in the avatarization pipeline
 
@@ -143,7 +159,8 @@ result = client.pipelines.avatarization_pipeline_with_processors(
         ),
         processors=[group_relationship_processor],
         df=df,
-    ), timeout = 1000
+    ), per_request_timeout=1000, 
+    timeout = 1000
 )
 # -
 
@@ -155,7 +172,7 @@ privacy_metrics = result.privacy_metrics
 print("*** Privacy metrics ***")
 for metric in privacy_metrics:
     print(metric)
-
+    
 utility_metrics = result.signal_metrics
 print("\n*** Utility metrics ***")
 for metric in utility_metrics:

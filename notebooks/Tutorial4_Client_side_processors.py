@@ -67,26 +67,34 @@ client.health.get_health()
 
 # We have seen in the previous tutorial one approach to handle categorical variables with large cardinality. We propose here an alternative to do so by means of a client-side processor.
 #
-# This processor will group modalities together to ensure the target variable has a requested number of modalities. The least represented modalities will be brought together under a `other` modality. Note that this transformation is irreversible (the original value cannot be infered from `other`.
+# This processor will group modalities together to ensure the target variable has a requested number of modalities. The least represented modalities will be brought together under a `other` modality. Note that this transformation is irreversible (the original value cannot be infered from `other`. 
 #
-# This processor will be used to demonstrate the use of the pipeline tool that automates the use of processors, the avatarization and the metric computation in a single command.
+# Because this is an irreversible operation, this transformation of the data should be done outside the pipeline. The transformed data will be used as a basis for comparison when computing utility and privacy metrics.
 
-df = pd.read_csv("../fixtures/adult_with_cities.csv")
+df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000)
 dataset = client.pandas_integration.upload_dataframe(df)
 print(df.shape)
 df.head()
+
+# After loading the data, we decide we wish to reduce the number of modalities for the variable `city` which contains originally over 80 distinct values.
 
 df['city'].value_counts()
 
 group_modalities_processor = GroupModalitiesProcessor(
     min_unique=10, # number of modalities for a variable to be considered for grouping
-    global_threshold=1000, # if considered for grouping, number of individuals in modality to preserve it
+    global_threshold=25, # if considered for grouping, number of individuals in modality to preserve it
     new_category="other"
 )
 
+df_preprocessed = group_modalities_processor.preprocess(df)
+
+# Once the group modality processor has been applied, we can confirm that the number of modalities for the `city` variables has been reduced
+
+df_preprocessed['city'].value_counts()
+
 # +
 # %%time
-dataset = client.pandas_integration.upload_dataframe(df)
+dataset = client.pandas_integration.upload_dataframe(df_preprocessed)
 
 result = client.pipelines.avatarization_pipeline_with_processors(
     AvatarizationPipelineCreate(
@@ -96,18 +104,20 @@ result = client.pipelines.avatarization_pipeline_with_processors(
                 k=5
             ),
         ),
-        processors=[group_modalities_processor],
+        processors=[],
         df=df,
     ), timeout = 1000
 )
 # -
+
+result
 
 avatars = result.post_processed_avatars
 avatars.head(3)
 
 avatars['city'].value_counts()
 
-# We observe that the avatars produced have a reduced number of cities and an extra `other` modality for the `city` variable. Note that the use of a client-side processor made the transformation of the data straightforward.
+# We observe that the avatars produced have a reduced number of cities and an extra `other` modality for the `city` variable. Note that the use of a client-side processor made the transformation of the data straightforward. 
 #
 # The calculation of the metrics has been performed during the execution of the pipeline. Results can be obtained as shown below.
 
@@ -116,7 +126,7 @@ privacy_metrics = result.privacy_metrics
 print("*** Privacy metrics ***")
 for metric in privacy_metrics:
     print(metric)
-
+    
 utility_metrics = result.signal_metrics
 print("\n*** Utility metrics ***")
 for metric in utility_metrics:
@@ -125,7 +135,16 @@ for metric in utility_metrics:
 
 # ## Modeling inter-variables constraints with processors
 
+# We will now use two processors to enforce inetr-variable constriants.
+#
+# The two processors we will now apply are processors that temporarily transform the data in order to improve the avatarization. This means that they both contain a `preprocess` step and a `postprocess` step, ensuring that the effect of the `preprocess` action can be reversed via the use of the `postprocess` action. 
+#
+# These processors will be used to demonstrate the use of the pipeline tool that automates the use of processors, the avatarization and the metric computation in a single command. 
+#
+
 df = pd.read_csv("../fixtures/epl.csv")
+
+df.dtypes
 
 # ### Proportions
 #
@@ -135,16 +154,29 @@ proportion_processor = ProportionProcessor(
     variable_names=["minutes_played_home", "minutes_played_away", "minutes_on_bench"],
     reference="minutes_in_game",
     sum_to_one=True,
+    decimal_count=0
 )
+
+df
 
 # ### Relative differences
 #
 # Some variables may have a hierarchy where on variable is always higher than an other. In order to be sure that this hierarchy is preserved at avatarization, it is recommended to express one variable as the difference from the other.
+#
+# We take `penalty_attempts` and `penalty_goals` as an example where one variable (`penalty_goals`) cannot be greater than the other (`penalty_attempts`).
 
 relative_difference_processor = RelativeDifferenceProcessor(
     target="penalty_goals",
     references=["penalty_attempts"],
 )
+
+# ### Computed variables
+#
+# The data also contains a third variable related to the penalty context: `penalty_misses`. This variable can be computed directly as the difference between `penalty_attempts` and `penalty_goals`. 
+#
+# Computed variables should be removed from the data prior to running the avtarization and re-computed after.
+
+df = df.drop(columns = ['penalty_misses'])
 
 # ### Run the pipeline
 
@@ -166,6 +198,8 @@ result = client.pipelines.avatarization_pipeline_with_processors(
 )
 # -
 
+result
+
 avatars = result.post_processed_avatars
 avatars.head(5)
 
@@ -174,7 +208,7 @@ privacy_metrics = result.privacy_metrics
 print("*** Privacy metrics ***")
 for metric in privacy_metrics:
     print(metric)
-
+    
 utility_metrics = result.signal_metrics
 print("\n*** Utility metrics ***")
 for metric in utility_metrics:
@@ -196,14 +230,13 @@ avatars_noprocessing = client.pandas_integration.download_dataframe(job.result.a
 avatars_noprocessing.head(5)
 
 # #### Preservation of the proportions
+#
+# To confirm that proportions are well kept, we can compute the maximum difference between the reference variable (`minutes_in_game`) and the sum of the three proportion variables (`minutes_played_home`, `minutes_played_away` and `minutes_on_bench`). Where it may not be zero when no processor is used, this difference should be zero when using a proportion processor. 
 
-avatars_noprocessing['minutes_in_game'] - (avatars_noprocessing['minutes_played_home'] + avatars_noprocessing['minutes_played_away'] + avatars_noprocessing['minutes_on_bench'])
+np.max(abs(avatars_noprocessing['minutes_in_game'] - (avatars_noprocessing['minutes_played_home'] + avatars_noprocessing['minutes_played_away'] + avatars_noprocessing['minutes_on_bench'])))
 
 
-avatars['minutes_in_game'] - (avatars['minutes_played_home'] + avatars['minutes_played_away'] + avatars['minutes_on_bench'])
-
-
-df['minutes_in_game'] - (df['minutes_played_home'] + df['minutes_played_away'] + df['minutes_on_bench'])
+np.max(abs(avatars['minutes_in_game'] - (avatars['minutes_played_home'] + avatars['minutes_played_away'] + avatars['minutes_on_bench'])))
 
 
 # #### Preservation of the relative difference
@@ -261,6 +294,16 @@ df.groupby(['position']).mean()[["goals_away", "goals_home"]]
 avatars.groupby(['position']).mean()[["goals_away", "goals_home"]]
 
 avatars_noprocessing.groupby(['position']).mean()[["goals_away", "goals_home"]]
+
+# ### Computed variables
+#
+# To complete the anonymization process, variables that are the results of an operation between other variables and that should have been removed from the data should be added back to the avatarized data.
+
+avatars['penalty_missed'] = avatars['penalty_attempts'] - avatars['penalty_goals']  
+avatars_noprocessing['penalty_missed'] = avatars_noprocessing['penalty_attempts'] - avatars_noprocessing['penalty_goals']
+
+
+avatars.head()
 
 # ### Perturbation level
 #
@@ -325,3 +368,5 @@ df['age'].value_counts() - avatars_perturbation_05['age'].value_counts()
 df['age'].value_counts() - avatars_perturbation_1['age'].value_counts()
 
 # *In the next tutorial, we will show how to define your own processor to be executed client-side.*
+
+

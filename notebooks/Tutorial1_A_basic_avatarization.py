@@ -14,7 +14,7 @@
 
 # # Tutorial 1: A basic avatarization
 
-# In this tutorial, we will connect to a server to perform the avatarization of a dataset that does not require any pre-processing. We'll retrieve the anonymized dataset and the associated avatarization report.
+# In this tutorial, we will connect to a server to perform the avatarization of a dataset that does not require any pre-processing. We'll retrieve the anonymized dataset and the associated avatarization report. 
 
 # ## Connection
 
@@ -24,8 +24,6 @@ import os
 url=os.environ.get("AVATAR_BASE_URL")
 username=os.environ.get("AVATAR_USERNAME")
 password=os.environ.get("AVATAR_PASSWORD")
-
-print(os.environ.get("VIRTUAL_ENV"))
 
 # +
 # This is the client that you'll be using for all of your requests
@@ -49,7 +47,7 @@ client.health.get_health()
 
 # ## Loading data
 
-# We recommend loading your csv file as a pandas dataframe. It enables you to check your data before avatarization and to pre-process it if required.
+# We recommend loading your csv file as a pandas dataframe. It enables you to check your data before avatarization and to pre-process it if required. 
 #
 # In this tutorial, we use the simple and well-known `iris` dataset to demonstrate the main steps of an avatarization.
 
@@ -60,15 +58,15 @@ df
 dataset = client.pandas_integration.upload_dataframe(df)
 print(dataset)
 
-# The data has now been loaded onto the server.
+# The data has now been loaded onto the server. 
 #
-# Note that it is also possible to directly load a csv file without using pandas.
+# Note that it is also possible to directly load a csv file without using pandas. 
 
 # +
 filename = "../fixtures/iris.csv"
 
 with open(filename, "r") as f:
-
+    
     dataset = client.datasets.create_dataset(request=f)
 print(dataset)
 # -
@@ -79,7 +77,10 @@ print(dataset)
 # - confirm that the data loaded is as expected and
 # - give insight on potential transformation to the data that are required (this will be covered in later tutorials)
 
-dataset = client.datasets.analyze_dataset(dataset.id, timeout = 1000)
+dataset
+
+while dataset.summary is None:
+    dataset = client.datasets.analyze_dataset(dataset.id)
 
 print(dataset.summary)
 
@@ -88,7 +89,7 @@ for var in dataset.summary.stats:
     for stat in var:
         print(stat)
 
-# ## Creation of an avatarization job
+# ## Creating and launching an avatarization job
 
 # +
 job = client.jobs.create_avatarization_job(
@@ -103,7 +104,7 @@ job = client.jobs.create_avatarization_job(
 print(job.status)
 # -
 
-# ## Launching the avatarization
+# ## Retrieving the completed avatarization job
 
 # +
 job = client.jobs.get_avatarization_job(id=job.id)
