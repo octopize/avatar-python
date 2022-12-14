@@ -111,11 +111,11 @@ def test_postprocess_wrong_reference() -> None:
 def test_preprocess_reference_variable_zero() -> None:
     # Verify result contains proportions when reference is zero.
     df = pd.DataFrame(
-    {
-        "variable_1": [100, 0],
-        "variable_2": [10, 10],
-        "variable_3": [90, 30],
-    }
+        {
+            "variable_1": [100, 0],
+            "variable_2": [10, 10],
+            "variable_3": [90, 30],
+        }
     )
     processor = ProportionProcessor(
         variable_names=["variable_2", "variable_3"],
@@ -124,11 +124,11 @@ def test_preprocess_reference_variable_zero() -> None:
     )
     preprocessed = processor.preprocess(df=df)
     expected = pd.DataFrame(
-    {
-        "variable_1": [100, 0],
-        "variable_2": [0.1, 0.25],
-        "variable_3": [0.9, 0.75],
-    }
+        {
+            "variable_1": [100, 0],
+            "variable_2": [0.1, 0.25],
+            "variable_3": [0.9, 0.75],
+        }
     )
     pd_testing.assert_frame_equal(preprocessed, expected)
 
@@ -136,11 +136,11 @@ def test_preprocess_reference_variable_zero() -> None:
 def test_preprocess_target_variables_sum_zero() -> None:
     # Verify target variables that equal zero still equal zero after transformation
     df = pd.DataFrame(
-    {
-        "variable_1": [100, 100],
-        "variable_2": [10, 0],
-        "variable_3": [90, 0],
-    }
+        {
+            "variable_1": [100, 100],
+            "variable_2": [10, 0],
+            "variable_3": [90, 0],
+        }
     )
     processor = ProportionProcessor(
         variable_names=["variable_2", "variable_3"],
@@ -149,14 +149,14 @@ def test_preprocess_target_variables_sum_zero() -> None:
     )
     preprocessed = processor.preprocess(df=df)
     expected = pd.DataFrame(
-    {
-        "variable_1": [100, 100],
-        "variable_2": [0.1, 0],
-        "variable_3": [0.9, 0],
-    }
+        {
+            "variable_1": [100, 100],
+            "variable_2": [0.1, 0],
+            "variable_3": [0.9, 0],
+        }
     )
     pd_testing.assert_frame_equal(preprocessed, expected)
-
+    
 
 def test_postprocess_saferounding() -> None:
     "Verify that the postprocessed variables sum up to reference variable." 

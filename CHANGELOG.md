@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Fix to processor taking the wrong number of arguments
+- Make the `toolz` package a mandatory dependency
+- Fix a handling of a target variable equaling zero
+
 ## 0.2.0
 
 - Drop support for python3.8 # BREAKING CHANGE

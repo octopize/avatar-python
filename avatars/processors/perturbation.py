@@ -5,6 +5,8 @@ import pandas as pd
 from avatars.lib.split_columns_types import NUMERIC_DTYPES
 from toolz.dicttoolz import valfilter
 
+from avatars.processors.lib import NUMERIC_DTYPES
+
 
 class PerturbationProcessor:
     def __init__(
