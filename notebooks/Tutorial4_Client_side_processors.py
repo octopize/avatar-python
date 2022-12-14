@@ -135,7 +135,7 @@ for metric in utility_metrics:
 
 # ## Modeling inter-variables constraints with processors
 
-# We will now use two processors to enforce inetr-variable constriants.
+# We will now use two processors to enforce inter-variable constraints.
 #
 # The two processors we will now apply are processors that temporarily transform the data in order to improve the avatarization. This means that they both contain a `preprocess` step and a `postprocess` step, ensuring that the effect of the `preprocess` action can be reversed via the use of the `postprocess` action. 
 #

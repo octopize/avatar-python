@@ -61,7 +61,7 @@ client.health.get_health()
 
 # ## Load some time series data
 
-# We will use an example dataset that contains data on 2 sensors for 50 devices. Each For each device, 100 time points are available.
+# We will use an example dataset that contains data on 2 sensors for 50 devices. For each device, 100 time points are available.
 
 df = pd.read_csv("../fixtures/sensors.csv")
 
@@ -78,7 +78,7 @@ sns.lineplot(df, x='t', y='sensor2', hue='id', palette = sns.color_palette(), le
 
 # The avatarization takes as input tabular data where each row contains the data relative to an individual. In the present example, each row should ideally refer to a device.
 #
-# The number of time points to include in the avatarization can also have an impact and it is currently recommended to use a small number of data points to prevent cases where the data has more variables than individuals. 
+# The number of time points to include in the avatarization can also have an impact and it is currently recommended to use a small number of data points (~ 5 to 10 points) to prevent cases where the data has more variables than individuals. 
 #
 # To perform the transformation which consists in pivotting the table and sampling a given number of time points, we will use a processor.
 #

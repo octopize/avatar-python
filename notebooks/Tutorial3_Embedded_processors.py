@@ -223,7 +223,7 @@ avatars['Clump_Thickness'].hist()
 #
 # Note that we'll see in the next tutorial how other processors can be used as an alternative.
 #
-# First, let's load the `adult` dataset that now contains a `city` variable. This variable is categorical and contains over a 80 modalities.
+# First, let's load the `adult` dataset that now contains a `city` variable. This variable is categorical and contains over 80 modalities.
 
 df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000)
 
