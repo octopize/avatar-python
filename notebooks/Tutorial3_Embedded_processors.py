@@ -12,9 +12,9 @@
 #     name: python3
 # ---
 
-# ## Tutorial 3: Using embedded processors
+# # Tutorial 3: Using embedded processors
 
-# In this tutorial, we will learn how to to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities.
+# In this tutorial, we will learn how to to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities. 
 
 # <img src="img/embedded.png" style="height:500px" />
 
@@ -56,7 +56,7 @@ client.health.get_health()
 #
 # To demonstrate the first embedded processor, we load the `adult` dataset which contains missing values. This dataset contains census data about the US population.
 
-df = pd.read_csv("../fixtures/adult_with_missing.csv")
+df = pd.read_csv("../fixtures/adult_with_missing.csv").head(1000)
 dataset = client.pandas_integration.upload_dataframe(df)
 print(df.shape)
 df.head()
@@ -65,7 +65,7 @@ df.head()
 #
 # Missing data is common in datasets and is a property that should be modelled.
 #
-# The Avatar solution can handle variables with missing data without requiring pre-processing. To do so, an additional variable defining whether a value is missing or not will be temporarily added to the data and the missing values will be temporarily imputed. These variables will be part of the anonymization process.
+# The Avatar solution can handle variables with missing data without requiring pre-processing. To do so, an additional variable defining whether a value is missing or not will be temporarily added to the data and the missing values will be temporarily imputed. These variables will be part of the anonymization process. 
 #
 # In the presence of missing values, the last step in the avatarization will be to remove temporary variables and add back missing values.
 #
@@ -106,7 +106,7 @@ msno.matrix(df)
 
 msno.matrix(avatars)
 
-# ### Handling missing data on large volumes
+# ### Handling missing data on large volumes 
 
 # Because there is an imputation step in the avatarization of data with missing values, it may yield long runtimes with some settings of the imputation. It is the case with the `ImputeMethod.knn` imputer demonstrated previously.
 #
@@ -122,7 +122,7 @@ msno.matrix(avatars)
 imputation_parameters = ImputationParameters(
     k=5,
     method= ImputeMethod.knn,
-    training_fraction=0.05
+    training_fraction=0.05 
 )
 
 # +
@@ -146,11 +146,14 @@ print(job.status)
 
 # ## Numeric variables with low cardinality
 
-# Some variables may be numeric but only contain several unique values. If their distributions show some peaks, these may not be preserved during avatarization.
+# Some variables may be numeric but only contain several unique values. If their distributions show some peaks, these may not be preserved during avatarization. 
 #
 # Let's take the Wisconcin Breast Cancer dataset (WBCD) as an example. This dataset contains categorical variables encoded as integers ranging between 0 and 10. The variable `Clump_Thickness` is one of them and exhibits a non-Gaussian distribution with peaks at different values
 
 df = pd.read_csv("../fixtures/wbcd.csv")
+df.shape
+
+df.head()
 
 df.dtypes
 
@@ -168,7 +171,7 @@ job = client.jobs.create_avatarization_job(
             k = 20,
             dataset_id=dataset.id,
             imputation=ImputationParameters(
-                method= ImputeMethod.mode
+                method= ImputeMethod.mode 
             )
         )
     )
@@ -182,7 +185,7 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 print("Number of distinct values in avatars:", avatars['Clump_Thickness'].nunique())
 avatars['Clump_Thickness'].hist()
 
-# An avatarization of this dataset without transformation of the low-cardinality numeric variables yields differences in the distribution.
+# An avatarization of this dataset without transformation of the low-cardinality numeric variables yields differences in the distribution. 
 
 # ### Avatarization as categorical
 
@@ -193,7 +196,7 @@ job = client.jobs.create_avatarization_job(
             k = 20,
             dataset_id=dataset.id,
             imputation=ImputationParameters(
-                method= ImputeMethod.mode
+                method= ImputeMethod.mode 
             ),
             to_categorical_threshold=20
         )
@@ -208,11 +211,11 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 print("Number of distinct values in avatars:", avatars['Clump_Thickness'].nunique())
 avatars['Clump_Thickness'].hist()
 
-# We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the proportion of each unique value where it may not be the case if we keep the variables as numeric.
+# We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the proportion of each unique value where it may not be the case if we keep the variables as numeric. 
 
 # ## Categorical variables with large cardinality
 
-# The anonymization of datasets containing categorical variables with large cardinality is not trivial and we recommend to exclude the variable from the avatarization before re-assigning it probabilistically.
+# The anonymization of datasets containing categorical variables with large cardinality is not trivial and we recommend to exclude the variable from the avatarization before re-assigning it probabilistically. 
 #
 # This necessary step is included in the avatarization job and can be managed via a set of parameters ExcludeCategoricalParameters.
 #
@@ -220,9 +223,9 @@ avatars['Clump_Thickness'].hist()
 #
 # Note that we'll see in the next tutorial how other processors can be used as an alternative.
 #
-# First, let's load the `adult` dataset that now contains a `city` variable. This variable is categorical and contains over a 100 modalities.
+# First, let's load the `adult` dataset that now contains a `city` variable. This variable is categorical and contains over 80 modalities.
 
-df = pd.read_csv("../fixtures/adult_with_cities.csv")
+df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000)
 
 df.head()
 
@@ -243,7 +246,6 @@ exclude_parameters = ExcludeCategoricalParameters(
         exclude_replacement_strategy=ExcludeCategoricalMethod.coordinate_similarity,
         rare_occurence_threshold = 1,
         rare_replacement_strategy=RareCategoricalMethod.most_similar,
-#         number_reference_records=1000
         )
 
 job = client.jobs.create_avatarization_job(
@@ -252,7 +254,7 @@ job = client.jobs.create_avatarization_job(
             k = 20,
             dataset_id=dataset.id,
             imputation=ImputationParameters(
-                method= ImputeMethod.mode
+                method= ImputeMethod.mode 
             ),
             exclude_categorical=exclude_parameters
         )
