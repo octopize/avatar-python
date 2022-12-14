@@ -167,13 +167,19 @@ def test_postprocess_saferounding() -> None:
             "variable_3": [66, 80],
         }
     )
+    preprocessed = pd.DataFrame(
+        {
+            "variable_1": [101, 101],
+            "variable_2": [0.34, 0.20],
+            "variable_3": [0.66, 0.80],
+        }
+    )
     processor = ProportionProcessor(
         variable_names=["variable_2", "variable_3"],
         reference="variable_1",
         sum_to_one=True,
         decimal_count=0
     )
-    preprocessed = processor.preprocess(df=df)
     postprocessed = processor.postprocess(df, preprocessed)
     sum_check = postprocessed['variable_2'] + postprocessed['variable_3']
     pd_testing.assert_series_equal(sum_check, postprocessed['variable_1'], check_names=False, check_dtype=False)
@@ -188,13 +194,19 @@ def test_decimals() -> None:
             "variable_3": [66, 80],
         }
     )
+    preprocessed = pd.DataFrame(
+        {
+            "variable_1": [101, 101],
+            "variable_2": [0.34, 0.20],
+            "variable_3": [0.66, 0.80],
+        }
+    )
     processor = ProportionProcessor(
         variable_names=["variable_2", "variable_3"],
         reference="variable_1",
         sum_to_one=True,
         decimal_count=2
     )
-    preprocessed = processor.preprocess(df=df)
     postprocessed = processor.postprocess(df, preprocessed)
     expected = pd.DataFrame(
         {
@@ -203,5 +215,4 @@ def test_decimals() -> None:
             "variable_3": [66.66, 80.80],
         }
     )
-    print(postprocessed)
     pd_testing.assert_frame_equal(postprocessed, expected)
