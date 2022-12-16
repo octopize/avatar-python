@@ -79,7 +79,12 @@ def saferound(
             - strategy is not valid
             - values are not all floats
     """
+
+    if strategy not in [v for v in RoundingStrategy]:
+        raise ValueError(f"Expected a valid RoundingStrategy, got {strategy} instead.")
+
     values: list[Union[float, int]]
+
     if isinstance(iterable, Mapping):
         keys, values_view = zip(*iterable.items())
         values = list(values_view)
@@ -104,7 +109,10 @@ def saferound(
     orig_sum = (
         _sumnum(local, places, rounder) if topline is None else rounder(topline, places)
     )
-    [n.round(places, rounder) for n in local]
+
+    for n in local:
+        n.round(places, rounder)
+
     local_sum = _sumnum(local, places, rounder)
 
     # adjust values to adhere to original sum

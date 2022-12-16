@@ -72,6 +72,11 @@ def test_error_bad_float() -> None:
         saferound(bad, 2)
 
 
+def test_error_bad_strategy(setup: Setup) -> None:
+    with pytest.raises(ValueError, match="valid RoundingStrategy"):
+        saferound(setup.in_list, 2, strategy="bad")
+
+
 def test_negative(setup: Setup) -> None:
     out = [-4.0, -3.24, -3.23, -6.45, -5.35, -7.34]
     assert saferound(setup.neg_in_list, 2) == out
