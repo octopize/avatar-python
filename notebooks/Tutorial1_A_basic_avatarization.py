@@ -143,7 +143,7 @@ for metric in utility_metrics:
 # ## Retrieving the avatarization report
 
 # +
-report = client.reports.create_report(ReportCreate(job_id=job.id))
+report = client.reports.create_report(ReportCreate(job_id=job.id), timeout=10)
 result = client.reports.download_report(id=report.id)
 
 with open("./my_avatarization_report.pdf", "wb") as f:
