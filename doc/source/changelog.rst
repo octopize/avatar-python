@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+-  Improve type hints of the method
+-  Update tutorial notebooks with smaller datasets
+-  Fix bugs in tutorial notebooks
+-  Improve error message when the call to the API times out
+-  Add ``jobs.find_all_jobs_by_user``
+
 0.2.1
 -----
 
