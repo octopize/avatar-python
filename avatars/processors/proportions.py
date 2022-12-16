@@ -106,6 +106,8 @@ class ProportionProcessor:
 
         for i, row in enumerate(dest[self.variable_names].values):
             if not np.any(np.isnan(row)):
-                dest.loc[i, self.variable_names] = saferound(row, self.decimal_count)
+                dest.loc[i, self.variable_names] = saferound(
+                    row.tolist(), self.decimal_count
+                )
 
         return dest
