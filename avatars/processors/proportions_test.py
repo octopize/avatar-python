@@ -156,10 +156,10 @@ def test_preprocess_target_variables_sum_zero() -> None:
         }
     )
     pd_testing.assert_frame_equal(preprocessed, expected)
-    
+
 
 def test_postprocess_saferounding() -> None:
-    "Verify that the postprocessed variables sum up to reference variable." 
+    "Verify that the postprocessed variables sum up to reference variable."
     df = pd.DataFrame(
         {
             "variable_1": [101, 101],
@@ -178,15 +178,17 @@ def test_postprocess_saferounding() -> None:
         variable_names=["variable_2", "variable_3"],
         reference="variable_1",
         sum_to_one=True,
-        decimal_count=0
+        decimal_count=0,
     )
     postprocessed = processor.postprocess(df, preprocessed)
-    sum_check = postprocessed['variable_2'] + postprocessed['variable_3']
-    pd_testing.assert_series_equal(sum_check, postprocessed['variable_1'], check_names=False, check_dtype=False)
+    sum_check = postprocessed["variable_2"] + postprocessed["variable_3"]
+    pd_testing.assert_series_equal(
+        sum_check, postprocessed["variable_1"], check_names=False, check_dtype=False
+    )
 
 
 def test_decimals() -> None:
-    "Verify that the postprocessed variables have the specified number of decimals." 
+    "Verify that the postprocessed variables have the specified number of decimals."
     df = pd.DataFrame(
         {
             "variable_1": [101, 101],
@@ -205,7 +207,7 @@ def test_decimals() -> None:
         variable_names=["variable_2", "variable_3"],
         reference="variable_1",
         sum_to_one=True,
-        decimal_count=2
+        decimal_count=2,
     )
     postprocessed = processor.postprocess(df, preprocessed)
     expected = pd.DataFrame(

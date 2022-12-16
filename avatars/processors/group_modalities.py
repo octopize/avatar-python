@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
 import pandas as pd
+
 from avatars.lib.split_columns_types import split_columns_types
 
 
