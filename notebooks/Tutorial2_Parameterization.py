@@ -21,9 +21,9 @@
 # +
 import os
 
-url=os.environ.get("AVATAR_BASE_URL")
-username=os.environ.get("AVATAR_USERNAME")
-password=os.environ.get("AVATAR_PASSWORD")
+url = os.environ.get("AVATAR_BASE_URL")
+username = os.environ.get("AVATAR_USERNAME")
+password = os.environ.get("AVATAR_PASSWORD")
 # -
 
 # Run the following cell if your environment does not have all the listed packages already installed.
@@ -44,9 +44,7 @@ import matplotlib.pyplot as plt
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=url)
-client.authenticate(
-    username=username, password=password
-)
+client.authenticate(username=username, password=password)
 
 # Verify that we can connect to the API server
 client.health.get_health()
@@ -69,12 +67,15 @@ df.head()
 #
 
 # +
-# Set k
+# Set k
 k = 2
 
-# Create and run avatarization
+# Create and run avatarization
 job_small_k = client.jobs.create_avatarization_job(
-    AvatarizationJobCreate(parameters=AvatarizationParameters(k = k, dataset_id=dataset.id)))
+    AvatarizationJobCreate(
+        parameters=AvatarizationParameters(k=k, dataset_id=dataset.id)
+    )
+)
 job_small_k = client.jobs.get_avatarization_job(id=job_small_k.id)
 
 # Retrieve selected metric
@@ -86,14 +87,16 @@ print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-
 # +
-# Set k
+# Set k
 k = 30
 
-# Create and run avatarization
+# Create and run avatarization
 job_large_k = client.jobs.create_avatarization_job(
-    AvatarizationJobCreate(parameters=AvatarizationParameters(k = k, dataset_id=dataset.id)))
+    AvatarizationJobCreate(
+        parameters=AvatarizationParameters(k=k, dataset_id=dataset.id)
+    )
+)
 job_large_k = client.jobs.get_avatarization_job(id=job_large_k.id)
 
 # Retrieve selected metric
@@ -113,8 +116,12 @@ print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 # By looking at original and avatars in the projected space, we can understand the area covered by avatars and if it covers the same space as the original data.
 
 projections = client.metrics.get_job_projections(job_id=job_small_k.id)
-projections_records = np.array(projections.records)[:,0:2]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[:,0:2]  # First 2 dimensions of projected records
+projections_records = np.array(projections.records)[
+    :, 0:2
+]  # First 2 dimensions of projected records
+projections_avatars = np.array(projections.avatars)[
+    :, 0:2
+]  # First 2 dimensions of projected records
 
 projections
 
@@ -122,46 +129,50 @@ projections
 fig, ax = plt.subplots(1, 1)
 sns.scatterplot(
     ax=ax,
-    x=projections_records[:,0],
-    y=projections_records[:,1],
+    x=projections_records[:, 0],
+    y=projections_records[:, 1],
     alpha=0.6,
-    color = "dimgrey",
-    label = 'Original'
+    color="dimgrey",
+    label="Original",
 )
 
 sns.scatterplot(
     ax=ax,
-    x=projections_avatars[:,0],
-    y=projections_avatars[:,1],
+    x=projections_avatars[:, 0],
+    y=projections_avatars[:, 1],
     alpha=0.6,
-    color = "#3BD6B0",
-    label = 'Avatars'
+    color="#3BD6B0",
+    label="Avatars",
 )
 
 ax.set_title("Projections of original and avatars produced with small k")
 
 # +
 projections = client.metrics.get_job_projections(job_id=job_large_k.id)
-projections_records = np.array(projections.records)[:,0:2]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[:,0:2]  # First 2 dimensions of projected records
+projections_records = np.array(projections.records)[
+    :, 0:2
+]  # First 2 dimensions of projected records
+projections_avatars = np.array(projections.avatars)[
+    :, 0:2
+]  # First 2 dimensions of projected records
 
 fig, ax = plt.subplots(1, 1)
 sns.scatterplot(
     ax=ax,
-    x=projections_records[:,0],
-    y=projections_records[:,1],
+    x=projections_records[:, 0],
+    y=projections_records[:, 1],
     alpha=0.6,
-    color = "dimgrey",
-    label = 'Original'
+    color="dimgrey",
+    label="Original",
 )
 
 sns.scatterplot(
     ax=ax,
-    x=projections_avatars[:,0],
-    y=projections_avatars[:,1],
+    x=projections_avatars[:, 0],
+    y=projections_avatars[:, 1],
     alpha=0.6,
-    color = "#3BD6B0",
-    label = 'Avatars'
+    color="#3BD6B0",
+    label="Avatars",
 )
 
 ax.set_title("Projections of original and avatars produced with large k")
@@ -179,7 +190,7 @@ ax.set_title("Projections of original and avatars produced with large k")
 #
 # By default, all variables are given equal weight of 1, but custom weights can be defined to bias the projection towards some specific variables.
 
-column_weights = {'variety': 3}
+column_weights = {"variety": 3}
 
 # ### Number of components
 #
@@ -200,15 +211,13 @@ seed = 123
 # The avatarization can now be run with different parameters
 
 # +
-parameters=AvatarizationParameters(
-    k = k,
-    dataset_id=dataset.id,
-    column_weights = column_weights,
-    ncp = ncp,
-    seed = seed
+parameters = AvatarizationParameters(
+    k=k, dataset_id=dataset.id, column_weights=column_weights, ncp=ncp, seed=seed
 )
 
-job = client.jobs.create_avatarization_job(AvatarizationJobCreate(parameters=parameters))
+job = client.jobs.create_avatarization_job(
+    AvatarizationJobCreate(parameters=parameters)
+)
 job = client.jobs.get_avatarization_job(id=job.id)
 # -
 
@@ -216,26 +225,30 @@ job = client.jobs.get_avatarization_job(id=job.id)
 
 # +
 projections = client.metrics.get_job_projections(job_id=job.id)
-projections_records = np.array(projections.records)[:,0:2]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[:,0:2]  # First 2 dimensions of projected records
+projections_records = np.array(projections.records)[
+    :, 0:2
+]  # First 2 dimensions of projected records
+projections_avatars = np.array(projections.avatars)[
+    :, 0:2
+]  # First 2 dimensions of projected records
 
 fig, ax = plt.subplots(1, 1)
 sns.scatterplot(
     ax=ax,
-    x=projections_records[:,0],
-    y=projections_records[:,1],
+    x=projections_records[:, 0],
+    y=projections_records[:, 1],
     alpha=0.6,
-    color = "dimgrey",
-    label = 'Original'
+    color="dimgrey",
+    label="Original",
 )
 
 sns.scatterplot(
     ax=ax,
-    x=projections_avatars[:,0],
-    y=projections_avatars[:,1],
+    x=projections_avatars[:, 0],
+    y=projections_avatars[:, 1],
     alpha=0.6,
-    color = "#3BD6B0",
-    label = 'Avatars'
+    color="#3BD6B0",
+    label="Avatars",
 )
 
 ax.set_title("Projections of original and avatars produced with custom settings")

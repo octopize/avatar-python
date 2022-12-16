@@ -26,20 +26,21 @@ import saiph
 import matplotlib.pyplot as plt
 
 from pandas_profiling import ProfileReport
+
 # -
 
 # ## Import data
 
 # +
 path_original = "https://raw.githubusercontent.com/octopize/avatar-paper/main/datasets/AIDS/aids_original_data.csv"
-df = pd.read_csv(path_original, sep=";").drop(columns = ["pidnum"])
+df = pd.read_csv(path_original, sep=";").drop(columns=["pidnum"])
 
 path_avatar = "https://raw.githubusercontent.com/octopize/avatar-paper/main/datasets/AIDS/aids_avatarized_base_k20_nf5.csv"
-avatar =  pd.read_csv(path_avatar)
+avatar = pd.read_csv(path_avatar)
 
 VALUE = 10
 for col in df.columns:
-    if len(np.unique(df[col])) < VALUE :
+    if len(np.unique(df[col])) < VALUE:
         df[col] = df[col].astype("category")
 
 avatar = avatar.astype(df.dtypes.to_dict())
@@ -52,9 +53,9 @@ df["type"] = "original"
 avatar["type"] = "avatar"
 
 combined = pd.concat([df, avatar], axis=0).reset_index(drop=True)
-numerics = ['int', 'float']
+numerics = ["int", "float"]
 col_num = df.select_dtypes(include=numerics).columns
-categorical = ['object', 'category']
+categorical = ["object", "category"]
 col_cat = df.select_dtypes(include=categorical).columns
 
 
@@ -75,8 +76,11 @@ for col in col_num:
 for col in col_cat:
     print(col)
     plt.figure()
-    ax = sns.countplot( data=combined, x=col, hue="type",)
-
+    ax = sns.countplot(
+        data=combined,
+        x=col,
+        hue="type",
+    )
 
 # #### Missing data
 # You are here comparing missing data between original and avatar data.
@@ -88,10 +92,10 @@ for col in col_cat:
 msno.matrix(avatar)
 msno.matrix(df)
 
-print( f"The total number of missing values in avatar : {avatar.isna().values.sum()}")
-print( f"The total number of missing values in original : {df.isna().values.sum()}")
+print(f"The total number of missing values in avatar : {avatar.isna().values.sum()}")
+print(f"The total number of missing values in original : {df.isna().values.sum()}")
 
-avatar_missing_ratio =  avatar.isna().values.sum() /  avatar.count().count()
+avatar_missing_ratio = avatar.isna().values.sum() / avatar.count().count()
 df_missing_ratio = df.isna().values.sum() / df.count().count()
 
 print(f"The percentage of missing values in avatar: {avatar_missing_ratio}")
@@ -111,13 +115,13 @@ original_corr = df.corr(method="pearson")
 avatar_corr = avatar.corr(method="pearson")
 corr_diff = abs(original_corr - avatar_corr).round(2)
 sns.heatmap(
-            corr_diff,
-            vmax=1,
-            vmin=0,
-            square=True,
-            linewidths=0.5,
-            cbar_kws={"shrink": 0.5},
-        )
+    corr_diff,
+    vmax=1,
+    vmin=0,
+    square=True,
+    linewidths=0.5,
+    cbar_kws={"shrink": 0.5},
+)
 
 # ## Multivariate comparison
 #
@@ -131,19 +135,20 @@ sns.heatmap(
 
 # +
 # Projection
-missing_columns = ["cd496"] # drop missing data to project
+missing_columns = ["cd496"]  # drop missing data to project
 df_proj = df.drop(columns=missing_columns)
 avatar_proj = avatar.drop(columns=missing_columns)
 
-NB_IND = 1000 # number of individuals to fit the model.
-model = saiph.fit(df_proj.sample(NB_IND).reset_index(drop=True), nf=5 )
+NB_IND = 1000  # number of individuals to fit the model.
+model = saiph.fit(df_proj.sample(NB_IND).reset_index(drop=True), nf=5)
 coord_df = saiph.transform(df_proj, model)
 coord_avatar = saiph.transform(avatar_proj, model)
 coord_df
-# -
 
+# +
 from saiph.visualization import plot_projections
-plot_projections(model, df_proj)
 
+plot_projections(model, df_proj)
+# -
 
 plot_projections(model, avatar_proj)

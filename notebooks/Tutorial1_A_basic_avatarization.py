@@ -21,9 +21,9 @@
 # +
 import os
 
-url=os.environ.get("AVATAR_BASE_URL")
-username=os.environ.get("AVATAR_USERNAME")
-password=os.environ.get("AVATAR_PASSWORD")
+url = os.environ.get("AVATAR_BASE_URL")
+username = os.environ.get("AVATAR_USERNAME")
+password = os.environ.get("AVATAR_PASSWORD")
 
 # +
 # This is the client that you'll be using for all of your requests
@@ -37,9 +37,7 @@ import io
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=url)
-client.authenticate(
-    username=username, password=password
-)
+client.authenticate(username=username, password=password)
 
 # Verify that we can connect to the API server
 client.health.get_health()
@@ -85,7 +83,7 @@ while dataset.summary is None:
 print(dataset.summary)
 
 for var in dataset.summary.stats:
-    print('---------')
+    print("---------")
     for stat in var:
         print(stat)
 
@@ -94,10 +92,7 @@ for var in dataset.summary.stats:
 # +
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
-        parameters=AvatarizationParameters(
-            k = 5,
-            dataset_id=dataset.id
-        ),
+        parameters=AvatarizationParameters(k=5, dataset_id=dataset.id),
     )
 )
 
