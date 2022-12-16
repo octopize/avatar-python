@@ -1,14 +1,46 @@
-"""Original source: https://github.com/cgdeboer/iteround."""
+"""
+Original source: https://github.com/cgdeboer/iteround
+
+Modified by Olivier Regnier-Coudert (olivier.rc@octopize.io)
+Modified by Tom Crasset (tom@octopize.io)
+"""
 
 from __future__ import absolute_import, division, print_function
+
 from collections import OrderedDict
+from collections.abc import Mapping, Sequence
+from enum import Enum
+from typing import Any, Callable, Optional, Union, cast
 
-SMALLEST = 'smallest'
-LARGEST = 'largest'
-DIFFERENCE = 'difference'
+
+class RoundingStrategy(Enum):
+    SMALLEST = "smallest"
+    LARGEST = "largest"
+    DIFFERENCE = "difference"
 
 
-def saferound(iterable, places, strategy=DIFFERENCE, rounder=round, topline=None):
+class Number(object):
+    def __init__(self, order: int, value: Union[float, int]):
+        self.value = float(value)
+        self.order = order
+        self.original = float(value)
+        self.diff: float
+
+    def round(self, places: int, rounder: Callable[[float, int], float]) -> None:
+        self.value = rounder(self.value, places)
+        self.diff = self.original - self.value
+
+    def __repr__(self) -> str:
+        return "{} <- {} ({})".format(self.value, self.original, self.diff)
+
+
+def saferound(
+    iterable: Any,
+    places: int,
+    strategy: RoundingStrategy = RoundingStrategy.DIFFERENCE,
+    rounder: Callable[[float, int], float] = round,
+    topline: Optional[float] = None,
+) -> Any:
     """Rounds an iterable of floats while retaining the original summed value.
     Function parameters should be documented in the ``Args`` section. The name
     of each parameter is required. The type and description of each parameter
@@ -47,34 +79,47 @@ def saferound(iterable, places, strategy=DIFFERENCE, rounder=round, topline=None
             - strategy is not valid
             - values are not all floats
     """
-    assert isinstance(places, int)
-    assert strategy in [SMALLEST, LARGEST, DIFFERENCE]
-    values = iterable
-    if (isinstance(iterable, dict) or isinstance(iterable, OrderedDict)):
-        keys, values = zip(*iterable.items())
-    assert all([isinstance(x, float) for x in values])
+    values: list[Union[float, int]]
+    if isinstance(iterable, Mapping):
+        keys, values_view = zip(*iterable.items())
+        values = list(values_view)
+    elif isinstance(iterable, Sequence):
+        values = list(iterable)
+    else:
+        raise ValueError(
+            f"Expected valid type for iterable, got {type(iterable)} instead."
+        )
+
+    if not all([isinstance(x, float) for x in values]):
+        raise ValueError("Expected all values in the iterable to be float.")
 
     # define a sorting method for rounded differences
-    sorter = _sort_by_diff if strategy == DIFFERENCE else _sort_by_value
-    default_reverse = False if strategy == SMALLEST else True
+    sorter = (
+        _sort_by_diff if strategy == RoundingStrategy.DIFFERENCE else _sort_by_value
+    )
+    default_reverse = False if strategy == RoundingStrategy.SMALLEST else True
 
     # calculate original sum, rounded,  then rounded local sum.
     local = [Number(i, value) for i, value in enumerate(values)]
-    orig_sum = (_sumnum(local, places, rounder)
-                if topline is None else
-                rounder(topline, places))
+    orig_sum = (
+        _sumnum(local, places, rounder) if topline is None else rounder(topline, places)
+    )
     [n.round(places, rounder) for n in local]
     local_sum = _sumnum(local, places, rounder)
 
     # adjust values to adhere to original sum
     while local and local_sum != orig_sum:
         diff = rounder(orig_sum - local_sum, places)
-        if diff < 0.:
+        if diff < 0.0:
             increment = -1 * _mininc(places)
-            reverse = False if strategy == DIFFERENCE else default_reverse
+            reverse = (
+                False if strategy == RoundingStrategy.DIFFERENCE else default_reverse
+            )
         else:
             increment = _mininc(places)
-            reverse = True if strategy == DIFFERENCE else default_reverse
+            reverse = (
+                True if strategy == RoundingStrategy.DIFFERENCE else default_reverse
+            )
         tweaks = int(abs(diff) / _mininc(places))
         local = sorter(local, reverse)
         for ith in range(0, min(tweaks, len(local))):
@@ -93,36 +138,23 @@ def saferound(iterable, places, strategy=DIFFERENCE, rounder=round, topline=None
     return rounded_list
 
 
-def _sumnum(numbers, places, rounder):
+def _sumnum(
+    numbers: list[Number], places: int, rounder: Callable[[float, int], float]
+) -> float:
     return rounder(sum([n.value for n in numbers]), places)
 
 
-def _sort_by_value(numbers, reverse):
+def _sort_by_value(numbers: list[Number], reverse: bool) -> list[Number]:
     return sorted(numbers, key=lambda x: x.value, reverse=reverse)
 
 
-def _sort_by_order(numbers):
+def _sort_by_order(numbers: list[Number]) -> list[Number]:
     return sorted(numbers, key=lambda x: x.order)
 
 
-def _sort_by_diff(numbers, reverse):
+def _sort_by_diff(numbers: list[Number], reverse: bool) -> list[Number]:
     return sorted(numbers, key=lambda x: x.diff, reverse=reverse)
 
 
-def _mininc(places):
-    return 1 / (10**places)
-
-
-class Number(object):
-    def __init__(self, order, value):
-        self.value = float(value)
-        self.order = order
-        self.original = float(value)
-        self.diff = None
-
-    def round(self, places, rounder):
-        self.value = rounder(self.value, places)
-        self.diff = self.original - self.value
-
-    def __repr__(self):
-        return '{} <- {} ({})'.format(self.value, self.original, self.diff)
+def _mininc(places: int) -> float:
+    return cast(float, 1 / (10**places))

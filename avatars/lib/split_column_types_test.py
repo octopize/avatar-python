@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
 import pytest
-from datetime import datetime
 
 from avatars.lib.split_columns_types import split_columns_types
+
 
 @pytest.fixture
 def many_dtypes_df() -> pd.DataFrame:
@@ -13,6 +15,7 @@ def many_dtypes_df() -> pd.DataFrame:
     df["strings"] = ["Mr", "John", "Doe", "Mrs.", "Mary", "Higgins", "Clark"]
     df["datetimes"] = pd.to_datetime([datetime(2022, 1, 1).replace(tzinfo=None)] * 7)
     return df
+
 
 def test_split_column_types(many_dtypes_df: pd.DataFrame) -> None:
     test_categorical = [2, 3]
