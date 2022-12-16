@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.14
+# API Version : 0.4.15
 
 
 import itertools
@@ -291,6 +291,26 @@ class Jobs:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
+    def find_all_jobs_by_user(
+        self,
+        nb_days: Optional[int] = None,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> None:
+        """Retrieve all jobs executed by the current user.
+
+        Jobs are filtered by execution date, by default only the last 5 days are displayed,
+        a parameter can be provided to go further back in time.
+        """
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs",
+            "params": dict(
+                nb_days=nb_days,
+            ),
+        }
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
+
     def create_avatarization_job(
         self,
         request: AvatarizationJobCreate,
@@ -508,8 +528,8 @@ class Users:
 
     def find_users(
         self,
-        email: str,
-        username: str,
+        email: Optional[str] = None,
+        username: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> None:

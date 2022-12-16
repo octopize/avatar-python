@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.14
+# API Version : 0.4.15
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -11,7 +11,9 @@ from typing import Any, Dict, Optional, Tuple, Union
 from uuid import UUID
 
 import httpx
+from httpx import ReadTimeout, WriteTimeout
 from pydantic import BaseModel
+from toolz.dicttoolz import valfilter
 
 from avatars.api import (
     DEFAULT_TIMEOUT,
@@ -32,6 +34,10 @@ MAX_FILE_LENGTH = 1024 * 1024 * 1024
 
 
 class FileTooLarge(Exception):
+    pass
+
+
+class Timeout(Exception):
     pass
 
 
@@ -128,6 +134,10 @@ class ApiClient:
         if should_verify and "Authorization" not in self._headers:
             raise Exception("You are not authenticated.")
 
+        # Remove params if they are set to None (allow handling of optionals)
+        if params:
+            params = valfilter(lambda x: x is not None, params)
+
         # Custom encoder because UUID is not JSON serializable by httpx
         # and Enums need their value to be sent, e.g. 'int' instead of 'ColumnType.int'
         json_arg = json_loads(json.json(encoder=_default_encoder)) if json else None
@@ -138,15 +148,20 @@ class ApiClient:
         with httpx.Client(
             timeout=timeout or self.timeout, base_url=self.base_url
         ) as client:
-            result = client.request(
-                method,
-                url,
-                params=params,
-                json=json_arg,
-                data=form_data_arg,
-                files=files_arg,
-                headers=self._headers,
-            )
+            try:
+                result = client.request(
+                    method,
+                    url,
+                    params=params,
+                    json=json_arg,
+                    data=form_data_arg,
+                    files=files_arg,
+                    headers=self._headers,
+                )
+            except (WriteTimeout, ReadTimeout):
+                raise Timeout(
+                    "The call timed out. Consider increasing the timeout with the `timeout` parameter."
+                ) from None
 
         if result.status_code != 200:
             json = result.json()
