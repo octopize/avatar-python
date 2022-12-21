@@ -24,3 +24,16 @@ def categorical_df() -> pd.DataFrame:
         }
     )
     return df
+
+
+@pytest.fixture
+def dates_df() -> pd.DataFrame:
+    df = pd.DataFrame(
+        {
+            "date_1": ["2015-01-01 07:00:00", "2015-01-01 10:00:00"],
+            "date_2": ["2018-01-01 11:00:00", "2020-01-01 11:00:00"],
+        }
+    )
+    df["date_1"] = pd.to_datetime(df["date_1"], format="%Y-%m-%d %H:%M:%S")
+    df["date_2"] = pd.to_datetime(df["date_2"], format="%Y-%m-%d %H:%M:%S")
+    return df
