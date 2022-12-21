@@ -151,7 +151,7 @@ def test_postprocess_with_scaling_unit(scaling_unit: int) -> None:
     pd_testing.assert_frame_equal(df, ORIGINAL_DF)
 
 
-def test_prerocess_wrong_parameters() -> None:
+def test_preprocess_wrong_parameters() -> None:
     with pytest.raises(
         ValueError,
         match="Expected drop_original_target to be False if a target_rename is None*",
@@ -164,7 +164,7 @@ def test_prerocess_wrong_parameters() -> None:
         )
 
 
-def test_prerocess_wrong_references_variables() -> None:
+def test_preprocess_wrong_references_variables() -> None:
     processor = RelativeDifferenceProcessor(
         target="variable_5",
         references=["wrong_variable"],
@@ -177,7 +177,7 @@ def test_prerocess_wrong_references_variables() -> None:
         processor.preprocess(df=ORIGINAL_DF)
 
 
-def test_postrocess_wrong_references_variables() -> None:
+def test_postprocess_wrong_references_variables() -> None:
     processor = RelativeDifferenceProcessor(
         target="variable_5",
         references=["wrong_variable"],
