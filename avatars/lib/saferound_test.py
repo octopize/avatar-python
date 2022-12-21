@@ -10,6 +10,7 @@ import pytest
 from avatars.lib.saferound import RoundingStrategy, saferound
 
 
+
 class Setup(NamedTuple):
     in_list: list[float]
     in_dict: dict[str, float]
@@ -17,6 +18,7 @@ class Setup(NamedTuple):
     in_tuple: Tuple[float, float, float]
     neg_in_list: list[float]
     huge_in_list: list[float]
+
 
 
 @pytest.fixture

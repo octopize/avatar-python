@@ -290,6 +290,7 @@ class PrivacyMetricsParameters(BaseModel):
     seed: Optional[int] = Field(None, title="Seed")
     job_id: Optional[UUID] = Field(None, title="Job Id")
     unshuffled_avatars_id: UUID = Field(..., title="Unshuffled Avatars Id")
+    avatarization_job_id: Optional[UUID] = Field(None, title="Avatarization Job Id")
     imputation: Optional[ImputationParameters] = None
     ncp: Optional[int] = Field(None, title="Ncp")
 

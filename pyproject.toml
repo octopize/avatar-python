@@ -28,10 +28,6 @@ pytest = "^7.2.0"
 jupytext = "^1.14.2"
 nbconvert = "^7.2.6"
 
-
-[tool.poetry.group.tutorial]
-optional = true
-
 [tool.poetry.group.tutorial.dependencies]
 seaborn = "^0.12.1"
 matplotlib = "^3.6.2"
