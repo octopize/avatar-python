@@ -53,6 +53,7 @@ from avatars.processors.group_modalities import GroupModalitiesProcessor
 from avatars.processors.relative_difference import RelativeDifferenceProcessor
 from avatars.processors.perturbation import PerturbationProcessor
 from avatars.processors.expected_mean import ExpectedMeanProcessor
+from avatars.processors.datetime import DatetimeProcessor
 
 # The following are not necessary to run avatar but are used in this tutorial
 import pandas as pd
@@ -73,7 +74,7 @@ client.health.get_health()
 
 # We have seen in the previous tutorial one approach to handle categorical variables with large cardinality. We propose here an alternative to do so by means of a client-side processor.
 #
-# This processor will group modalities together to ensure the target variable has a requested number of modalities. The least represented modalities will be brought together under a `other` modality. Note that this transformation is irreversible (the original value cannot be infered from `other`.
+# This processor will group modalities together to ensure the target variable has a requested number of modalities. The least represented modalities will be brought together under a `other` modality. Note that this transformation is irreversible (the original value cannot be infered from `other`. 
 #
 # Because this is an irreversible operation, this transformation of the data should be done outside the pipeline. The transformed data will be used as a basis for comparison when computing utility and privacy metrics.
 
@@ -121,7 +122,7 @@ avatars.head(3)
 
 avatars["city"].value_counts()
 
-# We observe that the avatars produced have a reduced number of cities and an extra `other` modality for the `city` variable. Note that the use of a client-side processor made the transformation of the data straightforward.
+# We observe that the avatars produced have a reduced number of cities and an extra `other` modality for the `city` variable. Note that the use of a client-side processor made the transformation of the data straightforward. 
 #
 # The calculation of the metrics has been performed during the execution of the pipeline. Results can be obtained as shown below.
 
@@ -141,14 +142,19 @@ for metric in utility_metrics:
 
 # We will now use two processors to enforce inter-variable constraints.
 #
-# The two processors we will now apply are processors that temporarily transform the data in order to improve the avatarization. This means that they both contain a `preprocess` step and a `postprocess` step, ensuring that the effect of the `preprocess` action can be reversed via the use of the `postprocess` action.
+# The two processors we will now apply are processors that temporarily transform the data in order to improve the avatarization. This means that they both contain a `preprocess` step and a `postprocess` step, ensuring that the effect of the `preprocess` action can be reversed via the use of the `postprocess` action. 
 #
-# These processors will be used to demonstrate the use of the pipeline tool that automates the use of processors, the avatarization and the metric computation in a single command.
+# These processors will be used to demonstrate the use of the pipeline tool that automates the use of processors, the avatarization and the metric computation in a single command. 
 #
 
 df = pd.read_csv("../fixtures/epl.csv")
 
+# Prior to applying processors, it is important to check `dtypes` and eventually convert date variables to a `datetime` format using `pandas.to_datetime` function. 
+
 df.dtypes
+
+df['career_start_date'] = pd.to_datetime(df['career_start_date'], format='%Y-%m-%d %H:%M:%S')
+df['club_signing_date'] = pd.to_datetime(df['club_signing_date'], format='%Y-%m-%d %H:%M:%S')
 
 # ### Proportions
 #
@@ -174,9 +180,20 @@ relative_difference_processor = RelativeDifferenceProcessor(
     references=["penalty_attempts"],
 )
 
+# ### Relative differences with datetime variables
+#
+# The relative difference processor can also be used to express a date relative to another. To do so, it is required to use the `DatetimeProcessor` processor that will transform datetime variables into numeric values, enabling differences to be computed between date variables. Because the `DatetimeProcessor` has a post-process function, the data output by the avtarization pipeline will contain the datetime variables in their original format (i.e. as datetime rather than numeric values). 
+
+datetime_processor = DatetimeProcessor()
+
+relative_difference_processor_dates = RelativeDifferenceProcessor(
+    target="club_signing_date",
+    references=["career_start_date"],
+)
+
 # ### Computed variables
 #
-# The data also contains a third variable related to the penalty context: `penalty_misses`. This variable can be computed directly as the difference between `penalty_attempts` and `penalty_goals`.
+# The data also contains a third variable related to the penalty context: `penalty_misses`. This variable can be computed directly as the difference between `penalty_attempts` and `penalty_goals`. 
 #
 # Computed variables should be removed from the data prior to running the avtarization and re-computed after.
 
@@ -191,16 +208,14 @@ dataset = client.pandas_integration.upload_dataframe(df)
 result = client.pipelines.avatarization_pipeline_with_processors(
     AvatarizationPipelineCreate(
         avatarization_job_create=AvatarizationJobCreate(
-            parameters=AvatarizationParameters(dataset_id=dataset.id, k=5),
+            parameters=AvatarizationParameters(dataset_id=dataset.id, k=5)
         ),
-        processors=[proportion_processor, relative_difference_processor],
+        processors=[proportion_processor, relative_difference_processor, datetime_processor, relative_difference_processor_dates],
         df=df,
     ),
     timeout=1000,
 )
 # -
-
-result
 
 avatars = result.post_processed_avatars
 avatars.head(5)
@@ -221,7 +236,11 @@ for metric in utility_metrics:
 #
 # Let's try without ...
 
+# +
 df2 = pd.read_csv("../fixtures/epl.csv")
+df2['career_start_date'] = pd.to_datetime(df2['career_start_date'], format='%Y-%m-%d %H:%M:%S')
+df2['club_signing_date'] = pd.to_datetime(df2['club_signing_date'], format='%Y-%m-%d %H:%M:%S')
+
 dataset = client.pandas_integration.upload_dataframe(df2)
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
@@ -229,6 +248,7 @@ job = client.jobs.create_avatarization_job(
     )
 )
 job = client.jobs.get_avatarization_job(id=job.id)
+# -
 
 avatars_noprocessing = client.pandas_integration.download_dataframe(
     job.result.avatars_dataset.id
@@ -238,7 +258,7 @@ avatars_noprocessing.head(5)
 
 # #### Preservation of the proportions
 #
-# To confirm that proportions are well kept, we can compute the maximum difference between the reference variable (`minutes_in_game`) and the sum of the three proportion variables (`minutes_played_home`, `minutes_played_away` and `minutes_on_bench`). Where it may not be zero when no processor is used, this difference should be zero when using a proportion processor.
+# To confirm that proportions are well kept, we can compute the maximum difference between the reference variable (`minutes_in_game`) and the sum of the three proportion variables (`minutes_played_home`, `minutes_played_away` and `minutes_on_bench`). Where it may not be zero when no processor is used, this difference should be zero when using a proportion processor. 
 
 np.max(
     abs(
@@ -325,8 +345,7 @@ result = client.pipelines.avatarization_pipeline_with_processors(
         ],
         df=df,
     ),
-    timeout=1000,
-)
+    timeout=1000)
 # -
 
 avatars = result.post_processed_avatars
@@ -336,11 +355,11 @@ avatars.head(5)
 #
 # The same statistics computed on avatars that did not get post-processed by this same processor are more different than the statistics obtained on the original data.
 
-df.groupby(["position"]).mean()[["goals_away", "goals_home"]]
+df.groupby(["position"]).mean(numeric_only=True)[["goals_away", "goals_home"]]
 
-avatars.groupby(["position"]).mean()[["goals_away", "goals_home"]]
+avatars.groupby(["position"]).mean(numeric_only=True)[["goals_away", "goals_home"]]
 
-avatars_noprocessing.groupby(["position"]).mean()[["goals_away", "goals_home"]]
+avatars_noprocessing.groupby(["position"]).mean(numeric_only=True)[["goals_away", "goals_home"]]
 
 # ### Computed variables
 #
