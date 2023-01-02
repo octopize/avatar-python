@@ -144,9 +144,12 @@ class ApiClient:
         form_data_arg = form_data.dict() if form_data else None
 
         files_arg = self._get_file_argument(file)
-
+        
+        # Ignore SSL . For testing purpose only . 
+        should_verify_ssl = kwargs.get("verify_ssl", True)
+                                    
         with httpx.Client(
-            timeout=timeout or self.timeout, base_url=self.base_url
+            timeout=timeout or self.timeout, base_url=self.base_url, verify=should_verify_ssl
         ) as client:
             try:
                 result = client.request(
