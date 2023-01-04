@@ -223,6 +223,8 @@
 </li>
 <li><a href="models.html#avatars.models.AvatarizationPipelineCreate.avatarization_job_create">avatarization_job_create (avatars.models.AvatarizationPipelineCreate attribute)</a>
 </li>
+<li><a href="models.html#avatars.models.PrivacyMetricsParameters.avatarization_job_id">avatarization_job_id (avatars.models.PrivacyMetricsParameters attribute)</a>
+</li>
 <li><a href="client_and_api.html#avatars.api.Pipelines.avatarization_pipeline_with_processors">avatarization_pipeline_with_processors() (avatars.api.Pipelines method)</a>
 </li>
 <li><a href="models.html#avatars.models.AvatarizationJob">AvatarizationJob (class in avatars.models)</a>
@@ -357,13 +359,17 @@
 </li>
 <li><a href="models.html#avatars.models.ExcludeCategoricalMethod.coordinate_similarity">coordinate_similarity (avatars.models.ExcludeCategoricalMethod attribute)</a>
 </li>
+<li><a href="models.html#avatars.models.SignalMetrics.correlation_difference_ratio">correlation_difference_ratio (avatars.models.SignalMetrics attribute)</a>
+</li>
 </ul></td>
 <td style="width: 33%; vertical-align: top;"><ul>
-<li><a href="models.html#avatars.models.SignalMetrics.correlation_difference_ratio">correlation_difference_ratio (avatars.models.SignalMetrics attribute)</a>
+<li><a href="models.html#avatars.models.PrivacyMetrics.correlation_protection_rate">correlation_protection_rate (avatars.models.PrivacyMetrics attribute)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Jobs.create_avatarization_job">create_avatarization_job() (avatars.api.Jobs method)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Datasets.create_dataset">create_dataset() (avatars.api.Datasets method)</a>
+</li>
+<li><a href="client_and_api.html#avatars.api.Jobs.create_full_avatarization_job">create_full_avatarization_job() (avatars.api.Jobs method)</a>
 </li>
 <li><a href="client_and_api.html#avatars.api.Jobs.create_privacy_metrics_job">create_privacy_metrics_job() (avatars.api.Jobs method)</a>
 </li>
@@ -400,17 +406,8 @@
 <td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.Dataset">Dataset (class in avatars.models)</a>
 </li>
-<li><a href="models.html#avatars.models.AvatarizationJob.dataset_id">dataset_id (avatars.models.AvatarizationJob attribute)</a>
-<ul>
-<li><a href="models.html#avatars.models.AvatarizationParameters.dataset_id">(avatars.models.AvatarizationParameters attribute)</a>
+<li><a href="models.html#avatars.models.AvatarizationParameters.dataset_id">dataset_id (avatars.models.AvatarizationParameters attribute)</a>
 </li>
-<li><a href="models.html#avatars.models.GenericJob.dataset_id">(avatars.models.GenericJob attribute)</a>
-</li>
-<li><a href="models.html#avatars.models.PrivacyMetricsJob.dataset_id">(avatars.models.PrivacyMetricsJob attribute)</a>
-</li>
-<li><a href="models.html#avatars.models.SignalMetricsJob.dataset_id">(avatars.models.SignalMetricsJob attribute)</a>
-</li>
-</ul></li>
 <li><a href="client_and_api.html#avatars.api.Datasets">Datasets (class in avatars.api)</a>
 </li>
 <li><a href="models.html#avatars.models.DatasetSummary">DatasetSummary (class in avatars.models)</a>
@@ -419,12 +416,12 @@
 </li>
 <li><a href="models.html#avatars.models.HTTPValidationError.detail">detail (avatars.models.HTTPValidationError attribute)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.AvatarizationPipelineCreate.df">df (avatars.models.AvatarizationPipelineCreate attribute)</a>
 </li>
-<li><a href="models.html#avatars.models.PrivacyMetrics.direct_match">direct_match (avatars.models.PrivacyMetrics attribute)</a>
+<li><a href="models.html#avatars.models.PrivacyMetrics.direct_match_protection">direct_match_protection (avatars.models.PrivacyMetrics attribute)</a>
 </li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.PrivacyMetrics.distance_to_closest">distance_to_closest (avatars.models.PrivacyMetrics attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.AnalysisStatus.done">done (avatars.models.AnalysisStatus attribute)</a>
@@ -607,6 +604,10 @@
 </li>
 <li><a href="models.html#avatars.models.ImputeMethod">ImputeMethod (class in avatars.models)</a>
 </li>
+<li><a href="models.html#avatars.models.PrivacyMetrics.inference_categorical">inference_categorical (avatars.models.PrivacyMetrics attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.PrivacyMetrics.inference_continuous">inference_continuous (avatars.models.PrivacyMetrics attribute)</a>
+</li>
 <li><a href="models.html#avatars.models.ColumnType.int">int (avatars.models.ColumnType attribute)</a>
 </li>
 <li><a href="models.html#avatars.models.CreateUser.is_email_confirmed">is_email_confirmed (avatars.models.CreateUser attribute)</a>
@@ -655,8 +656,6 @@
 </ul></li>
 <li><a href="models.html#avatars.models.JobStatus.killed">killed (avatars.models.JobStatus attribute)</a>
 </li>
-</ul></td>
-<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.AvatarizationJobCreate.kind">kind (avatars.models.AvatarizationJobCreate attribute)</a>
 <ul>
 <li><a href="models.html#avatars.models.PrivacyMetricsJobCreate.kind">(avatars.models.PrivacyMetricsJobCreate attribute)</a>
@@ -664,7 +663,11 @@
 <li><a href="models.html#avatars.models.SignalMetricsJobCreate.kind">(avatars.models.SignalMetricsJobCreate attribute)</a>
 </li>
 </ul></li>
+</ul></td>
+<td style="width: 33%; vertical-align: top;"><ul>
 <li><a href="models.html#avatars.models.ImputeMethod.knn">knn (avatars.models.ImputeMethod attribute)</a>
+</li>
+<li><a href="models.html#avatars.models.PrivacyMetricsParameters.known_variables">known_variables (avatars.models.PrivacyMetricsParameters attribute)</a>
 </li>
 </ul></td>
 </tr></table>
@@ -1006,6 +1009,8 @@
 <h2>T</h2>
 <table class="indextable genindextable" style="width: 100%"><tr>
 <td style="width: 33%; vertical-align: top;"><ul>
+<li><a href="models.html#avatars.models.PrivacyMetricsParameters.target">target (avatars.models.PrivacyMetricsParameters attribute)</a>
+</li>
 <li><a href="client_and_api.html#avatars.client.Timeout">Timeout</a>
 </li>
 <li><a href="models.html#avatars.models.AvatarizationParameters.to_categorical_threshold">to_categorical_threshold (avatars.models.AvatarizationParameters attribute)</a>

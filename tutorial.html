@@ -185,9 +185,9 @@ main docs at <a class="reference external" href="https://docs.octopize.io">https
 <a class="reference external" href="https://github.com/octopize/avatar-python/releases">https://github.com/octopize/avatar-python/releases</a></p>
 <p>Install the package by pointing to the .whl file (replace with correct
 version below).</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
 <span class="c1"># or, if you're using poetry (recommended)</span>
-poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
+poetry add https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
 </pre></div>
 </div>
 </section>
@@ -230,7 +230,7 @@ interface hints from your IDE.</p>
 
 <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s2">"fixtures/iris.csv"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">))</span>
 
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_full_avatarization_job</span><span class="p">(</span>
     <span class="n">AvatarizationJobCreate</span><span class="p">(</span>
         <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span>
             <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
@@ -324,7 +324,10 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </section>
 <section id="launch-an-avatarization-job">
 <h3>Launch an avatarization job<a class="headerlink" href="#launch-an-avatarization-job" title="Permalink to this headline">#</a></h3>
-<p>One job corresponds to one avatarization.</p>
+<p>One job corresponds to one avatarization. 2 methods are available to
+create a job: - (stand use) <code class="docutils literal notranslate"><span class="pre">create_full_avatarization_job</span></code> creates an
+avatarization job then computes metrics. - (expert use)
+<code class="docutils literal notranslate"><span class="pre">create_avatarization_job</span></code> only creates an avatarization job.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationJobCreate</span>
 
 <span class="c1"># Pass the parameters to the AvatarizationJobCreate object...</span>
@@ -332,7 +335,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 
 <span class="c1"># ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_avatarization_job method</span>
 <span class="c1"># This launches the avatarization and returns immediately</span>
-<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">job_create</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_full_avatarization_job</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">job_create</span><span class="p">)</span>
 
 <span class="c1"># You can retrieve the result and the status of the job (if it is running, has stopped, etc...).</span>
 <span class="c1"># This call will block until the job is done or a timeout is expired.</span>
