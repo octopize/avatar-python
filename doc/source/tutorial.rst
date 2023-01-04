@@ -148,9 +148,13 @@ Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.
 
 -  ``k`` (required)
+
 -  ``dataset_id`` (required): id of the dataset to avatarize
+
 -  ``column_weights``: default=1 for each variable
+
 -  ``ncp``: default=5.
+
 -  ``imputation``: imputation parameters type of
    ``ImputationParameters``.
 

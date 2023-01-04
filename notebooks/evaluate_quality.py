@@ -26,10 +26,9 @@ import saiph
 import matplotlib.pyplot as plt
 
 from pandas_profiling import ProfileReport
-
 # -
 
-# ## Import data
+# ## Import data 
 
 # +
 path_original = "https://raw.githubusercontent.com/octopize/avatar-paper/main/datasets/AIDS/aids_original_data.csv"
@@ -62,8 +61,8 @@ col_cat = df.select_dtypes(include=categorical).columns
 combined.tail()
 # -
 
-# ## Univariate comparison
-# You can here compare distributions between original and avatar data.
+# ## Univariate comparison 
+# You can here compare distributions between original and avatar data.  
 #
 # If distributions are not well preserved, you can work with the parameter `columns_weight` in your avatarization.
 
@@ -83,7 +82,7 @@ for col in col_cat:
     )
 
 # #### Missing data
-# You are here comparing missing data between original and avatar data.
+# You are here comparing missing data between original and avatar data. 
 #
 # If you want to improve the quality of missing data, you can use the parameter `imputation` in your avatarization.
 
@@ -104,7 +103,7 @@ print(f"The percentage of missing values in original: {df_missing_ratio}")
 
 # ## Bivariate comparison
 #
-# We compare bivariate analysis. We are computing Pearson correlation.
+# We compare bivariate analysis. We are computing Pearson correlation. 
 #
 # If you want to compare correlations between continuous and categorical variables, you can use Phik correlation (with the `phik` package).
 #
@@ -123,11 +122,11 @@ sns.heatmap(
     cbar_kws={"shrink": 0.5},
 )
 
-# ## Multivariate comparison
+# ## Multivariate comparison 
 #
-# We compare multi-variate structures.
+# We compare multi-variate structures. 
 #
-# In short, we are checking if the structure of the dataset is preserved.
+# In short, we are checking if the structure of the dataset is preserved. 
 #
 # Datasets should have the same projection on the maximum of the dimensions.
 #

@@ -7,14 +7,14 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.2
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: 'Python 3.10.8 (''env'': venv)'
 #     language: python
 #     name: python3
 # ---
 
 # # Tutorial 1: A basic avatarization
 
-# In this tutorial, we will connect to a server to perform the avatarization of a dataset that does not require any pre-processing. We'll retrieve the anonymized dataset and the associated avatarization report.
+# In this tutorial, we will connect to a server to perform the avatarization of a dataset that does not require any pre-processing. We'll retrieve the anonymized dataset and the associated avatarization report. 
 
 # ## Connection
 
@@ -45,7 +45,7 @@ client.health.get_health()
 
 # ## Loading data
 
-# We recommend loading your csv file as a pandas dataframe. It enables you to check your data before avatarization and to pre-process it if required.
+# We recommend loading your csv file as a pandas dataframe. It enables you to check your data before avatarization and to pre-process it if required. 
 #
 # In this tutorial, we use the simple and well-known `iris` dataset to demonstrate the main steps of an avatarization.
 
@@ -56,9 +56,9 @@ df
 dataset = client.pandas_integration.upload_dataframe(df)
 print(dataset)
 
-# The data has now been loaded onto the server.
+# The data has now been loaded onto the server. 
 #
-# Note that it is also possible to directly load a csv file without using pandas.
+# Note that it is also possible to directly load a csv file without using pandas. 
 
 # +
 filename = "../fixtures/iris.csv"
@@ -90,7 +90,7 @@ for var in dataset.summary.stats:
 # ## Creating and launching an avatarization job
 
 # +
-job = client.jobs.create_avatarization_job(
+job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(k=5, dataset_id=dataset.id),
     )

@@ -311,6 +311,21 @@ class Jobs:
         }
         return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
+    def create_full_avatarization_job(
+        self,
+        request: AvatarizationJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationJob:
+        """Create an avatarization job, then calculate metrics."""
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs",
+        }
+        return AvatarizationJob(
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
+        )
+
     def create_avatarization_job(
         self,
         request: AvatarizationJobCreate,

@@ -15,9 +15,9 @@ Choose the latest version at https://github.com/octopize/avatar-python/releases
 Install the package by pointing to the .whl file (replace with correct version below).
 
 ```bash
-pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
+pip install https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
 # or, if you're using poetry (recommended)
-poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
+poetry add https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
 ```
 
 ## Setup
@@ -60,7 +60,7 @@ client.authenticate(username="username", password="strong_password")
 
 dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
 
-job = client.jobs.create_avatarization_job(
+job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(
             k=20,
@@ -151,7 +151,9 @@ parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
 
 ### Launch an avatarization job
 
-One job corresponds to one avatarization.
+One job corresponds to one avatarization. 2 methods are available to create a job:
+- (stand use) `create_full_avatarization_job` creates an avatarization job then computes metrics.
+- (expert use) `create_avatarization_job` only creates an avatarization job.
 
 ```python
 from avatars.models import AvatarizationJobCreate
@@ -161,7 +163,7 @@ job_create = AvatarizationJobCreate(parameters=parameters)
 
 # ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_avatarization_job method
 # This launches the avatarization and returns immediately
-job = client.jobs.create_avatarization_job(request=job_create)
+job = client.jobs.create_full_avatarization_job(request=job_create)
 
 # You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
 # This call will block until the job is done or a timeout is expired.

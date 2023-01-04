@@ -7,14 +7,14 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.2
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: 'Python 3.10.8 (''env'': venv)'
 #     language: python
 #     name: python3
 # ---
 
 # # Tutorial 3: Using embedded processors
 
-# In this tutorial, we will learn how to to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities.
+# In this tutorial, we will learn how to to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities. 
 
 # <img src="img/embedded.png" style="height:500px" />
 
@@ -71,7 +71,7 @@ df.head()
 #
 # Missing data is common in datasets and is a property that should be modelled.
 #
-# The Avatar solution can handle variables with missing data without requiring pre-processing. To do so, an additional variable defining whether a value is missing or not will be temporarily added to the data and the missing values will be temporarily imputed. These variables will be part of the anonymization process.
+# The Avatar solution can handle variables with missing data without requiring pre-processing. To do so, an additional variable defining whether a value is missing or not will be temporarily added to the data and the missing values will be temporarily imputed. These variables will be part of the anonymization process. 
 #
 # In the presence of missing values, the last step in the avatarization will be to remove temporary variables and add back missing values.
 #
@@ -85,7 +85,7 @@ imputation_parameters = ImputationParameters(k=5, method=ImputeMethod.knn)
 # +
 # %%time
 # Create and run avatarization
-job = client.jobs.create_avatarization_job(
+job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(
             k=5, dataset_id=dataset.id, imputation=imputation_parameters
@@ -107,7 +107,7 @@ msno.matrix(df)
 
 msno.matrix(avatars)
 
-# ### Handling missing data on large volumes
+# ### Handling missing data on large volumes 
 
 # Because there is an imputation step in the avatarization of data with missing values, it may yield long runtimes with some settings of the imputation. It is the case with the `ImputeMethod.knn` imputer demonstrated previously.
 #
@@ -143,7 +143,7 @@ print(job.status)
 
 # ## Numeric variables with low cardinality
 
-# Some variables may be numeric but only contain several unique values. If their distributions show some peaks, these may not be preserved during avatarization.
+# Some variables may be numeric but only contain several unique values. If their distributions show some peaks, these may not be preserved during avatarization. 
 #
 # Let's take the Wisconcin Breast Cancer dataset (WBCD) as an example. This dataset contains categorical variables encoded as integers ranging between 0 and 10. The variable `Clump_Thickness` is one of them and exhibits a non-Gaussian distribution with peaks at different values
 
@@ -180,7 +180,7 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
 avatars["Clump_Thickness"].hist()
 
-# An avatarization of this dataset without transformation of the low-cardinality numeric variables yields differences in the distribution.
+# An avatarization of this dataset without transformation of the low-cardinality numeric variables yields differences in the distribution. 
 
 # ### Avatarization as categorical
 
@@ -204,11 +204,11 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
 avatars["Clump_Thickness"].hist()
 
-# We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the proportion of each unique value where it may not be the case if we keep the variables as numeric.
+# We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the proportion of each unique value where it may not be the case if we keep the variables as numeric. 
 
 # ## Categorical variables with large cardinality
 
-# The anonymization of datasets containing categorical variables with large cardinality is not trivial and we recommend to exclude the variable from the avatarization before re-assigning it probabilistically.
+# The anonymization of datasets containing categorical variables with large cardinality is not trivial and we recommend to exclude the variable from the avatarization before re-assigning it probabilistically. 
 #
 # This necessary step is included in the avatarization job and can be managed via a set of parameters ExcludeCategoricalParameters.
 #

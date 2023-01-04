@@ -7,7 +7,7 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.2
 #   kernelspec:
-#     display_name: Python 3 (ipykernel)
+#     display_name: 'Python 3.10.8 (''env'': venv)'
 #     language: python
 #     name: python3
 # ---
@@ -90,12 +90,11 @@ sns.lineplot(
 
 # The avatarization takes as input tabular data where each row contains the data relative to an individual. In the present example, each row should ideally refer to a device.
 #
-# The number of time points to include in the avatarization can also have an impact and it is currently recommended to use a small number of data points (~ 5 to 10 points) to prevent cases where the data has more variables than individuals.
+# The number of time points to include in the avatarization can also have an impact and it is currently recommended to use a small number of data points (~ 5 to 10 points) to prevent cases where the data has more variables than individuals. 
 #
 # To perform the transformation which consists in pivotting the table and sampling a given number of time points, we will use a processor.
 #
 # We can call this processor `SimpleTimeSeriesProcessor`.
-
 
 class SimpleTimeSeriesProcessor:
     def __init__(
@@ -216,7 +215,7 @@ postprocessed_df.head()
 dataset = client.pandas_integration.upload_dataframe(preprocessed_df)
 print(preprocessed_df.shape)
 
-job = client.jobs.create_avatarization_job(
+job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(k=5, dataset_id=dataset.id)
     )
