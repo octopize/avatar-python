@@ -2,7 +2,7 @@ import warnings
 from typing import List, Optional
 
 import pandas as pd
-
+import numpy as np
 
 class ExpectedMeanProcessor:
     def __init__(
@@ -24,11 +24,40 @@ class ExpectedMeanProcessor:
         ---------
             target_variables:
                 variables to transform
+
+        Keyword Arguments
+        -----------------
             groupby_variables:
                 variables to use to group values in different distributions
             same_std:
                 Set to True to force the variables to transform to have the same
                 standard deviation as the reference data. default: False.
+
+        Examples
+        --------
+        from avatars.models import AvatarizationJobCreate, AvatarizationParameters,
+
+        >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
+        ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
+        ...                   columns=['one', 'two', 'three'])
+        >>> df = df.astype('int')
+        >>> processor = ExpectedMeanProcessor(target_variables = ['one'])
+        >>> processed = processor.preprocess(df)
+
+        The processor save the mean and the std of each target variables
+        >>> processor.properties_df
+          ___NOGROUPVAR___  onemean    onestd
+        0   __NOGROUPVAL__      2.5  1.732051
+        
+        Now you can force your synthetic dataset to have the same mean as the original.
+        >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
+        ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
+        ...                   columns=['one', 'two', 'three'])
+        >>> avatar.one.mean()
+        5.5
+        >>> avatar = processor.postprocess(df, avatar)
+        >>> avatar.one.mean()
+        2.5
         """
         # Variable added temporarily when no groupby is used. It is a column with only one modality
         # that can be used to perform a groupby in order to get the expected mean and std on all
