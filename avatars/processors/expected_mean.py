@@ -35,8 +35,6 @@ class ExpectedMeanProcessor:
 
         Examples
         --------
-        from avatars.models import AvatarizationJobCreate, AvatarizationParameters,
-
         >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
         ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
         ...                   columns=['one', 'two', 'three'])
@@ -45,11 +43,13 @@ class ExpectedMeanProcessor:
         >>> processed = processor.preprocess(df)
 
         The processor save the mean and the std of each target variables
+
         >>> processor.properties_df
           ___NOGROUPVAR___  onemean    onestd
         0   __NOGROUPVAL__      2.5  1.732051
         
         Now you can force your synthetic dataset to have the same mean as the original.
+        
         >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
         ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
         ...                   columns=['one', 'two', 'three'])
