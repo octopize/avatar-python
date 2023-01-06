@@ -6,9 +6,11 @@ These processors are used to process data before and after avatarization.
 
 Table of contents
 -----------------
+.. autosummary::
+   :toctree: avatars/processors
+   :template: processors.rst
 
-.. toctree:: 
-   :maxdepth: 1
 
-   expected_mean <expected_mean>
+   processors.expected_mean
+   processors.datetime_
 
