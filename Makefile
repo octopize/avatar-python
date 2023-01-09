@@ -36,6 +36,7 @@ lint-fix: ## Fix linting
 
 lint: ## Lint source files
 	poetry run bandit -r avatars -c bandit.yaml
+	poetry run flake8 .
 .PHONY: lint
 
 
