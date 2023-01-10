@@ -1,12 +1,14 @@
 # Changelog
 
-## Unreleased
+## 0.2.2
 
 - Improve type hints of the method
 - Update tutorial notebooks with smaller datasets
 - Fix bugs in tutorial notebooks
 - Improve error message when the call to the API times out
 - Add `jobs.find_all_jobs_by_user`
+- Add two new privacy metrics: `direct_match_protection` and `categorical_hidden_rate`
+- Add the `DatetimeProcessor`
 
 ## 0.2.1
 
