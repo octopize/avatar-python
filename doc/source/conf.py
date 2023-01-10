@@ -12,18 +12,20 @@
 #
 import os
 import sys
+from datetime import date
 from typing import Optional
-
 sys.path.insert(
     0, os.path.abspath("../../avatars/")
 )  # Source code dir relative to this file
 
+from avatars import __version__
 # -- Project information -----------------------------------------------------
 
 project = "avatars"
-copyright = "2022, Octopize"
+copyright = f"{date.today().year}, Octopize"
 author = "Octopize"
-
+version = __version__
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,6 +35,7 @@ author = "Octopize"
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
+    "sphinx_multiversion",
 ]
 
 autodoc_default_options = {
@@ -46,6 +49,10 @@ python_use_unqualified_type_names = True
 
 
 templates_path = ["_templates"]
+
+# https://holzhaus.github.io/sphinx-multiversion/master/configuration.html
+smv_branch_whitelist = "None" # do not create a separate doc version for each branch
+smv_released_pattern = r'^refs/tags/.*$'           # Tags define a release
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
