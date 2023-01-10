@@ -59,8 +59,8 @@ jobs:
       # This latest version is fetched using `git tag -l`.
       run: |
         mkdir gh-pages
-        touch gh-pages/.nojekyll
         DOC_OUTPUT_DIR=gh-pages make doc-build
+        touch gh-pages/.nojekyll
         cp doc/index-redirect.html gh-pages/index.html
         ln -srf gh-pages/$(git tag -l --sort=creatordate |tail -1) gh-pages/latest
     - name: Deploy documentation
