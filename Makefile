@@ -55,6 +55,7 @@ doc: doc-build  ## Build and open the docs
 
 doc-build:  ## Build the docs
 	rm -rf $(DOC_OUTPUT_DIR)
+	mkdir -p $(DOC_OUTPUT_DIR)
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
 	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
