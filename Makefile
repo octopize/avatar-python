@@ -31,7 +31,7 @@ lci: generate-py lint-fix lint test-integration doc-build pip-requirements ## Ap
 .PHONY: lci
 
 lint-fix: ## Fix linting
-	poetry run black avatars/ bin doc/source notebooks/
+	poetry run black avatars/ bin doc/source notebooks/ release.py
 	poetry run blacken-docs docs/tutorial.md
 	poetry run isort avatars/ bin doc/source
 	poetry run jupyter nbconvert --clear-output --inplace notebooks/*.ipynb
