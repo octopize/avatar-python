@@ -1,14 +1,19 @@
 Changelog
 =========
 
-Unreleased
-----------
+0.2.2
+-----
 
 -  Improve type hints of the method
 -  Update tutorial notebooks with smaller datasets
 -  Fix bugs in tutorial notebooks
 -  Improve error message when the call to the API times out
 -  Add ``jobs.find_all_jobs_by_user``
+-  Add two new privacy metrics: ``direct_match_protection`` and
+   ``categorical_hidden_rate``
+-  Add the ``DatetimeProcessor``
+
+.. _section-1:
 
 0.2.1
 -----
@@ -17,7 +22,7 @@ Unreleased
 -  Make the ``toolz`` package a mandatory dependency
 -  Fix a handling of a target variable equaling zero
 
-.. _section-1:
+.. _section-2:
 
 0.2.0
 -----
@@ -39,7 +44,7 @@ Unreleased
 -  Add ExcludeCategoricalParameters to use embedded processor on the
    server side
 
-.. _section-2:
+.. _section-3:
 
 0.1.16
 ------
@@ -49,7 +54,7 @@ Unreleased
 -  JobParameters becomes AvatarizationParameters
 -  Add DCR and NNDR to privacy metrics
 
-.. _section-3:
+.. _section-4:
 
 0.1.15
 ------
@@ -71,14 +76,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
-.. _section-4:
+.. _section-5:
 
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-5:
+.. _section-6:
 
 0.1.13
 ------
