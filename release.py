@@ -84,7 +84,7 @@ def get_version_from_file(filename: Path) -> Optional[Match]:  # type: ignore[ty
         return get_version_match(file.read(), KEY_MAPPING[filename])
 
 
-def _bump_version(bump_type: BumpType) -> None:
+def bump_version(bump_type: BumpType) -> None:
     version = get_version_from_file(PYPROJECT_TOML)
 
     if not version:
@@ -137,13 +137,6 @@ def push() -> None:
             raise typer.Exit(result)
 
 
-@app.command()
-def bump_version(
-    bump_type: BumpType = typer.Option(BumpType.PATCH, case_sensitive=False)
-) -> Any:
-    _bump_version(bump_type)
-
-
 def check_preconditions() -> None:
     preconditions = [
         f"Have you updated the changelog at {CHANGELOG}?",
@@ -169,7 +162,7 @@ def release(bump_type: BumpType = typer.Option(BumpType.PATCH)) -> Any:
         raise typer.Exit(1)
 
     check_preconditions()
-    _bump_version(bump_type)
+    bump_version(bump_type)
     commit_and_tag()
     push()
 
