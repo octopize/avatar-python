@@ -26,7 +26,7 @@ class BumpType(enum.Enum):
 
 
 def get_version_pattern(key: str) -> Pattern:  # type: ignore[type-arg]
-    pattern = re.compile(f'{key} = "(\d+)\.(\d+)\.(\d+)"') # noqa W905
+    pattern = re.compile(f'{key} = "(\d+)\.(\d+)\.(\d+)"')  # noqa W905
     return pattern
 
 
@@ -111,17 +111,54 @@ def commit_and_tag() -> None:
 
     new_version = ".".join(match.groups())
 
-    commands = [
-        ("git", "add", str(PYPROJECT_TOML), str(INIT_PY), str(CHANGELOG)),
-        ("git", "commit", "-m", f"chore: release version {new_version}"),
-        ("git", "tag", "-s", f"{new_version}", "-m", f"Release version {new_version}"),
+    files_to_add = [str(PYPROJECT_TOML), str(INIT_PY), str(CHANGELOG)]
+    DoCommand = UndoCommand = list[str]
+    commands: list[tuple[DoCommand, UndoCommand]] = [
+        (
+            ["git", "add", *files_to_add],
+            [
+                "git",
+                "restore",
+                "--source=HEAD",
+                "--staged",
+                "--worktree",
+                *files_to_add,
+            ],  # we remove the version bump, which is technically not part of the 'do' command
+        ),
+        (
+            ["git", "commit", "-m", f"chore: release version {new_version}"],
+            ["git", "reset", "HEAD^", "--soft"],
+        ),
+        (
+            ["git", "tag", "-s", new_version, "-m", f"Release version {new_version}"],
+            ["git", "tag", "-d", new_version],
+        ),
     ]
+    call_stack = []
+    for do_undo_command in commands:
+        call_stack.append(do_undo_command)
+        do_command, undo_command = do_undo_command
 
-    for command in commands:
-        typer.echo(" ".join(command))
-        result = subprocess.call(command)
-        if result != 0:
-            raise typer.Exit(result)
+        typer.echo(" ".join(do_command))
+        do_result = subprocess.call(do_command)
+        if do_result != 0:
+            typer.echo(
+                "Command produced non-zero exit status. Undoing previous commands..."
+            )
+            call_stack.pop()  # Remove currently executed commands that failed
+            while call_stack:
+                _, undo_command = call_stack.pop()
+                typer.echo(" ".join(undo_command))
+                undo_result = subprocess.call(undo_command)
+
+                if undo_result:
+                    typer.echo(
+                        """Unexpected exception during undoing. """
+                        """Git worktree is most likely in invalid state. Aborting..."""
+                    )
+                    raise typer.Exit(undo_result)
+            typer.echo("Successfully undid previous commands.")
+            raise typer.Exit(do_result)
 
 
 def push() -> None:
@@ -151,13 +188,14 @@ def check_preconditions() -> None:
 
 @app.command()
 def release(bump_type: BumpType = typer.Option(BumpType.PATCH)) -> Any:
-    proc = subprocess.Popen(args=("git", "branch", "--show-current"), stdout=PIPE)
-    stdout, _ = proc.communicate()
+    proc = subprocess.Popen(
+        args=("git", "branch", "--show-current"), stdout=PIPE, text=True
+    )
+    current_branch, _ = proc.communicate()
 
-    current_branch = stdout.decode(encoding="utf-8")
     if not current_branch == "main":
         typer.echo(
-            f"You can only run this on the 'main' branch. You are on {str(current_branch)}."
+            f"You can only run this on the 'main' branch. You are on {current_branch}."
         )
         raise typer.Exit(1)
 
