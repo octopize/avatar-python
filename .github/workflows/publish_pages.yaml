@@ -50,11 +50,19 @@ jobs:
         sudo apt-get -y install --no-install-recommends pandoc
 
     - name: Build documentation
+      # Inspired by https://github.com/librosa/librosa/pull/1447/files
+      # We are building all the versions and outputting them in
+      # in the `gh-pages` folder.
+      # We are inserting a custom index.html into the root
+      # of the gh-pages folder to link to the latest version
+      # of the doc once someone visits our doc website.
+      # This latest version is fetched using `git tag -l`.
       run: |
         mkdir gh-pages
         touch gh-pages/.nojekyll
         DOC_OUTPUT_DIR=gh-pages make doc-build
-
+        cp doc/index-redirect.html gh-pages/index.html
+        ln -srf gh-pages/$(git tag -l --sort=creatordate |tail -1) gh-pages/latest
     - name: Deploy documentation
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:

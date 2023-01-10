@@ -27,6 +27,7 @@ mypy = "^0.971"
 pytest = "^7.2.0"
 jupytext = "^1.14.2"
 nbconvert = "^7.2.6"
+sphinx-multiversion = "^0.2.4"
 
 [tool.poetry.group.tutorial.dependencies]
 seaborn = "^0.12.1"

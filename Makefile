@@ -46,7 +46,7 @@ lint: ## Lint source files
 ##@ Doc
 
 
-DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment variable. Uses in github actions
+DOC_OUTPUT_DIR ?= doc/build/html # will read from DOC_OUTPUT_DIR environment variable. Uses in github actions
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
@@ -57,7 +57,7 @@ doc-build:  ## Build the docs
 	rm -rf $(DOC_OUTPUT_DIR)
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
-	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
+	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)
 .PHONY: doc-build
 
