@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import enum
 from typing import Any, Optional
+from typing_extensions import TypeAlias
 import typer
 from re import Pattern, Match
 
@@ -112,7 +113,8 @@ def commit_and_tag() -> None:
     new_version = ".".join(match.groups())
 
     files_to_add = [str(PYPROJECT_TOML), str(INIT_PY), str(CHANGELOG)]
-    DoCommand = UndoCommand = list[str]
+    DoCommand: TypeAlias = list[str]
+    UndoCommand: TypeAlias = list[str]
     commands: list[tuple[DoCommand, UndoCommand]] = [
         (
             ["git", "add", *files_to_add],
