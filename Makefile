@@ -9,6 +9,9 @@ install:  ## Install the stack
 	poetry install --sync
 .PHONY: install
 
+release-and-push:
+	poetry run python release.py --bump-type patch
+.PHONY: release-and-push
 
 ##@ Tests
 
