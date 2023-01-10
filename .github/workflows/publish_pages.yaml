@@ -19,6 +19,8 @@ jobs:
         python-version: 3.9
 
     - name: Load cached Poetry installation
+    # TODO: Upgrade to actions/cache@v3 or higher once https://github.com/actions/cache/issues/1045 is fixed
+    # This is to get rid of the deprecation warning
       uses: actions/cache@v2
       with:
         path: ~/.local  # the path depends on the OS
