@@ -50,7 +50,10 @@ jobs:
     - name: Install pandoc
       run: |
         sudo apt-get -y install --no-install-recommends pandoc
-
+    - name: Get all git tags
+      # This is necessary so that the 'Build documentation' script
+      # has access to the tags for sphinx-multiversion.
+      run: git fetch --prune --unshallow --tags
     - name: Build documentation
       # Inspired by https://github.com/librosa/librosa/pull/1447/files
       # We are building all the versions and outputting them in
