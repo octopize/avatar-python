@@ -34,7 +34,7 @@ lint-fix: ## Fix linting
 	poetry run black avatars/ bin doc/source notebooks/ release.py
 	poetry run blacken-docs docs/tutorial.md
 	poetry run isort avatars/ bin doc/source
-	poetry run jupyter nbconvert --clear-output --inplace notebooks/*.ipynb
+	poetry run jupyter nbconvert --clear-output --ClearMetadataPreprocessor.enabled=True --inplace notebooks/*.ipynb
 .PHONY: lint-fix
 
 lint: ## Lint source files
