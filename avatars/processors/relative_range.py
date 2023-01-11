@@ -6,6 +6,47 @@ from numpy.random import SeedSequence
 
 
 class RelativeRangeProcessor:
+    """Processor to express a numeric variables as within a range defined by two other variables.
+
+    Arguments
+    ---------
+        target:
+            variable to transform
+        bounds:
+            the variables defining the upper and lower bounds
+
+    Keyword Arguments
+    -----------------
+        drop_target:
+            set to ``True`` to drop the target variable at preprocess step.
+        drop_references:
+            set to ``True`` to drop the reference variables at postprocess step.
+            default: ``False``
+        seed:
+            the randomness seed
+
+    Examples
+    --------
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [130, 230, 200],
+    ...        "variable_1_lb": [110, 180, 130],
+    ...        "variable_1_ub": [210, 340, 280],
+    ...    }
+    ... )
+    >>> processor = RelativeRangeProcessor(
+    ...    target="variable_1", bounds=("variable_1_lb", "variable_1_ub"), drop_references=True
+    ...    )
+    >>> df = processor.preprocess(df)
+    >>> df
+        variable_1_lb  variable_1_ub
+    0            110            210
+    1            180            340
+    2            130            280
+
+    TODO : finish this processor with oliv
+    """
+
     def __init__(
         self,
         target: str,
@@ -14,17 +55,6 @@ class RelativeRangeProcessor:
         drop_references: bool = False,
         seed: Optional[Union[int, SeedSequence]] = None,
     ):
-        r"""Processor to express a numeric variables as within a range defined by two other variables.
-
-        Arguments
-        ---------
-            target: variable to transform
-            bounds: the variables defining the upper and lower bounds
-            drop_target: set to ``True`` to drop the target variable at preprocess step.
-            drop_references: set to ``True`` to drop the reference variables at postprocess step.
-                default: ``False``
-            seed: the randomness seed
-        """
         self.target = target
         self.bounds = bounds
         self.drop_references = drop_references

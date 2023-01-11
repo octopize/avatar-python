@@ -3,7 +3,7 @@ import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
-from avatars.processors.relative_difference import RelativeDifferenceProcessor
+from avatars.processors import RelativeDifferenceProcessor
 
 ORIGINAL_DF = pd.DataFrame(
     {

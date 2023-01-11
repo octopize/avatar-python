@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from avatars.processors.perturbation import PerturbationProcessor
+from avatars.processors import PerturbationProcessor
 
 
 @pytest.mark.parametrize("perturbation_level", np.arange(0.1, 1, 0.1))

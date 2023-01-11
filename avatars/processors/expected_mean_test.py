@@ -4,7 +4,7 @@ import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
-from avatars.processors.expected_mean import ExpectedMeanProcessor
+from avatars.processors import ExpectedMeanProcessor
 
 
 @pytest.fixture

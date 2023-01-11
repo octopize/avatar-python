@@ -325,7 +325,7 @@ We have implemented the concept of pipelines.
        AvatarizationParameters,
    )
    from avatars.models import AvatarizationPipelineCreate
-   from avatars.processors.proportions import ProportionProcessor
+   from avatars.processors import ProportionProcessor
 
    df = pd.DataFrame(
        {

@@ -38,11 +38,11 @@ from avatars.models import (
 from avatars.models import ReportCreate
 
 from avatars.api import AvatarizationPipelineCreate
-from avatars.processors.proportions import ProportionProcessor
-from avatars.processors.group_modalities import GroupModalitiesProcessor
-from avatars.processors.relative_difference import RelativeDifferenceProcessor
-from avatars.processors.perturbation import PerturbationProcessor
-from avatars.processors.expected_mean import ExpectedMeanProcessor
+from avatars.processors import ProportionProcessor
+from avatars.processors import GroupModalitiesProcessor
+from avatars.processors import RelativeDifferenceProcessor
+from avatars.processors import PerturbationProcessor
+from avatars.processors import ExpectedMeanProcessor
 
 # The following are not necessary to run avatar but are used in this tutorial
 import pandas as pd

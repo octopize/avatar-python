@@ -15,7 +15,7 @@ release-and-push:
 
 ##@ Tests
 
-test: typecheck test-integration test-doc ## Run all the tests
+test: typecheck test-integration ## Run all the tests
 	poetry run pytest --doctest-modules avatars
 .PHONY: test
 

@@ -5,7 +5,7 @@ import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
-from avatars.processors.datetime import DatetimeProcessor
+from avatars.processors import DatetimeProcessor
 
 
 @pytest.fixture

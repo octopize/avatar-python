@@ -6,6 +6,48 @@ from avatars.lib.split_columns_types import split_columns_types
 
 
 class GroupModalitiesProcessor:
+    """Processor to group modalities in order to reduce the dataframe dimension.
+
+    Use the parameter `variables` if you want to apply a custom threshold to each variable.
+    Use the parameter `min_unique` and `threshold` if you want to apply a generic threshold.
+
+    Keyword Arguments
+    -----------------
+        variable_thresholds:
+            dictionary of variables and thresholds to apply,
+            see global_threshold below.
+        min_unique:
+            number of unique modalities by variable needed to be transformed.
+        global_threshold:
+            limit of the number of individuals in each category to rename it.
+        new_category:
+            new modality name (default="other").
+
+    Examples
+    --------
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": ["red", "blue", "blue", "green"],
+    ...        "variable_2": ["red", "blue", "blue", "red"],
+    ...        "variable_3": ["green", "green", "green", "green"],
+    ...    }
+    ... )
+    >>> df
+        variable_1 variable_2 variable_3
+    0        red        red      green
+    1       blue       blue      green
+    2       blue       blue      green
+    3      green        red      green
+    >>> processor = GroupModalitiesProcessor(min_unique=2, global_threshold=1, new_category="other")
+    >>> processed = processor.preprocess(df)
+    >>> processed
+        variable_1 variable_2 variable_3
+    0      other        red      green
+    1       blue       blue      green
+    2       blue       blue      green
+    3      other        red      green
+    """
+
     def __init__(
         self,
         *,
@@ -14,20 +56,6 @@ class GroupModalitiesProcessor:
         global_threshold: Optional[int] = None,
         new_category: str = "other",
     ):
-        """Processor to group modalities in order to reduce the dataframe dimension.
-
-        Use the parameter `variables` if you want to apply a custom threshold to each variable.
-        Use the parameter `min_unique` and `threshold` if you want to apply a generic threshold.
-
-        Arguments
-        ---------
-            variable_thresholds: dictionary of variables and thresholds to apply,
-            see global_threshold below.
-            min_unique: number of unique modalities by variable needed to be transformed.
-            global_threshold: limit of the number of individuals in each category
-            to rename it.
-            new_category: new modality name (default="other").
-        """
         if (not min_unique and global_threshold) or (
             not global_threshold and min_unique
         ):

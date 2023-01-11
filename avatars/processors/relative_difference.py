@@ -4,6 +4,94 @@ import pandas as pd
 
 
 class RelativeDifferenceProcessor:
+    """Processor to express numeric variables as a difference relative to the sum of other variables.
+
+    Even if the avatarization is keeping relation and correlation, it will not guarantee mathematical relation retention.
+    You can apply the RelativeDifferenceProcessor to retain this relation between variables.
+
+    Arguments
+    ---------
+        target:
+            variables to transform
+        references:
+            the variable of reference
+
+    Keyword Arguments
+    -----------------
+        scaling_unit:
+            divide difference by factor to handle unit variation.
+            Eg. if 1000, a difference in meters will be expressed in kilometers.
+        target_rename:
+            target name after preprocess.
+        drop_original_target:
+            drop original_target. Can only be set to ``True``
+            if ``target_rename`` is specified
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [100, 150, 120, 100],
+    ...        "variable_2": [110, 180, 130, np.nan]
+    ...        }
+    ...    )
+    >>> processor = RelativeDifferenceProcessor( target="variable_2", references=["variable_1"])
+    >>> df = processor.preprocess(df)
+    >>> df
+        variable_1  variable_2
+    0         100        10.0
+    1         150        30.0
+    2         120        10.0
+    3         100         NaN
+
+    This preprocess allow you to convert some variable as a difference of other. It can useful
+    when there is a relation between variables such as variable_2 >= variable_1
+
+    >>> avatar = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [110, 105, 115, 107],
+    ...        "variable_2": [12, np.nan, 23, 15],
+                "variable_3": [1, np.nan, 3, 4],
+    ...        }
+    ...    )
+    >>> avatar = processor.postprocess(df, avatar)
+    >>> avatar
+        variable_1  variable_2
+    0         110       122.0
+    1         105         NaN
+    2         115       138.0
+    3         107       122.0
+
+    This processor can be useful when you have a relation between three variables.
+    Lets suppose you have three variable with such as:
+
+    - age_at_t0
+    - age_at_t1
+    - age_at_t2
+
+    The relation is age_at_t0 < age_at_t1 < age_at_t2, for all the individuals.
+
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "age_at_t0": [20, 40, 34, 56],
+    ...        "age_at_t1": [23, 46, 37, 57],
+    ...        "age_at_t2": [29, 54, 39, 64],
+    ...        }
+    ...    )
+    >>> df
+    >>> processor_1 = RelativeDifferenceProcessor( target="age_at_t2", references=["age_at_t1"])
+    >>> processor_2 = RelativeDifferenceProcessor( target="age_at_t1", references=["age_at_t0"])
+
+    .. note::
+
+        Be careful about the order of application of the processors
+
+    >>> df = processor_1.preprocess(df)
+    >>> df = processor_2.preprocess(df)
+    >>> df
+    """
+
     def __init__(
         self,
         target: str,
@@ -12,18 +100,6 @@ class RelativeDifferenceProcessor:
         target_rename: Optional[str] = None,
         drop_original_target: Optional[bool] = False,
     ):
-        r"""Processor to express numeric variables as a difference relative to the sum of other variables.
-
-        Arguments
-        ---------
-            target: variables to transform
-            references: the variable of reference
-            target_rename: target name after preprocess.
-            scaling_unit: divide difference by factor to handle unit variation.
-              Eg. if 1000, a difference in meters will be expressed in kilometers.
-            drop_original_target: drop original_target. Can only be set to ``True``
-                if ``target_rename`` is specified
-        """
         self.target = target
         self.references = references
         self.scaling_unit = scaling_unit or 1

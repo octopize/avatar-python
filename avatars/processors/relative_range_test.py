@@ -2,7 +2,7 @@ import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
-from avatars.processors.relative_range import RelativeRangeProcessor
+from avatars.processors import RelativeRangeProcessor
 
 ORIGINAL_DF = pd.DataFrame(
     {

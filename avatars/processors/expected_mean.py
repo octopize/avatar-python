@@ -3,7 +3,57 @@ from typing import List, Optional
 
 import pandas as pd
 
+
 class ExpectedMeanProcessor:
+    """Processor to force values to have similar mean to original data.
+
+    Means and standard deviations are computed for groups of variables and the
+    processor ensures that the transformed data has similar mean and std than in
+    the original data for each group.
+    Care should be taken when using this processor as it only targets enhancement of unimodal
+    utility. This may occur at the expense of multi-modal utility and privacy.
+
+    Arguments
+    ---------
+        target_variables:
+            variables to transform
+
+    Keyword Arguments
+    -----------------
+        groupby_variables:
+            variables to use to group values in different distributions
+        same_std:
+            Set to True to force the variables to transform to have the same
+            standard deviation as the reference data. default: False.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
+    ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
+    ...                   columns=['one', 'two', 'three'])
+    >>> df = df.astype('int')
+    >>> processor = ExpectedMeanProcessor(target_variables = ['one'])
+    >>> processed = processor.preprocess(df)
+
+    The processor save the mean and the std of each target variables
+
+    >>> processor.properties_df
+        ___NOGROUPVAR___  onemean    onestd
+    0   __NOGROUPVAL__      2.5  1.732051
+
+    Now you can force your synthetic dataset to have the same mean as the original.
+
+    >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
+    ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
+    ...                   columns=['one', 'two', 'three'])
+    >>> avatar.one.mean()
+    5.5
+    >>> avatar = processor.postprocess(df, avatar)
+    >>> avatar.one.mean()
+    2.5
+    """
+
     def __init__(
         self,
         target_variables: List[str],
@@ -11,54 +61,6 @@ class ExpectedMeanProcessor:
         groupby_variables: Optional[List[str]] = None,
         same_std: bool = False,
     ):
-        """Processor to force values to have similar mean to original data.
-
-        Means and standard deviations are computed for groups of variables and the
-        processor ensures that the transformed data has similar mean and std than in
-        the original data for each group.
-        Care should be taken when using this processor as it only targets enhancement of unimodal
-        utility. This may occur at the expense of multi-modal utility and privacy.
-
-        Arguments
-        ---------
-            target_variables:
-                variables to transform
-
-        Keyword Arguments
-        -----------------
-            groupby_variables:
-                variables to use to group values in different distributions
-            same_std:
-                Set to True to force the variables to transform to have the same
-                standard deviation as the reference data. default: False.
-
-        Examples
-        --------
-        >>> import numpy as np
-        >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
-        ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
-        ...                   columns=['one', 'two', 'three'])
-        >>> df = df.astype('int')
-        >>> processor = ExpectedMeanProcessor(target_variables = ['one'])
-        >>> processed = processor.preprocess(df)
-
-        The processor save the mean and the std of each target variables
-
-        >>> processor.properties_df
-          ___NOGROUPVAR___  onemean    onestd
-        0   __NOGROUPVAL__      2.5  1.732051
-        
-        Now you can force your synthetic dataset to have the same mean as the original.
-        
-        >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
-        ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
-        ...                   columns=['one', 'two', 'three'])
-        >>> avatar.one.mean()
-        5.5
-        >>> avatar = processor.postprocess(df, avatar)
-        >>> avatar.one.mean()
-        2.5
-        """
         # Variable added temporarily when no groupby is used. It is a column with only one modality
         # that can be used to perform a groupby in order to get the expected mean and std on all
         # records.
