@@ -50,7 +50,8 @@ DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment vari
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
-	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/main/index.html
+	current_branch=$$(git branch --show-current)
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
 .PHONY: doc
 
 doc-build:  ## Build the docs

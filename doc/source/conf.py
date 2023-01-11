@@ -11,8 +11,10 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import subprocess
 import sys
 from datetime import date
+from subprocess import PIPE
 from typing import Optional
 
 sys.path.insert(
@@ -53,14 +55,18 @@ python_use_unqualified_type_names = True
 
 templates_path = ["_templates"]
 
-# $$$  Sphinx Multi-version  $$$
+# -- Sphinx Multi-version -------------------------------------------------
 # https://holzhaus.github.io/sphinx-multiversion/master/configuration.html
 
-# create a version for main to be able to see layout during development
-smv_branch_whitelist = "main"
+# create a version for main and current branch to be able to see layout during development
+proc = subprocess.Popen(
+    args=("git", "branch", "--show-current"), stdout=PIPE, text=True
+)
+current_branch, _ = proc.communicate()
+smv_branch_whitelist = f"^(main|{current_branch.strip()})$"
 # Tags define a release. Releases are the ones being shown publicly.
 smv_released_pattern = r"^refs/tags/.*$"
-# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+# -------------------------------------------------------------------------
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
