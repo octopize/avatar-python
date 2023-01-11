@@ -40,7 +40,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx_multiversion",
-    "sphinx.ext.autosummary", 
+    "sphinx.ext.autosummary",
 ]
 
 autodoc_default_options = {
