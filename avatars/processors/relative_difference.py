@@ -20,7 +20,7 @@ class RelativeDifferenceProcessor:
     -----------------
         scaling_unit:
             divide difference by factor to handle unit variation.
-            Eg. if 1000, a difference in meters will be expressed in kilometers.
+            Eg. if scaling_unit=1000, a difference in meters will be expressed in kilometers.
         target_rename:
             target name after preprocess.
         drop_original_target:
@@ -45,8 +45,8 @@ class RelativeDifferenceProcessor:
     2         120        10.0
     3         100         NaN
 
-    This preprocess allow you to convert some variable as a difference of other. It can useful
-    when there is a relation between variables such as variable_2 >= variable_1
+    This preprocess allows you to convert some variable as a difference of other. It can useful
+    when there is a relation between variables when `variable_2 >= variable_1`
 
     >>> avatar = pd.DataFrame(
     ...    {
@@ -98,8 +98,7 @@ class RelativeDifferenceProcessor:
         Be careful about the order of application of the processors
 
     >>> processed = processor_1.preprocess(df)
-    >>> processed = processor_2.preprocess(processed)
-    >>> processed
+    >>> processor_2.preprocess(processed)
        age_at_t0  age_at_t1  age_at_t2
     0         20        3.0        6.0
     1         40        6.0        8.0

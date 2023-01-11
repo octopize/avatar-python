@@ -8,7 +8,9 @@ from avatars.lib.split_columns_types import NUMERIC_DTYPES
 
 
 class PerturbationProcessor:
-    """Specifies the perturbation level of specified variables, 0 means no perturbation.
+    """Processor to reduce the difference between originals and avatars.
+
+    Specifies the perturbation level of specified variables, 0 means no perturbation.
     (default: ``np.ones(df.shape[1])``)
 
     Arguments
@@ -31,9 +33,6 @@ class PerturbationProcessor:
     1     0.0
     2     0.0
     >>> processor = PerturbationProcessor(perturbation_level={"column": 0.3}, seed=1)
-
-    The preprocess is doing nothing
-
     >>> processor.preprocess(df)
        column
     0     0.0
@@ -69,10 +68,11 @@ class PerturbationProcessor:
             )
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Preprocess is doing nothing."""
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-
+        """Force to reduce the difference between originals and avatars."""
         if not self.perturbation_level:
             return dest
 

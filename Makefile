@@ -51,8 +51,15 @@ DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
 	current_branch=$$(git branch --show-current)
-	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
 .PHONY: doc
+
+doc-fast: ## Build and open the current version of the docs only
+	current_branch=$$(git branch --show-current)
+	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR) -D "smv_tag_whitelist=None" -D "smv_branch_whitelist=$$current_branch"
+	echo $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
+.PHONY: doc-fast 
 
 doc-build:  ## Build the docs
 ##! This script is also used to deploy to production.

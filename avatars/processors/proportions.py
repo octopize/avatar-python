@@ -7,7 +7,9 @@ from avatars.lib.saferound import saferound
 
 
 class ProportionProcessor:
-    """Processor to express numeric variables as proportion of another variable.
+    """Processor to express numeric variables as a proportion of another variable.
+
+    By this transformation, we keep the addition and substraction relations such as variable_1 = variable_2 + variable_3.
 
     Arguments
     ---------
@@ -36,16 +38,14 @@ class ProportionProcessor:
     >>> processor = ProportionProcessor(
     ...    variable_names=["variable_2", "variable_3"],
     ...    reference="variable_1",
-    ...    sum_to_one=True,
     ... )
     >>> processor.preprocess(df=df)
        variable_1  variable_2  variable_3
     0         100        0.10        0.90
     1          10        0.25        0.75
 
-    This processor allows you to avatarize some variable as proportion of another variable.
+    This processor allows you to transform some variable as a proportion of another variable.
     The `sum_to_one=True` parameter will enforce the proportion of `variable_names` to be equal to 1.
-    
 
     >>> avatar = pd.DataFrame(
     ...        {
