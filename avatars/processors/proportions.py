@@ -45,7 +45,7 @@ class ProportionProcessor:
     1          10        0.25        0.75
 
     This processor allows you to transform some variable as a proportion of another variable.
-    The `sum_to_one=True` parameter will enforce the proportion of `variable_names` to be equal to 1.
+    By default, the processor enforces the proportion of `variable_names` to be equal to 1.
 
     >>> avatar = pd.DataFrame(
     ...        {
@@ -67,6 +67,33 @@ class ProportionProcessor:
     1          15         8.0         7.0
 
     By this, we keep the mathematical relation variable_1 = variable_2 + variable_3
+
+    with `sum_to_one=False`
+
+    >>> processor = ProportionProcessor(
+    ...    variable_names=["variable_2", "variable_3"],
+    ...    reference="variable_1",
+    ...    sum_to_one=False,
+    ... )
+    >>> processor.preprocess(df=df)
+       variable_1  variable_2  variable_3
+    0         100         0.1         0.9
+    1          10         1.0         3.0
+    >>> avatar = pd.DataFrame(
+    ...        {
+    ...            "variable_1": [60, 15],
+    ...            "variable_2": [0.15, 0.88],
+    ...            "variable_3": [1.5, 2.8],
+    ...        }
+    ...    )
+    >>> avatar
+       variable_1  variable_2  variable_3
+    0          60        0.15         1.5
+    1          15        0.88         2.8
+    >>> processor.postprocess(df, avatar)
+       variable_1  variable_2  variable_3
+    0          60         9.0        90.0
+    1          15        13.2        42.0
     """
 
     def __init__(

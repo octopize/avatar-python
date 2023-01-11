@@ -102,6 +102,7 @@ class ExpectedMeanProcessor:
     variable_2            
     blue             23.75
     red              11.50
+    
     # fmt: on
     """
     def __init__(
