@@ -34,8 +34,7 @@ class PerturbationProcessor:
 
     The preprocess is doing nothing
 
-    >>> processed = processor.preprocess(df)
-    >>> processed
+    >>> processor.preprocess(df)
        column
     0     0.0
     1     0.0
@@ -49,8 +48,7 @@ class PerturbationProcessor:
 
     The post process reduces the gap between df and avatar
 
-    >>> postprocessed = processor.postprocess(df, avatar)
-    >>> postprocessed
+    >>> processor.postprocess(df, avatar)
        column
     0     0.3
     1     0.3

@@ -38,15 +38,14 @@ class ProportionProcessor:
     ...    reference="variable_1",
     ...    sum_to_one=True,
     ... )
-    >>> preprocessed = processor.preprocess(df=df)
-
-    This processor allows you to avatarize some variable as proportion of another variable.
-    The `sum_to_one=True` parameter will enforce the proportion of `variable_names` to be equal to 1.
-
-    >>> preprocessed
+    >>> processor.preprocess(df=df)
        variable_1  variable_2  variable_3
     0         100        0.10        0.90
     1          10        0.25        0.75
+
+    This processor allows you to avatarize some variable as proportion of another variable.
+    The `sum_to_one=True` parameter will enforce the proportion of `variable_names` to be equal to 1.
+    
 
     >>> avatar = pd.DataFrame(
     ...        {
@@ -62,8 +61,7 @@ class ProportionProcessor:
 
     Then the postprocess allows you to get the original variable unit.
 
-    >>> avatar = processor.postprocess(df, avatar)
-    >>> avatar
+    >>> processor.postprocess(df, avatar)
        variable_1  variable_2  variable_3
     0          60        27.3        32.7
     1          15         8.0         7.0

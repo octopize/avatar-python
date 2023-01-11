@@ -66,7 +66,12 @@ class ExpectedMeanProcessor:
     blue             23.75
     red              11.50
     >>> processor = ExpectedMeanProcessor(target_variables = ['variable_1'], groupby_variables= ['variable_2'])
-    >>> processed = processor.preprocess(df)
+    >>> processor.preprocess(df)
+       variable_1 variable_2
+    0        11.0        red
+    1        24.0       blue
+    2        23.5       blue
+    3        12.0        red
     >>> avatar = pd.DataFrame(
     ...    {
     ...        "variable_1": [12, 13.5, 23.5, 22],

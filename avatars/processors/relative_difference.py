@@ -120,8 +120,7 @@ class RelativeDifferenceProcessor:
     2         34        1.0        7.0
     3         56        5.0        6.0
     >>> post_avatar = processor_2.postprocess(df, avatar)
-    >>> post_avatar = processor_1.postprocess(df, post_avatar)
-    >>> post_avatar
+    >>> processor_1.postprocess(df, post_avatar)
        age_at_t0  age_at_t1  age_at_t2
     0         22       26.0       31.0
     1         38       43.0       46.0
