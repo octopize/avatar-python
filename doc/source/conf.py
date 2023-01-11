@@ -51,8 +51,12 @@ python_use_unqualified_type_names = True
 templates_path = ["_templates"]
 
 # https://holzhaus.github.io/sphinx-multiversion/master/configuration.html
-smv_branch_whitelist = "None" # do not create a separate doc version for each branch
-smv_released_pattern = r'^refs/tags/.*$'           # Tags define a release
+
+# create a version for main to be able to see layout during development
+smv_branch_whitelist = "main"
+# Tags define a release. Releases are the ones being shown publicly.
+smv_released_pattern = r"^refs/tags/.*$"
+# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

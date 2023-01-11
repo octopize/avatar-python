@@ -46,14 +46,17 @@ lint: ## Lint source files
 ##@ Doc
 
 
-DOC_OUTPUT_DIR ?= doc/build/html # will read from DOC_OUTPUT_DIR environment variable. Uses in github actions
+DOC_OUTPUT_DIR ?= doc/build/html# will read from DOC_OUTPUT_DIR environment variable. Uses in github actions
 DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
-	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/index.html
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/main/index.html
 .PHONY: doc
 
 doc-build:  ## Build the docs
+##! This script is also used to deploy to production.
+##! DO NOT modify this script without taking into account
+##! the repercussions on the Github Actions script
 	rm -rf $(DOC_OUTPUT_DIR)
 	mkdir -p $(DOC_OUTPUT_DIR)
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
