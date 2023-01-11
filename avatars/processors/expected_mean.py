@@ -30,7 +30,6 @@ class ExpectedMeanProcessor:
     --------
     >>> import numpy as np
     >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
-    ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
     ...                   columns=['one', 'two', 'three'])
     >>> df = df.astype('int')
     >>> processor = ExpectedMeanProcessor(target_variables = ['one'])
@@ -45,7 +44,6 @@ class ExpectedMeanProcessor:
     Now you can force your synthetic dataset to have the same mean as the original.
 
     >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
-    ...                   index=['mouse', 'rabbit', 'horse', 'cat'],
     ...                   columns=['one', 'two', 'three'])
     >>> avatar.one.mean()
     5.5

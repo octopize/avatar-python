@@ -41,6 +41,7 @@ class ProportionProcessor:
     >>> preprocessed = processor.preprocess(df=df)
 
     This processor allows you to avatarize some variable as proportion of another variable.
+    The `sum_to_one=True` parameter will enforce the proportion of `variable_names` to be equal to 1.
 
     >>> preprocessed
        variable_1  variable_2  variable_3
@@ -67,8 +68,7 @@ class ProportionProcessor:
     0          60        27.3        32.7
     1          15         8.0         7.0
 
-
-    TODO : review this
+    By this, we keep the mathematical relation variable_1 = variable_2 + variable_3
     """
 
     def __init__(

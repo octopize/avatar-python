@@ -20,22 +20,25 @@ class DatetimeProcessor:
              date_1        date_2
     0  1.420096e+09  1.514804e+09
     1  1.420106e+09  1.577876e+09
-    >>> postprocessed = processor.postprocess(df, processed)
+    >>> avatar = pd.DataFrame(
+    ...    {
+    ...        "date_1": [1.420096e+09, 1.537804e+09],
+    ...        "date_2": [1.420106e+09, 1.568676e+09],
+    ...    }
+    ... )
+    >>> avatar
+             date_1        date_2
+    0  1.420096e+09  1.420106e+09
+    1  1.537804e+09  1.568676e+09
+    >>> postprocessed = processor.postprocess(df, avatar)
     >>> postprocessed
                    date_1              date_2
-    0 2015-01-01 07:00:00 2018-01-01 11:00:00
-    1 2015-01-01 10:00:00 2020-01-01 11:00:00
+    0 2015-01-01 07:06:40 2015-01-01 09:53:20
+    1 2018-09-24 15:46:40 2019-09-16 23:20:00
     """
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        """_summary_
-
-        Arguments:
-            df -- _description_
-
-        Returns:
-            _description_
-        """
+        """Turn datetime variables into int64 (seconds since epoch)."""
         df = df.copy()
         for col in df.columns:
             if not str(df[col].dtype).startswith("datetime"):

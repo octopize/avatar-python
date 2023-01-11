@@ -25,29 +25,29 @@ class PerturbationProcessor:
     --------
     >>> import numpy as np
     >>> df = pd.DataFrame(np.zeros(3), columns=["column"], dtype="float")
-    >>> avatar = pd.DataFrame(np.ones(3), columns=["column"], dtype="float")
     >>> df
        column
     0     0.0
     1     0.0
     2     0.0
-    >>> avatar
-       column
-    0     1.0
-    1     1.0
-    2     1.0
     >>> processor = PerturbationProcessor(perturbation_level={"column": 0.3}, seed=1)
 
     The preprocess is doing nothing
 
     >>> processed = processor.preprocess(df)
-    >>> df
+    >>> processed
        column
     0     0.0
     1     0.0
     2     0.0
+    >>> avatar = pd.DataFrame(np.ones(3), columns=["column"], dtype="float")
+    >>> avatar
+       column
+    0     1.0
+    1     1.0
+    2     1.0
 
-    The post process is reduce the gap between df and avatar
+    The post process reduces the gap between df and avatar
 
     >>> postprocessed = processor.postprocess(df, avatar)
     >>> postprocessed

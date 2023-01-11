@@ -49,6 +49,8 @@ autodoc_default_options = {
     "undoc-members": True,
 }
 autodoc_typehints_format = "short"
+autodoc_member_order = 'bysource'
+
 # autodoc_typehints_format is not applied to attributes:
 # See https://github.com/sphinx-doc/sphinx/issues/10290
 python_use_unqualified_type_names = True

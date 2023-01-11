@@ -36,7 +36,7 @@ class RelativeDifferenceProcessor:
     ...        "variable_2": [110, 180, 130, np.nan]
     ...        }
     ...    )
-    >>> processor = RelativeDifferenceProcessor( target="variable_2", references=["variable_1"])
+    >>> processor = RelativeDifferenceProcessor(target="variable_2", references=["variable_1"])
     >>> df = processor.preprocess(df)
     >>> df
        variable_1  variable_2
@@ -54,6 +54,12 @@ class RelativeDifferenceProcessor:
     ...        "variable_2": [12, np.nan, 23, 15],
     ...        }
     ...    )
+    >>> avatar
+       variable_1  variable_2
+    0         110        12.0
+    1         105         NaN
+    2         115        23.0
+    3         107        15.0
     >>> avatar = processor.postprocess(df, avatar)
     >>> avatar
        variable_1  variable_2
@@ -91,9 +97,9 @@ class RelativeDifferenceProcessor:
 
         Be careful about the order of application of the processors
 
-    >>> df = processor_1.preprocess(df)
-    >>> df = processor_2.preprocess(df)
-    >>> df
+    >>> processed = processor_1.preprocess(df)
+    >>> processed = processor_2.preprocess(processed)
+    >>> processed
        age_at_t0  age_at_t1  age_at_t2
     0         20        3.0        6.0
     1         40        6.0        8.0
@@ -113,14 +119,14 @@ class RelativeDifferenceProcessor:
     1         38        5.0        3.0
     2         34        1.0        7.0
     3         56        5.0        6.0
-    >>> avatar = processor_2.preprocess(avatar)
-    >>> avatar = processor_1.preprocess(avatar)
-    >>> avatar
+    >>> post_avatar = processor_2.postprocess(df, avatar)
+    >>> post_avatar = processor_1.postprocess(df, post_avatar)
+    >>> post_avatar
        age_at_t0  age_at_t1  age_at_t2
-    0         22      -18.0       23.0
-    1         38      -33.0       36.0
-    2         34      -33.0       40.0
-    3         56      -51.0       57.0
+    0         22       26.0       31.0
+    1         38       43.0       46.0
+    2         34       35.0       42.0
+    3         56       61.0       67.0
     """
 
     def __init__(
