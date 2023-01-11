@@ -35,13 +35,8 @@ class ExpectedMeanProcessor:
     >>> processor = ExpectedMeanProcessor(target_variables = ['one'])
     >>> processed = processor.preprocess(df)
 
-    The processor save the mean and the std of each target variables
 
-    >>> processor.properties_df
-      ___NOGROUPVAR___  onemean    onestd
-    0   __NOGROUPVAL__      2.5  1.732051
-
-    Now you can force your synthetic dataset to have the same mean as the original.
+    The processor forces your synthetic dataset to have the same mean as the original.
 
     >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
     ...                   columns=['one', 'two', 'three'])
@@ -50,6 +45,57 @@ class ExpectedMeanProcessor:
     >>> avatar = processor.postprocess(df, avatar)
     >>> avatar.one.mean()
     2.5
+
+    You can also force the mean by category using ```groupby_variables```
+
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [11, 24, 23.5, 12],
+    ...        "variable_2": ["red", "blue", "blue", "red"],
+    ...    }
+    ... )
+    >>> df
+       variable_1 variable_2
+    0        11.0        red
+    1        24.0       blue
+    2        23.5       blue
+    3        12.0        red
+    >>> df.groupby("variable_2").mean()
+                variable_1
+    variable_2            
+    blue             23.75
+    red              11.50
+    >>> processor = ExpectedMeanProcessor(target_variables = ['variable_1'], groupby_variables= ['variable_2'])
+    >>> processed = processor.preprocess(df)
+    >>> avatar = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [12, 13.5, 23.5, 22],
+    ...        "variable_2": ["red", "red", "blue", "blue"],
+    ...    }
+    ... )
+    >>> avatar  
+       variable_1 variable_2
+    0        12.0        red
+    1        13.5        red
+    2        23.5       blue
+    3        22.0       blue
+    >>> avatar.groupby("variable_2").mean()
+                variable_1
+    variable_2            
+    blue             22.75
+    red              12.75
+    >>> avatar = processor.postprocess(df, avatar)  
+    >>> avatar
+       variable_1 variable_2
+    0       10.75        red
+    1       12.25        red
+    2       24.50       blue
+    3       23.00       blue
+    >>> avatar.groupby("variable_2").mean()
+                variable_1
+    variable_2            
+    blue             23.75
+    red              11.50
     """
 
     def __init__(
