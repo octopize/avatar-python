@@ -39,7 +39,7 @@ class ExpectedMeanProcessor:
     The processor save the mean and the std of each target variables
 
     >>> processor.properties_df
-        ___NOGROUPVAR___  onemean    onestd
+      ___NOGROUPVAR___  onemean    onestd
     0   __NOGROUPVAL__      2.5  1.732051
 
     Now you can force your synthetic dataset to have the same mean as the original.

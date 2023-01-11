@@ -39,7 +39,7 @@ class RelativeDifferenceProcessor:
     >>> processor = RelativeDifferenceProcessor( target="variable_2", references=["variable_1"])
     >>> df = processor.preprocess(df)
     >>> df
-        variable_1  variable_2
+       variable_1  variable_2
     0         100        10.0
     1         150        30.0
     2         120        10.0
@@ -52,12 +52,11 @@ class RelativeDifferenceProcessor:
     ...    {
     ...        "variable_1": [110, 105, 115, 107],
     ...        "variable_2": [12, np.nan, 23, 15],
-                "variable_3": [1, np.nan, 3, 4],
     ...        }
     ...    )
     >>> avatar = processor.postprocess(df, avatar)
     >>> avatar
-        variable_1  variable_2
+       variable_1  variable_2
     0         110       122.0
     1         105         NaN
     2         115       138.0
@@ -80,6 +79,11 @@ class RelativeDifferenceProcessor:
     ...        }
     ...    )
     >>> df
+       age_at_t0  age_at_t1  age_at_t2
+    0         20         23         29
+    1         40         46         54
+    2         34         37         39
+    3         56         57         64
     >>> processor_1 = RelativeDifferenceProcessor( target="age_at_t2", references=["age_at_t1"])
     >>> processor_2 = RelativeDifferenceProcessor( target="age_at_t1", references=["age_at_t0"])
 
@@ -90,6 +94,11 @@ class RelativeDifferenceProcessor:
     >>> df = processor_1.preprocess(df)
     >>> df = processor_2.preprocess(df)
     >>> df
+       age_at_t0  age_at_t1  age_at_t2
+    0         20        3.0        6.0
+    1         40        6.0        8.0
+    2         34        3.0        2.0
+    3         56        1.0        7.0
     """
 
     def __init__(

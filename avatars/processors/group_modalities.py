@@ -33,7 +33,7 @@ class GroupModalitiesProcessor:
     ...    }
     ... )
     >>> df
-        variable_1 variable_2 variable_3
+      variable_1 variable_2 variable_3
     0        red        red      green
     1       blue       blue      green
     2       blue       blue      green
@@ -41,7 +41,7 @@ class GroupModalitiesProcessor:
     >>> processor = GroupModalitiesProcessor(min_unique=2, global_threshold=1, new_category="other")
     >>> processed = processor.preprocess(df)
     >>> processed
-        variable_1 variable_2 variable_3
+      variable_1 variable_2 variable_3
     0      other        red      green
     1       blue       blue      green
     2       blue       blue      green
