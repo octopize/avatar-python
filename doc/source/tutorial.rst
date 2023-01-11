@@ -22,9 +22,9 @@ version below).
 
 .. code:: bash
 
-   pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
+   pip install https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
    # or, if you're using poetry (recommended)
-   poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.2.1-py3-none-any.whl
+   poetry add https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
 
 Setup
 -----
@@ -72,7 +72,7 @@ This is all you need to run and evaluate an avatarization:
 
    dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
 
-   job = client.jobs.create_avatarization_job(
+   job = client.jobs.create_full_avatarization_job(
        AvatarizationJobCreate(
            parameters=AvatarizationParameters(
                k=20,
@@ -148,13 +148,9 @@ Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.
 
 -  ``k`` (required)
-
 -  ``dataset_id`` (required): id of the dataset to avatarize
-
 -  ``column_weights``: default=1 for each variable
-
 -  ``ncp``: default=5.
-
 -  ``imputation``: imputation parameters type of
    ``ImputationParameters``.
 
@@ -178,7 +174,10 @@ you can import from ``avatars.models`` like so
 Launch an avatarization job
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One job corresponds to one avatarization.
+One job corresponds to one avatarization. 2 methods are available to
+create a job: - (stand use) ``create_full_avatarization_job`` creates an
+avatarization job then computes metrics. - (expert use)
+``create_avatarization_job`` only creates an avatarization job.
 
 .. code:: python
 
@@ -189,7 +188,7 @@ One job corresponds to one avatarization.
 
    # ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_avatarization_job method
    # This launches the avatarization and returns immediately
-   job = client.jobs.create_avatarization_job(request=job_create)
+   job = client.jobs.create_full_avatarization_job(request=job_create)
 
    # You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
    # This call will block until the job is done or a timeout is expired.

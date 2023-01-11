@@ -20,7 +20,7 @@ test: typecheck test-integration  ## Run all the tests
 .PHONY: test
 
 typecheck:  ## Run the type checker
-	poetry run mypy avatars --show-error-codes --pretty
+	poetry run mypy avatars/ bin/ --show-error-codes --pretty
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
@@ -96,6 +96,7 @@ notebook: pip-install-tutorial ## Start the tutorial notebooks
 
 generate-py:  ## Generate .py files from notebooks
 	poetry run jupytext notebooks/*.ipynb  --from ipynb --to py
+	poetry run black notebooks/*.py
 .PHONY: generate-py
 
 

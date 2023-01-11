@@ -76,28 +76,29 @@ df["relationship"].value_counts()
 
 
 # To be compatible with the avatarization pipeline, a processor must be defined following the structure:
-#     
+#
 # ```python
 # class MyCustomProcessor:
 #     def __init__(
 #         self, <some_arguments>
 #     ):
 #         ...
-#     
+#
 #     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
 #         ...
-#         
+#
 #     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
 #         ...
 # ```
 
-# We can define a simple example processor that will group some modalities together in a preprocessing step and sample from the original modalities on the basis of the original frequencies in the postprocessing step. 
+# We can define a simple example processor that will group some modalities together in a preprocessing step and sample from the original modalities on the basis of the original frequencies in the postprocessing step.
 #
 # We can call this processor `GroupRelationshipProcessor`.
 
 # We first define a constructor. To keep things simple, this processor will only take the name of the variable to transform.
 #
 # We then define a preprocess step. This step always takes a pandas dataframe as input and output a pandas dataframe
+
 
 class GroupRelationshipProcessor:
     def __init__(self, variable_to_transform: str):
@@ -205,5 +206,3 @@ print("\n*** Utility metrics ***")
 for metric in utility_metrics:
     print(metric)
 # -
-
-

@@ -14,7 +14,7 @@
 
 # # Tutorial 2: Parameterizing an avatarization
 
-# In this tutorial, we will learn how to set key parameters of the avatarization and how they impact privacy and utility.  
+# In this tutorial, we will learn how to set key parameters of the avatarization and how they impact privacy and utility.
 
 # ## Connection
 
@@ -109,7 +109,7 @@ print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 # -
 
-# We observe that we are able to increase the level of privacy by simply increasing *k*. But this is at the expense of the utility.  
+# We observe that we are able to increase the level of privacy by simply increasing *k*. But this is at the expense of the utility.
 
 # ## Visualization of originals and avatars
 
@@ -178,15 +178,15 @@ sns.scatterplot(
 ax.set_title("Projections of original and avatars produced with large k")
 # -
 
-# We observe that the area covered by avatars generated with a low *k* is much closer to the area covered by original data points. We can also see that with a low *k*, some avatars are close to original points that are isolated. This may pose a risk of re-identification. This explains the drop in privacy level when reducing *k*.   
+# We observe that the area covered by avatars generated with a low *k* is much closer to the area covered by original data points. We can also see that with a low *k*, some avatars are close to original points that are isolated. This may pose a risk of re-identification. This explains the drop in privacy level when reducing *k*.
 #
-# Avatars produced with a large *k* are significantly further away from isolated originals and so ensure their privacy. However care should be taken in setting *k*  with values that are not too high to prevent a drop in utility level. The drop in utility level is represented by the area covered by avatars being much smaller than the ones of originals. 
+# Avatars produced with a large *k* are significantly further away from isolated originals and so ensure their privacy. However care should be taken in setting *k*  with values that are not too high to prevent a drop in utility level. The drop in utility level is represented by the area covered by avatars being much smaller than the ones of originals.
 
-# ## Other parameters 
+# ## Other parameters
 
 # ### Column weights
 #
-# Column weights represent the importance of each variable during the projection process. The higher the value for one variable, the more the individuals will be separated regarding this variable. 
+# Column weights represent the importance of each variable during the projection process. The higher the value for one variable, the more the individuals will be separated regarding this variable.
 #
 # By default, all variables are given equal weight of 1, but custom weights can be defined to bias the projection towards some specific variables.
 
@@ -194,7 +194,7 @@ column_weights = {"variety": 3}
 
 # ### Number of components
 #
-# The number of components represents the number of dimensions to consider for the KNN algorithm. With a low value, computation will mostly be based on well-represented variables in the projection. 
+# The number of components represents the number of dimensions to consider for the KNN algorithm. With a low value, computation will mostly be based on well-represented variables in the projection.
 #
 # By default, `ncp` is set to 5, meaning that the 5 dimensions in the projected space that represent the most the variance on the data are used when computing neighbors.
 

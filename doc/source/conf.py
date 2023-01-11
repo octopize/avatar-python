@@ -14,11 +14,13 @@ import os
 import sys
 from datetime import date
 from typing import Optional
+
 sys.path.insert(
     0, os.path.abspath("../../avatars/")
 )  # Source code dir relative to this file
 
-from avatars import __version__
+from avatars import __version__  # noqa: E402
+
 # -- Project information -----------------------------------------------------
 
 project = "avatars"
@@ -40,7 +42,8 @@ extensions = [
 
 autodoc_default_options = {
     "exclude-members": "login, get_job, to_common_type",
-    "undoc-members": True,  # weird, have to add this so that the avatars.client module is documented
+    # weird, have to add this so that the avatars.client module is documented
+    "undoc-members": True,
 }
 autodoc_typehints_format = "short"
 # autodoc_typehints_format is not applied to attributes:
@@ -50,6 +53,7 @@ python_use_unqualified_type_names = True
 
 templates_path = ["_templates"]
 
+# $$$  Sphinx Multi-version  $$$
 # https://holzhaus.github.io/sphinx-multiversion/master/configuration.html
 
 # create a version for main to be able to see layout during development

@@ -1,7 +1,4 @@
-import re
 from pathlib import Path
-from pprint import pprint
-from re import L
 
 import typer
 from bs4 import BeautifulSoup
@@ -21,9 +18,9 @@ def main(path: Path):
 def to_snake_case(s: str):
     return "".join(["_" + c.lower() if c.isupper() else c for c in str(s)]).strip("_")
 
+
 def modify_class_name(soup: BeautifulSoup) -> BeautifulSoup:
     """Example: replace avatars.api.Datasets by avatars.ApiClient.datasets"""
-
     # Find all class entries in the docs
     all_classes = soup.find_all("dl", {"class": "py class"})
     if not all_classes:
@@ -36,16 +33,18 @@ def modify_class_name(soup: BeautifulSoup) -> BeautifulSoup:
 
     # Get the module name tag from the signature
     module_name_tags = [
-        c.find("span", {"class": "sig-prename descclassname"}) for c in client_and_api_class_definition_tags
+        c.find("span", {"class": "sig-prename descclassname"})
+        for c in client_and_api_class_definition_tags
     ]
-    module_name_tags = [c.find("span", {"class" : "pre"}) for c in module_name_tags if c]
+    module_name_tags = [c.find("span", {"class": "pre"}) for c in module_name_tags if c]
 
     # Get the class name tag from the signature
     class_name_tags = [
-        c.find("span", {"class": "sig-name descname"}) for c in client_and_api_class_definition_tags
+        c.find("span", {"class": "sig-name descname"})
+        for c in client_and_api_class_definition_tags
     ]
 
-    class_name_tags = [c.find("span", {"class" : "pre"}) for c in class_name_tags if c]
+    class_name_tags = [c.find("span", {"class": "pre"}) for c in class_name_tags if c]
 
     for module_name, class_name in zip(module_name_tags, class_name_tags):
         module_name.string = "avatars.ApiClient."
