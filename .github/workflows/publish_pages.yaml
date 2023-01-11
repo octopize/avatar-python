@@ -64,7 +64,7 @@ jobs:
         DOC_OUTPUT_DIR=gh-pages make doc-build
         touch gh-pages/.nojekyll
         cp doc/index-redirect.html gh-pages/index.html
-        ln -srf gh-pages/$(git tag -l --sort=creatordate |tail -1) gh-pages/latest
+        ln -srf gh-pages/$(git for-each-ref --format="%(refname:short)" --sort=-taggerdate --count=1 refs/tags) gh-pages/latest
     - name: Deploy documentation
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
