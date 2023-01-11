@@ -40,7 +40,7 @@ class ProportionProcessor:
     ... )
     >>> preprocessed = processor.preprocess(df=df)
 
-    This processor allows you to avatarize some variable as proportion of another variable.    
+    This processor allows you to avatarize some variable as proportion of another variable.
 
     >>> preprocessed
        variable_1  variable_2  variable_3
@@ -70,6 +70,7 @@ class ProportionProcessor:
 
     TODO : review this
     """
+
     def __init__(
         self,
         variable_names: List[str],
@@ -77,8 +78,8 @@ class ProportionProcessor:
         *,
         sum_to_one: bool = True,
         decimal_count: int = 1,
-    ):  
-    
+    ):
+
         self.variable_names = variable_names
         self.reference = reference
         self.sum_to_one = sum_to_one

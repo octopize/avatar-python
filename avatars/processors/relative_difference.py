@@ -99,6 +99,28 @@ class RelativeDifferenceProcessor:
     1         40        6.0        8.0
     2         34        3.0        2.0
     3         56        1.0        7.0
+
+    >>> avatar = pd.DataFrame(
+    ...    {
+    ...        "age_at_t0": [22, 38, 34, 56],
+    ...        "age_at_t1": [4.0, 5.0, 1.0, 5.0],
+    ...        "age_at_t2": [5.0, 3.0, 7.0, 6.0],
+    ...        }
+    ...    )
+    >>> avatar
+       age_at_t0  age_at_t1  age_at_t2
+    0         22        4.0        5.0
+    1         38        5.0        3.0
+    2         34        1.0        7.0
+    3         56        5.0        6.0
+    >>> avatar = processor_2.preprocess(avatar)
+    >>> avatar = processor_1.preprocess(avatar)
+    >>> avatar
+       age_at_t0  age_at_t1  age_at_t2
+    0         22      -18.0       23.0
+    1         38      -33.0       36.0
+    2         34      -33.0       40.0
+    3         56      -51.0       57.0
     """
 
     def __init__(
