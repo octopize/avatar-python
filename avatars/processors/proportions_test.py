@@ -3,7 +3,7 @@ import pandas as pd
 import pandas.testing as pd_testing
 import pytest
 
-from avatars.processors.proportions import ProportionProcessor
+from avatars.processors import ProportionProcessor
 
 ORIGINAL_DF = pd.DataFrame(
     {

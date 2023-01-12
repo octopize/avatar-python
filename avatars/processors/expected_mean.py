@@ -5,6 +5,106 @@ import pandas as pd
 
 
 class ExpectedMeanProcessor:
+    """Processor to force values to have similar mean to original data.
+
+    Means and standard deviations are computed for groups of variables and the
+    processor ensures that the transformed data has similar mean and std than in
+    the original data for each group.
+    Care should be taken when using this processor as it only targets enhancement of unimodal
+    utility. This may occur at the expense of multi-modal utility and privacy.
+
+    Arguments
+    ---------
+        target_variables:
+            variables to transform
+
+    Keyword Arguments
+    -----------------
+        groupby_variables:
+            variables to use to group values in different distributions
+        same_std:
+            Set to True to force the variables to transform to have the same
+            standard deviation as the reference data. default: False.
+
+    Examples
+    --------
+    # fmt: off
+    >>> import numpy as np
+    >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
+    ...                   columns=['one', 'two', 'three'])
+    >>> df = df.astype('int')
+    >>> processor = ExpectedMeanProcessor(target_variables = ['one'])
+    >>> processed = processor.preprocess(df)
+
+
+    The processor forces your synthetic dataset to have the same mean as the original.
+
+    >>> avatar = pd.DataFrame(np.array(([3, 2, 3], [3, 5, 6], [8, 5, 6], [8, 2, 3])),
+    ...                   columns=['one', 'two', 'three'])
+    >>> avatar.one.mean()
+    5.5
+    >>> avatar = processor.postprocess(df, avatar)
+    >>> avatar.one.mean()
+    2.5
+
+    You can also force the mean by category using ```groupby_variables```
+
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [11, 24, 23.5, 12],
+    ...        "variable_2": ["red", "blue", "blue", "red"],
+    ...    }
+    ... )
+    >>> df
+       variable_1 variable_2
+    0        11.0        red
+    1        24.0       blue
+    2        23.5       blue
+    3        12.0        red
+    >>> df.groupby("variable_2").mean()
+                variable_1
+    variable_2            
+    blue             23.75
+    red              11.50
+    >>> processor = ExpectedMeanProcessor(target_variables = ['variable_1'], groupby_variables= ['variable_2'])
+    >>> processor.preprocess(df)
+       variable_1 variable_2
+    0        11.0        red
+    1        24.0       blue
+    2        23.5       blue
+    3        12.0        red
+    >>> avatar = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [12, 13.5, 23.5, 22],
+    ...        "variable_2": ["red", "red", "blue", "blue"],
+    ...    }
+    ... )
+    >>> avatar
+       variable_1 variable_2
+    0        12.0        red
+    1        13.5        red
+    2        23.5       blue
+    3        22.0       blue
+    >>> avatar.groupby("variable_2").mean()
+                variable_1
+    variable_2            
+    blue             22.75
+    red              12.75
+    >>> avatar = processor.postprocess(df, avatar)
+    >>> avatar
+       variable_1 variable_2
+    0       10.75        red
+    1       12.25        red
+    2       24.50       blue
+    3       23.00       blue
+    >>> avatar.groupby("variable_2").mean()
+                variable_1
+    variable_2            
+    blue             23.75
+    red              11.50
+    
+    # fmt: on
+    """
     def __init__(
         self,
         target_variables: List[str],
@@ -12,24 +112,6 @@ class ExpectedMeanProcessor:
         groupby_variables: Optional[List[str]] = None,
         same_std: bool = False,
     ):
-        """Processor to force values to have similar mean to original data.
-
-        Means and standard deviations are computed for groups of variables and the
-        processor ensures that the transformed data has similar mean and std than in
-        the original data for each group.
-        Care should be taken when using this processor as it only targets enhancement of unimodal
-        utility. This may occur at the expense of multi-modal utility and privacy.
-
-        Arguments
-        ---------
-            target_variables:
-                variables to transform
-            groupby_variables:
-                variables to use to group values in different distributions
-            same_std:
-                Set to True to force the variables to transform to have the same
-                standard deviation as the reference data. default: False.
-        """
         # Variable added temporarily when no groupby is used. It is a column with only one modality
         # that can be used to perform a groupby in order to get the expected mean and std on all
         # records.

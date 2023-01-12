@@ -8,6 +8,52 @@ from avatars.lib.split_columns_types import NUMERIC_DTYPES
 
 
 class PerturbationProcessor:
+    """Processor to reduce the difference between originals and avatars.
+
+    Specifies the perturbation level of specified variables, 0 means no perturbation.
+    (default: ``np.ones(df.shape[1])``)
+
+    Arguments
+    ---------
+        perturbation_level:
+            variables and perturbation level
+
+    Keyword Arguments
+    -----------------
+        seed:
+            A seed to initialize the BitGenerator.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> df = pd.DataFrame(np.zeros(3), columns=["column"], dtype="float")
+    >>> df
+       column
+    0     0.0
+    1     0.0
+    2     0.0
+    >>> processor = PerturbationProcessor(perturbation_level={"column": 0.3}, seed=1)
+    >>> processor.preprocess(df)
+       column
+    0     0.0
+    1     0.0
+    2     0.0
+    >>> avatar = pd.DataFrame(np.ones(3), columns=["column"], dtype="float")
+    >>> avatar
+       column
+    0     1.0
+    1     1.0
+    2     1.0
+
+    The post process reduces the gap between df and avatar
+
+    >>> processor.postprocess(df, avatar)
+       column
+    0     0.3
+    1     0.3
+    2     0.3
+    """
+
     def __init__(
         self,
         perturbation_level: Optional[Dict[str, float]] = None,
@@ -22,10 +68,11 @@ class PerturbationProcessor:
             )
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Preprocess is doing nothing."""
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-
+        """Force to reduce the difference between originals and avatars."""
         if not self.perturbation_level:
             return dest
 

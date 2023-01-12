@@ -15,8 +15,8 @@ release-and-push:
 
 ##@ Tests
 
-
-test: typecheck test-integration  ## Run all the tests
+test: typecheck test-integration ## Run all the tests
+	poetry run pytest --doctest-modules avatars
 .PHONY: test
 
 typecheck:  ## Run the type checker
@@ -51,8 +51,15 @@ DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
 	current_branch=$$(git branch --show-current)
-	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
 .PHONY: doc
+
+doc-fast: ## Build and open the current version of the docs only
+	current_branch=$$(git branch --show-current)
+	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR) -D "smv_tag_whitelist=None" -D "smv_branch_whitelist=$$current_branch"
+	echo $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
+.PHONY: doc-fast 
 
 doc-build:  ## Build the docs
 ##! This script is also used to deploy to production.
@@ -106,7 +113,7 @@ test-tutorial: generate-py ## Verify that all tutorials run without errors
 
 	SYSTEM=$$(uname -s)
 	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
-
+	echo $$XARGS; echo $$SYSTEM; echo $$XARGS
 	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=http://localhost:8000 AVATAR_USERNAME=user_integration AVATAR_PASSWORD=password_integration $(abspath $(VENV_NAME))/bin/python3.9 {{}} > /dev/null && echo \"Succesfully ran {{}}\""
 .PHONY: test-tutorial
 

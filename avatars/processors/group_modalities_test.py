@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from avatars.processors.group_modalities import GroupModalitiesProcessor
+from avatars.processors import GroupModalitiesProcessor
 
 
 def test_postprocess_noop(many_dtypes_df: pd.DataFrame) -> None:
