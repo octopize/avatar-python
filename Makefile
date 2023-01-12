@@ -56,7 +56,7 @@ doc: doc-build  ## Build and open the docs
 
 doc-fast: ## Build and open the current version of the docs only
 	current_branch=$$(git branch --show-current)
-	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR) -D "smv_tag_whitelist=None" -D "smv_branch_whitelist=$$current_branch"
+	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)/$$current_branch
 	echo $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
 	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
 .PHONY: doc-fast 

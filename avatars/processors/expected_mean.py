@@ -28,7 +28,6 @@ class ExpectedMeanProcessor:
 
     Examples
     --------
-    # fmt: off
     >>> import numpy as np
     >>> df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
     ...                   columns=['one', 'two', 'three'])
@@ -62,11 +61,14 @@ class ExpectedMeanProcessor:
     2        23.5       blue
     3        12.0        red
     >>> df.groupby("variable_2").mean()
+    ... # doctest: +NORMALIZE_WHITESPACE
                 variable_1
-    variable_2            
+    variable_2
     blue             23.75
     red              11.50
-    >>> processor = ExpectedMeanProcessor(target_variables = ['variable_1'], groupby_variables= ['variable_2'])
+    >>> processor = ExpectedMeanProcessor(
+    ...    target_variables = ['variable_1'], groupby_variables= ['variable_2'],
+    ...    )
     >>> processor.preprocess(df)
        variable_1 variable_2
     0        11.0        red
@@ -86,8 +88,9 @@ class ExpectedMeanProcessor:
     2        23.5       blue
     3        22.0       blue
     >>> avatar.groupby("variable_2").mean()
+    ... # doctest: +NORMALIZE_WHITESPACE
                 variable_1
-    variable_2            
+    variable_2
     blue             22.75
     red              12.75
     >>> avatar = processor.postprocess(df, avatar)
@@ -98,13 +101,13 @@ class ExpectedMeanProcessor:
     2       24.50       blue
     3       23.00       blue
     >>> avatar.groupby("variable_2").mean()
+    ... # doctest: +NORMALIZE_WHITESPACE
                 variable_1
-    variable_2            
+    variable_2
     blue             23.75
     red              11.50
-    
-    # fmt: on
     """
+
     def __init__(
         self,
         target_variables: List[str],
