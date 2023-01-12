@@ -295,13 +295,14 @@ standard deviation as the reference data. default: False.</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<p># fmt: off
-&gt;&gt;&gt; import numpy as np
-&gt;&gt;&gt; df = pd.DataFrame(np.array(([1, 2, 3], [4, 5, 6], [4, 5, 6], [1, 2, 3])),
-…                   columns=[‘one’, ‘two’, ‘three’])
-&gt;&gt;&gt; df = df.astype(‘int’)
-&gt;&gt;&gt; processor = ExpectedMeanProcessor(target_variables = [‘one’])
-&gt;&gt;&gt; processed = processor.preprocess(df)</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])),</span>
+<span class="gp">... </span>                  <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">ExpectedMeanProcessor</span><span class="p">(</span><span class="n">target_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processed</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>The processor forces your synthetic dataset to have the same mean as the original.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">avatar</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])),</span>
 <span class="gp">... </span>                  <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="p">])</span>
@@ -326,11 +327,14 @@ standard deviation as the reference data. default: False.</p></li>
 <span class="go">2        23.5       blue</span>
 <span class="go">3        12.0        red</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;variable_2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="gp">... </span>
 <span class="go">            variable_1</span>
 <span class="go">variable_2</span>
 <span class="go">blue             23.75</span>
 <span class="go">red              11.50</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">ExpectedMeanProcessor</span><span class="p">(</span><span class="n">target_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;variable_1&#39;</span><span class="p">],</span> <span class="n">groupby_variables</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;variable_2&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">ExpectedMeanProcessor</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">target_variables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;variable_1&#39;</span><span class="p">],</span> <span class="n">groupby_variables</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;variable_2&#39;</span><span class="p">],</span>
+<span class="gp">... </span>   <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 <span class="go">   variable_1 variable_2</span>
 <span class="go">0        11.0        red</span>
@@ -350,6 +354,7 @@ standard deviation as the reference data. default: False.</p></li>
 <span class="go">2        23.5       blue</span>
 <span class="go">3        22.0       blue</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">avatar</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;variable_2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="gp">... </span>
 <span class="go">            variable_1</span>
 <span class="go">variable_2</span>
 <span class="go">blue             22.75</span>
@@ -362,13 +367,13 @@ standard deviation as the reference data. default: False.</p></li>
 <span class="go">2       24.50       blue</span>
 <span class="go">3       23.00       blue</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">avatar</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;variable_2&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="gp">... </span>
 <span class="go">            variable_1</span>
 <span class="go">variable_2</span>
 <span class="go">blue             23.75</span>
 <span class="go">red              11.50</span>
 </pre></div>
 </div>
-<p># fmt: on</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="processors.ExpectedMeanProcessor.preprocess">
 <span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#processors.ExpectedMeanProcessor.preprocess" title="Permalink to this definition">#</a></dt>
