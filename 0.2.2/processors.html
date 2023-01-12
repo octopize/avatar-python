@@ -293,6 +293,23 @@ standard deviation as the reference data. default: False.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="avatars.processors.expected_mean.ExpectedMeanProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Compute the reference mean and standard deviations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> – reference dataframe</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the unaltered reference dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>df</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="avatars.processors.expected_mean.ExpectedMeanProcessor.postprocess">
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Force the data to have the reference mean.</p>
@@ -308,23 +325,6 @@ standard deviation as the reference data. default: False.</p></li>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>dest</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.expected_mean.ExpectedMeanProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.preprocess" title="Permalink to this definition">#</a></dt>
-<dd><p>Compute the reference mean and standard deviations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>df</strong> – reference dataframe</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>the unaltered reference dataframe.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>df</p>
 </dd>
 </dl>
 </dd></dl>
@@ -355,13 +355,13 @@ Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.group_modalities.GroupModalitiesProcessor.postprocess">
-<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.postprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.processors.group_modalities.GroupModalitiesProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.preprocess" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.group_modalities.GroupModalitiesProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.processors.group_modalities.GroupModalitiesProcessor.postprocess">
+<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -375,13 +375,13 @@ Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.perturbation.PerturbationProcessor.postprocess">
-<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.perturbation.PerturbationProcessor.postprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.processors.perturbation.PerturbationProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.perturbation.PerturbationProcessor.preprocess" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.perturbation.PerturbationProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.perturbation.PerturbationProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.processors.perturbation.PerturbationProcessor.postprocess">
+<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.perturbation.PerturbationProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -406,15 +406,15 @@ Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.proportions.ProportionProcessor.postprocess">
-<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.proportions.ProportionProcessor.postprocess" title="Permalink to this definition">#</a></dt>
-<dd><p>Transform proportion of another variable into an absolute numeric value.</p>
+<dt class="sig sig-object py" id="avatars.processors.proportions.ProportionProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.proportions.ProportionProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Transform numeric variables into proportion of another variable.</p>
+<p>If some values for the variables to transform are set to nan, they will be transformed
+into nan and will be considered as a 0% proportion of the reference when transforming
+values of other variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>source</strong> (<em>not used</em>) – </p></li>
-<li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
@@ -426,15 +426,15 @@ Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.proportions.ProportionProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.proportions.ProportionProcessor.preprocess" title="Permalink to this definition">#</a></dt>
-<dd><p>Transform numeric variables into proportion of another variable.</p>
-<p>If some values for the variables to transform are set to nan, they will be transformed
-into nan and will be considered as a 0% proportion of the reference when transforming
-values of other variables.</p>
+<dt class="sig sig-object py" id="avatars.processors.proportions.ProportionProcessor.postprocess">
+<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.proportions.ProportionProcessor.postprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Transform proportion of another variable into an absolute numeric value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>not used</em>) – </p></li>
+<li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
@@ -468,6 +468,20 @@ values of other variables.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="avatars.processors.relative_difference.RelativeDifferenceProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Transform a numeric variable into a difference relative to the sum of other variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>a dataframe with the transformed version of wanted columns</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="avatars.processors.relative_difference.RelativeDifferenceProcessor.postprocess">
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Transform a difference relative to the sum of other variables into an absolute numeric value.</p>
@@ -477,20 +491,6 @@ values of other variables.</p>
 <li><p><strong>source</strong> (<em>not used</em>) – </p></li>
 <li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
 </ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>a dataframe with the transformed version of wanted columns</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.relative_difference.RelativeDifferenceProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.preprocess" title="Permalink to this definition">#</a></dt>
-<dd><p>Transform a numeric variable into a difference relative to the sum of other variables.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>a dataframe with the transformed version of wanted columns</p>
@@ -521,15 +521,12 @@ values of other variables.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.relative_range.RelativeRangeProcessor.postprocess">
-<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.postprocess" title="Permalink to this definition">#</a></dt>
-<dd><p>Sample values for the target variable within the range defined.</p>
+<dt class="sig sig-object py" id="avatars.processors.relative_range.RelativeRangeProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Set a numeric variable as within a range defined by two other variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>source</strong> (<em>not used</em>) – </p></li>
-<li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
@@ -541,12 +538,15 @@ values of other variables.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.processors.relative_range.RelativeRangeProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.preprocess" title="Permalink to this definition">#</a></dt>
-<dd><p>Set a numeric variable as within a range defined by two other variables.</p>
+<dt class="sig sig-object py" id="avatars.processors.relative_range.RelativeRangeProcessor.postprocess">
+<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.postprocess" title="Permalink to this definition">#</a></dt>
+<dd><p>Sample values for the target variable within the range defined.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>not used</em>) – </p></li>
+<li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
