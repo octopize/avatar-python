@@ -168,7 +168,7 @@ You need to run privacy and signal metrics with the arguments ``persistance_job_
 You might want to access the avatars dataset prior to being shuffled.
 **WARNING**: There is no protection at all, as the linkage between the
 unshuffled avatars dataset and the original data is obvious. **This
-dataset contains sensitive data**. You will need to shuffle it in order
+dataset contavatars/client.pyains sensitive data**. You will need to shuffle it in order
 to make it safe.
 
 .. code:: python
