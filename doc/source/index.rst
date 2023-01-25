@@ -13,7 +13,9 @@ Table of contents
 .. toctree::
    :maxdepth: 1
 
+   Installation <installation>
    Tutorial <tutorial>
+   How to <how_to>
    Client <client_and_api>
    Models <models>
    Processors <processors>

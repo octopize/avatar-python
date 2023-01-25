@@ -1,0 +1,163 @@
+How to
+======
+
+How to reset your password
+--------------------------
+
+**NB**: This section is only available if the use of emails to login is
+activated in the global configuration. It is not the case by default.
+
+If you forgot your password or if you need to set one, first call the
+forgotten_password endpoint:
+
+.. raw:: html
+
+   <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
+
+.. code:: javascript
+
+   from avatars.client import ApiClient
+
+   client = ApiClient(base_url=os.environ.get("BASE_URL"))
+   client.forgotten_password("yourmail@mail.com")
+
+You’ll then receive an email containing a token. This token is only
+valid once, and expires after 24 hours. Use it to reset your password:
+
+.. code:: javascript
+
+   from avatars.client import ApiClient
+
+   client = ApiClient(base_url=os.environ.get("BASE_URL"))
+   client.reset_password("yourmail@mail.com", "new_password", "new_password", "token-received-by-mail")
+
+You’ll receive an email confirming your password was reset.
+
+How to upload a dataframe
+-------------------------
+as a pandas dataframe
+
+.. code:: python 
+
+    import pandas as pd
+
+   df = pd.read_csv("fixtures/iris.csv")
+
+   # ... do some modifications on the dataset
+
+   dataset = client.pandas_integration.upload_dataframe(df)
+
+as a csv file
+
+.. code::  python
+
+    filename = "fixtures/iris.csv"
+
+    with open(filename, "r") as f:
+        dataset = client.datasets.create_dataset(request=f)
+
+How to lunch an avatarization job
+---------------------------------
+
+You can lunch a simple avatarization job without any metrics computation. 
+
+.. code:: python
+
+    job = client.jobs.create_avatarization_job(
+            AvatarizationJobCreate(
+                parameters=AvatarizationParameters(
+                    k=20,
+                    dataset_id=dataset.id,
+                ),
+            )
+        )
+
+
+How to lunch privacy metrics
+----------------------------
+
+You can lunch a privacy metrics with two datasets, the original and the anonymized.
+
+You need to enter some parameters to lunch some specifics privacy metrics.
+
+.. code:: python
+
+    privacy_job = client.jobs.create_privacy_metrics_job(
+        PrivacyMetricsJobCreate(
+        parameters=PrivacyMetricsParameters(
+                original_id=dataset.id,
+                unshuffled_avatars_id=job.result.sensitive_unshuffled_avatars_datasets.id,
+                closest_rate_percentage_threshold=0.3,
+                closest_rate_ratio_threshold=0.3,
+                known_variables=[
+                    "age",
+                    "height",
+                    "eye_color",
+                    "time",
+                ],
+                target="target_variable",
+                seed=42,
+            ),
+        ))
+
+    privacy_job = client.jobs.get_privacy_metrics(
+        privacy_job.id,  timeout=10
+    )
+
+    print(privacy_job.status)
+    print(privacy_job.result.privacy_metrics)
+
+See 
+`our technical documentation <https://docs.octopize.io/docs/understanding/Privacy/>`__
+for more details on all privacy metrics.
+
+How to lunch signal metrics
+---------------------------
+
+You can evaluate your avatarization on different criteria:
+
+-  univariate
+-  bivariate
+-  multivariate
+
+.. code:: python 
+
+    signal_job = client.jobs.create_signal_metrics_job(
+    SignalMetricsJobCreate(
+    parameters=SignalMetricsParameters(
+            original_id=dataset.id,
+            avatars_id=job.result.avatars_dataset.id,
+            seed=42,
+        ),
+    ))
+
+    signal_job = client.jobs.get_signal_metrics(
+            signal_job.id,  timeout=10
+    )
+    print(signal_job.status)
+    print(signal_job.result.signal_metrics)
+
+See
+`here <https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb>`__
+a jupyter notebook example to evaluate the quality of an avatarization.
+
+See 
+`our technical documentation <https://docs.octopize.io/docs/understanding/Privacy/>`__
+for more details on all signal metrics.
+
+
+How to generate the report
+--------------------------
+
+You can create an avatarization report. 
+
+You need to run privacy and signal metrics with the arguments ``persistance_job_id=job.id`` before running the report.
+
+.. code:: python
+
+   report = client.reports.create_report(ReportCreate(job_id=job.id), timeout=1000)
+   result = client.reports.download_report(id=report.id)
+   with open(f"./my_avatarization_report.pdf", "wb") as f:
+      f.write(result)
+
+

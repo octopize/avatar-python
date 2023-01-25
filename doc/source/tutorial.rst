@@ -6,26 +6,6 @@ This Python client communicates with the Avatar platform.
 For more information about the Avatar method and process, check out our
 main docs at https://docs.octopize.io
 
-Prerequisites
--------------
-
-``avatars`` is intended to be run with Python 3.9+.
-
-Installation
-------------
-
-Choose the latest version at
-https://github.com/octopize/avatar-python/releases
-
-Install the package by pointing to the .whl file (replace with correct
-version below).
-
-.. code:: bash
-
-   pip install https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
-   # or, if you're using poetry (recommended)
-   poetry add https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
-
 Setup
 -----
 
@@ -66,11 +46,13 @@ This is all you need to run and evaluate an avatarization:
    from avatars.client import ApiClient
    from avatars.models import AvatarizationJobCreate, AvatarizationParameters
    import os
+   import pandas as pd
 
    client = ApiClient(base_url=os.environ.get("BASE_URL"))
    client.authenticate(username="username", password="strong_password")
 
-   dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
+   df = pd.read_csv("fixtures/iris.csv")
+   dataset = client.pandas_integration.upload_dataframe(df)
 
    job = client.jobs.create_full_avatarization_job(
        AvatarizationJobCreate(
@@ -89,57 +71,14 @@ This is all you need to run and evaluate an avatarization:
    # Download the avatars
    dataset = client.datasets.download_dataset(job.result.avatars_dataset.id)
 
+   # generate the report 
+    report = client.reports.create_report(ReportCreate(job_id=job.id), timeout=1000)
+    result = client.reports.download_report(id=report.id)
+    with open(f"./my_avatarization_report.pdf", "wb") as f:
+        f.write(result)
+
 Avatarization step by step
 --------------------------
-
-Manipulate datasets
-~~~~~~~~~~~~~~~~~~~
-
-You can pass the data to ``create_dataset()`` directly as a file handle.
-
-Using CSV files
-^^^^^^^^^^^^^^^
-
-.. code:: python
-
-   filename = "fixtures/iris.csv"
-
-   with open(filename, "r") as f:
-       dataset = client.datasets.create_dataset(request=f)
-
-Using ``pandas`` dataframes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you are using ``pandas``, and want to manipulate the dataframe before
-sending it to the engine, here’s how you should proceed.
-
-.. code:: python
-
-   import pandas as pd
-
-   df = pd.read_csv("fixtures/iris.csv")
-
-   # ... do some modifications on the dataset
-
-   dataset = client.pandas_integration.upload_dataframe(df)
-
-   job = client.jobs.create_avatarization_job(
-       AvatarizationJobCreate(
-           parameters=AvatarizationParameters(
-               k=20,
-               dataset_id=dataset.id,
-           ),
-       )
-   )
-   job = client.jobs.get_avatarization_job(job.id)
-
-Then receive the generated avatars as a pandas dataframe:
-
-.. code:: python
-
-   avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
-
-The dtypes will be copied over from the original dataframe.
 
 Setting the avatarization parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,10 +117,11 @@ you can import from ``avatars.models`` like so
 Launch an avatarization job
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One job corresponds to one avatarization. 2 methods are available to
-create a job: - (stand use) ``create_full_avatarization_job`` creates an
-avatarization job then computes metrics. - (expert use)
-``create_avatarization_job`` only creates an avatarization job.
+One job corresponds to one avatarization. 2 methods are available to create a job: 
+
+- (standard use) ``create_full_avatarization_job`` creates an avatarization job then computes metrics.
+
+- (expert use) ``create_avatarization_job`` only creates an avatarization job.
 
 .. code:: python
 
@@ -258,29 +198,6 @@ Retrieving results
    avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
    print(avatars_df.head())
 
-Evaluate privacy
-~~~~~~~~~~~~~~~~
-
-You can retrieve the privacy metrics from the result object (see our
-main docs for details about each metric):
-
-.. code:: python
-
-   print(result.privacy_metrics.hidden_rate)
-   print(result.privacy_metrics.local_cloaking)
-
-Evaluate utility
-~~~~~~~~~~~~~~~~
-
-You can evaluate your avatarization on different criteria:
-
--  univariate
--  bivariate
--  multivariate
-
-See
-`here <https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb>`__
-a jupyter notebook example to evaluate the quality of an avatarization.
 
 ⚠ Sensitive ⚠ Access the results unshuffled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -355,34 +272,3 @@ We have implemented the concept of pipelines.
        )
    )
 
-Reset your password
--------------------
-
-**NB**: This section is only available if the use of emails to login is
-activated in the global configuration. It is not the case by default.
-
-If you forgot your password or if you need to set one, first call the
-forgotten_password endpoint:
-
-.. raw:: html
-
-   <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
-
-.. code:: javascript
-
-   from avatars.client import ApiClient
-
-   client = ApiClient(base_url=os.environ.get("BASE_URL"))
-   client.forgotten_password("yourmail@mail.com")
-
-You’ll then receive an email containing a token. This token is only
-valid once, and expires after 24 hours. Use it to reset your password:
-
-.. code:: javascript
-
-   from avatars.client import ApiClient
-
-   client = ApiClient(base_url=os.environ.get("BASE_URL"))
-   client.reset_password("yourmail@mail.com", "new_password", "new_password", "token-received-by-mail")
-
-You’ll receive an email confirming your password was reset.
