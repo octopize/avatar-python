@@ -199,34 +199,6 @@ Retrieving results
    print(avatars_df.head())
 
 
-⚠ Sensitive ⚠ Access the results unshuffled
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-You might want to access the avatars dataset prior to being shuffled.
-**WARNING**: There is no protection at all, as the linkage between the
-unshuffled avatars dataset and the original data is obvious. **This
-dataset contains sensitive data**. You will need to shuffle it in order
-to make it safe.
-
-.. code:: python
-
-   # Note that the order of the lines have NOT been shuffled, which means that the link
-   # between original and avatar individuals IS OBVIOUS.
-   sensitive_unshuffled_avatars_datasets_id = (
-       result.sensitive_unshuffled_avatars_datasets.id
-   )
-   sensitive_unshuffled_avatars_datasets = client.datasets.download_dataset(
-       id=sensitive_unshuffled_avatars_datasets_id
-   )
-
-   # The returned dataset is a CSV file as string.
-   # We'll use pandas to get the data into a dataframe and io.StringIO to
-   # transform the string into something understandable for pandas
-   sensitive_unshuffled_avatars_df = pd.read_csv(
-       io.StringIO(sensitive_unshuffled_avatars_datasets)
-   )
-   print(avatars_df.head())
-
 Launch a whole pipeline
 -----------------------
 
