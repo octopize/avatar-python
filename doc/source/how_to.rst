@@ -1,5 +1,6 @@
 How to
 ======
+                            
 
 How to reset your password
 --------------------------
@@ -47,7 +48,7 @@ as a pandas dataframe
 
    dataset = client.pandas_integration.upload_dataframe(df)
 
-as a csv file
+as a ``.csv`` file
 
 .. code::  python
 
@@ -71,7 +72,9 @@ You can lunch a simple avatarization job without any metrics computation.
                 ),
             )
         )
-
+    job = client.jobs.get_avatarization_job(job.id, timeout=10)
+    print(job.status)
+    print(job.result)
 
 How to lunch privacy metrics
 ----------------------------
@@ -92,7 +95,7 @@ You need to enter some parameters to lunch some specifics privacy metrics.
                 known_variables=[
                     "age",
                     "height",
-                    "eye_color",
+                    "eyes_color",
                     "time",
                 ],
                 target="target_variable",
@@ -161,14 +164,41 @@ You need to run privacy and signal metrics with the arguments ``persistance_job_
       f.write(result)
 
 
+How to download an avatar dataset 
+---------------------------------
 
-⚠ Sensitive ⚠ Access the results unshuffled
--------------------------------------------
+As a pandas dataframe. 
+The dtypes will be copied over from the original dataframe.
+
+Note that the order of the lines have been shuffled, which means that the link between original and avatar individuals cannot be made.
+
+.. code:: python
+
+   result = job.result
+   avatars_dataset_id = result.avatars_dataset.id
+
+   avatar_df = client.pandas_integration.download_dataframe(avatars_dataset_id)
+   print(avatars_df.head())
+
+
+As a ``.csv`` file as string.
+
+.. code:: python
+
+   result = job.result
+   avatars_dataset_id = result.avatars_dataset.id
+   avatars_dataset = client.datasets.download_dataset(id=avatars_dataset_id)
+   avatar_df = pd.read_csv(io.StringIO(avatars_dataset))
+   print(avatars_df.head())
+
+
+⚠ Sensitive ⚠  how to access the results unshuffled
+---------------------------------------------------
 
 You might want to access the avatars dataset prior to being shuffled.
 **WARNING**: There is no protection at all, as the linkage between the
 unshuffled avatars dataset and the original data is obvious. **This
-dataset contavatars/client.pyains sensitive data**. You will need to shuffle it in order
+dataset contains sensitive data**. You will need to shuffle it in order
 to make it safe.
 
 .. code:: python
@@ -178,15 +208,6 @@ to make it safe.
    sensitive_unshuffled_avatars_datasets_id = (
        result.sensitive_unshuffled_avatars_datasets.id
    )
-   sensitive_unshuffled_avatars_datasets = client.datasets.download_dataset(
-       id=sensitive_unshuffled_avatars_datasets_id
-   )
-
-   # The returned dataset is a CSV file as string.
-   # We'll use pandas to get the data into a dataframe and io.StringIO to
-   # transform the string into something understandable for pandas
-   sensitive_unshuffled_avatars_df = pd.read_csv(
-       io.StringIO(sensitive_unshuffled_avatars_datasets)
-   )
+   sensitive_unshuffled_avatars_df = client.pandas_integration.download_dataframe(sensitive_unshuffled_avatars_datasets_id)
    print(avatars_df.head())
 

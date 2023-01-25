@@ -6,26 +6,6 @@ This Python client communicates with the Avatar platform.
 For more information about the Avatar method and process, check out our
 main docs at https://docs.octopize.io
 
-Prerequisites
--------------
-
-``avatars`` is intended to be run with Python 3.9+.
-
-Installation
-------------
-
-Choose the latest version at
-https://github.com/octopize/avatar-python/releases
-
-Install the package by pointing to the .whl file (replace with correct
-version below).
-
-.. code:: bash
-
-   pip install https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
-   # or, if you're using poetry (recommended)
-   poetry add https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
-
 Setup
 -----
 
@@ -92,55 +72,6 @@ This is all you need to run and evaluate an avatarization:
 Avatarization step by step
 --------------------------
 
-Manipulate datasets
-~~~~~~~~~~~~~~~~~~~
-
-You can pass the data to ``create_dataset()`` directly as a file handle.
-
-Using CSV files
-^^^^^^^^^^^^^^^
-
-.. code:: python
-
-   filename = "fixtures/iris.csv"
-
-   with open(filename, "r") as f:
-       dataset = client.datasets.create_dataset(request=f)
-
-Using ``pandas`` dataframes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-If you are using ``pandas``, and want to manipulate the dataframe before
-sending it to the engine, here’s how you should proceed.
-
-.. code:: python
-
-   import pandas as pd
-
-   df = pd.read_csv("fixtures/iris.csv")
-
-   # ... do some modifications on the dataset
-
-   dataset = client.pandas_integration.upload_dataframe(df)
-
-   job = client.jobs.create_avatarization_job(
-       AvatarizationJobCreate(
-           parameters=AvatarizationParameters(
-               k=20,
-               dataset_id=dataset.id,
-           ),
-       )
-   )
-   job = client.jobs.get_avatarization_job(job.id)
-
-Then receive the generated avatars as a pandas dataframe:
-
-.. code:: python
-
-   avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
-
-The dtypes will be copied over from the original dataframe.
-
 Setting the avatarization parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -158,7 +89,7 @@ description for each parameter is available in our main docs.
 -  ``imputation``: imputation parameters type of
    ``ImputationParameters``.
 
-   -  ``k``: number of neighbors for the knn imputation. default=5
+   -  ``k``: number of neighbors for the knn imputation. default=20
    -  ``method``: method used for the imputation with ``ImputeMethod``,
       default=\ ``ImputeMethod.knn``)
    -  ``training_fraction``: the fraction of the dataset used to train
@@ -173,15 +104,17 @@ you can import from ``avatars.models`` like so
 
    from avatars.models import AvatarizationParameters
 
-   parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
+   parameters = AvatarizationParameters(dataset_id=dataset.id, k=20, ncp=7, seed=42)
 
 Launch an avatarization job
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 One job corresponds to one avatarization. 2 methods are available to
-create a job: - (stand use) ``create_full_avatarization_job`` creates an
-avatarization job then computes metrics. - (expert use)
-``create_avatarization_job`` only creates an avatarization job.
+create a job: 
+
+- (stand use) ``create_full_avatarization_job`` creates an avatarization job then computes basic metrics. 
+
+- (expert use) ``create_avatarization_job`` only creates an avatarization job.
 
 .. code:: python
 
@@ -190,8 +123,8 @@ avatarization job then computes metrics. - (expert use)
    # Pass the parameters to the AvatarizationJobCreate object...
    job_create = AvatarizationJobCreate(parameters=parameters)
 
-   # ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_avatarization_job method
-   # This launches the avatarization and returns immediately
+   # ... and launch the avatarization by passing the AvatarizationJobCreate object to 
+   # the create_full_avatarization_job method
    job = client.jobs.create_full_avatarization_job(request=job_create)
 
    # You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
@@ -234,29 +167,6 @@ available as only a single call is made.
 
    # Will periodically retry for 10 seconds, and each request can take 2 seconds.
    job = client.jobs.get_avatarization_job(id=job.id, per_request_timeout=2, timeout=10)
-
-Retrieving results
-~~~~~~~~~~~~~~~~~~
-
-.. code:: python
-
-   # Once the avatarization is finished, you can retrieve the results of the avatarization,
-   # most notably the privacy metrics
-   result = job.result
-   print(f"got metrics : {result.privacy_metrics}")
-   # For the full response, checkout the JobResponse class in models.py
-
-   # You will also be able to manipulate the avatarized dataset.
-   # Note that the order of the lines have been shuffled, which means that the link
-   # between original and avatar individuals cannot be made.
-   avatars_dataset_id = result.avatars_dataset.id
-   avatars_dataset = client.datasets.download_dataset(id=avatars_dataset_id)
-
-   # The returned dataset is a CSV file as string.
-   # We'll use pandas to get the data into a dataframe and io.StringIO to
-   # transform the string into something understandable for pandas
-   avatars_df = pd.read_csv(io.StringIO(avatars_dataset))
-   print(avatars_df.head())
 
 
 Launch a whole pipeline
@@ -303,3 +213,6 @@ We have implemented the concept of pipelines.
            df=df,
        )
    )
+
+
+See :doc:`./processors` for more detail about the pipeline features.
