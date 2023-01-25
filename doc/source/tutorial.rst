@@ -6,6 +6,26 @@ This Python client communicates with the Avatar platform.
 For more information about the Avatar method and process, check out our
 main docs at https://docs.octopize.io
 
+Prerequisites
+-------------
+
+``avatars`` is intended to be run with Python 3.9+.
+
+Installation
+------------
+
+Choose the latest version at
+https://github.com/octopize/avatar-python/releases
+
+Install the package by pointing to the .whl file (replace with correct
+version below).
+
+.. code:: bash
+
+   pip install https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
+   # or, if you're using poetry (recommended)
+   poetry add https://github.com/octopize/avatar-python/releases/download/0.2.3/avatars-0.2.3-py3-none-any.whl
+
 Setup
 -----
 
@@ -46,13 +66,11 @@ This is all you need to run and evaluate an avatarization:
    from avatars.client import ApiClient
    from avatars.models import AvatarizationJobCreate, AvatarizationParameters
    import os
-   import pandas as pd
 
    client = ApiClient(base_url=os.environ.get("BASE_URL"))
    client.authenticate(username="username", password="strong_password")
 
-   df = pd.read_csv("fixtures/iris.csv")
-   dataset = client.pandas_integration.upload_dataframe(df)
+   dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
 
    job = client.jobs.create_full_avatarization_job(
        AvatarizationJobCreate(
@@ -71,14 +89,57 @@ This is all you need to run and evaluate an avatarization:
    # Download the avatars
    dataset = client.datasets.download_dataset(job.result.avatars_dataset.id)
 
-   # generate the report 
-    report = client.reports.create_report(ReportCreate(job_id=job.id), timeout=1000)
-    result = client.reports.download_report(id=report.id)
-    with open(f"./my_avatarization_report.pdf", "wb") as f:
-        f.write(result)
-
 Avatarization step by step
 --------------------------
+
+Manipulate datasets
+~~~~~~~~~~~~~~~~~~~
+
+You can pass the data to ``create_dataset()`` directly as a file handle.
+
+Using CSV files
+^^^^^^^^^^^^^^^
+
+.. code:: python
+
+   filename = "fixtures/iris.csv"
+
+   with open(filename, "r") as f:
+       dataset = client.datasets.create_dataset(request=f)
+
+Using ``pandas`` dataframes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using ``pandas``, and want to manipulate the dataframe before
+sending it to the engine, here’s how you should proceed.
+
+.. code:: python
+
+   import pandas as pd
+
+   df = pd.read_csv("fixtures/iris.csv")
+
+   # ... do some modifications on the dataset
+
+   dataset = client.pandas_integration.upload_dataframe(df)
+
+   job = client.jobs.create_avatarization_job(
+       AvatarizationJobCreate(
+           parameters=AvatarizationParameters(
+               k=20,
+               dataset_id=dataset.id,
+           ),
+       )
+   )
+   job = client.jobs.get_avatarization_job(job.id)
+
+Then receive the generated avatars as a pandas dataframe:
+
+.. code:: python
+
+   avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
+
+The dtypes will be copied over from the original dataframe.
 
 Setting the avatarization parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,11 +178,10 @@ you can import from ``avatars.models`` like so
 Launch an avatarization job
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-One job corresponds to one avatarization. 2 methods are available to create a job: 
-
-- (standard use) ``create_full_avatarization_job`` creates an avatarization job then computes metrics.
-
-- (expert use) ``create_avatarization_job`` only creates an avatarization job.
+One job corresponds to one avatarization. 2 methods are available to
+create a job: - (stand use) ``create_full_avatarization_job`` creates an
+avatarization job then computes metrics. - (expert use)
+``create_avatarization_job`` only creates an avatarization job.
 
 .. code:: python
 
@@ -243,4 +303,3 @@ We have implemented the concept of pipelines.
            df=df,
        )
    )
-
