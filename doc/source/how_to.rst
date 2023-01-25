@@ -57,10 +57,10 @@ as a ``.csv`` file
     with open(filename, "r") as f:
         dataset = client.datasets.create_dataset(request=f)
 
-How to lunch an avatarization job
+How to launch an avatarization job
 ---------------------------------
 
-You can lunch a simple avatarization job without any metrics computation. 
+You can launch a simple avatarization job without any metrics computation. 
 
 .. code:: python
 
@@ -76,12 +76,12 @@ You can lunch a simple avatarization job without any metrics computation.
     print(job.status)
     print(job.result)
 
-How to lunch privacy metrics
+How to launch privacy metrics
 ----------------------------
 
-You can lunch a privacy metrics with two datasets, the original and the anonymized.
+You can launch a privacy metrics with two datasets, the original and the anonymized.
 
-You need to enter some parameters to lunch some specifics privacy metrics.
+You need to enter some parameters to launch some specifics privacy metrics.
 
 .. code:: python
 
@@ -114,7 +114,7 @@ See
 `our technical documentation <https://docs.octopize.io/docs/understanding/Privacy/>`__
 for more details on all privacy metrics.
 
-How to lunch signal metrics
+How to launch signal metrics
 ---------------------------
 
 You can evaluate your avatarization on different criteria:
