@@ -67,7 +67,8 @@ This is all you need to run and evaluate an avatarization:
    print(f"got privacy metrics : {metrics}")
 
    # Download the avatars
-   dataset = client.datasets.download_dataframe(job.result.avatars_dataset.id)
+   df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
+   print(df.head())
 
 Avatarization step by step
 --------------------------
@@ -89,7 +90,7 @@ description for each parameter is available in our main docs.
 -  ``imputation``: imputation parameters type of
    ``ImputationParameters``.
 
-   -  ``k``: number of neighbors for the knn imputation. default=20
+   -  ``k``: number of neighbors for the knn imputation. default=5
    -  ``method``: method used for the imputation with ``ImputeMethod``,
       default=\ ``ImputeMethod.knn``)
    -  ``training_fraction``: the fraction of the dataset used to train
@@ -104,7 +105,7 @@ you can import from ``avatars.models`` like so
 
    from avatars.models import AvatarizationParameters
 
-   parameters = AvatarizationParameters(dataset_id=dataset.id, k=20, ncp=7, seed=42)
+   parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
 
 Launch an avatarization job
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,19 +113,16 @@ Launch an avatarization job
 One job corresponds to one avatarization. 2 methods are available to
 create a job:
 
- - (stand use) ``create_full_avatarization_job`` creates an avatarization job then computes metrics.
-
- - (expert use) ``create_avatarization_job`` only creates an avatarization job.
+-  (stand use) ``create_full_avatarization_job`` creates an
+   avatarization job then computes metrics.
+-  (expert use) ``create_avatarization_job`` only creates an
+   avatarization job.
 
 .. code:: python
 
    from avatars.models import AvatarizationJobCreate
 
-   # Pass the parameters to the AvatarizationJobCreate object...
    job_create = AvatarizationJobCreate(parameters=parameters)
-
-   # ... and launch the avatarization by passing the AvatarizationJobCreate object to the create_avatarization_job method
-   # This launches the avatarization and returns immediately
    job = client.jobs.create_full_avatarization_job(request=job_create)
 
    # You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
@@ -177,9 +175,12 @@ Retrieving results
    # most notably the privacy metrics
    result = job.result
    print(f"got metrics : {result.privacy_metrics}")
-   
+
+   # You will also be able to manipulate the avatarized dataset.
+   # Note that the order of the lines have been shuffled, which means that the link
+   # between original and avatar individuals cannot be made.
    avatars_dataset_id = result.avatars_dataset.id
-   avatars_dataset = client.datasets.download_dataframe(id=avatars_dataset_id)
+   avatars_dataset = client.pandas_integration.download_dataframe(id=avatars_dataset_id)
    print(avatars_df.head())
 
 Launch a whole pipeline

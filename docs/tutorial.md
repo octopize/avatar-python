@@ -87,7 +87,7 @@ These can all be set using the `AvatarizationParameters` object that you can imp
 ```python
 from avatars.models import AvatarizationParameters
 
-parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
+parameters = AvatarizationParameters(dataset_id=dataset.id, k=20, ncp=7, seed=42)
 ```
 
 ### Launch an avatarization job
