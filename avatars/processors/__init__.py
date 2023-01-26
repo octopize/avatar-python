@@ -4,6 +4,7 @@ from avatars.processors.group_modalities import GroupModalitiesProcessor
 from avatars.processors.perturbation import PerturbationProcessor
 from avatars.processors.proportions import ProportionProcessor
 from avatars.processors.relative_difference import RelativeDifferenceProcessor
+from avatars.processors.to_categorical import ToCategoricalProcessor
 
 __all__ = [
     "DatetimeProcessor",
@@ -12,4 +13,5 @@ __all__ = [
     "PerturbationProcessor",
     "ProportionProcessor",
     "RelativeDifferenceProcessor",
+    "ToCategoricalProcessor ",
 ]

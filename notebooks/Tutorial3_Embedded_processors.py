@@ -6,6 +6,10 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.14.2
+#   kernelspec:
+#     display_name: .venv
+#     language: python
+#     name: python3
 # ---
 
 # # Tutorial 3: Using embedded processors
@@ -22,6 +26,10 @@ import os
 url = os.environ.get("AVATAR_BASE_URL")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
+
+url = "http://localhost:8000"
+username = "user_integration"
+password = "password_integration"
 
 # +
 # This is the client that you'll be using for all of your requests
@@ -181,6 +189,12 @@ avatars["Clump_Thickness"].hist()
 # ### Avatarization as categorical
 
 # +
+from avatars.processors import ToCategoricalProcessor
+
+processor = ToCategoricalProcessor(variables=["Clump_Thickness"])
+processed = processor.preprocess(df)
+
+dataset = client.pandas_integration.upload_dataframe(processed)
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(
@@ -195,6 +209,8 @@ job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
+avatars = processor.postprocess(df, avatars)
+
 # -
 
 print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
@@ -248,10 +264,11 @@ job = client.jobs.create_avatarization_job(
     )
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
-
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -
+
+job
 
 avatars.head()
 
