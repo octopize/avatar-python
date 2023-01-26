@@ -6,10 +6,6 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.14.2
-#   kernelspec:
-#     display_name: .venv
-#     language: python
-#     name: python3
 # ---
 
 # # Tutorial 3: Using embedded processors
@@ -210,7 +206,6 @@ job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 avatars = processor.postprocess(df, avatars)
-
 # -
 
 print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
