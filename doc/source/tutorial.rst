@@ -105,7 +105,7 @@ you can import from ``avatars.models`` like so
 
    from avatars.models import AvatarizationParameters
 
-   parameters = AvatarizationParameters(dataset_id=dataset.id, k=5, ncp=7, seed=42)
+   parameters = AvatarizationParameters(dataset_id=dataset.id, k=20, ncp=7, seed=42)
 
 Launch an avatarization job
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -24,7 +24,7 @@ typecheck:  ## Run the type checker
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
-	poetry run python ./bin/markdowncode.py ./docs/tutorial.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
+	poetry run python ./bin/markdowncode.py ./docs/* | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
 lci: generate-py lint-fix lint test-integration doc-build pip-requirements ## Apply the whole integration pipeline
@@ -32,7 +32,7 @@ lci: generate-py lint-fix lint test-integration doc-build pip-requirements ## Ap
 
 lint-fix: ## Fix linting
 	poetry run black avatars/ bin doc/source notebooks/ release.py
-	poetry run blacken-docs docs/tutorial.md
+	poetry run blacken-docs docs/*
 	poetry run isort avatars/ bin doc/source
 	poetry run jupyter nbconvert --clear-output --ClearMetadataPreprocessor.enabled=True --inplace notebooks/*.ipynb
 .PHONY: lint-fix
@@ -68,6 +68,7 @@ doc-build:  ## Build the docs
 	rm -rf $(DOC_OUTPUT_DIR)
 	mkdir -p $(DOC_OUTPUT_DIR)
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/how_to.rst docs/how_to.md
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
 	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)
