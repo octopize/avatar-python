@@ -23,9 +23,6 @@ url = os.environ.get("AVATAR_BASE_URL")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
-url = "http://localhost:8000"
-username = "user_integration"
-password = "password_integration"
 
 # +
 # This is the client that you'll be using for all of your requests
@@ -173,7 +170,7 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
-# Download the avatars as a pandas dataframe
+# Download the avat ars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -
 
@@ -261,8 +258,6 @@ job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -
-
-job
 
 avatars.head()
 
