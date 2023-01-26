@@ -5,6 +5,72 @@ import pandas as pd
 
 
 class ToCategoricalProcessor:
+    """Processor to model selected numeric variables as categorical variables.
+
+    Arguments
+    ---------
+        variables:
+            Continuous variables to transform to categorical
+
+    Keyword Arguments
+    -----------------
+        keep_continuous:
+            if `True`, continuous variables will be kept and
+        suffixed with `continuous_suffix`.
+        continuous_suffix:
+            suffix for the continuous variable created during preprocess.
+        category:
+            if `keep_continuous=True`, name of the new category, needed for some specific
+            avatarization cases with the use of group_modalities processor
+
+    Examples
+    --------
+    With `keep_continuous=False` it only convert the variable to object. 
+    By this you ensure to keep all values during the avatarization.
+    
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [1, 2, 7, 1],
+    ...        "variable_2": [1, 2, 7, 1]
+    ...        }
+    ...    )
+    >>> processor = ToCategoricalProcessor(variables = ["variable_1"])
+    >>> processor.preprocess(df).dtypes
+    variable_1    object
+    variable_2     int64
+    dtype: object
+    >>> avatar = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [2, 1, 4, 1],
+    ...        "variable_2": [3, 5, 4, 1],
+    ...        }
+    ...    )
+    >>> avatar["variable_1"] = avatar["variable_1"].astype('object')
+    >>> avatar.dtypes
+    variable_1    object
+    variable_2     int64
+    dtype: object
+    >>> processor.postprocess(df, avatar).dtypes
+    variable_1    int64
+    variable_2    int64
+    dtype: object
+
+    With `keep_continuous=True`, you duplicate the variable and keep it as continuous. 
+    This can be useful for other uses.
+
+    >>> df = pd.DataFrame(
+    ...    {
+    ...        "variable_1": [1, 2, 7, 1],
+    ...        "variable_2": [1, 2, 7, 1]
+    ...        }
+    ...    )
+    >>> processor = ToCategoricalProcessor(variables = ["variable_1"], keep_continuous=True)
+    >>> processor.preprocess(df).dtypes
+    variable_1          object
+    variable_2           int64
+    variable_1__cont     int64
+    dtype: object
+    """
     def __init__(
         self,
         variables: List[str],
@@ -13,27 +79,6 @@ class ToCategoricalProcessor:
         continuous_suffix: str = "__cont",
         category: str = "other",
     ):
-        """Processor to model selected numeric variables as categorical variables.
-
-        Arguments
-        ---------
-            variables:
-                Continuous variables to transform to categorical
-
-        Keyword Arguments
-        -----------------
-            keep_continuous:
-                if `True`, continuous variables will be kept and
-            suffixed with `continuous_suffix`.
-            continuous_suffix:
-                suffix for the continuous variable created during preprocess.
-            category:
-                if `keep_continuous=True`, name of the new category, needed for some specific
-                avatarization cases with the use of group_modalities processor
-
-        Examples
-        --------
-        """
         self.variables = variables
         self.keep_continuous = keep_continuous
         self.continuous_suffix = continuous_suffix

@@ -197,7 +197,6 @@ job = client.jobs.create_avatarization_job(
             k=20,
             dataset_id=dataset.id,
             imputation=ImputationParameters(method=ImputeMethod.mode),
-            to_categorical_threshold=20,
         )
     )
 )
