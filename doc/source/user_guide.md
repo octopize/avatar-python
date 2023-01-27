@@ -77,6 +77,7 @@ You can lunch an avatarization with some simple privacy and signal metrics.
 
 ```python
 from avatars.models import AvatarizationJobCreate, AvatarizationParameters
+
 job_create = AvatarizationJobCreate(parameters=parameters)
 job = client.jobs.create_full_avatarization_job(request=job_create)
 

@@ -89,3 +89,4 @@ from avatars.models import AvatarizationParameters
 
 parameters = AvatarizationParameters(dataset_id=dataset.id, k=20, ncp=7, seed=42)
 ```
+

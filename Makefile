@@ -24,7 +24,7 @@ typecheck:  ## Run the type checker
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
-	poetry run python ./bin/markdowncode.py ./docs/* | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
+	poetry run python ./bin/markdowncode.py  doc/source/**.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
 lci: generate-py lint-fix lint test-integration doc-build pip-requirements ## Apply the whole integration pipeline
@@ -32,7 +32,7 @@ lci: generate-py lint-fix lint test-integration doc-build pip-requirements ## Ap
 
 lint-fix: ## Fix linting
 	poetry run black avatars/ bin doc/source notebooks/ release.py
-	poetry run blacken-docs docs/*
+	poetry run blacken-docs doc/source/**.md
 	poetry run isort avatars/ bin doc/source
 	poetry run jupyter nbconvert --clear-output --ClearMetadataPreprocessor.enabled=True --inplace notebooks/*.ipynb
 .PHONY: lint-fix
