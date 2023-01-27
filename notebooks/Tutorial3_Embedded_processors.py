@@ -169,7 +169,7 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
-# Download the avat ars as a pandas dataframe
+# Download the avatars a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -
 
