@@ -52,6 +52,7 @@ class DatetimeProcessor:
         datetime_variables = filter(
             lambda col: source[col].dtype == "datetime64[ns]", source.columns
         )
+        
         epoch = np.datetime64(0, "Y")  # 0 years since epoch ==> epoch itself
 
         for name in datetime_variables:

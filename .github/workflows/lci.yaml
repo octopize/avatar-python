@@ -51,7 +51,7 @@ jobs:
       - name: Install app
         run: poetry install --no-interaction
 
-      - name: test
+      - name: Test
         run: 	poetry run pytest --doctest-modules avatars
 
       - name: Build doc
