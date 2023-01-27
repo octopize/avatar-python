@@ -67,8 +67,8 @@ doc-build:  ## Build the docs
 ##! the repercussions on the Github Actions script
 	rm -rf $(DOC_OUTPUT_DIR)
 	mkdir -p $(DOC_OUTPUT_DIR)
-	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst docs/tutorial.md
-	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/how_to.rst docs/how_to.md
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst doc/source/tutorial.md
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/user_guide.rst doc/source/user_guide.md
 	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
 	poetry run sphinx-multiversion $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)

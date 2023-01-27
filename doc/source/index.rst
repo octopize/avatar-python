@@ -15,7 +15,7 @@ Table of contents
 
    Installation <installation>
    Tutorial <tutorial>
-   How to <how_to>
+   User Guide <user_guide>
    API reference <api_reference>
    Changelog <changelog>
 

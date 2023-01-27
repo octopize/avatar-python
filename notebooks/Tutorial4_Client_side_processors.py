@@ -156,6 +156,8 @@ df["club_signing_date"] = pd.to_datetime(
     df["club_signing_date"], format="%Y-%m-%d %H:%M:%S"
 )
 
+df.dtypes
+
 # ### Proportions
 #
 # Variables may have relationships in which one or many variables to be represented as a proportion of another. In order to best preserve this type of relationships during avatarization, it is recommended to express such variables as proportions. To do so, the `proportion` processor can be used.
@@ -201,8 +203,10 @@ df = df.drop(columns=["penalty_misses"])
 
 # ### Run the pipeline
 
+df.dtypes
+
 # +
-# %%time
+# # %%time
 dataset = client.pandas_integration.upload_dataframe(df)
 
 result = client.pipelines.avatarization_pipeline_with_processors(

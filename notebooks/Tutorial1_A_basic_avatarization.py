@@ -83,12 +83,12 @@ for var in dataset.summary.stats:
     for stat in var:
         print(stat)
 
-# ## Creating and launching an avatarization job
+# ## Creating and launching an avatarization job with metrics
 
 # +
 job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(
-        parameters=AvatarizationParameters(k=5, dataset_id=dataset.id),
+        parameters=AvatarizationParameters(k=20, dataset_id=dataset.id),
     )
 )
 
@@ -131,10 +131,74 @@ print("*** Utility metrics ***")
 for metric in utility_metrics:
     print(metric)
 
+# ## Creating and launching an avatarization job without metrics
+
+# +
+avatarization_job = client.jobs.create_avatarization_job(
+    AvatarizationJobCreate(
+        parameters=AvatarizationParameters(k=20, dataset_id=dataset.id),
+    )
+)
+
+
+avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=10)
+print(job.status)
+print(job.result)  # there is no metrics
+
+# +
+from avatars.models import PrivacyMetricsJobCreate, PrivacyMetricsParameters
+
+privacy_job = client.jobs.create_privacy_metrics_job(
+    PrivacyMetricsJobCreate(
+        parameters=PrivacyMetricsParameters(
+            original_id=dataset.id,
+            unshuffled_avatars_id=job.result.sensitive_unshuffled_avatars_datasets.id,
+            closest_rate_percentage_threshold=0.3,
+            closest_rate_ratio_threshold=0.3,
+            known_variables=[
+                "sepal.length",
+                "petal.length",
+            ],
+            target="variety",
+            seed=42,
+        ),
+    )
+)
+
+privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=10)
+
+print(privacy_job.status)
+print(privacy_job.result)
+
+# +
+from avatars.models import SignalMetricsJobCreate, SignalMetricsParameters
+
+signal_job = client.jobs.create_signal_metrics_job(
+    SignalMetricsJobCreate(
+        parameters=SignalMetricsParameters(
+            original_id=dataset.id,
+            avatars_id=job.result.avatars_dataset.id,
+            seed=42,
+        ),
+    )
+)
+
+signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=10)
+print(signal_job.status)
+print(signal_job.result)
+# -
+
 # ## Retrieving the avatarization report
 
 # +
-report = client.reports.create_report(ReportCreate(job_id=job.id), timeout=10)
+report = client.reports.create_report(
+    ReportCreate(
+        avatarization_job_id=avatarization_job.id,
+        privacy_job_id=privacy_job.id,
+        signal_job_id=signal_job.id,
+    ),
+    timeout=10,
+)
 result = client.reports.download_report(id=report.id)
 
 with open("./my_avatarization_report.pdf", "wb") as f:

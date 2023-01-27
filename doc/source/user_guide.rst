@@ -1,5 +1,5 @@
-How to
-======
+User guide
+==========
 
 How to reset your password
 --------------------------
@@ -77,15 +77,36 @@ as a ``.csv`` file
    with open(filename, "r") as f:
        dataset = client.datasets.create_dataset(request=f)
 
-How to launch an avatarization job
-----------------------------------
+How to launch an avatarization with metric
+------------------------------------------
+
+You can lunch an avatarization with some simple privacy and signal
+metrics.
+
+.. code:: python
+
+   from avatars.models import AvatarizationJobCreate, AvatarizationParameters
+   job_create = AvatarizationJobCreate(parameters=parameters)
+   job = client.jobs.create_full_avatarization_job(request=job_create)
+
+   job = client.jobs.get_avatarization_job(id=job.id)
+   print(job.result.privacy_metrics)
+   print(job.result.avatars)
+
+You can retrieve the result and the status of the job (if it is running,
+has stopped, etc…). This call will block until the job is done or a
+timeout is expired. You can call this function as often as you want.
+
+You can modify this timeout by passing the ``timeout`` keyword to
+``get_avatarization_job``.
+
+How to launch an avatarization job only
+---------------------------------------
 
 You can launch a simple avatarization job without any metrics
 computation.
 
 .. code:: python
-
-   from avatars.models import AvatarizationJobCreate, AvatarizationParameters
 
    job = client.jobs.create_avatarization_job(
        AvatarizationJobCreate(
@@ -166,7 +187,7 @@ You can evaluate your avatarization on different criteria:
    print(signal_job.result)
 
 See
-[here](https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb
+`here <https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb>`__
 a jupyter notebook example to evaluate the quality of an avatarization.
 
 See `our technical
@@ -196,6 +217,49 @@ You need to run privacy and signal metrics with the arguments
    result = client.reports.download_report(id=report.id)
    with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
        f.write(result)
+
+How to launch a whole pipeline
+------------------------------
+
+We have implemented the concept of pipelines.
+
+.. code:: python
+
+   from avatars.models import AvatarizationPipelineCreate
+   from avatars.processors import ProportionProcessor
+
+   df = pd.DataFrame(
+       {
+           "variable_1": [100, 150, 120, 100],
+           "variable_2": [10, 30, 30, 22],
+           "variable_3": [30, 60, 30, 35],
+           "variable_4": [60, 60, 60, 65],
+       }
+   )
+
+   dataset = client.pandas_integration.upload_dataframe(df)
+
+
+   proportion_processor = ProportionProcessor(
+       variable_names=["variable_2", "variable_3", "variable_4"],
+       reference="variable_1",
+       sum_to_one=True,
+   )
+
+   result = client.pipelines.avatarization_pipeline_with_processors(
+       AvatarizationPipelineCreate(
+           avatarization_job_create=AvatarizationJobCreate(
+               parameters=AvatarizationParameters(dataset_id=dataset.id, k=3),
+           ),
+           processors=[proportion_processor],
+           df=df,
+       )
+   )
+
+See :doc:`processors <processors>`__ for more information about the
+processor. See `this
+notebook <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb>`__
+for an advanced usage of the pipeline.
 
 How to download an avatar dataset
 ---------------------------------
