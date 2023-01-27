@@ -1,4 +1,4 @@
-.github/workflows/lci.yamlon:
+on:
   push:
     branches: [$default-branch]
     paths:
