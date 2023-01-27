@@ -15,9 +15,11 @@ from httpx import ReadTimeout, WriteTimeout
 from pydantic import BaseModel
 from toolz.dicttoolz import valfilter
 
+from avatars import __version__
 from avatars.api import (
     DEFAULT_TIMEOUT,
     Auth,
+    Compatibility,
     Datasets,
     Health,
     Jobs,
@@ -71,6 +73,7 @@ class ApiClient:
         self.base_url = base_url
 
         self.auth = Auth(self)
+        self.compatibility = Compatibility(self)
         self.datasets = Datasets(self)
         self.health = Health(self)
         self.jobs = Jobs(self)
@@ -82,7 +85,7 @@ class ApiClient:
         self.pipelines = Pipelines(self)
 
         self.timeout = timeout
-        self._headers = {"User-Agent": "avatar-python"}
+        self._headers = {"User-Agent": f"avatar-python/{__version__}"}
 
     def authenticate(
         self, username: str, password: str, timeout: Optional[int] = None
@@ -186,7 +189,7 @@ class ApiClient:
                 error_msg = "Internal error"
 
             raise Exception(
-                f"Got error in HTTP request: {method} {url}. {result.status_code} {error_msg}"
+                f"Got error in HTTP request: {method} {url}. Error status {result.status_code} - {error_msg}"
             )
 
         if result.headers["content-type"] == "application/json":

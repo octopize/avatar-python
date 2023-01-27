@@ -169,7 +169,7 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
-# Download the avatars as a pandas dataframe
+# Download the avatars a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -
 
@@ -181,13 +181,18 @@ avatars["Clump_Thickness"].hist()
 # ### Avatarization as categorical
 
 # +
+from avatars.processors import ToCategoricalProcessor
+
+processor = ToCategoricalProcessor(to_categorical_threshold=20)
+processed = processor.preprocess(df)
+
+dataset = client.pandas_integration.upload_dataframe(processed)
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(
             k=20,
             dataset_id=dataset.id,
             imputation=ImputationParameters(method=ImputeMethod.mode),
-            to_categorical_threshold=20,
         )
     )
 )
@@ -195,6 +200,7 @@ job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
+avatars = processor.postprocess(df, avatars)
 # -
 
 print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
@@ -248,7 +254,6 @@ job = client.jobs.create_avatarization_job(
     )
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
-
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -

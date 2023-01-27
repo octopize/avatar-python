@@ -113,7 +113,6 @@ test-tutorial: generate-py ## Verify that all tutorials run without errors
 
 	SYSTEM=$$(uname -s)
 	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
-	echo $$XARGS; echo $$SYSTEM; echo $$XARGS
 	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=http://localhost:8000 AVATAR_USERNAME=user_integration AVATAR_PASSWORD=password_integration $(abspath $(VENV_NAME))/bin/python3.9 {{}} > /dev/null && echo \"Succesfully ran {{}}\""
 .PHONY: test-tutorial
 

@@ -6,7 +6,7 @@ import itertools
 import logging
 import time
 from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -19,11 +19,13 @@ from avatars.models import (
     ClusterStats,
     ColumnDetail,
     ColumnType,
+    CompatibilityResponse,
     CreateDataset,
     CreateUser,
     Dataset,
     ExplainedVariance,
     ForgottenPasswordRequest,
+    GenericJob,
     JobStatus,
     Login,
     LoginResponse,
@@ -41,6 +43,7 @@ from avatars.models import (
     SignalMetricsJob,
     SignalMetricsJobCreate,
     SignalMetricsParameters,
+    User,
 )
 
 if TYPE_CHECKING:
@@ -135,7 +138,7 @@ class Auth:
         request: ForgottenPasswordRequest,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         kwargs = {
             "method": "post",
             "url": f"/login/forgotten_password",
@@ -147,12 +150,31 @@ class Auth:
         request: ResetPasswordRequest,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         kwargs = {
             "method": "post",
             "url": f"/login/reset_password",
         }
         return self.client.request(**kwargs, verify_auth=False, json=request, timeout=timeout)  # type: ignore
+
+
+class Compatibility:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def is_client_compatible(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> CompatibilityResponse:
+        """Verify if the client is compatible with the API."""
+        kwargs = {
+            "method": "get",
+            "url": f"/check_client",
+        }
+        return CompatibilityResponse(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore
+        )
 
 
 class Datasets:
@@ -224,7 +246,7 @@ class Datasets:
         id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Get a dataset's correlations."""
         kwargs = {
             "method": "get",
@@ -237,7 +259,7 @@ class Datasets:
         id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Download a dataset."""
         kwargs = {
             "method": "get",
@@ -254,7 +276,7 @@ class Health:
         self,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Verify server health."""
         kwargs = {
             "method": "get",
@@ -266,7 +288,7 @@ class Health:
         self,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Verify server health."""
         kwargs = {
             "method": "get",
@@ -278,7 +300,7 @@ class Health:
         self,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Verify connection to the db health."""
         kwargs = {
             "method": "get",
@@ -296,7 +318,7 @@ class Jobs:
         nb_days: Optional[int] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> List[GenericJob]:
         """Retrieve all jobs executed by the current user.
 
         Jobs are filtered by execution date, by default only the last 5 days are displayed,
@@ -309,7 +331,10 @@ class Jobs:
                 nb_days=nb_days,
             ),
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
+        return [
+            GenericJob(**item)
+            for item in self.client.request(**kwargs, timeout=timeout)
+        ]
 
     def create_full_avatarization_job(
         self,
@@ -457,7 +482,7 @@ class Metrics:
         dataset_id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Get the contributions of the dataset variables within the fitted space."""
         kwargs = {
             "method": "get",
@@ -509,7 +534,7 @@ class Reports:
         id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> Any:
         """Download a report."""
         kwargs = {
             "method": "get",
@@ -547,7 +572,7 @@ class Users:
         username: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> List[User]:
         """Get users, optionally filtering them by username or email.
 
         This endpoint is protected with rate limiting.
@@ -560,14 +585,14 @@ class Users:
                 username=username,
             ),
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
+        return [User(**item) for item in self.client.request(**kwargs, timeout=timeout)]
 
     def create_user(
         self,
         request: CreateUser,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> User:
         """Create a user.
 
         This endpoint is protected with rate limiting.
@@ -576,35 +601,37 @@ class Users:
             "method": "post",
             "url": f"/users",
         }
-        return self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
+        return User(
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
+        )
 
     def get_me(
         self,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
+    ) -> User:
         """Get my own user."""
         kwargs = {
             "method": "get",
             "url": f"/users/me",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
+        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore
 
     def get_user(
         self,
-        username: str,
+        id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> None:
-        """Get a user by username.
+    ) -> User:
+        """Get a user by id.
 
         This endpoint is protected with rate limiting.
         """
         kwargs = {
             "method": "get",
-            "url": f"/users/{username}",
+            "url": f"/users/{id}",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
+        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore
 
 
 class PandasIntegration:
