@@ -183,7 +183,7 @@ avatars["Clump_Thickness"].hist()
 # +
 from avatars.processors import ToCategoricalProcessor
 
-processor = ToCategoricalProcessor(variables=["Clump_Thickness"])
+processor = ToCategoricalProcessor(to_categorical_threshold=20)
 processed = processor.preprocess(df)
 
 dataset = client.pandas_integration.upload_dataframe(processed)
