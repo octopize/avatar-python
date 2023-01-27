@@ -3,14 +3,16 @@ from typing import List
 import numpy as np
 import pandas as pd
 
+from avatars.lib.continuous_threshold import get_continuous_under_threshold
+
 
 class ToCategoricalProcessor:
     """Processor to model selected numeric variables as categorical variables.
 
     Arguments
     ---------
-        variables:
-            Continuous variables to transform to categorical
+        to_categorical_threshold:
+            threshold of the number of distinct value to consider a continuous variable as categorical.
 
     Keyword Arguments
     -----------------
@@ -25,16 +27,16 @@ class ToCategoricalProcessor:
 
     Examples
     --------
-    With `keep_continuous=False` it only convert the variable to object. 
+    With `keep_continuous=False` it only convert the variable to object.
     By this you ensure to keep all values during the avatarization.
-    
+
     >>> df = pd.DataFrame(
     ...    {
-    ...        "variable_1": [1, 2, 7, 1],
+    ...        "variable_1": [1, 7, 7, 1],
     ...        "variable_2": [1, 2, 7, 1]
     ...        }
     ...    )
-    >>> processor = ToCategoricalProcessor(variables = ["variable_1"])
+    >>> processor = ToCategoricalProcessor(to_categorical_threshold = 2)
     >>> processor.preprocess(df).dtypes
     variable_1    object
     variable_2     int64
@@ -42,7 +44,7 @@ class ToCategoricalProcessor:
     >>> avatar = pd.DataFrame(
     ...    {
     ...        "variable_1": [2, 1, 4, 1],
-    ...        "variable_2": [3, 5, 4, 1],
+    ...        "variable_2": [2, 1, 4, 1]
     ...        }
     ...    )
     >>> avatar["variable_1"] = avatar["variable_1"].astype('object')
@@ -55,31 +57,32 @@ class ToCategoricalProcessor:
     variable_2    int64
     dtype: object
 
-    With `keep_continuous=True`, you duplicate the variable and keep it as continuous. 
+    With `keep_continuous=True`, you duplicate the variable and keep it as continuous.
     This can be useful for other uses.
 
     >>> df = pd.DataFrame(
     ...    {
-    ...        "variable_1": [1, 2, 7, 1],
+    ...        "variable_1": [1, 7, 7, 1],
     ...        "variable_2": [1, 2, 7, 1]
     ...        }
     ...    )
-    >>> processor = ToCategoricalProcessor(variables = ["variable_1"], keep_continuous=True)
+    >>> processor = ToCategoricalProcessor(to_categorical_threshold=2, keep_continuous=True)
     >>> processor.preprocess(df).dtypes
     variable_1          object
     variable_2           int64
     variable_1__cont     int64
     dtype: object
     """
+
     def __init__(
         self,
-        variables: List[str],
+        to_categorical_threshold: List[str],
         *,
         keep_continuous: bool = False,
         continuous_suffix: str = "__cont",
         category: str = "other",
     ):
-        self.variables = variables
+        self.to_categorical_threshold = to_categorical_threshold
         self.keep_continuous = keep_continuous
         self.continuous_suffix = continuous_suffix
         self.category = category
@@ -95,12 +98,10 @@ class ToCategoricalProcessor:
         -------
             DataFrame: transformed dataframe
         """
-        unknown_variables = [elem for elem in self.variables if elem not in df.columns]
-        if unknown_variables:
-            raise ValueError(
-                "Expected variables in DataFrame, " f"got {unknown_variables} instead.",
-            )
         df = df.copy()
+        self.variables = get_continuous_under_threshold(
+            df, threshold=self.to_categorical_threshold
+        )
 
         # Perform the transformation by creating a new column cont_suffix where
         # NAs are kept as NAs.

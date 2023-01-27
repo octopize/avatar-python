@@ -11,7 +11,7 @@ def original() -> pd.DataFrame:
     df = pd.DataFrame(
         {
             "variable_1": [1, 2, 3, np.nan],
-            "variable_2": [1, 2, 3, np.nan],
+            "variable_2": [1, 2, 2, np.nan],
         }
     )
     return df
@@ -23,7 +23,7 @@ def test_preprocess_to_categorical_keep_continuous(original: pd.DataFrame) -> No
     expected["variable_2__cont"] = expected["variable_2"]
     expected = expected.astype({"variable_2": "object"})
 
-    processor = ToCategoricalProcessor(variables=["variable_2"], keep_continuous=True)
+    processor = ToCategoricalProcessor(to_categorical_threshold=2, keep_continuous=True)
     df = processor.preprocess(df=original)
 
     pd_testing.assert_frame_equal(expected, df)
@@ -34,7 +34,7 @@ def test_preprocess_to_categorical(original: pd.DataFrame) -> None:
     expected = original.copy()
     expected = expected.astype({"variable_2": "object"})
 
-    processor = ToCategoricalProcessor(variables=["variable_2"])
+    processor = ToCategoricalProcessor(to_categorical_threshold=2)
     processed = processor.preprocess(df=original)
 
     pd_testing.assert_frame_equal(expected, processed)
@@ -43,7 +43,9 @@ def test_preprocess_to_categorical(original: pd.DataFrame) -> None:
 def test_processor_to_categorical(original: pd.DataFrame) -> None:
     """Verify that pre- and post-process, with keep_continuous=False, gives original."""
     expected = original.copy()
-    processor = ToCategoricalProcessor(variables=["variable_2"], keep_continuous=False)
+    processor = ToCategoricalProcessor(
+        to_categorical_threshold=2, keep_continuous=False
+    )
     processed_df = processor.preprocess(df=original)
     df = processor.postprocess(source=original, dest=processed_df)
 
@@ -53,7 +55,7 @@ def test_processor_to_categorical(original: pd.DataFrame) -> None:
 def test_processor_to_categorical_keep_continuous(original: pd.DataFrame) -> None:
     """Verify that pre- and post-process, with keep_continuous=True, gives original."""
     expected = original.copy()
-    processor = ToCategoricalProcessor(variables=["variable_2"], keep_continuous=True)
+    processor = ToCategoricalProcessor(to_categorical_threshold=2, keep_continuous=True)
     processed_df = processor.preprocess(df=original)
     df = processor.postprocess(source=original, dest=processed_df)
     pd_testing.assert_frame_equal(df, expected)
@@ -68,20 +70,14 @@ def test_postprocessed_with_category(original: pd.DataFrame) -> None:
         {
             "variable_1": [1, 2, 3, np.nan],
             "variable_2": ["other", "other", "other", np.nan],
-            "variable_2__cont": [1, 2, 3, np.nan],
+            "variable_2__cont": [1, 2, 2, np.nan],
         }
     )
     processor = ToCategoricalProcessor(
-        variables=["variable_2"], keep_continuous=True, category="other"
+        to_categorical_threshold=2, keep_continuous=True, category="other"
     )
     _ = processor.preprocess(
         df=original
     )  # Needed to to add self.continuous_variables to the model
     df = processor.postprocess(source=original, dest=transformed)
     pd_testing.assert_series_equal(df["variable_2"], original["variable_2"])
-
-
-def test_preprocess_wrong_variables(original: pd.DataFrame) -> None:
-    processor = ToCategoricalProcessor(variables=["wrong_variable"])
-    with pytest.raises(ValueError, match="Expected variables in DataFrame, got *"):
-        processor.preprocess(df=original)

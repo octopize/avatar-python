@@ -23,7 +23,6 @@ url = os.environ.get("AVATAR_BASE_URL")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
-
 # +
 # This is the client that you'll be using for all of your requests
 from avatars.client import ApiClient
