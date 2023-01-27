@@ -9,7 +9,7 @@ install:  ## Install the stack
 	poetry install --sync
 .PHONY: install
 
-release-and-push:
+release-and-push: ## Prepare a new client release
 	poetry run python release.py --bump-type patch
 .PHONY: release-and-push
 
@@ -78,11 +78,6 @@ doc-build:  ## Build the docs
 
 TUTORIAL_REQUIREMENTS := requirements-tutorial.txt
 VENV_NAME := notebooks/env
-
-
-install-tutorial: ## Install the packages used for the tutorials
-	poetry install --with tutorial --sync
-.PHONY: install-tutorial
 
 
 pip-requirements: ## Export the packages for the tutorials as a pip requirements.txt file
