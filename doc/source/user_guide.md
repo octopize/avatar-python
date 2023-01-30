@@ -30,7 +30,7 @@ client.reset_password("yourmail@mail.com", "new_password", "new_password", "toke
 
 You’ll receive an email confirming your password was reset.
 
-## How to log in to the server 
+## How to log in to the doc/source/user_guide.md server 
 
 ```python
 import os
@@ -268,7 +268,7 @@ result = client.pipelines.avatarization_pipeline_with_processors(
 )
 ```
 
-See [processors](processors.htmlnotebooks/Tutorial4_Client_side_processors.py) for more information about the processor. 
+See [processors](processors.html) for more information about the processor. 
 See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb) for an advanced usage of the pipeline.
 
 ## How to download an avatar dataset 

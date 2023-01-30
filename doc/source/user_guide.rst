@@ -292,9 +292,8 @@ We have implemented the concept of pipelines.
        )
    )
 
-See
-`processors <processors.htmlnotebooks/Tutorial4_Client_side_processors.py>`__
-for more information about the processor. See `this
+See `processors <processors.html>`__ for more information about the
+processor. See `this
 notebook <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb>`__
 for an advanced usage of the pipeline.
 
