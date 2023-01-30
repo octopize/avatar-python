@@ -237,7 +237,7 @@ result = client.pipelines.avatarization_pipeline_with_processors(
 )
 ```
 
-See [processors](processors.rst) for more information about the processor. 
+See [processors](processors.html) for more information about the processor. 
 See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb) for an advanced usage of the pipeline.
 
 ## How to download an avatar dataset 

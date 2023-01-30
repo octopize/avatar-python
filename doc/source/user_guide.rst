@@ -86,6 +86,7 @@ metrics.
 .. code:: python
 
    from avatars.models import AvatarizationJobCreate, AvatarizationParameters
+
    job_create = AvatarizationJobCreate(parameters=parameters)
    job = client.jobs.create_full_avatarization_job(request=job_create)
 
@@ -256,7 +257,7 @@ We have implemented the concept of pipelines.
        )
    )
 
-See :doc:`processors <processors>`__ for more information about the
+See `processors <processors.html>`__ for more information about the
 processor. See `this
 notebook <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb>`__
 for an advanced usage of the pipeline.
