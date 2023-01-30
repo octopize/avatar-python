@@ -178,6 +178,37 @@ See [our technical documentation](https://docs.octopize.io/docs/understanding/Pr
 for more details on all signal metrics.
 
 
+### How to set the avatarization parameters
+
+See our [Avatarization parameters](https://docs.octopize.io/docs/using/running) documentation for more information about the parameters.
+
+These can all be set using the `AvatarizationParameters` object that you can import from `avatars.models`:
+
+```python
+from avatars.models import (
+    AvatarizationParameters,
+    ExcludeCategoricalParameters,
+    ImputationParameters,
+    ExcludeCategoricalMethod,
+)
+
+
+imputation = ImputationParameters(method="mode", k=8, training_fraction=0.3)
+exclude_parameters = ExcludeCategoricalParameters(
+    exclude_cardinality_threshold=10,
+    exclude_replacement_strategy=ExcludeCategoricalMethod(
+        "exclude_replacement_strategy"
+    ),
+)
+parameters = AvatarizationParameters(
+    dataset_id=dataset.id,
+    k=25,
+    ncp=10,
+    imputation=imputation,
+    exclude_categorical=exclude_parameters,
+)
+```
+
 ## How to generate the report
 
 You can create an avatarization report. 
@@ -229,7 +260,7 @@ proportion_processor = ProportionProcessor(
 result = client.pipelines.avatarization_pipeline_with_processors(
     AvatarizationPipelineCreate(
         avatarization_job_create=AvatarizationJobCreate(
-            parameters=AvatarizationParameters(dataset_id=dataset.id, k=3),
+            parameters=AvatarizationParameters(dataset_id=dataset.id, k=20),
         ),
         processors=[proportion_processor],
         df=df,
@@ -237,7 +268,7 @@ result = client.pipelines.avatarization_pipeline_with_processors(
 )
 ```
 
-See [processors](processors.html) for more information about the processor. 
+See [processors](processors.htmlnotebooks/Tutorial4_Client_side_processors.py) for more information about the processor. 
 See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb) for an advanced usage of the pipeline.
 
 ## How to download an avatar dataset 

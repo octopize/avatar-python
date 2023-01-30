@@ -195,6 +195,41 @@ See `our technical
 documentation <https://docs.octopize.io/docs/understanding/Privacy/>`__
 for more details on all signal metrics.
 
+How to set the avatarization parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See our `Avatarization
+parameters <https://docs.octopize.io/docs/using/running>`__
+documentation for more information about the parameters.
+
+These can all be set using the ``AvatarizationParameters`` object that
+you can import from ``avatars.models``:
+
+.. code:: python
+
+   from avatars.models import (
+       AvatarizationParameters,
+       ExcludeCategoricalParameters,
+       ImputationParameters,
+       ExcludeCategoricalMethod,
+   )
+
+
+   imputation = ImputationParameters(method="mode", k=8, training_fraction=0.3)
+   exclude_parameters = ExcludeCategoricalParameters(
+       exclude_cardinality_threshold=10,
+       exclude_replacement_strategy=ExcludeCategoricalMethod(
+           "exclude_replacement_strategy"
+       ),
+   )
+   parameters = AvatarizationParameters(
+       dataset_id=dataset.id,
+       k=25,
+       ncp=10,
+       imputation=imputation,
+       exclude_categorical=exclude_parameters,
+   )
+
 How to generate the report
 --------------------------
 
@@ -250,15 +285,16 @@ We have implemented the concept of pipelines.
    result = client.pipelines.avatarization_pipeline_with_processors(
        AvatarizationPipelineCreate(
            avatarization_job_create=AvatarizationJobCreate(
-               parameters=AvatarizationParameters(dataset_id=dataset.id, k=3),
+               parameters=AvatarizationParameters(dataset_id=dataset.id, k=20),
            ),
            processors=[proportion_processor],
            df=df,
        )
    )
 
-See `processors <processors.html>`__ for more information about the
-processor. See `this
+See
+`processors <processors.htmlnotebooks/Tutorial4_Client_side_processors.py>`__
+for more information about the processor. See `this
 notebook <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb>`__
 for an advanced usage of the pipeline.
 
