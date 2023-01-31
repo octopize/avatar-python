@@ -11,7 +11,6 @@ If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:
 
 <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
-
 ```javascript
 from avatars.client import ApiClient
 
@@ -38,7 +37,6 @@ import os
 # This is the client that you'll be using for all of your requests
 from avatars.client import ApiClient
 
-# The following are not necessary to run avatar but are used in this tutorial
 import pandas as pd
 import io
 
@@ -49,9 +47,9 @@ client.authenticate(
 )
 ```
 
-## How to upload a dataframe
+## How to upload a data
 
-As a pandas dataframe
+### As a `pandas` dataframe
 
 ```python
 import pandas as pd
@@ -62,7 +60,7 @@ df = pd.read_csv("fixtures/iris.csv")
 
 dataset = client.pandas_integration.upload_dataframe(df)
 ```
-as a ``.csv`` file
+### As a `.csv` file
 
 ```python
 filename = "fixtures/iris.csv"
@@ -71,9 +69,9 @@ with open(filename, "r") as f:
     dataset = client.datasets.create_dataset(request=f)
 ```
 
-## How to launch an avatarization with metric
+## How to launch an avatarization with metrics
 
-You can lunch an avatarization with some simple privacy and signal metrics.
+You can launch an avatarization with some simple privacy and signal metrics.
 
 ```python
 from avatars.models import AvatarizationJobCreate, AvatarizationParameters
@@ -112,7 +110,7 @@ print(job.result)
 
 ## How to launch privacy metrics
 
-You can launch a privacy metrics with two datasets, the original and the anonymized.
+You can launch a privacy metrics job with two datasets, the original and the anonymized.
 
 You need to enter some parameters to launch some specifics privacy metrics.
 
@@ -213,7 +211,6 @@ parameters = AvatarizationParameters(
 
 You can create an avatarization report. 
 
-You need to run privacy and signal metrics with the arguments ``persistance_job_id=job.id`` before running the report.
 
 ```python
 from avatars.models import ReportCreate
@@ -268,12 +265,12 @@ result = client.pipelines.avatarization_pipeline_with_processors(
 )
 ```
 
-See [processors](processors.html) for more information about the processor. 
+See [processors](processors.html) for more information about the processors. 
 See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb) for an advanced usage of the pipeline.
 
 ## How to download an avatar dataset 
 
-As a pandas dataframe. 
+### As a pandas dataframe
 The dtypes will be copied over from the original dataframe.
 
 Note that the order of the lines have been shuffled, which means that the link between original and avatar individuals cannot be made.
@@ -286,7 +283,7 @@ avatar_df = client.pandas_integration.download_dataframe(avatars_dataset_id)
 print(avatar_df.head())
 ```
 
-As a ``.csv`` file as string.
+### As a `.csv` formatted string
 
 ```python
 result = job.result
