@@ -33,8 +33,8 @@ valid once, and expires after 24 hours. Use it to reset your password:
 
 You’ll receive an email confirming your password was reset.
 
-How to log in to the doc/source/user_guide.md server
-----------------------------------------------------
+How to log in to the server
+---------------------------
 
 .. code:: python
 

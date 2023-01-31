@@ -29,7 +29,7 @@ client.reset_password("yourmail@mail.com", "new_password", "new_password", "toke
 
 You’ll receive an email confirming your password was reset.
 
-## How to log in to the doc/source/user_guide.md server 
+## How to log in to the server 
 
 ```python
 import os
