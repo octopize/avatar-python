@@ -54,5 +54,5 @@ jobs:
       - name: Test
         run: 	poetry run pytest --doctest-modules avatars
 
-      - name: Build doc
+      - name: Build latest doc version
         run: make doc-fast
