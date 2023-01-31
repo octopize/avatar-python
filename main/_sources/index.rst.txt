@@ -13,10 +13,10 @@ Table of contents
 .. toctree::
    :maxdepth: 1
 
+   Installation <installation>
    Tutorial <tutorial>
-   Client <client_and_api>
-   Models <models>
-   Processors <processors>
+   User Guide <user_guide>
+   API reference <api_reference>
    Changelog <changelog>
 
 Our main docs are at https://docs.octopize.io/
