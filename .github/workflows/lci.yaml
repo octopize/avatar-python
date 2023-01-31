@@ -1,0 +1,58 @@
+on:
+  push:
+    branches: [$default-branch]
+    paths:
+      - "avatars/**"
+  pull_request:
+    paths:
+      - "avatars/**"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Load cached Poetry installation
+        uses: actions/cache@v3
+        with:
+          path: ~/.local # the path depends on the OS
+          key: poetry-3 # increment to reset cache
+
+      # will not install if it's already there (see previous cache step)
+      - name: Install poetry
+        uses: snok/install-poetry@v1.3.3
+        with:
+          version: 1.3.2
+          virtualenvs-create: true
+          virtualenvs-in-project: false
+          installer-parallel: true
+          virtualenvs-path: ~/.venv
+
+      # install deps (use cache if poetry.lock did not change)
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      - name: Install app
+        run: poetry install --no-interaction
+
+      - name: Test
+        run: 	poetry run pytest --doctest-modules avatars
+
+      - name: Build latest doc version
+        run: make doc-fast
