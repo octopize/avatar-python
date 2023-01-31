@@ -33,8 +33,8 @@ valid once, and expires after 24 hours. Use it to reset your password:
 
 You’ll receive an email confirming your password was reset.
 
-How to log in to the server
----------------------------
+How to log in to the doc/source/user_guide.md server
+----------------------------------------------------
 
 .. code:: python
 
@@ -43,7 +43,6 @@ How to log in to the server
    # This is the client that you'll be using for all of your requests
    from avatars.client import ApiClient
 
-   # The following are not necessary to run avatar but are used in this tutorial
    import pandas as pd
    import io
 
@@ -53,10 +52,11 @@ How to log in to the server
        username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password")
    )
 
-How to upload a dataframe
--------------------------
+How to upload a data
+--------------------
 
-As a pandas dataframe
+As a ``pandas`` dataframe
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -68,7 +68,8 @@ As a pandas dataframe
 
    dataset = client.pandas_integration.upload_dataframe(df)
 
-as a ``.csv`` file
+As a ``.csv`` file
+~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -77,10 +78,10 @@ as a ``.csv`` file
    with open(filename, "r") as f:
        dataset = client.datasets.create_dataset(request=f)
 
-How to launch an avatarization with metric
-------------------------------------------
+How to launch an avatarization with metrics
+-------------------------------------------
 
-You can lunch an avatarization with some simple privacy and signal
+You can launch an avatarization with some simple privacy and signal
 metrics.
 
 .. code:: python
@@ -124,8 +125,8 @@ computation.
 How to launch privacy metrics
 -----------------------------
 
-You can launch a privacy metrics with two datasets, the original and the
-anonymized.
+You can launch a privacy metrics job with two datasets, the original and
+the anonymized.
 
 You need to enter some parameters to launch some specifics privacy
 metrics.
@@ -235,9 +236,6 @@ How to generate the report
 
 You can create an avatarization report.
 
-You need to run privacy and signal metrics with the arguments
-``persistance_job_id=job.id`` before running the report.
-
 .. code:: python
 
    from avatars.models import ReportCreate
@@ -293,15 +291,19 @@ We have implemented the concept of pipelines.
    )
 
 See `processors <processors.html>`__ for more information about the
-processor. See `this
+processors. See `this
 notebook <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb>`__
 for an advanced usage of the pipeline.
 
 How to download an avatar dataset
 ---------------------------------
 
-As a pandas dataframe. The dtypes will be copied over from the original
-dataframe.
+.. _as-a-pandas-dataframe-1:
+
+As a pandas dataframe
+~~~~~~~~~~~~~~~~~~~~~
+
+The dtypes will be copied over from the original dataframe.
 
 Note that the order of the lines have been shuffled, which means that
 the link between original and avatar individuals cannot be made.
@@ -314,7 +316,8 @@ the link between original and avatar individuals cannot be made.
    avatar_df = client.pandas_integration.download_dataframe(avatars_dataset_id)
    print(avatar_df.head())
 
-As a ``.csv`` file as string.
+As a ``.csv`` formatted string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
