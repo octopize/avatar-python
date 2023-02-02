@@ -1,8 +1,6 @@
 # User guide
-                            
 
 ## How to reset your password
-
 
 **NB**: This section is only available if the use of emails to login is
 activated in the global configuration. It is not the case by default.
@@ -11,12 +9,14 @@ If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:
 
 <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  -->
+
 ```javascript
 from avatars.client import ApiClient
 
 client = ApiClient(base_url=os.environ.get("BASE_URL"))
 client.forgotten_password("yourmail@mail.com")
 ```
+
 You’ll then receive an email containing a token. This token is only
 valid once, and expires after 24 hours. Use it to reset your password:
 
@@ -29,7 +29,7 @@ client.reset_password("yourmail@mail.com", "new_password", "new_password", "toke
 
 You’ll receive an email confirming your password was reset.
 
-## How to log in to the server 
+## How to log in to the server
 
 ```python
 import os
@@ -47,6 +47,23 @@ client.authenticate(
 )
 ```
 
+## How to check compatibility
+
+After authentication, you can check whether you can communicate with the server with
+
+```python
+# Verify that we can connect to the API server
+client.health.get_health()
+```
+
+You can also check if the version of your client is compatible with the server you are running, and see if it is up-to-date.
+We frequently release new versions of the server and client that provide bugfixes and feature improvements, so be on the look out for these updates.
+
+```python
+# Verify that the client is compatible.
+client.compatibility.is_client_compatible()
+```
+
 ## How to upload a data
 
 ### As a `pandas` dataframe
@@ -60,6 +77,7 @@ df = pd.read_csv("fixtures/iris.csv")
 
 dataset = client.pandas_integration.upload_dataframe(df)
 ```
+
 ### As a `.csv` file
 
 ```python
@@ -92,7 +110,7 @@ You can modify this timeout by passing the `timeout` keyword to `get_avatarizati
 
 ## How to launch an avatarization job only
 
-You can launch a simple avatarization job without any metrics computation. 
+You can launch a simple avatarization job without any metrics computation.
 
 ```python
 job = client.jobs.create_avatarization_job(
@@ -147,9 +165,9 @@ for more details on all privacy metrics.
 
 You can evaluate your avatarization on different criteria:
 
--  univariate
--  bivariate
--  multivariate
+- univariate
+- bivariate
+- multivariate
 
 ```python
 from avatars.models import SignalMetricsJobCreate, SignalMetricsParameters
@@ -174,7 +192,6 @@ a jupyter notebook example to evaluate the quality of an avatarization.
 
 See [our technical documentation](https://docs.octopize.io/docs/understanding/Privacy/)
 for more details on all signal metrics.
-
 
 ### How to set the avatarization parameters
 
@@ -209,8 +226,7 @@ parameters = AvatarizationParameters(
 
 ## How to generate the report
 
-You can create an avatarization report. 
-
+You can create an avatarization report.
 
 ```python
 from avatars.models import ReportCreate
@@ -265,12 +281,13 @@ result = client.pipelines.avatarization_pipeline_with_processors(
 )
 ```
 
-See [processors](processors.html) for more information about the processors. 
+See [processors](processors.html) for more information about the processors.
 See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb) for an advanced usage of the pipeline.
 
-## How to download an avatar dataset 
+## How to download an avatar dataset
 
 ### As a pandas dataframe
+
 The dtypes will be copied over from the original dataframe.
 
 Note that the order of the lines have been shuffled, which means that the link between original and avatar individuals cannot be made.
@@ -293,8 +310,7 @@ avatar_df = pd.read_csv(io.StringIO(avatars_dataset))
 print(avatar_df.head())
 ```
 
-
-## ⚠ Sensitive ⚠  how to access the results unshuffled
+## ⚠ Sensitive ⚠ how to access the results unshuffled
 
 You might want to access the avatars dataset prior to being shuffled.
 **WARNING**: There is no protection at all, as the linkage between the

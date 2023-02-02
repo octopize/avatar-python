@@ -26,6 +26,9 @@ client.authenticate(
 
 # Verify that we can connect to the API server
 client.health.get_health()
+
+# Verify compatibility with the server
+client.compatibility.is_client_compatible()
 ```
 
 The Python client library is fully type-annotated. This will let you use interface hints from your IDE.
@@ -62,4 +65,3 @@ print(f"got privacy metrics : {metrics}")
 df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 print(df.head())
 ```
-

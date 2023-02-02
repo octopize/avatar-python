@@ -51,15 +51,15 @@ DOC_SOURCE_DIR := doc/source
 
 doc: doc-build  ## Build and open the docs
 	current_branch=$$(git branch --show-current)
-	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
 .PHONY: doc
 
 doc-fast: ## Build and open the current version of the docs only
 	current_branch=$$(git branch --show-current)
 	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)/$$current_branch
-	echo $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
-	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html 
-.PHONY: doc-fast 
+	echo $(DOC_OUTPUT_DIR)/$$current_branch/index.html
+	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
+.PHONY: doc-fast
 
 doc-build:  ## Build the docs
 ##! This script is also used to deploy to production.
@@ -86,7 +86,7 @@ pip-requirements: ## Export the packages for the tutorials as a pip requirements
 .PHONY: pip-requirements
 
 
-pip-install-tutorial: ## Install the dependecies of the tutorial via pip
+pip-install-tutorial: pip-requirements ## Install the dependecies of the tutorial via pip
 	python3.9 -m venv $(VENV_NAME)
 	"$(abspath $(VENV_NAME))/bin/pip3" install -r $(TUTORIAL_REQUIREMENTS)
 	"$(abspath $(VENV_NAME))/bin/pip3" install . ## Installing the avatars package

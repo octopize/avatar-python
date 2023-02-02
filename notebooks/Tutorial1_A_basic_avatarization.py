@@ -27,17 +27,19 @@ from avatars.client import ApiClient
 from avatars.models import AvatarizationJobCreate, AvatarizationParameters
 from avatars.models import ReportCreate
 
-# The following are not necessary to run avatar but are used in this tutorial
 import pandas as pd
 import io
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=url)
 client.authenticate(username=username, password=password)
+# -
 
 # Verify that we can connect to the API server
 client.health.get_health()
-# -
+
+# Verify that the client is compatible.
+client.compatibility.is_client_compatible()
 
 # ## Loading data
 
