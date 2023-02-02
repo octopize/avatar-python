@@ -56,7 +56,7 @@ After authentication, you can check whether you can communicate with the server 
 client.health.get_health()
 ```
 
-You can also check if your current version of your client is compatible with the server you are running, and see if it is up-to-date.
+You can also check if the version of your client is compatible with the server you are running, and see if it is up-to-date.
 We frequently release new versions of the server and client that provide bugfixes and feature improvements, so be on the look out for these updates.
 
 ```python
