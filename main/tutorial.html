@@ -303,6 +303,9 @@ password.</p>
 
 <span class="c1"># Verify that we can connect to the API server</span>
 <span class="n">client</span><span class="o">.</span><span class="n">health</span><span class="o">.</span><span class="n">get_health</span><span class="p">()</span>
+
+<span class="c1"># Verify compatibility with the server</span>
+<span class="n">client</span><span class="o">.</span><span class="n">compatibility</span><span class="o">.</span><span class="n">is_client_compatible</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>The Python client library is fully type-annotated. This will let you use

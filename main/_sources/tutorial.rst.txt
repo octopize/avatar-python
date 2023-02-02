@@ -33,6 +33,9 @@ password.
    # Verify that we can connect to the API server
    client.health.get_health()
 
+   # Verify compatibility with the server
+   client.compatibility.is_client_compatible()
+
 The Python client library is fully type-annotated. This will let you use
 interface hints from your IDE.
 

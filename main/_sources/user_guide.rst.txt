@@ -52,6 +52,28 @@ How to log in to the server
        username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password")
    )
 
+How to check compatibility
+--------------------------
+
+After authentication, you can check whether you can communicate with the
+server with
+
+.. code:: python
+
+   # Verify that we can connect to the API server
+   client.health.get_health()
+
+You can also check if your current version of your client is compatible
+with the server you are running, and see if it is up-to-date. We
+frequently release new versions of the server and client that provide
+bugfixes and feature improvements, so be on the look out for these
+updates.
+
+.. code:: python
+
+   # Verify that the client is compatible.
+   client.compatibility.is_client_compatible()
+
 How to upload a data
 --------------------
 
