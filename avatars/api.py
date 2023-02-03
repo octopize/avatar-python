@@ -655,6 +655,7 @@ class PandasIntegration:
                     for i, e in zip(df_types.index, df_types)
                 ]
             ),
+            timeout=timeout,
         )
 
         return dataset
