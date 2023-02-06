@@ -195,9 +195,9 @@ def release(bump_type: BumpType = typer.Option(BumpType.PATCH)) -> Any:
     )
     current_branch, _ = proc.communicate()
 
-    if not current_branch == "main":
+    if not current_branch.strip() == "main":
         typer.echo(
-            f"You can only run this on the 'main' branch. You are on {current_branch}."
+            f"You can only run this on the 'main' branch. You are on '{current_branch}'."
         )
         raise typer.Exit(1)
 
