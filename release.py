@@ -78,6 +78,7 @@ def bump_version_in_file(
         new_content = get_bumped_text_with_bumped_version(bump_type, content, key)
         file.seek(0)
         file.write(new_content)
+        file.truncate()  # remove new line
 
 
 def get_version_from_file(filename: Path) -> Optional[Match]:  # type: ignore[type-arg]
