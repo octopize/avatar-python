@@ -8,11 +8,11 @@
 - Mark `AvatarizationParameters.to_categorical_threshold` as deprecated
 - `client.jobs.create_avatarization_job` behaviour does not compute metrics anymore. Use `client.jobs.create_full_avatarization_job` instead
 - `AvatarizationResult` now has `signal_metrics` and `privacy_metrics` properties as `Optional`
-- Verify dataset size on upload. This will prevent you from upload a dataset that is too big to handle for the server
+- Verify dataset size on upload. This will prevent you from uploading a dataset that is too big to handle for the server
 - The `direct_match_protection` privacy metrics got split and renamed to `column_direct_match_protection` and `row_direct_match_protection`
 - `dataset_id` from `AvatarizationParameters` is now required
 - `dataset_id` from `AvatarizationJob`,`SignalMetricsJob` and `PrivacyMetricsJob` got removed
-- `client.users.get_user` now accepts and `id` rather than a `username`
+- `client.users.get_user` now accepts an `id` rather than a `username`
 - `SignalMetricsParameters.job_id` got renamed to `persistance_job_id`
 - `CreateUser` does not take `is_email_confirmed` as parameter anymore
 - Processors get imported from `avatars.processors` instead of `avatars.processor.{processor_name}`
