@@ -9,7 +9,7 @@
 - `client.jobs.create_avatarization_job` behaviour does not compute metrics anymore. Use `client.jobs.create_full_avatarization_job` instead
 - `AvatarizationResult` now has `signal_metrics` and `privacy_metrics` properties as `Optional`
 - Verify dataset size on upload. This will prevent you from uploading a dataset that is too big to handle for the server
-- The `direct_match_protection` privacy metrics got split and renamed to `column_direct_match_protection` and `row_direct_match_protection`
+- The `direct_match_protection` privacy metrics got renamed to `column_direct_match_protection`
 - `dataset_id` from `AvatarizationParameters` is now required
 - `dataset_id` from `AvatarizationJob`,`SignalMetricsJob` and `PrivacyMetricsJob` got removed
 - `client.users.get_user` now accepts an `id` rather than a `username`
@@ -26,7 +26,7 @@
 - feat: add `nb_dimensions` property to `Dataset`
 - feat: add `User` object
 - feat: use `patch` in `client.datasets.create_dataset` to patch dataset columns on upload
-- feat: add `correlation_protection_rate`, `inference_continuous`, `inference_categorical`, and `closest_rate` privacy metrics
+- feat: add `correlation_protection_rate`, `inference_continuous`, `inference_categorical`, `row_direct_match_protection` and `closest_rate` privacy metrics
 - feat: add `known_variables`, `target`, `closest_rate_percentage_threshold`, and `closest_rate_ratio_threshold` to `PrivacyMetricsParameters`
 - docs: add multiple versions of the documentation
 - feat: each user now belongs to an organization and gets a new field: `organization_id`
