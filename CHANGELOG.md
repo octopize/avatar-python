@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.3.0
+
+### BREAKING
+
+- `ReportCreate` now takes required `avatarization_job_id`, `signal_job_id`, and `privacy_job_id` parameters
+- Mark `AvatarizationParameters.to_categorical_threshold` as deprecated
+- `client.jobs.create_avatarization_job` behaviour does not compute metrics anymore. Use `client.jobs.create_full_avatarization_job` instead
+- `AvatarizationResult` now has `signal_metrics` and `privacy_metrics` properties as `Optional`
+- Verify dataset size on upload. This will prevent you from uploading a dataset that is too big to handle for the server
+- The `direct_match_protection` privacy metrics got renamed to `column_direct_match_protection`
+- `dataset_id` from `AvatarizationParameters` is now required
+- `dataset_id` from `AvatarizationJob`,`SignalMetricsJob` and `PrivacyMetricsJob` got removed
+- `client.users.get_user` now accepts an `id` rather than a `username`
+- `SignalMetricsParameters.job_id` got renamed to `persistance_job_id`
+- `CreateUser` does not take `is_email_confirmed` as parameter anymore
+- Processors get imported from `avatars.processors` instead of `avatars.processor.{processor_name}`
+  - Example: `from avatars.processors.expected_mean import ExpectedMeanProcessor` becomes `from avatars.processors import ExpectedMeanProcessor`
+
+### Others
+
+- feat: add more metrics and graphs to report
+- feat: add `client.compatibility.is_client_compatible` to verify client-server compatibility
+- feat: enable to avatarize without calculating metrics using `client.jobs.create_avatarization_job`
+- feat: add `nb_dimensions` property to `Dataset`
+- feat: add `User` object
+- feat: use `patch` in `client.datasets.create_dataset` to patch dataset columns on upload
+- feat: add `correlation_protection_rate`, `inference_continuous`, `inference_categorical`, `row_direct_match_protection` and `closest_rate` privacy metrics
+- feat: add `known_variables`, `target`, `closest_rate_percentage_threshold`, and `closest_rate_ratio_threshold` to `PrivacyMetricsParameters`
+- docs: add multiple versions of the documentation
+- feat: each user now belongs to an organization and gets a new field: `organization_id`
+- fix: fixed a bug where computing privacy metrics with distinct missing values was impossible
+
 ## 0.2.2
 
 - Improve type hints of the method
