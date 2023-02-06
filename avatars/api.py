@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.16
+# API Version : 0.5.0
 
 
 import itertools
@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar, 
 
 import numpy as np
 import pandas as pd
+from pydantic import BaseModel
 
 from avatars.models import (
     AvatarizationJob,
@@ -54,6 +55,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
+
 
 T = TypeVar("T")
 
@@ -185,6 +187,7 @@ class Datasets:
         self,
         request: Union[StringIO, BytesIO],
         *,
+        patch: Optional[PatchDataset] = None,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
         """Create a dataset from file upload.
@@ -195,8 +198,16 @@ class Datasets:
             "method": "post",
             "url": f"/datasets",
         }
+        if patch:
+            d = patch.dict()
+            types = [("types", e["type"].value) for e in d["columns"]]
+            labels = [("labels", e["label"]) for e in d["columns"]]
+            params = types + labels
+        else:
+            params = None
+
         return Dataset(
-            **self.client.request(**kwargs, file=request, timeout=timeout)  # type: ignore
+            **self.client.request(**kwargs, params=params, file=request, timeout=timeout)  # type: ignore
         )
 
     def get_dataset(
@@ -645,16 +656,15 @@ class PandasIntegration:
         request.to_csv(buffer, index=False)
         buffer.seek(0)
 
-        dataset = self.client.datasets.create_dataset(buffer, timeout=timeout)
         df_types = request.dtypes
-        self.client.datasets.patch_dataset(
-            id=dataset.id,
-            request=PatchDataset(
-                columns=[
-                    ColumnDetail(type=to_common_type(str(e)), label=i)
-                    for i, e in zip(df_types.index, df_types)
-                ]
-            ),
+        patch = PatchDataset(
+            columns=[
+                ColumnDetail(type=to_common_type(str(e)), label=i)
+                for i, e in zip(df_types.index, df_types)
+            ]
+        )
+        dataset = self.client.datasets.create_dataset(
+            buffer, patch=patch, timeout=timeout
         )
 
         return dataset

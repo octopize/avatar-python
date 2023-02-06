@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.4.16
+# API Version : 0.5.0
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -138,7 +138,7 @@ class ApiClient:
             raise Exception("You are not authenticated.")
 
         # Remove params if they are set to None (allow handling of optionals)
-        if params:
+        if isinstance(params, dict):
             params = valfilter(lambda x: x is not None, params)
 
         # Custom encoder because UUID is not JSON serializable by httpx
