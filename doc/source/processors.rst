@@ -6,7 +6,7 @@ These processors are used to process data before and after avatarization.
 
 Table of contents
 -----------------
-.. autosummary:: 
+.. autosummary::
    :toctree: avatars
    :template: processors.rst
 
