@@ -148,8 +148,14 @@ class ApiClient:
 
         files_arg = self._get_file_argument(file)
 
+        # Forcing that property to allow self-signed certificates.
+        # Even while using self-signed certificate streams remain encrypted.
+        should_verify_ssl = kwargs.get("verify_ssl", True)
+
         with httpx.Client(
-            timeout=timeout or self.timeout, base_url=self.base_url
+            timeout=timeout or self.timeout,
+            base_url=self.base_url,
+            verify=should_verify_ssl,
         ) as client:
             try:
                 result = client.request(
