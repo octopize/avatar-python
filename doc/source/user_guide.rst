@@ -1,11 +1,30 @@
 User guide
 ==========
 
+How to setup your email account
+-------------------------------
+
+*This section is only needed if the use of emails to login is
+activated in the global configuration. It is not the case by default.*
+
+At the moment, you have to get in touch with your Octopize contact so that they can
+create your account.
+
+Our current email provider is AWS. They need to verify an email address before our platform
+can send emails to it.
+
+You'll thus get an email from AWS asking you to verify your email by clicking on a link.
+Once you have verified your email address by clicking on that link,
+you can follow the steps in the section about :ref:`reset_password_label`.
+
+
+.. _reset_password_label:
+
 How to reset your password
 --------------------------
 
-**NB**: This section is only available if the use of emails to login is
-activated in the global configuration. It is not the case by default.
+*This section is only available if the use of emails to login is
+activated in the global configuration. It is not the case by default.*
 
 If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:
