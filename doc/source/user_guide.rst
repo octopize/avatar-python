@@ -7,7 +7,7 @@ How to setup your email account
 *This section is only needed if the use of emails to login is
 activated in the global configuration. It is not the case by default.*
 
-At this moment, you have to get in touch with your Octopize contact so that they can
+At the moment, you have to get in touch with your Octopize contact so that they can
 create your account.
 
 Our current email provider is AWS. They need to verify an email address before our platform
