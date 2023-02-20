@@ -281,10 +281,22 @@
         <article role="main">
           <section id="user-guide">
 <h1>User guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">#</a></h1>
+<section id="how-to-setup-your-email-account">
+<h2>How to setup your email account<a class="headerlink" href="#how-to-setup-your-email-account" title="Permalink to this headline">#</a></h2>
+<p><em>This section is only needed if the use of emails to login is
+activated in the global configuration. It is not the case by default.</em></p>
+<p>At the moment, you have to get in touch with your Octopize contact so that they can
+create your account.</p>
+<p>Our current email provider is AWS. They need to verify an email address before our platform
+can send emails to it.</p>
+<p>You’ll thus get an email from AWS asking you to verify your email by clicking on a link.
+Once you have verified your email address by clicking on that link,
+you can follow the steps in the section about <a class="reference internal" href="#reset-password-label"><span class="std std-ref">How to reset your password</span></a>.</p>
+</section>
 <section id="how-to-reset-your-password">
-<h2>How to reset your password<a class="headerlink" href="#how-to-reset-your-password" title="Permalink to this headline">#</a></h2>
-<p><strong>NB</strong>: This section is only available if the use of emails to login is
-activated in the global configuration. It is not the case by default.</p>
+<span id="reset-password-label"></span><h2>How to reset your password<a class="headerlink" href="#how-to-reset-your-password" title="Permalink to this headline">#</a></h2>
+<p><em>This section is only available if the use of emails to login is
+activated in the global configuration. It is not the case by default.</em></p>
 <p>If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:</p>
 <!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --><div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span><span class="w"></span>
@@ -663,6 +675,7 @@ to make it safe.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">User guide</a><ul>
+<li><a class="reference internal" href="#how-to-setup-your-email-account">How to setup your email account</a></li>
 <li><a class="reference internal" href="#how-to-reset-your-password">How to reset your password</a></li>
 <li><a class="reference internal" href="#how-to-log-in-to-the-server">How to log in to the server</a></li>
 <li><a class="reference internal" href="#how-to-check-compatibility">How to check compatibility</a></li>
