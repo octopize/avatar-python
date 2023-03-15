@@ -16,3 +16,5 @@ Table of contents
    processors.PerturbationProcessor
    processors.ProportionProcessor
    processors.RelativeDifferenceProcessor
+   processors.ToCategoricalProcessor
+   processors.InterRecordCumulatedDifferenceProcessor

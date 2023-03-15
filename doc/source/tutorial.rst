@@ -25,11 +25,11 @@ password.
    import io
 
    # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
-   client = ApiClient(base_url=os.environ.get("BASE_URL"))
+   client = ApiClient(base_url=os.environ.get("AVATAR_BASE_URL"))
    client.authenticate(
-       username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password")
+       username=os.environ.get("AVATAR_USERNAME"),
+       password=os.environ.get("AVATAR_PASSWORD"),
    )
-
    # Verify that we can connect to the API server
    client.health.get_health()
 
@@ -50,8 +50,11 @@ This is all you need to run and evaluate an avatarization:
    from avatars.models import AvatarizationJobCreate, AvatarizationParameters
    import os
 
-   client = ApiClient(base_url=os.environ.get("BASE_URL"))
-   client.authenticate(username="username", password="strong_password")
+   client = ApiClient(base_url=os.environ.get("AVATAR_BASE_URL"))
+   client.authenticate(
+       username=os.environ.get("AVATAR_USERNAME"),
+       password=os.environ.get("AVATAR_PASSWORD"),
+   )
 
    dataset = client.datasets.create_dataset(open("fixtures/iris.csv", "r"))
 

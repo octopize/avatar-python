@@ -16,6 +16,6 @@ __all__ = [
     "PerturbationProcessor",
     "ProportionProcessor",
     "RelativeDifferenceProcessor",
-    "ToCategoricalProcessor ",
+    "ToCategoricalProcessor",
     "InterRecordCumulatedDifferenceProcessor",
 ]

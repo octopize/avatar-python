@@ -6,14 +6,14 @@ class InterRecordCumulatedDifferenceProcessor:
 
     This processor can be used only on data where there are several records for each individual.
     By this transformation, a variable whose value is cumulative will be expressed as:
-        - a variable containing its first value.
-        - a variable containing the difference from the previous record
+    - a variable containing its first value.
+    - a variable containing the difference from the previous record
 
     This processor is not suitable for data where the target or the id variable contain missing
     values.
 
     Keyword Arguments
-    ---------
+    -----------------
         id_variable:
             variable indicating which individual each row belongs to
         target_variable:

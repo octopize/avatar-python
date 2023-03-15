@@ -41,9 +41,10 @@ import pandas as pd
 import io
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
-client = ApiClient(base_url=os.environ.get("BASE_URL"))
+client = ApiClient(base_url=os.environ.get("AVATAR_BASE_URL"))
 client.authenticate(
-    username="username", password=os.environ.get("AVATAR_PASSWORD", "strong_password")
+    username=os.environ.get("AVATAR_USERNAME"),
+    password=os.environ.get("AVATAR_PASSWORD"),
 )
 ```
 
