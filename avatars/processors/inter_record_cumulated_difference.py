@@ -52,7 +52,7 @@ class InterRecordCumulatedDifferenceProcessor:
     ...    "value_difference": [25, 2, 0, 105, 0, 40],
     ... })
     >>> processor.postprocess(df, preprocessed_df)
-        id  value
+       id  value
     0   1   1025
     1   2  20042
     2   1   1000
