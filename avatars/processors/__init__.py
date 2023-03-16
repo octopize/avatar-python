@@ -4,6 +4,9 @@ from avatars.processors.group_modalities import GroupModalitiesProcessor
 from avatars.processors.inter_record_cumulated_difference import (
     InterRecordCumulatedDifferenceProcessor,
 )
+from avatars.processors.inter_record_range_difference import (
+    InterRecordRangeDifferenceProcessor,
+)
 from avatars.processors.perturbation import PerturbationProcessor
 from avatars.processors.proportions import ProportionProcessor
 from avatars.processors.relative_difference import RelativeDifferenceProcessor
@@ -17,5 +20,6 @@ __all__ = [
     "ProportionProcessor",
     "RelativeDifferenceProcessor",
     "ToCategoricalProcessor",
+    "InterRecordRangeDifferenceProcessor",
     "InterRecordCumulatedDifferenceProcessor",
 ]
