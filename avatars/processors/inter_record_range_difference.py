@@ -54,7 +54,7 @@ class InterRecordRangeDifferenceProcessor:
     ...     new_difference_variable_name="value_difference",
     ... )
     >>> processor.preprocess(df)
-        id  range_value  first_value  value_difference
+       id  range_value  first_value  value_difference
     0   1            1            6               0.0
     1   2            4           10               2.0
     2   1            1            6               0.0
@@ -73,7 +73,7 @@ class InterRecordRangeDifferenceProcessor:
     ...     }
     ... )
     >>> processor.postprocess(df, preprocessed_df)
-        id  start   end
+       id  start   end
     0   1    7.0   8.0
     1   2   14.0  18.0
     2   1    6.0   7.0
