@@ -3,9 +3,10 @@ name: Publish documentation
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
-    paths:
-      - 'doc/source/**'
+#    branches: [ main ]
+    branches: [ orc/fix ]
+#    paths:
+#      - 'doc/source/**'
 jobs:
   build-docs:
     runs-on: ubuntu-latest
