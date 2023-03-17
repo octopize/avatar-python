@@ -3,8 +3,8 @@ name: Publish documentation
 on:
   workflow_dispatch:
   push:
-   branches: [ main ]
-   paths:
+    branches: [ main ]
+    paths:
      - 'doc/source/**'
 jobs:
   build-docs:
