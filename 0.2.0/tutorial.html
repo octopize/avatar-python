@@ -280,9 +280,9 @@ main docs at <a class="reference external" href="https://docs.octopize.io">https
 <a class="reference external" href="https://github.com/octopize/avatar-python/releases">https://github.com/octopize/avatar-python/releases</a></p>
 <p>Install the package by pointing to the .whl file (replace with correct
 version below).</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 <span class="c1"># or, if you&#39;re using poetry (recommended)</span>
-poetry add https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
+poetry<span class="w"> </span>add<span class="w"> </span>https://github.com/octopize/avatar-python/releases/download/0.1.16/avatars-0.1.16-py3-none-any.whl
 </pre></div>
 </div>
 </section>
@@ -584,18 +584,18 @@ to make it safe.</p>
 activated in the global configuration. It is not the case by default.</p>
 <p>If you forgot your password or if you need to set one, first call the
 forgotten_password endpoint:</p>
-<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --><div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span><span class="w"></span>
+<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --><div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span>
 
-<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;BASE_URL&quot;</span><span class="p">))</span><span class="w"></span>
-<span class="nx">client</span><span class="p">.</span><span class="nx">forgotten_password</span><span class="p">(</span><span class="s2">&quot;yourmail@mail.com&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;BASE_URL&quot;</span><span class="p">))</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">forgotten_password</span><span class="p">(</span><span class="s2">&quot;yourmail@mail.com&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You’ll then receive an email containing a token. This token is only
 valid once, and expires after 24 hours. Use it to reset your password:</p>
-<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span><span class="w"></span>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span>
 
-<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;BASE_URL&quot;</span><span class="p">))</span><span class="w"></span>
-<span class="nx">client</span><span class="p">.</span><span class="nx">reset_password</span><span class="p">(</span><span class="s2">&quot;yourmail@mail.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;new_password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;new_password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;token-received-by-mail&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;BASE_URL&quot;</span><span class="p">))</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">reset_password</span><span class="p">(</span><span class="s2">&quot;yourmail@mail.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;new_password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;new_password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;token-received-by-mail&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>You’ll receive an email confirming your password was reset.</p>
