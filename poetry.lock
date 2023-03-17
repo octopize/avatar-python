@@ -728,14 +728,14 @@ pyflakes = ">=3.0.0,<3.1.0"
 
 [[package]]
 name = "fonttools"
-version = "4.39.0"
+version = "4.39.2"
 description = "Tools to manipulate font files"
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "fonttools-4.39.0-py3-none-any.whl", hash = "sha256:f5e764e1fd6ad54dfc201ff32af0ba111bcfbe0d05b24540af74c63db4ed6390"},
-    {file = "fonttools-4.39.0.zip", hash = "sha256:909c104558835eac27faeb56be5a4c32694192dca123d073bf746ce9254054af"},
+    {file = "fonttools-4.39.2-py3-none-any.whl", hash = "sha256:85245aa2fd4cf502a643c9a9a2b5a393703e150a6eaacc3e0e84bb448053f061"},
+    {file = "fonttools-4.39.2.zip", hash = "sha256:e2d9f10337c9e3b17f9bce17a60a16a885a7d23b59b7f45ce07ea643e5580439"},
 ]
 
 [package.extras]
@@ -1167,19 +1167,19 @@ test = ["codecov", "coverage", "ipykernel (>=6.14)", "mypy", "paramiko", "pre-co
 
 [[package]]
 name = "jupyter-core"
-version = "5.2.0"
+version = "5.3.0"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_core-5.2.0-py3-none-any.whl", hash = "sha256:4bdc2928c37f6917130c667d8b8708f20aee539d8283c6be72aabd2a4b4c83b0"},
-    {file = "jupyter_core-5.2.0.tar.gz", hash = "sha256:1407cdb4c79ee467696c04b76633fc1884015fa109323365a6372c8e890cc83f"},
+    {file = "jupyter_core-5.3.0-py3-none-any.whl", hash = "sha256:d4201af84559bc8c70cead287e1ab94aeef3c512848dde077b7684b54d67730d"},
+    {file = "jupyter_core-5.3.0.tar.gz", hash = "sha256:6db75be0c83edbf1b7c9f91ec266a9a24ef945da630f3120e1a0046dc13713fc"},
 ]
 
 [package.dependencies]
 platformdirs = ">=2.5"
-pywin32 = {version = ">=1.0", markers = "sys_platform == \"win32\" and platform_python_implementation != \"PyPy\""}
+pywin32 = {version = ">=300", markers = "sys_platform == \"win32\" and platform_python_implementation != \"PyPy\""}
 traitlets = ">=5.3"
 
 [package.extras]
@@ -1213,14 +1213,14 @@ test = ["click", "coverage", "pre-commit", "pytest (>=7.0)", "pytest-asyncio (>=
 
 [[package]]
 name = "jupyter-server"
-version = "2.4.0"
+version = "2.5.0"
 description = "The backend—i.e. core services, APIs, and REST endpoints—to Jupyter web applications."
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jupyter_server-2.4.0-py3-none-any.whl", hash = "sha256:cc22792281bfb0131a728414f28ae74883b44ad6d009971aa975cae9bcc650de"},
-    {file = "jupyter_server-2.4.0.tar.gz", hash = "sha256:f31f0ba2c3c44f07143bfa03fb07dd0253f857eb63f0c26f2fea955f04a49765"},
+    {file = "jupyter_server-2.5.0-py3-none-any.whl", hash = "sha256:e6bc1e9e96d7c55b9ce9699ff6cb9a910581fe7349e27c40389acb67632e24c0"},
+    {file = "jupyter_server-2.5.0.tar.gz", hash = "sha256:9fde612791f716fd34d610cd939704a9639643744751ba66e7ee8fdc9cead07e"},
 ]
 
 [package.dependencies]
