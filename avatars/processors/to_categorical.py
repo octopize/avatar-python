@@ -76,7 +76,7 @@ class ToCategoricalProcessor:
 
     def __init__(
         self,
-        to_categorical_threshold: List[str],
+        to_categorical_threshold: int,
         *,
         keep_continuous: bool = False,
         continuous_suffix: str = "__cont",

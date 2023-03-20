@@ -15,7 +15,7 @@ release-and-push: ## Prepare a new client release
 
 ##@ Tests
 
-test: typecheck test-integration ## Run all the tests
+test: typecheck  ## Run all the tests
 	poetry run pytest --doctest-modules avatars
 .PHONY: test
 
@@ -27,7 +27,7 @@ test-integration: ## Do a simple integration test
 	poetry run python ./bin/markdowncode.py  doc/source/**.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
-lci: generate-py lint-fix lint test-integration doc-build pip-requirements ## Apply the whole integration pipeline
+lci: generate-py lint-fix lint test test-integration doc-build pip-requirements ## Apply the whole integration pipeline
 .PHONY: lci
 
 lint-fix: ## Fix linting
@@ -37,7 +37,7 @@ lint-fix: ## Fix linting
 	poetry run jupyter nbconvert --clear-output --ClearMetadataPreprocessor.enabled=True --inplace notebooks/*.ipynb
 .PHONY: lint-fix
 
-lint: ## Lint source files
+lint: typecheck ## Lint source files
 	poetry run bandit -r avatars -c bandit.yaml
 	poetry run flake8 .
 .PHONY: lint

@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.0
+# API Version : 0.5.1
 
 
 import itertools
@@ -344,7 +344,7 @@ class Jobs:
         }
         return [
             GenericJob(**item)
-            for item in self.client.request(**kwargs, timeout=timeout)
+            for item in self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
         ]
 
     def create_full_avatarization_job(
@@ -596,7 +596,7 @@ class Users:
                 username=username,
             ),
         }
-        return [User(**item) for item in self.client.request(**kwargs, timeout=timeout)]
+        return [User(**item) for item in self.client.request(**kwargs, timeout=timeout)]  # type: ignore[arg-type]
 
     def create_user(
         self,
@@ -652,11 +652,12 @@ class PandasIntegration:
     def upload_dataframe(
         self, request: "pd.DataFrame", *, timeout: Optional[int] = DEFAULT_TIMEOUT
     ) -> Dataset:
+        df_types = request.dtypes
         buffer = StringIO()
         request.to_csv(buffer, index=False)
         buffer.seek(0)
+        del request
 
-        df_types = request.dtypes
         patch = PatchDataset(
             columns=[
                 ColumnDetail(type=to_common_type(str(e)), label=i)
@@ -732,7 +733,7 @@ class Pipelines:
             request.avatarization_job_create
         )
         avatarization_job = self.client.jobs.get_avatarization_job(
-            avatarization_job.id,
+            str(avatarization_job.id),
             timeout=timeout,
             per_request_timeout=per_request_timeout,
         )
@@ -750,7 +751,7 @@ class Pipelines:
         # Download the dataframe, postprocess it and upload the new dataframe
         sensitive_unshuffled_avatars = (
             self.client.pandas_integration.download_dataframe(
-                avatarization_job.result.sensitive_unshuffled_avatars_datasets.id,
+                str(avatarization_job.result.sensitive_unshuffled_avatars_datasets.id),
                 timeout=timeout,
             )
         )
@@ -785,10 +786,12 @@ class Pipelines:
 
         # Get the job results
         signal_job = self.client.jobs.get_signal_metrics(
-            signal_job.id, timeout=timeout, per_request_timeout=per_request_timeout
+            str(signal_job.id), timeout=timeout, per_request_timeout=per_request_timeout
         )
         privacy_job = self.client.jobs.get_privacy_metrics(
-            privacy_job.id, timeout=timeout, per_request_timeout=per_request_timeout
+            str(privacy_job.id),
+            timeout=timeout,
+            per_request_timeout=per_request_timeout,
         )
         if signal_job.status == JobStatus.failure:
             raise Exception(

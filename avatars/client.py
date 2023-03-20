@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.0
+# API Version : 0.5.1
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -150,7 +150,7 @@ class ApiClient:
 
         # Forcing that property to allow self-signed certificates.
         # Even while using self-signed certificate streams remain encrypted.
-        should_verify_ssl = kwargs.get("verify_ssl", True)
+        should_verify_ssl = bool(kwargs.get("verify_ssl", True))
 
         with httpx.Client(
             timeout=timeout or self.timeout,
