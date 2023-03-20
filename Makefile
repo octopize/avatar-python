@@ -5,6 +5,10 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
+AVATAR_BASE_URL ?= "http://localhost:8000"
+AVATAR_USERNAME ?= "user_integration"
+AVATAR_PASSWORD ?= "password_integration"
+
 install:  ## Install the stack
 	poetry install --sync
 .PHONY: install
@@ -24,7 +28,7 @@ typecheck:  ## Run the type checker
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
-	poetry run python ./bin/markdowncode.py  doc/source/**.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
+	poetry run python ./bin/markdowncode.py  doc/source/**.md | AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME="user_integration" AVATAR_PASSWORD="password_integration" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
 lci: generate-py lint-fix lint doc-build pip-requirements test test-integration ## Apply the whole integration pipeline
@@ -94,7 +98,7 @@ pip-install-tutorial: pip-requirements ## Install the dependecies of the tutoria
 
 
 notebook: pip-install-tutorial ## Start the tutorial notebooks
-	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL="http://localhost:8000" AVATAR_USERNAME="user_integration" AVATAR_PASSWORD="password_integration" jupyter notebook notebooks
+	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL="http://localhost:8000" AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) jupyter notebook notebooks
 .PHONY: notebook
 
 
@@ -103,10 +107,6 @@ generate-py:  ## Generate .py files from notebooks
 	poetry run black notebooks/*.py
 .PHONY: generate-py
 
-
-AVATAR_BASE_URL ?= "http://localhost:8000"
-AVATAR_USERNAME ?= "user_integration"
-AVATAR_PASSWORD ?= "password_integration"
 
 test-tutorial: generate-py ## Verify that all tutorials run without errors
 	echo "You must install the pip venv first. Run make pip-install-tutorial."
