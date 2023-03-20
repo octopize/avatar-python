@@ -27,7 +27,7 @@ test-integration: ## Do a simple integration test
 	poetry run python ./bin/markdowncode.py  doc/source/**.md | BASE_URL="http://localhost:8000" PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
-lci: generate-py lint-fix lint test test-integration doc-build pip-requirements ## Apply the whole integration pipeline
+lci: generate-py lint-fix lint doc-build pip-requirements test test-integration ## Apply the whole integration pipeline
 .PHONY: lci
 
 lint-fix: ## Fix linting
