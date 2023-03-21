@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.0
+# API Version : 0.5.1
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -133,7 +133,7 @@ class ApiClient:
     ) -> Any:
         """Request the API."""
 
-        should_verify = kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True  # type: ignore
+        should_verify = kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True  # type: ignore[comparison-overlap]
         if should_verify and "Authorization" not in self._headers:
             raise Exception("You are not authenticated.")
 
@@ -150,7 +150,7 @@ class ApiClient:
 
         # Forcing that property to allow self-signed certificates.
         # Even while using self-signed certificate streams remain encrypted.
-        should_verify_ssl = kwargs.get("verify_ssl", True)
+        should_verify_ssl = bool(kwargs.get("verify_ssl", True))
 
         with httpx.Client(
             timeout=timeout or self.timeout,
@@ -174,19 +174,19 @@ class ApiClient:
 
         if result.status_code != 200:
             json = result.json()
-            value = json.get("detail")  # type: ignore
+            value = json.get("detail")  # type: ignore[union-attr]
             if (
                 result.status_code == 401
                 and isinstance(value, str)
                 and "authenticated" in value
             ):
                 raise Exception("You are not authenticated.")
-            standard_error = _get_nested_value(json, "message")  # type: ignore
+            standard_error = _get_nested_value(json, "message")  # type: ignore[arg-type]
 
             if standard_error:
                 error_msg = standard_error
-            elif validation_error := _get_nested_value(json, "msg"):  # type: ignore
-                if detailed_message := _get_nested_value(json, "loc"):  # type: ignore
+            elif validation_error := _get_nested_value(json, "msg"):  # type: ignore[arg-type]
+                if detailed_message := _get_nested_value(json, "loc"):  # type: ignore[arg-type]
                     field = detailed_message[-1]
                     error_msg = f"{validation_error}: {field}"
                 else:
