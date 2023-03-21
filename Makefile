@@ -28,11 +28,14 @@ typecheck:  ## Run the type checker
 .PHONY: typecheck
 
 test-integration: ## Do a simple integration test
-	poetry run python ./bin/markdowncode.py  doc/source/**.md | AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME="user_integration" AVATAR_PASSWORD="password_integration" PYTHONPATH="avatars/" poetry run python --
+	poetry run python ./bin/markdowncode.py  doc/source/**.md | AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
 
-lci: generate-py lint-fix lint doc-build pip-requirements test test-integration ## Apply the whole integration pipeline
+lci: lint-fix ci ## Apply the whole integration pipeline
 .PHONY: lci
+
+ci : lint typecheck doc-build pip-requirements test test-integration pip-install-tutorial test-tutorial ## Run all checks
+.PHONY: ci
 
 lint-fix: ## Fix linting
 	poetry run black avatars/ bin doc/source notebooks/ release.py
@@ -41,7 +44,7 @@ lint-fix: ## Fix linting
 	poetry run jupyter nbconvert --clear-output --ClearMetadataPreprocessor.enabled=True --inplace notebooks/*.ipynb
 .PHONY: lint-fix
 
-lint: typecheck ## Lint source files
+lint: ## Lint source files
 	poetry run bandit -r avatars -c bandit.yaml
 	poetry run flake8 .
 .PHONY: lint
