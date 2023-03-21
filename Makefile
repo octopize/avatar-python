@@ -98,7 +98,7 @@ pip-install-tutorial: pip-requirements ## Install the dependecies of the tutoria
 
 
 notebook: pip-install-tutorial ## Start the tutorial notebooks
-	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL="http://localhost:8000" AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) jupyter notebook notebooks
+	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) jupyter notebook notebooks
 .PHONY: notebook
 
 
