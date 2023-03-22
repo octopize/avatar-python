@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.2
+#       jupytext_version: 1.14.5
 # ---
 
 # # Tutorial 4: Client-side processors
@@ -110,6 +110,7 @@ result = client.pipelines.avatarization_pipeline_with_processors(
     timeout=1000,
 )
 # -
+
 
 result
 
@@ -454,5 +455,26 @@ df["age"].value_counts() - avatars_perturbation_0["age"].value_counts()
 df["age"].value_counts() - avatars_perturbation_05["age"].value_counts()
 
 df["age"].value_counts() - avatars_perturbation_1["age"].value_counts()
+
+# ### Generate a report after running a pipeline
+#
+# In this final section, we show that we can also generate a report when using the pipeline to perform an avatarization. To do so, we simply need to retrieve the IDs of the avatarization job, privacy metric jobs and utility metric jobs already executed within the pipeline. Those 3 IDs are all in the AvatarizationPipelineResult object.
+
+result  # check the content of the AvatarizationPipelineResult object
+
+# +
+report = client.reports.create_report(
+    ReportCreate(
+        avatarization_job_id=result.avatarization_job_id,
+        privacy_job_id=result.privacy_job_id,
+        signal_job_id=result.signal_job_id,
+    ),
+    timeout=10,
+)
+result = client.reports.download_report(id=report.id)
+
+with open("./my_avatarization_report.pdf", "wb") as f:
+    f.write(result)
+# -
 
 # *In the next tutorial, we will show how to define your own processor to be executed client-side.*
