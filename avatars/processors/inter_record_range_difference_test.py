@@ -40,14 +40,13 @@ def test_preprocess(
         id_variable="id",
         target_start_variable="start",
         target_end_variable="end",
-        sort_by_variable_name="start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
+        sort_by_variable="start",
+        new_first_variable="first_value",
+        new_range_variable="range_value",
+        new_difference_variable="value_difference",
     )
 
     processed_df = processor.preprocess(df_with_cumulated)
-    print(processed_df)
 
     assert_frame_equal(processed_df, preprocessed_df_with_cumulated, check_dtype=False)
 
@@ -60,123 +59,134 @@ def test_postprocess(
         id_variable="id",
         target_start_variable="start",
         target_end_variable="end",
-        sort_by_variable_name="start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
+        sort_by_variable="start",
+        new_first_variable="first_value",
+        new_range_variable="range_value",
+        new_difference_variable="value_difference",
     )
 
     postprocessed_df = processor.postprocess(
         df_with_cumulated, preprocessed_df_with_cumulated
     )
-    print(postprocessed_df)
+
     assert_frame_equal(postprocessed_df, df_with_cumulated, check_dtype=False)
 
 
-def test_preprocess_raises_error_when_missing_values(
-    df_with_cumulated: pd.DataFrame,
-) -> None:
-    df_with_cumulated.loc[0, "end"] = np.nan
-    processor = InterRecordRangeDifferenceProcessor(
-        id_variable="id",
-        target_start_variable="start",
-        target_end_variable="end",
-        sort_by_variable_name="start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
-    )
-
-    with pytest.raises(ValueError, match="Expected no missing values for"):
-        processor.preprocess(df_with_cumulated)
-
-
+@pytest.mark.parametrize(
+    "argument_name",
+    ["id_variable", "target_start_variable", "target_end_variable", "sort_by_variable"],
+)
 def test_preprocess_raises_error_when_wrong_var(
-    df_with_cumulated: pd.DataFrame,
-) -> None:
-    processor = InterRecordRangeDifferenceProcessor(
+    df_with_cumulated: pd.DataFrame, argument_name: str
+):
+    # all the correct arguments, that should pass without errors
+    arguments = dict(
         id_variable="id",
         target_start_variable="start",
         target_end_variable="end",
-        sort_by_variable_name="wrong_start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
+        sort_by_variable="start",
+        new_first_variable="first_value",
+        new_range_variable="range_value",
+        new_difference_variable="value_difference",
     )
+
+    # assign a wrong value to one of the argument
+    arguments[argument_name] = "wrong_value"
+
+    processor = InterRecordRangeDifferenceProcessor(**arguments)
 
     with pytest.raises(ValueError, match="Expected valid variable names for"):
         processor.preprocess(df_with_cumulated)
 
 
-def test_postprocess_raises_error_when_wrong_var(
-    df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
-) -> None:
-    processor = InterRecordRangeDifferenceProcessor(
+@pytest.mark.parametrize(
+    "argument_name",
+    ["id_variable", "target_start_variable", "target_end_variable", "sort_by_variable"],
+)
+def test_preprocess_raises_error_when_missing_values(
+    df_with_cumulated: pd.DataFrame, argument_name: str
+):
+    # all the correct arguments
+    arguments = dict(
         id_variable="id",
         target_start_variable="start",
         target_end_variable="end",
-        sort_by_variable_name="start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="wrong_range_value",
-        new_difference_variable_name="value_difference",
+        sort_by_variable="start",
+        new_first_variable="first_value",
+        new_range_variable="range_value",
+        new_difference_variable="value_difference",
     )
+
+    # add a missing value to one of the argument
+    df_with_cumulated.loc[0, arguments[argument_name]] = np.nan
+    processor = InterRecordRangeDifferenceProcessor(**arguments)
+
+    with pytest.raises(ValueError, match="Expected no missing values for"):
+        processor.preprocess(df_with_cumulated)
+
+
+@pytest.mark.parametrize(
+    "argument_name",
+    [
+        "id_variable",
+        "new_first_variable",
+        "new_range_variable",
+        "new_difference_variable",
+    ],
+)
+def test_postprocess_raises_error_when_wrong_var(
+    df_with_cumulated: pd.DataFrame,
+    preprocessed_df_with_cumulated: pd.DataFrame,
+    argument_name: str,
+):
+    # all the correct arguments, that should pass without errors
+    arguments = dict(
+        id_variable="id",
+        target_start_variable="start",
+        target_end_variable="end",
+        sort_by_variable="start",
+        new_first_variable="first_value",
+        new_range_variable="range_value",
+        new_difference_variable="value_difference",
+    )
+
+    # assign a wrong value to one of the argument
+    arguments[argument_name] = "wrong_value"
+
+    processor = InterRecordRangeDifferenceProcessor(**arguments)
 
     with pytest.raises(ValueError, match="Expected valid variable names for"):
         processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
 
 
-def test_postprocess_raises_error_when_wrong_sort_by_var(
-    df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
-) -> None:
-    processor = InterRecordRangeDifferenceProcessor(
-        id_variable="id",
-        target_start_variable="start",
-        target_end_variable="end",
-        sort_by_variable_name="wrong_start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
-    )
-
-    with pytest.raises(
-        ValueError, match="Expected a valid `sort_by_variable_name`, got"
-    ):
-        processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
-
-
+@pytest.mark.parametrize(
+    "argument_name",
+    [
+        "id_variable",
+        "new_first_variable",
+        "new_range_variable",
+        "new_difference_variable",
+    ],
+)
 def test_postprocess_raises_error_when_missing_values(
-    df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
-) -> None:
-    preprocessed_df_with_cumulated.loc[3, "first_value"] = np.nan
-    processor = InterRecordRangeDifferenceProcessor(
+    df_with_cumulated: pd.DataFrame,
+    preprocessed_df_with_cumulated: pd.DataFrame,
+    argument_name: str,
+):
+    # all the correct arguments
+    arguments = dict(
         id_variable="id",
         target_start_variable="start",
         target_end_variable="end",
-        sort_by_variable_name="start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
+        sort_by_variable="start",
+        new_first_variable="first_value",
+        new_range_variable="range_value",
+        new_difference_variable="value_difference",
     )
+
+    # add a missing value to one of the argument
+    preprocessed_df_with_cumulated.loc[0, arguments[argument_name]] = np.nan
+    processor = InterRecordRangeDifferenceProcessor(**arguments)
 
     with pytest.raises(ValueError, match="Expected no missing values for"):
-        processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
-
-
-def test_postprocess_raises_error_when_missing_sort_by_values(
-    df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
-) -> None:
-    df_with_cumulated.loc[3, "start"] = np.nan
-    processor = InterRecordRangeDifferenceProcessor(
-        id_variable="id",
-        target_start_variable="start",
-        target_end_variable="end",
-        sort_by_variable_name="start",
-        new_first_variable_name="first_value",
-        new_range_variable_name="range_value",
-        new_difference_variable_name="value_difference",
-    )
-
-    with pytest.raises(
-        ValueError, match="Expected no missing values for `sort_by_variable_name`"
-    ):
         processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)

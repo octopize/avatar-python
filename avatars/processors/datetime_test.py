@@ -18,7 +18,6 @@ def test_preprocess_datetime(dates_df: pd.DataFrame, processor: Any) -> None:
     expected = pd.DataFrame(
         {"date_1": [1.420096e09, 1.420106e09], "date_2": [1.514804e09, 1.577876e09]}
     )
-    print(test_df)
     assert not pd.api.types.is_datetime64_dtype(test_df["date_1"])
     pd_testing.assert_frame_equal(test_df, expected)
 
@@ -39,7 +38,6 @@ def test_preprocess_and_postprocess_handle_nan(
     dates_df: pd.DataFrame, processor: Any
 ) -> None:
     dates_df.loc[0, "date_1"] = np.nan
-    print(dates_df)
     expected = dates_df.copy()
     test_df = processor.preprocess(dates_df)
     test_df = processor.postprocess(dates_df, test_df)

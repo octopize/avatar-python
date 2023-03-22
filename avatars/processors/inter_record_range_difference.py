@@ -26,13 +26,13 @@ class InterRecordRangeDifferenceProcessor:
             variable representing the start of the range to transform
         target_end_variable:
             variable representing the end of the range to transform
-        sort_by_variable_name:
+        sort_by_variable:
             variable used to sort records for each id
-        new_first_variable_name:
+        new_first_variable:
             name of the variable to be created to contain the first value of the target variable
-        new_range_variable_name:
+        new_range_variable:
             name of the variable to be created to contain the range value
-        new_difference_variable_name:
+        new_difference_variable:
             name of the variable to be created to contain the difference value
 
     Examples
@@ -48,10 +48,10 @@ class InterRecordRangeDifferenceProcessor:
     ...     id_variable="id",
     ...     target_start_variable='start',
     ...     target_end_variable='end',
-    ...     sort_by_variable_name="start",
-    ...     new_first_variable_name="first_value",
-    ...     new_range_variable_name='range_value',
-    ...     new_difference_variable_name="value_difference",
+    ...     sort_by_variable="start",
+    ...     new_first_variable="first_value",
+    ...     new_range_variable='range_value',
+    ...     new_difference_variable="value_difference",
     ... )
     >>> processor.preprocess(df)
        id  range_value  first_value  value_difference
@@ -88,63 +88,48 @@ class InterRecordRangeDifferenceProcessor:
         id_variable: str,
         target_start_variable: str,
         target_end_variable: str,
-        sort_by_variable_name: str,
-        new_first_variable_name: str,
-        new_range_variable_name: str,
-        new_difference_variable_name: str,
+        sort_by_variable: str,
+        new_first_variable: str,
+        new_range_variable: str,
+        new_difference_variable: str,
     ):
         self.id_variable = id_variable
         self.target_start_variable = target_start_variable
         self.target_end_variable = target_end_variable
-        self.sort_by_variable_name = sort_by_variable_name
-        self.new_first_variable_name = new_first_variable_name
-        self.new_range_variable_name = new_range_variable_name
-        self.new_difference_variable_name = new_difference_variable_name
+        self.sort_by_variable = sort_by_variable
+        self.new_first_variable = new_first_variable
+        self.new_range_variable = new_range_variable
+        self.new_difference_variable = new_difference_variable
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        if any(
-            [
-                x not in df.columns.values
-                for x in [
-                    self.id_variable,
-                    self.target_start_variable,
-                    self.target_end_variable,
-                    self.sort_by_variable_name,
-                ]
-            ]
-        ):
+        variables_to_check = [
+            self.id_variable,
+            self.target_start_variable,
+            self.target_end_variable,
+            self.sort_by_variable,
+        ]
+        if len(set(variables_to_check).difference(df.columns.values)) > 0:
             raise ValueError(
-                f"Expected valid variable names for `id_variable`, `target_start_variable`, `target_end_variable` and `sort_by_variable_name`, got `{self.id_variable}`, `{self.target_start_variable}`, `{self.target_end_variable}` and `{self.sort_by_variable_name}` instead"
+                f"Expected valid variable names for `id_variable`, `target_start_variable`, `target_end_variable` and `sort_by_variable`, got '{self.id_variable}', '{self.target_start_variable}', '{self.target_end_variable}' and '{self.sort_by_variable}' instead"
             )
 
-        if (
-            df[
-                [
-                    self.id_variable,
-                    self.target_start_variable,
-                    self.target_end_variable,
-                    self.sort_by_variable_name,
-                ]
-            ]
-            .isnull()
-            .values.any()
-        ):
+        if df[variables_to_check].isnull().values.any():
             raise ValueError(
-                f"Expected no missing values for `id_variable`, `target_start_variable`, `target_end_variable` and `sort_by_variable_name`, got columns with nulls instead"
+                f"Expected no missing values for `id_variable`, `target_start_variable`, `target_end_variable` and `sort_by_variable`, got columns with nulls instead"
             )
 
         df = df.copy()
 
-        # data need to be sorted
-        df = df.sort_values([self.id_variable, self.sort_by_variable_name])
+        # data needs to be sorted
+        df = df.sort_values([self.id_variable, self.sort_by_variable])
 
         # store range value (difference between end and start)
-        df[self.new_range_variable_name] = (
+        df[self.new_range_variable] = (
             df[self.target_end_variable] - df[self.target_start_variable]
         )
 
         # store first value of target start variable
-        df[self.new_first_variable_name] = df.groupby(self.id_variable)[
+        df[self.new_first_variable] = df.groupby(self.id_variable)[
             self.target_start_variable
         ].transform("first")
 
@@ -154,12 +139,10 @@ class InterRecordRangeDifferenceProcessor:
         ].shift()
 
         # store the difference between current and previous value
-        df[self.new_difference_variable_name] = (
+        df[self.new_difference_variable] = (
             df[self.target_start_variable] - df["__end_tmp__"]
         )
-        df[self.new_difference_variable_name] = df[
-            self.new_difference_variable_name
-        ].fillna(0)
+        df[self.new_difference_variable] = df[self.new_difference_variable].fillna(0)
 
         # remove the tmp column and the original target variables
         df = df.drop(
@@ -176,77 +159,62 @@ class InterRecordRangeDifferenceProcessor:
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-        if any(
-            [
-                x not in dest.columns.values
-                for x in [
-                    self.id_variable,
-                    self.new_first_variable_name,
-                    self.new_range_variable_name,
-                    self.new_difference_variable_name,
-                ]
-            ]
-        ):
+        variables_to_check = [
+            self.id_variable,
+            self.new_first_variable,
+            self.new_range_variable,
+            self.new_difference_variable,
+        ]
+        if len(set(variables_to_check).difference(dest.columns.values)) > 0:
             raise ValueError(
-                f"Expected valid variable names for `id_variable`, `new_first_variable_name`, `new_range_variable_name` and `new_difference_variable_name`, got `{self.id_variable}`, `{self.new_first_variable_name}`, `{self.new_range_variable_name}` and `{self.new_difference_variable_name}` instead"
+                f"Expected valid variable names for `id_variable`, `new_first_variable`, `new_range_variable` and `new_difference_variable`, got '{self.id_variable}', '{self.new_first_variable}', '{self.new_range_variable}' and '{self.new_difference_variable}' instead"
             )
 
-        if self.sort_by_variable_name not in source.columns.values:
+        if self.sort_by_variable not in source.columns.values:
             raise ValueError(
-                f"Expected a valid `sort_by_variable_name`, got {self.sort_by_variable_name} instead"
+                f"Expected a valid `sort_by_variable`, got '{self.sort_by_variable}' instead"
             )
 
-        if (
-            dest[
-                [
-                    self.id_variable,
-                    self.new_first_variable_name,
-                    self.new_range_variable_name,
-                    self.new_difference_variable_name,
-                ]
-            ]
-            .isnull()
-            .values.any()
-        ):
+        if dest[variables_to_check].isnull().values.any():
             raise ValueError(
-                f"Expected no missing values for `id_variable`, `new_first_variable_name`, `new_range_variable_name` and `new_difference_variable_name`, got columns with nulls instead"
+                f"Expected no missing values for `id_variable`, `new_first_variable`, `new_range_variable` and `new_difference_variable`, got columns with nulls instead"
             )
 
-        if source[self.sort_by_variable_name].isnull().values.any():
+        if source[self.sort_by_variable].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for `sort_by_variable_name` in source, got column with nulls instead"
+                "Expected no missing values for `sort_by_variable` in source, got column with nulls instead"
             )
 
         df = dest.copy()
 
         # sort values in the same way as they were ordered in preprocess
         ordered_indices = source.sort_values(
-            [self.id_variable, self.sort_by_variable_name]
+            [self.id_variable, self.sort_by_variable]
         ).index
         df = df.loc[ordered_indices]
 
         # calculate for each row the sum of ranges of all previous records
         df["__range_tmp__"] = df.groupby(self.id_variable)[
-            self.new_range_variable_name
+            self.new_range_variable
         ].shift()
         df["__range_tmp__"] = df["__range_tmp__"].fillna(0)
         df["__totalizer_tmp__"] = df.groupby(self.id_variable)[
             "__range_tmp__"
         ].transform(pd.Series.cumsum) + df.groupby(self.id_variable)[
-            self.new_difference_variable_name
+            self.new_difference_variable
         ].transform(
             pd.Series.cumsum
-        )  # Fixed
+        )
 
         # calculate for each row the start value as the sum of the first value and the previously
         # calculated sum of ranges of all previous records (`__totalizer_tmp__`)
         df[self.target_start_variable] = (
-            df[self.new_first_variable_name] + df["__totalizer_tmp__"]
-        )  # Fix
+            df[self.new_first_variable] + df["__totalizer_tmp__"]
+        )
 
         # calculate end values from start value and range value
         df[self.target_end_variable] = (
-            df[self.target_start_variable] + df[self.new_range_variable_name]
+            df[self.target_start_variable] + df[self.new_range_variable]
         )
 
         # remove all temp columns and columns added at preprocessing
@@ -254,9 +222,9 @@ class InterRecordRangeDifferenceProcessor:
             columns=[
                 "__range_tmp__",
                 "__totalizer_tmp__",
-                self.new_difference_variable_name,
-                self.new_range_variable_name,
-                self.new_first_variable_name,
+                self.new_difference_variable,
+                self.new_range_variable,
+                self.new_first_variable,
             ]
         )
 
