@@ -17,4 +17,5 @@ Table of contents
    processors.ProportionProcessor
    processors.RelativeDifferenceProcessor
    processors.ToCategoricalProcessor
+   processors.InterRecordRangeDifferenceProcessor
    processors.InterRecordCumulatedDifferenceProcessor
