@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.2
+#       jupytext_version: 1.14.4
 # ---
 
 # # Quickstart - Avatarization with parameters
@@ -15,10 +15,16 @@
 # +
 # This is the client that you'll be using for all of your requests
 from avatars.client import ApiClient
-from avatars.models import AvatarizationJobCreate, AvatarizationParameters, JobStatus
-from avatars.models import ReportCreate
-from avatars.models import PrivacyMetricsJobCreate, PrivacyMetricsParameters
-from avatars.models import SignalMetricsJobCreate, SignalMetricsParameters
+from avatars.models import (
+    AvatarizationJobCreate,
+    AvatarizationParameters,
+    JobStatus,
+    ReportCreate,
+    PrivacyMetricsJobCreate,
+    PrivacyMetricsParameters,
+    SignalMetricsJobCreate,
+    SignalMetricsParameters,
+)
 
 # The following are not necessary to run avatar but are used in this tutorial
 import pandas as pd
@@ -37,13 +43,12 @@ client.authenticate(username=username, password=password)
 
 # ## Loading data
 
-df = pd.read_csv("../fixtures/tests/diabetes_70k_by_22.csv")
+df = pd.read_csv("../fixtures/wbcd.csv")
 dataset = client.pandas_integration.upload_dataframe(df)
 
 # ## Analyze your data
 
-while dataset.summary is None:
-    dataset = client.datasets.analyze_dataset(dataset.id)
+dataset = client.datasets.analyze_dataset(dataset.id)
 print(f"Lines: {dataset.nb_lines}, dimensions: {dataset.nb_dimensions}")
 
 # ## Creating and launching an avatarization job and metrics
@@ -55,12 +60,9 @@ avatarization_job = client.jobs.create_avatarization_job(
     )
 )
 
-avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=10)
-while avatarization_job.status == JobStatus.pending:
-    avatarization_job = client.jobs.get_avatarization_job(
-        avatarization_job.id, timeout=10
-    )
-    print(".", end="")
+avatarization_job = client.jobs.get_avatarization_job(
+    avatarization_job.id, timeout=1800
+)
 print(avatarization_job.status)
 # -
 
@@ -79,10 +81,7 @@ privacy_job = client.jobs.create_privacy_metrics_job(
     )
 )
 
-privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=10)
-while privacy_job.status == JobStatus.pending:
-    privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=10)
-    print(".", end="")
+privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=1800)
 print(privacy_job.status)
 print("*** Privacy metrics ***")
 for metric in privacy_job.result:
@@ -99,10 +98,7 @@ signal_job = client.jobs.create_signal_metrics_job(
     )
 )
 
-signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=10)
-while signal_job.status == JobStatus.pending:
-    signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=10)
-    print(".", end="")
+signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=1800)
 print(signal_job.status)
 print("*** Utility metrics ***")
 for metric in signal_job.result:
@@ -115,6 +111,8 @@ for metric in signal_job.result:
 avatars_str = client.datasets.download_dataset(
     avatarization_job.result.avatars_dataset.id
 )
+with open("./avatar_output.csv", "wb") as f:
+    f.write(avatars_str)
 
 # Download the avatars as a pandas dataframe
 avatars_df = client.pandas_integration.download_dataframe(
@@ -130,7 +128,7 @@ report = client.reports.create_report(
         privacy_job_id=privacy_job.id,
         signal_job_id=signal_job.id,
     ),
-    timeout=30,
+    timeout=240,
 )
 print(report)
 
