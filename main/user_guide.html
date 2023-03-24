@@ -379,6 +379,13 @@ feature improvements, so be on the look out for these updates.</p>
 </div>
 </section>
 </section>
+<section id="how-to-do-first-analysis-on-your-dataset">
+<h2>How to do first analysis on your dataset<a class="headerlink" href="#how-to-do-first-analysis-on-your-dataset" title="Permalink to this headline">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">analyze_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lines: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">nb_lines</span><span class="si">}</span><span class="s2">, dimensions: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">nb_dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
 <section id="how-to-launch-an-avatarization-with-metrics">
 <h2>How to launch an avatarization with metrics<a class="headerlink" href="#how-to-launch-an-avatarization-with-metrics" title="Permalink to this headline">#</a></h2>
 <p>You can launch an avatarization with some simple privacy and signal
@@ -689,6 +696,7 @@ to make it safe.</p>
 <li><a class="reference internal" href="#as-a-csv-file">As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#how-to-do-first-analysis-on-your-dataset">How to do first analysis on your dataset</a></li>
 <li><a class="reference internal" href="#how-to-launch-an-avatarization-with-metrics">How to launch an avatarization with metrics</a></li>
 <li><a class="reference internal" href="#how-to-launch-an-avatarization-job-only">How to launch an avatarization job only</a></li>
 <li><a class="reference internal" href="#how-to-launch-privacy-metrics">How to launch privacy metrics</a></li>

@@ -117,6 +117,14 @@ As a ``.csv`` file
    with open(filename, "r") as f:
        dataset = client.datasets.create_dataset(request=f)
 
+How to do first analysis on your dataset
+----------------------------------------
+
+.. code:: python
+
+   dataset = client.datasets.analyze_dataset(dataset.id)
+   print(f"Lines: {dataset.nb_lines}, dimensions: {dataset.nb_dimensions}")
+
 How to launch an avatarization with metrics
 -------------------------------------------
 
