@@ -2,17 +2,16 @@
   This file is only used on ReadTheDocs. -->
 {% if versions %}
 <div class="sidebar-tree">
-{%- if versions.tags %}
   <p class="caption" role="heading">
     <span class="caption-text">{{ _('Versions') }}</span>
   </p>
   <ul>
-    {%- for item in versions.tags| sort(reverse = True) %}
+  <!-- https://holzhaus.github.io/sphinx-multiversion/master/templates.html#list-branches-and-tags-separately -->
+    {%- for item in versions| sort(reverse = True) %}
     <li class="toctree-l1">
       <a class="reference internal" href="{{ item.url }}">{{ item.name }}</a>
     </li>
     {%- endfor %}
   </ul>
-  {%- endif %}
 </div>
 {% endif %}
