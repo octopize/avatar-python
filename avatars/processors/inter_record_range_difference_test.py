@@ -78,7 +78,7 @@ def test_postprocess(
 )
 def test_preprocess_raises_error_when_wrong_var(
     df_with_cumulated: pd.DataFrame, argument_name: str
-):
+) -> None:
     # all the correct arguments, that should pass without errors
     arguments = dict(
         id_variable="id",
@@ -105,7 +105,7 @@ def test_preprocess_raises_error_when_wrong_var(
 )
 def test_preprocess_raises_error_when_missing_values(
     df_with_cumulated: pd.DataFrame, argument_name: str
-):
+) -> None:
     # all the correct arguments
     arguments = dict(
         id_variable="id",
@@ -138,7 +138,7 @@ def test_postprocess_raises_error_when_wrong_var(
     df_with_cumulated: pd.DataFrame,
     preprocessed_df_with_cumulated: pd.DataFrame,
     argument_name: str,
-):
+) -> None:
     # all the correct arguments, that should pass without errors
     arguments = dict(
         id_variable="id",
@@ -172,7 +172,7 @@ def test_postprocess_raises_error_when_missing_values(
     df_with_cumulated: pd.DataFrame,
     preprocessed_df_with_cumulated: pd.DataFrame,
     argument_name: str,
-):
+) -> None:
     # all the correct arguments
     arguments = dict(
         id_variable="id",
