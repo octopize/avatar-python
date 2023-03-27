@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.1
+# API Version : 0.5.3
 
 
 import itertools
@@ -57,6 +57,14 @@ DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
 
 
+class FileTooLarge(Exception):
+    pass
+
+
+class Timeout(Exception):
+    pass
+
+
 T = TypeVar("T")
 
 
@@ -100,8 +108,8 @@ def get_job(
     # Iterate while we are < retry_timeout
     while current == 0 or (current < retry_timeout):
         timeout = per_request_timeout  # to pass to client.request
-        response = response_cls(**client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
-        if response.status not in (JobStatus.pending, JobStatus.started):  # type: ignore[attr-defined]
+        response = response_cls(**client.request(**kwargs, timeout=timeout))  # type: ignore
+        if response.status not in (JobStatus.pending, JobStatus.started):  # type: ignore
             print_response(response)
             return response
 
@@ -132,7 +140,7 @@ class Auth:
             "url": f"/login",
         }
         return LoginResponse(
-            **self.client.request(**kwargs, verify_auth=False, form_data=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, verify_auth=False, form_data=request, timeout=timeout)  # type: ignore
         )
 
     def forgotten_password(
@@ -145,7 +153,7 @@ class Auth:
             "method": "post",
             "url": f"/login/forgotten_password",
         }
-        return self.client.request(**kwargs, verify_auth=False, json=request, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, verify_auth=False, json=request, timeout=timeout)  # type: ignore
 
     def reset_password(
         self,
@@ -157,7 +165,7 @@ class Auth:
             "method": "post",
             "url": f"/login/reset_password",
         }
-        return self.client.request(**kwargs, verify_auth=False, json=request, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, verify_auth=False, json=request, timeout=timeout)  # type: ignore
 
 
 class Compatibility:
@@ -175,7 +183,7 @@ class Compatibility:
             "url": f"/check_client",
         }
         return CompatibilityResponse(
-            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore
         )
 
 
@@ -207,7 +215,7 @@ class Datasets:
             params = None
 
         return Dataset(
-            **self.client.request(**kwargs, params=params, file=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, params=params, file=request, timeout=timeout)  # type: ignore
         )
 
     def get_dataset(
@@ -221,7 +229,7 @@ class Datasets:
             "method": "get",
             "url": f"/datasets/{id}",
         }
-        return Dataset(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return Dataset(**self.client.request(**kwargs, timeout=timeout))  # type: ignore
 
     def patch_dataset(
         self,
@@ -236,7 +244,7 @@ class Datasets:
             "url": f"/datasets/{id}",
         }
         return Dataset(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def analyze_dataset(
@@ -250,7 +258,7 @@ class Datasets:
             "method": "post",
             "url": f"/datasets/{id}/analyze",
         }
-        return Dataset(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return Dataset(**self.client.request(**kwargs, timeout=timeout))  # type: ignore
 
     def get_dataset_correlations(
         self,
@@ -263,7 +271,7 @@ class Datasets:
             "method": "get",
             "url": f"/datasets/{id}/correlations",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
     def download_dataset(
         self,
@@ -276,7 +284,7 @@ class Datasets:
             "method": "get",
             "url": f"/datasets/{id}/download",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
 
 class Health:
@@ -293,7 +301,7 @@ class Health:
             "method": "get",
             "url": f"/",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
     def get_health(
         self,
@@ -305,7 +313,7 @@ class Health:
             "method": "get",
             "url": f"/health",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
     def get_health_db(
         self,
@@ -317,7 +325,7 @@ class Health:
             "method": "get",
             "url": f"/health/db",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
 
 class Jobs:
@@ -344,7 +352,7 @@ class Jobs:
         }
         return [
             GenericJob(**item)
-            for item in self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+            for item in self.client.request(**kwargs, timeout=timeout)
         ]
 
     def create_full_avatarization_job(
@@ -359,7 +367,7 @@ class Jobs:
             "url": f"/jobs",
         }
         return AvatarizationJob(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def create_avatarization_job(
@@ -374,7 +382,7 @@ class Jobs:
             "url": f"/jobs/avatarization",
         }
         return AvatarizationJob(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def get_avatarization_job(
@@ -394,7 +402,7 @@ class Jobs:
             response_cls=AvatarizationJob,
             per_request_timeout=per_request_timeout,
             timeout=timeout,
-            **kwargs,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore
         )
 
     def create_signal_metrics_job(
@@ -409,7 +417,7 @@ class Jobs:
             "url": f"/jobs/metrics/signal",
         }
         return SignalMetricsJob(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def create_privacy_metrics_job(
@@ -424,7 +432,7 @@ class Jobs:
             "url": f"/jobs/metrics/privacy",
         }
         return PrivacyMetricsJob(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def get_signal_metrics(
@@ -444,7 +452,7 @@ class Jobs:
             response_cls=SignalMetricsJob,
             per_request_timeout=per_request_timeout,
             timeout=timeout,
-            **kwargs,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore
         )
 
     def get_privacy_metrics(
@@ -464,7 +472,7 @@ class Jobs:
             response_cls=PrivacyMetricsJob,
             per_request_timeout=per_request_timeout,
             timeout=timeout,
-            **kwargs,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore
         )
 
 
@@ -484,7 +492,7 @@ class Metrics:
             "url": f"/projections/{job_id}",
         }
         return Projections(
-            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore
         )
 
     def get_variable_contributions(
@@ -503,7 +511,7 @@ class Metrics:
                 dataset_id=dataset_id,
             ),
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
     def get_explained_variance(
         self,
@@ -517,7 +525,7 @@ class Metrics:
             "url": f"/variance/{job_id}",
         }
         return ExplainedVariance(
-            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore
         )
 
 
@@ -537,7 +545,7 @@ class Reports:
             "url": f"/reports",
         }
         return Report(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def download_report(
@@ -551,7 +559,7 @@ class Reports:
             "method": "get",
             "url": f"/reports/{id}/download",
         }
-        return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        return self.client.request(**kwargs, timeout=timeout)  # type: ignore
 
 
 class Stats:
@@ -569,7 +577,7 @@ class Stats:
             "url": f"/stats/cluster",
         }
         return ClusterStats(
-            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore
         )
 
 
@@ -596,7 +604,7 @@ class Users:
                 username=username,
             ),
         }
-        return [User(**item) for item in self.client.request(**kwargs, timeout=timeout)]  # type: ignore[arg-type]
+        return [User(**item) for item in self.client.request(**kwargs, timeout=timeout)]
 
     def create_user(
         self,
@@ -613,7 +621,7 @@ class Users:
             "url": f"/users",
         }
         return User(
-            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore
         )
 
     def get_me(
@@ -626,7 +634,7 @@ class Users:
             "method": "get",
             "url": f"/users/me",
         }
-        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore
 
     def get_user(
         self,
@@ -642,7 +650,7 @@ class Users:
             "method": "get",
             "url": f"/users/{id}",
         }
-        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore
 
 
 class PandasIntegration:
@@ -673,7 +681,6 @@ class PandasIntegration:
     def download_dataframe(
         self, id: str, *, timeout: Optional[int] = DEFAULT_TIMEOUT
     ) -> pd.DataFrame:
-
         dataset_info = self.client.datasets.get_dataset(id, timeout=timeout)
         dataset = self.client.datasets.download_dataset(id, timeout=timeout)
         dataset_io = StringIO(dataset)
@@ -733,7 +740,7 @@ class Pipelines:
             request.avatarization_job_create
         )
         avatarization_job = self.client.jobs.get_avatarization_job(
-            str(avatarization_job.id),
+            avatarization_job.id,
             timeout=timeout,
             per_request_timeout=per_request_timeout,
         )
@@ -746,12 +753,16 @@ class Pipelines:
             avatarization_job.status == JobStatus.pending
             or not avatarization_job.result
         ):
-            raise Exception(f"Avatarization job timeout out. Try increasing timeout")
+            raise Timeout(
+                f"The avatarization job '{avatarization_job.id}' timed out."
+                ""
+                """Try increasing the timeout with the `timeout` parameter."""
+            )
 
         # Download the dataframe, postprocess it and upload the new dataframe
         sensitive_unshuffled_avatars = (
             self.client.pandas_integration.download_dataframe(
-                str(avatarization_job.result.sensitive_unshuffled_avatars_datasets.id),
+                avatarization_job.result.sensitive_unshuffled_avatars_datasets.id,
                 timeout=timeout,
             )
         )
@@ -786,12 +797,10 @@ class Pipelines:
 
         # Get the job results
         signal_job = self.client.jobs.get_signal_metrics(
-            str(signal_job.id), timeout=timeout, per_request_timeout=per_request_timeout
+            signal_job.id, timeout=timeout, per_request_timeout=per_request_timeout
         )
         privacy_job = self.client.jobs.get_privacy_metrics(
-            str(privacy_job.id),
-            timeout=timeout,
-            per_request_timeout=per_request_timeout,
+            privacy_job.id, timeout=timeout, per_request_timeout=per_request_timeout
         )
         if signal_job.status == JobStatus.failure:
             raise Exception(
@@ -803,9 +812,18 @@ class Pipelines:
             )
 
         if signal_job.status == JobStatus.pending or not signal_job.result:
-            raise Exception(f"Signal Metrics job timeout out. Try increasing timeout")
+            raise Timeout(
+                f"The signal metrics job '{signal_job.id}' timed out."
+                ""
+                """Try increasing the timeout with the `timeout` parameter."""
+            )
+
         if privacy_job.status == JobStatus.pending or not privacy_job.result:
-            raise Exception(f"Privacy Metrics job timeout out. Try increasing timeout")
+            raise Timeout(
+                f"The privacy metrics job '{privacy_job.id}' timed out."
+                ""
+                """Try increasing the timeout with the `timeout` parameter."""
+            )
 
         # Shuffle sensitive_unshuffled_avatars for security reasons
         random_gen = np.random.default_rng()
@@ -818,6 +836,9 @@ class Pipelines:
             privacy_metrics=privacy_job.result,
             signal_metrics=signal_job.result,
             post_processed_avatars=post_processed_avatars,
+            avatarization_job_id=avatarization_job.id,
+            signal_job_id=signal_job.id,
+            privacy_job_id=privacy_job.id,
         )
 
 

@@ -28,7 +28,6 @@ def test_split_column_types(many_dtypes_df: pd.DataFrame) -> None:
 
 
 def test_split_column_types_no_categorical(many_dtypes_df: pd.DataFrame) -> None:
-
     test_continuous, test_categorical = split_columns_types(
         many_dtypes_df[["ints", "floats"]]
     )
@@ -38,7 +37,6 @@ def test_split_column_types_no_categorical(many_dtypes_df: pd.DataFrame) -> None
 
 
 def test_split_column_types_no_continuous(many_dtypes_df: pd.DataFrame) -> None:
-
     test_continuous, test_categorical = split_columns_types(
         many_dtypes_df[["strings", "datetimes"]]
     )

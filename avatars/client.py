@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.1
+# API Version : 0.5.3
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -21,6 +21,7 @@ from avatars.api import (
     Auth,
     Compatibility,
     Datasets,
+    FileTooLarge,
     Health,
     Jobs,
     Metrics,
@@ -28,19 +29,12 @@ from avatars.api import (
     Pipelines,
     Reports,
     Stats,
+    Timeout,
     Users,
 )
 from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024
-
-
-class FileTooLarge(Exception):
-    pass
-
-
-class Timeout(Exception):
-    pass
 
 
 def _get_nested_value(
@@ -133,7 +127,7 @@ class ApiClient:
     ) -> Any:
         """Request the API."""
 
-        should_verify = kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True  # type: ignore[comparison-overlap]
+        should_verify = kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True  # type: ignore
         if should_verify and "Authorization" not in self._headers:
             raise Exception("You are not authenticated.")
 
@@ -150,7 +144,7 @@ class ApiClient:
 
         # Forcing that property to allow self-signed certificates.
         # Even while using self-signed certificate streams remain encrypted.
-        should_verify_ssl = bool(kwargs.get("verify_ssl", True))
+        should_verify_ssl = kwargs.get("verify_ssl", True)
 
         with httpx.Client(
             timeout=timeout or self.timeout,
@@ -174,19 +168,19 @@ class ApiClient:
 
         if result.status_code != 200:
             json = result.json()
-            value = json.get("detail")  # type: ignore[union-attr]
+            value = json.get("detail")  # type: ignore
             if (
                 result.status_code == 401
                 and isinstance(value, str)
                 and "authenticated" in value
             ):
                 raise Exception("You are not authenticated.")
-            standard_error = _get_nested_value(json, "message")  # type: ignore[arg-type]
+            standard_error = _get_nested_value(json, "message")  # type: ignore
 
             if standard_error:
                 error_msg = standard_error
-            elif validation_error := _get_nested_value(json, "msg"):  # type: ignore[arg-type]
-                if detailed_message := _get_nested_value(json, "loc"):  # type: ignore[arg-type]
+            elif validation_error := _get_nested_value(json, "msg"):  # type: ignore
+                if detailed_message := _get_nested_value(json, "loc"):  # type: ignore
                     field = detailed_message[-1]
                     error_msg = f"{validation_error}: {field}"
                 else:
@@ -208,7 +202,6 @@ class ApiClient:
     def _get_file_argument(
         self, file: Optional[Union[StringIO, BytesIO]]
     ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
-
         if not file:
             return None
 
