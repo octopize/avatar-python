@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "avatars"
 # Also modify avatars/__init__.py
-version = "0.3.0"
+version = "0.3.1"
 description = "Python client for Avatar's API"
 authors = ["Octopize <help@octopize.io>"]
 license = "Apache-2.0"
