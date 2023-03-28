@@ -181,7 +181,7 @@ def check_preconditions() -> None:
     preconditions = [
         f"Have you updated the changelog at {CHANGELOG}?",
         "Have you generated the doc using `make doc`?",
-        "Have you added the new version to the compatibility mapping in the API?",
+        "Have you added the (major/minor only) version to the compatibility mapping in the API?",
     ]
 
     for condition in preconditions:
