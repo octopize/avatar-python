@@ -75,7 +75,6 @@ class InterRecordCumulatedDifferenceProcessor:
         self.new_difference_variable_name = new_difference_variable_name
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-
         if self.id_variable not in df.columns.values:
             raise ValueError(
                 f"Expected a valid `id_variable`, got {self.id_variable} instead"
@@ -124,7 +123,6 @@ class InterRecordCumulatedDifferenceProcessor:
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-
         if self.new_first_variable_name not in dest.columns.values:
             raise ValueError(
                 f"Expected a valid `new_first_variable_name`, got {self.new_first_variable_name} instead"

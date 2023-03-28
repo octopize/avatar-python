@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.1
+# API Version : 0.5.3
 
 import sys
 from collections.abc import Mapping, Sequence
@@ -21,6 +21,7 @@ from avatars.api import (
     Auth,
     Compatibility,
     Datasets,
+    FileTooLarge,
     Health,
     Jobs,
     Metrics,
@@ -28,19 +29,12 @@ from avatars.api import (
     Pipelines,
     Reports,
     Stats,
+    Timeout,
     Users,
 )
 from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024
-
-
-class FileTooLarge(Exception):
-    pass
-
-
-class Timeout(Exception):
-    pass
 
 
 def _get_nested_value(
@@ -208,7 +202,6 @@ class ApiClient:
     def _get_file_argument(
         self, file: Optional[Union[StringIO, BytesIO]]
     ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
-
         if not file:
             return None
 

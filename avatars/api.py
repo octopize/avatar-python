@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.1
+# API Version : 0.5.3
 
 
 import itertools
@@ -55,6 +55,14 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
+
+
+class FileTooLarge(Exception):
+    pass
+
+
+class Timeout(Exception):
+    pass
 
 
 T = TypeVar("T")
@@ -221,7 +229,9 @@ class Datasets:
             "method": "get",
             "url": f"/datasets/{id}",
         }
-        return Dataset(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return Dataset(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        )
 
     def patch_dataset(
         self,
@@ -250,7 +260,9 @@ class Datasets:
             "method": "post",
             "url": f"/datasets/{id}/analyze",
         }
-        return Dataset(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return Dataset(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        )
 
     def get_dataset_correlations(
         self,
@@ -342,10 +354,7 @@ class Jobs:
                 nb_days=nb_days,
             ),
         }
-        return [
-            GenericJob(**item)
-            for item in self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
-        ]
+        return [GenericJob(**item) for item in self.client.request(**kwargs, timeout=timeout)]  # type: ignore[arg-type]
 
     def create_full_avatarization_job(
         self,
@@ -394,7 +403,7 @@ class Jobs:
             response_cls=AvatarizationJob,
             per_request_timeout=per_request_timeout,
             timeout=timeout,
-            **kwargs,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore
         )
 
     def create_signal_metrics_job(
@@ -444,7 +453,7 @@ class Jobs:
             response_cls=SignalMetricsJob,
             per_request_timeout=per_request_timeout,
             timeout=timeout,
-            **kwargs,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore
         )
 
     def get_privacy_metrics(
@@ -464,7 +473,7 @@ class Jobs:
             response_cls=PrivacyMetricsJob,
             per_request_timeout=per_request_timeout,
             timeout=timeout,
-            **kwargs,  # type: ignore[arg-type]
+            **kwargs,  # type: ignore
         )
 
 
@@ -626,7 +635,9 @@ class Users:
             "method": "get",
             "url": f"/users/me",
         }
-        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return User(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        )
 
     def get_user(
         self,
@@ -642,7 +653,9 @@ class Users:
             "method": "get",
             "url": f"/users/{id}",
         }
-        return User(**self.client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
+        return User(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        )
 
 
 class PandasIntegration:
@@ -673,7 +686,6 @@ class PandasIntegration:
     def download_dataframe(
         self, id: str, *, timeout: Optional[int] = DEFAULT_TIMEOUT
     ) -> pd.DataFrame:
-
         dataset_info = self.client.datasets.get_dataset(id, timeout=timeout)
         dataset = self.client.datasets.download_dataset(id, timeout=timeout)
         dataset_io = StringIO(dataset)
@@ -732,6 +744,8 @@ class Pipelines:
         avatarization_job = self.client.jobs.create_avatarization_job(
             request.avatarization_job_create
         )
+        print(f"launching avatarization job with id={avatarization_job.id}")
+
         avatarization_job = self.client.jobs.get_avatarization_job(
             str(avatarization_job.id),
             timeout=timeout,
@@ -746,7 +760,11 @@ class Pipelines:
             avatarization_job.status == JobStatus.pending
             or not avatarization_job.result
         ):
-            raise Exception(f"Avatarization job timeout out. Try increasing timeout")
+            raise Timeout(
+                f"The avatarization job '{avatarization_job.id}' timed out."
+                ""
+                """Try increasing the timeout with the `timeout` parameter."""
+            )
 
         # Download the dataframe, postprocess it and upload the new dataframe
         sensitive_unshuffled_avatars = (
@@ -773,6 +791,7 @@ class Pipelines:
             ),
             timeout=per_request_timeout,
         )
+        print(f"launching privacy metrics job with id={privacy_job.id}")
 
         # Calculate signal metrics
         signal_job = self.client.jobs.create_signal_metrics_job(
@@ -783,6 +802,7 @@ class Pipelines:
             ),
             timeout=per_request_timeout,
         )
+        print(f"launching signal metrics job with id={signal_job.id}")
 
         # Get the job results
         signal_job = self.client.jobs.get_signal_metrics(
@@ -803,9 +823,18 @@ class Pipelines:
             )
 
         if signal_job.status == JobStatus.pending or not signal_job.result:
-            raise Exception(f"Signal Metrics job timeout out. Try increasing timeout")
+            raise Timeout(
+                f"The signal metrics job '{signal_job.id}' timed out."
+                ""
+                """Try increasing the timeout with the `timeout` parameter."""
+            )
+
         if privacy_job.status == JobStatus.pending or not privacy_job.result:
-            raise Exception(f"Privacy Metrics job timeout out. Try increasing timeout")
+            raise Timeout(
+                f"The privacy metrics job '{privacy_job.id}' timed out."
+                ""
+                """Try increasing the timeout with the `timeout` parameter."""
+            )
 
         # Shuffle sensitive_unshuffled_avatars for security reasons
         random_gen = np.random.default_rng()
@@ -818,6 +847,9 @@ class Pipelines:
             privacy_metrics=privacy_job.result,
             signal_metrics=signal_job.result,
             post_processed_avatars=post_processed_avatars,
+            avatarization_job_id=avatarization_job.id,
+            signal_job_id=signal_job.id,
+            privacy_job_id=privacy_job.id,
         )
 
 

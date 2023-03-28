@@ -104,7 +104,6 @@ class ProportionProcessor:
         sum_to_one: bool = True,
         decimal_count: int = 1,
     ):
-
         self.variable_names = variable_names
         self.reference = reference
         self.sum_to_one = sum_to_one
