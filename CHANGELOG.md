@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- add `should_verify_ssl` to allow usage of self-signed certificate on server side
+- add `InterRecordCumulatedDifferenceProcessor`
+- add `InterRecordRangeDifferenceProcessor`
+- improve logging and error handling in avatarization_pipeline to resume easier on failure
+
 ## 0.3.0
 
 ### BREAKING
