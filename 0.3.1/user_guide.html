@@ -1,0 +1,735 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API reference" href="api_reference.html" /><link rel="prev" title="Tutorial" href="tutorial.html" />
+
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+        <title>User guide - avatars 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">avatars 0.3.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">avatars 0.3.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">User Guide</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api_reference.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="client_and_api.html"> Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html"> Models</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="processors.html"> Processors</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.ExpectedMeanProcessor.html">processors.ExpectedMeanProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.DatetimeProcessor.html">processors.DatetimeProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.GroupModalitiesProcessor.html">processors.GroupModalitiesProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.PerturbationProcessor.html">processors.PerturbationProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.ProportionProcessor.html">processors.ProportionProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.RelativeDifferenceProcessor.html">processors.RelativeDifferenceProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.ToCategoricalProcessor.html">processors.ToCategoricalProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.InterRecordRangeDifferenceProcessor.html">processors.InterRecordRangeDifferenceProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="avatars/processors.InterRecordCumulatedDifferenceProcessor.html">processors.InterRecordCumulatedDifferenceProcessor</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+</div><!-- We are overriding the ethical-ads.html file form the furo theme to display versions.
+  This file is only used on ReadTheDocs. -->
+
+<div class="sidebar-tree">
+  <p class="caption" role="heading">
+    <span class="caption-text">Versions</span>
+  </p>
+  <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="user_guide.html">0.3.1</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.3.0/user_guide.html">0.3.0</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.2.2/index.html">0.2.2</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.2.1/index.html">0.2.1</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.2.0/index.html">0.2.0</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.9/index.html">0.1.9</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.8/index.html">0.1.8</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.7/index.html">0.1.7</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.6/index.html">0.1.6</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.5/index.html">0.1.5</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.4/index.html">0.1.4</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.3/index.html">0.1.3</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.2/index.html">0.1.2</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.16/index.html">0.1.16</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.15/index.html">0.1.15</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.14/index.html">0.1.14</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.13/index.html">0.1.13</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.12/index.html">0.1.12</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.11/index.html">0.1.11</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.10/index.html">0.1.10</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.1/index.html">0.1.1</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.1.0/index.html">0.1.0</a>
+    </li>
+  </ul>
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="user-guide">
+<h1>User guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">#</a></h1>
+<section id="how-to-setup-your-email-account">
+<h2>How to setup your email account<a class="headerlink" href="#how-to-setup-your-email-account" title="Permalink to this headline">#</a></h2>
+<p><em>This section is only needed if the use of emails to login is activated
+in the global configuration. It is not the case by default.</em></p>
+<p>At the moment, you have to get in touch with your Octopize contact so
+that they can create your account.</p>
+<p>Our current email provider is AWS. They need to verify an email address
+before our platform can send emails to it.</p>
+<p>You’ll thus get an email from AWS asking you to verify your email by
+clicking on a link. Once you have verified your email address by
+clicking on that link, you can follow the steps in the section about
+<a class="reference external" href="#how-to-reset-your-password">reset password</a>.</p>
+</section>
+<section id="how-to-reset-your-password">
+<h2>How to reset your password<a class="headerlink" href="#how-to-reset-your-password" title="Permalink to this headline">#</a></h2>
+<p><strong>NB</strong>: This section is only available if the use of emails to login is
+activated in the global configuration. It is not the case by default.</p>
+<p>If you forgot your password or if you need to set one, first call the
+forgotten_password endpoint:</p>
+<!-- It is python, just doing this so that test-integration does not run this code (need mail config to run)  --><div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span>
+
+<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;BASE_URL&quot;</span><span class="p">))</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">forgotten_password</span><span class="p">(</span><span class="s2">&quot;yourmail@mail.com&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You’ll then receive an email containing a token. This token is only
+valid once, and expires after 24 hours. Use it to reset your password:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">from</span><span class="w"> </span><span class="nx">avatars</span><span class="p">.</span><span class="nx">client</span><span class="w"> </span><span class="k">import</span><span class="w"> </span><span class="nx">ApiClient</span>
+
+<span class="nx">client</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ApiClient</span><span class="p">(</span><span class="nx">base_url</span><span class="o">=</span><span class="nx">os</span><span class="p">.</span><span class="nx">environ</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;BASE_URL&quot;</span><span class="p">))</span>
+<span class="nx">client</span><span class="p">.</span><span class="nx">reset_password</span><span class="p">(</span><span class="s2">&quot;yourmail@mail.com&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;new_password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;new_password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;token-received-by-mail&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You’ll receive an email confirming your password was reset.</p>
+</section>
+<section id="how-to-log-in-to-the-server">
+<h2>How to log in to the server<a class="headerlink" href="#how-to-log-in-to-the-server" title="Permalink to this headline">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># This is the client that you&#39;ll be using for all of your requests</span>
+<span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">io</span>
+
+<span class="c1"># Change this to your actual server endpoint, e.g. base_url=&quot;https://avatar.company.com&quot;</span>
+<span class="n">client</span> <span class="o">=</span> <span class="n">ApiClient</span><span class="p">(</span><span class="n">base_url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;AVATAR_BASE_URL&quot;</span><span class="p">))</span>
+<span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span>
+    <span class="n">username</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;AVATAR_USERNAME&quot;</span><span class="p">),</span>
+    <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;AVATAR_PASSWORD&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-check-compatibility">
+<h2>How to check compatibility<a class="headerlink" href="#how-to-check-compatibility" title="Permalink to this headline">#</a></h2>
+<p>After authentication, you can check whether you can communicate with the
+server with</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify that we can connect to the API server</span>
+<span class="n">client</span><span class="o">.</span><span class="n">health</span><span class="o">.</span><span class="n">get_health</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can also check if the version of your client is compatible with the
+server you are running, and see if it is up-to-date. We frequently
+release new versions of the server and client that provide bugfixes and
+feature improvements, so be on the look out for these updates.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify that the client is compatible.</span>
+<span class="n">client</span><span class="o">.</span><span class="n">compatibility</span><span class="o">.</span><span class="n">is_client_compatible</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-upload-a-data">
+<h2>How to upload a data<a class="headerlink" href="#how-to-upload-a-data" title="Permalink to this headline">#</a></h2>
+<section id="as-a-pandas-dataframe">
+<h3>As a <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframe<a class="headerlink" href="#as-a-pandas-dataframe" title="Permalink to this headline">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;fixtures/iris.csv&quot;</span><span class="p">)</span>
+
+<span class="c1"># ... do some modifications on the dataset</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="as-a-csv-file">
+<h3>As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file<a class="headerlink" href="#as-a-csv-file" title="Permalink to this headline">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;fixtures/iris.csv&quot;</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="how-to-do-first-analysis-on-your-dataset">
+<h2>How to do first analysis on your dataset<a class="headerlink" href="#how-to-do-first-analysis-on-your-dataset" title="Permalink to this headline">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">analyze_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lines: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">nb_lines</span><span class="si">}</span><span class="s2">, dimensions: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">nb_dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-launch-an-avatarization-with-metrics">
+<h2>How to launch an avatarization with metrics<a class="headerlink" href="#how-to-launch-an-avatarization-with-metrics" title="Permalink to this headline">#</a></h2>
+<p>You can launch an avatarization with some simple privacy and signal
+metrics.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationJobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
+
+<span class="n">job_create</span> <span class="o">=</span> <span class="n">AvatarizationJobCreate</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_full_avatarization_job</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="n">job_create</span><span class="p">)</span>
+
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">avatars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can retrieve the result and the status of the job (if it is running,
+has stopped, etc…). This call will block until the job is done or a
+timeout is expired. You can call this function as often as you want.</p>
+<p>You can modify this timeout by passing the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword to
+<code class="docutils literal notranslate"><span class="pre">get_avatarization_job</span></code>.</p>
+</section>
+<section id="how-to-launch-an-avatarization-job-only">
+<h2>How to launch an avatarization job only<a class="headerlink" href="#how-to-launch-an-avatarization-job-only" title="Permalink to this headline">#</a></h2>
+<p>You can launch a simple avatarization job without any metrics
+computation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
+    <span class="n">AvatarizationJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-launch-privacy-metrics">
+<h2>How to launch privacy metrics<a class="headerlink" href="#how-to-launch-privacy-metrics" title="Permalink to this headline">#</a></h2>
+<p>You can launch a privacy metrics job with two datasets, the original and
+the anonymized.</p>
+<p>You need to enter some parameters to launch some specifics privacy
+metrics.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">PrivacyMetricsJobCreate</span><span class="p">,</span> <span class="n">PrivacyMetricsParameters</span>
+
+<span class="n">privacy_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_privacy_metrics_job</span><span class="p">(</span>
+    <span class="n">PrivacyMetricsJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">PrivacyMetricsParameters</span><span class="p">(</span>
+            <span class="n">original_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">unshuffled_avatars_id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">closest_rate_percentage_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">closest_rate_ratio_threshold</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">known_variables</span><span class="o">=</span><span class="p">[</span>
+                <span class="s2">&quot;sepal.length&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;petal.length&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">target</span><span class="o">=</span><span class="s2">&quot;variety&quot;</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">privacy_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_privacy_metrics</span><span class="p">(</span><span class="n">privacy_job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">privacy_job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">privacy_job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="https://docs.octopize.io/docs/understanding/Privacy/">our technical
+documentation</a>
+for more details on all privacy metrics.</p>
+</section>
+<section id="how-to-launch-signal-metrics">
+<h2>How to launch signal metrics<a class="headerlink" href="#how-to-launch-signal-metrics" title="Permalink to this headline">#</a></h2>
+<p>You can evaluate your avatarization on different criteria:</p>
+<ul class="simple">
+<li><p>univariate</p></li>
+<li><p>bivariate</p></li>
+<li><p>multivariate</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">SignalMetricsJobCreate</span><span class="p">,</span> <span class="n">SignalMetricsParameters</span>
+
+<span class="n">signal_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_signal_metrics_job</span><span class="p">(</span>
+    <span class="n">SignalMetricsJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">SignalMetricsParameters</span><span class="p">(</span>
+            <span class="n">original_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">avatars_id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">signal_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_signal_metrics</span><span class="p">(</span><span class="n">signal_job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">signal_job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">signal_job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See
+<a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb">here</a>
+a jupyter notebook example to evaluate the quality of an avatarization.</p>
+<p>See <a class="reference external" href="https://docs.octopize.io/docs/understanding/Privacy/">our technical
+documentation</a>
+for more details on all signal metrics.</p>
+<section id="how-to-set-the-avatarization-parameters">
+<h3>How to set the avatarization parameters<a class="headerlink" href="#how-to-set-the-avatarization-parameters" title="Permalink to this headline">#</a></h3>
+<p>See our <a class="reference external" href="https://docs.octopize.io/docs/using/running">Avatarization
+parameters</a>
+documentation for more information about the parameters.</p>
+<p>These can all be set using the <code class="docutils literal notranslate"><span class="pre">AvatarizationParameters</span></code> object that
+you can import from <code class="docutils literal notranslate"><span class="pre">avatars.models</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AvatarizationParameters</span><span class="p">,</span>
+    <span class="n">ExcludeCategoricalParameters</span><span class="p">,</span>
+    <span class="n">ImputationParameters</span><span class="p">,</span>
+    <span class="n">ExcludeCategoricalMethod</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">imputation</span> <span class="o">=</span> <span class="n">ImputationParameters</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">training_fraction</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">exclude_parameters</span> <span class="o">=</span> <span class="n">ExcludeCategoricalParameters</span><span class="p">(</span>
+    <span class="n">exclude_cardinality_threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">exclude_replacement_strategy</span><span class="o">=</span><span class="n">ExcludeCategoricalMethod</span><span class="p">(</span>
+        <span class="s2">&quot;exclude_replacement_strategy&quot;</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+<span class="n">parameters</span> <span class="o">=</span> <span class="n">AvatarizationParameters</span><span class="p">(</span>
+    <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">ncp</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">imputation</span><span class="o">=</span><span class="n">imputation</span><span class="p">,</span>
+    <span class="n">exclude_categorical</span><span class="o">=</span><span class="n">exclude_parameters</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="how-to-generate-the-report">
+<h2>How to generate the report<a class="headerlink" href="#how-to-generate-the-report" title="Permalink to this headline">#</a></h2>
+<p>You can create an avatarization report.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">ReportCreate</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">create_report</span><span class="p">(</span>
+    <span class="n">ReportCreate</span><span class="p">(</span>
+        <span class="n">avatarization_job_id</span><span class="o">=</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">privacy_job_id</span><span class="o">=</span><span class="n">privacy_job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">signal_job_id</span><span class="o">=</span><span class="n">signal_job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">download_report</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">report</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./tmp/my_avatarization_report.pdf&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-launch-a-whole-pipeline">
+<h2>How to launch a whole pipeline<a class="headerlink" href="#how-to-launch-a-whole-pipeline" title="Permalink to this headline">#</a></h2>
+<p>We have implemented the concept of pipelines.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationPipelineCreate</span>
+<span class="kn">from</span> <span class="nn">avatars.processors</span> <span class="kn">import</span> <span class="n">ProportionProcessor</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;variable_1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s2">&quot;variable_2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">22</span><span class="p">],</span>
+        <span class="s2">&quot;variable_3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">35</span><span class="p">],</span>
+        <span class="s2">&quot;variable_4&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">65</span><span class="p">],</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+
+<span class="n">proportion_processor</span> <span class="o">=</span> <span class="n">ProportionProcessor</span><span class="p">(</span>
+    <span class="n">variable_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;variable_2&quot;</span><span class="p">,</span> <span class="s2">&quot;variable_3&quot;</span><span class="p">,</span> <span class="s2">&quot;variable_4&quot;</span><span class="p">],</span>
+    <span class="n">reference</span><span class="o">=</span><span class="s2">&quot;variable_1&quot;</span><span class="p">,</span>
+    <span class="n">sum_to_one</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pipelines</span><span class="o">.</span><span class="n">avatarization_pipeline_with_processors</span><span class="p">(</span>
+    <span class="n">AvatarizationPipelineCreate</span><span class="p">(</span>
+        <span class="n">avatarization_job_create</span><span class="o">=</span><span class="n">AvatarizationJobCreate</span><span class="p">(</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span><span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">),</span>
+        <span class="p">),</span>
+        <span class="n">processors</span><span class="o">=</span><span class="p">[</span><span class="n">proportion_processor</span><span class="p">],</span>
+        <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>See <a class="reference external" href="processors.html">processors</a> for more information about the
+processors. See <a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial4_Client_side_processors.ipynb">this
+notebook</a>
+for an advanced usage of the pipeline.</p>
+</section>
+<section id="how-to-download-an-avatar-dataset">
+<h2>How to download an avatar dataset<a class="headerlink" href="#how-to-download-an-avatar-dataset" title="Permalink to this headline">#</a></h2>
+<section id="as-a-pandas-dataframe-1">
+<span id="id1"></span><h3>As a pandas dataframe<a class="headerlink" href="#as-a-pandas-dataframe-1" title="Permalink to this headline">#</a></h3>
+<p>The dtypes will be copied over from the original dataframe.</p>
+<p>Note that the order of the lines have been shuffled, which means that
+the link between original and avatar individuals cannot be made.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
+<span class="n">avatars_dataset_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span>
+
+<span class="n">avatar_df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">download_dataframe</span><span class="p">(</span><span class="n">avatars_dataset_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">avatar_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+<section id="as-a-csv-formatted-string">
+<h3>As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> formatted string<a class="headerlink" href="#as-a-csv-formatted-string" title="Permalink to this headline">#</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
+<span class="n">avatars_dataset_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span>
+<span class="n">avatars_dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">avatars_dataset_id</span><span class="p">)</span>
+<span class="n">avatar_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">avatars_dataset</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">avatar_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="sensitive-how-to-access-the-results-unshuffled">
+<h2>⚠ Sensitive ⚠ how to access the results unshuffled<a class="headerlink" href="#sensitive-how-to-access-the-results-unshuffled" title="Permalink to this headline">#</a></h2>
+<p>You might want to access the avatars dataset prior to being shuffled.
+<strong>WARNING</strong>: There is no protection at all, as the linkage between the
+unshuffled avatars dataset and the original data is obvious. <strong>This
+dataset contains sensitive data</strong>. You will need to shuffle it in order
+to make it safe.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Note that the order of the lines have NOT been shuffled, which means that the link</span>
+<span class="c1"># between original and avatar individuals IS OBVIOUS.</span>
+<span class="n">sensitive_unshuffled_avatars_datasets_id</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">sensitive_unshuffled_avatars_datasets</span><span class="o">.</span><span class="n">id</span>
+<span class="p">)</span>
+<span class="n">sensitive_unshuffled_avatars_df</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">download_dataframe</span><span class="p">(</span>
+    <span class="n">sensitive_unshuffled_avatars_datasets_id</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sensitive_unshuffled_avatars_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="api_reference.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="tutorial.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Tutorial</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2023, Octopize
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">User guide</a><ul>
+<li><a class="reference internal" href="#how-to-setup-your-email-account">How to setup your email account</a></li>
+<li><a class="reference internal" href="#how-to-reset-your-password">How to reset your password</a></li>
+<li><a class="reference internal" href="#how-to-log-in-to-the-server">How to log in to the server</a></li>
+<li><a class="reference internal" href="#how-to-check-compatibility">How to check compatibility</a></li>
+<li><a class="reference internal" href="#how-to-upload-a-data">How to upload a data</a><ul>
+<li><a class="reference internal" href="#as-a-pandas-dataframe">As a <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframe</a></li>
+<li><a class="reference internal" href="#as-a-csv-file">As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to-do-first-analysis-on-your-dataset">How to do first analysis on your dataset</a></li>
+<li><a class="reference internal" href="#how-to-launch-an-avatarization-with-metrics">How to launch an avatarization with metrics</a></li>
+<li><a class="reference internal" href="#how-to-launch-an-avatarization-job-only">How to launch an avatarization job only</a></li>
+<li><a class="reference internal" href="#how-to-launch-privacy-metrics">How to launch privacy metrics</a></li>
+<li><a class="reference internal" href="#how-to-launch-signal-metrics">How to launch signal metrics</a><ul>
+<li><a class="reference internal" href="#how-to-set-the-avatarization-parameters">How to set the avatarization parameters</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to-generate-the-report">How to generate the report</a></li>
+<li><a class="reference internal" href="#how-to-launch-a-whole-pipeline">How to launch a whole pipeline</a></li>
+<li><a class="reference internal" href="#how-to-download-an-avatar-dataset">How to download an avatar dataset</a><ul>
+<li><a class="reference internal" href="#as-a-pandas-dataframe-1">As a pandas dataframe</a></li>
+<li><a class="reference internal" href="#as-a-csv-formatted-string">As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> formatted string</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sensitive-how-to-access-the-results-unshuffled">⚠ Sensitive ⚠ how to access the results unshuffled</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    </body>
+</html>

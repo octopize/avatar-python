@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#" /><link rel="search" title="Search" href="search.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/><title>Index - avatars 0.3.0 documentation</title>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/><title>Index - avatars 0.3.1 documentation</title>
 <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -121,7 +121,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.3.0 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.3.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -144,7 +144,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.3.0 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.3.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -184,6 +184,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.3.1/index.html">0.3.1</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.3.0/index.html">0.3.0</a>
     </li>
@@ -316,9 +319,11 @@
 </li>
         <li><a href="models.html#avatars.models.AvatarizationPipelineCreate.avatarization_job_create">avatarization_job_create (avatars.models.AvatarizationPipelineCreate attribute)</a>
 </li>
-        <li><a href="models.html#avatars.models.PrivacyMetricsParameters.avatarization_job_id">avatarization_job_id (avatars.models.PrivacyMetricsParameters attribute)</a>
+        <li><a href="models.html#avatars.models.AvatarizationPipelineResult.avatarization_job_id">avatarization_job_id (avatars.models.AvatarizationPipelineResult attribute)</a>
 
         <ul>
+          <li><a href="models.html#avatars.models.PrivacyMetricsParameters.avatarization_job_id">(avatars.models.PrivacyMetricsParameters attribute)</a>
+</li>
           <li><a href="models.html#avatars.models.ReportCreate.avatarization_job_id">(avatars.models.ReportCreate attribute)</a>
 </li>
         </ul></li>
@@ -571,7 +576,7 @@
 </li>
         <li><a href="models.html#avatars.models.CreateDataset.file">file (avatars.models.CreateDataset attribute)</a>
 </li>
-        <li><a href="client_and_api.html#avatars.client.FileTooLarge">FileTooLarge</a>
+        <li><a href="client_and_api.html#avatars.api.FileTooLarge">FileTooLarge</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -990,8 +995,12 @@
           <li><a href="avatars/processors.ToCategoricalProcessor.html#processors.ToCategoricalProcessor.preprocess">(processors.ToCategoricalProcessor method)</a>
 </li>
         </ul></li>
-        <li><a href="models.html#avatars.models.ReportCreate.privacy_job_id">privacy_job_id (avatars.models.ReportCreate attribute)</a>
+        <li><a href="models.html#avatars.models.AvatarizationPipelineResult.privacy_job_id">privacy_job_id (avatars.models.AvatarizationPipelineResult attribute)</a>
+
+        <ul>
+          <li><a href="models.html#avatars.models.ReportCreate.privacy_job_id">(avatars.models.ReportCreate attribute)</a>
 </li>
+        </ul></li>
         <li><a href="models.html#avatars.models.AvatarizationPipelineResult.privacy_metrics">privacy_metrics (avatars.models.AvatarizationPipelineResult attribute)</a>
 
         <ul>
@@ -1094,8 +1103,12 @@
         </ul></li>
         <li><a href="models.html#avatars.models.AvatarizationResult.sensitive_unshuffled_avatars_datasets">sensitive_unshuffled_avatars_datasets (avatars.models.AvatarizationResult attribute)</a>
 </li>
-        <li><a href="models.html#avatars.models.ReportCreate.signal_job_id">signal_job_id (avatars.models.ReportCreate attribute)</a>
+        <li><a href="models.html#avatars.models.AvatarizationPipelineResult.signal_job_id">signal_job_id (avatars.models.AvatarizationPipelineResult attribute)</a>
+
+        <ul>
+          <li><a href="models.html#avatars.models.ReportCreate.signal_job_id">(avatars.models.ReportCreate attribute)</a>
 </li>
+        </ul></li>
         <li><a href="models.html#avatars.models.AvatarizationPipelineResult.signal_metrics">signal_metrics (avatars.models.AvatarizationPipelineResult attribute)</a>
 
         <ul>
@@ -1152,7 +1165,7 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="models.html#avatars.models.PrivacyMetricsParameters.target">target (avatars.models.PrivacyMetricsParameters attribute)</a>
 </li>
-        <li><a href="client_and_api.html#avatars.client.Timeout">Timeout</a>
+        <li><a href="client_and_api.html#avatars.api.Timeout">Timeout</a>
 </li>
         <li><a href="models.html#avatars.models.AvatarizationParameters.to_categorical_threshold">to_categorical_threshold (avatars.models.AvatarizationParameters attribute)</a>
 </li>

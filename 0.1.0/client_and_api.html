@@ -169,6 +169,9 @@
   </p>
   <ul>
     <li class="toctree-l1">
+      <a class="reference internal" href="../0.3.1/client_and_api.html">0.3.1</a>
+    </li>
+    <li class="toctree-l1">
       <a class="reference internal" href="../0.3.0/client_and_api.html">0.3.0</a>
     </li>
     <li class="toctree-l1">
@@ -278,17 +281,7 @@ You’ll instantiate it, and authenticate using the credentials to the engine.</
 only there if you want to make a manual call to the engine.
 For regular use, use the methods described below.</p>
 </div>
-<span class="target" id="module-avatars.client"></span><dl class="py exception">
-<dt class="sig sig-object py" id="avatars.client.FileTooLarge">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.client.</span></span><span class="sig-name descname"><span class="pre">FileTooLarge</span></span><a class="headerlink" href="#avatars.client.FileTooLarge" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py exception">
-<dt class="sig sig-object py" id="avatars.client.Timeout">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.client.</span></span><span class="sig-name descname"><span class="pre">Timeout</span></span><a class="headerlink" href="#avatars.client.Timeout" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
+<span class="target" id="module-avatars.client"></span><dl class="py class">
 <dt class="sig sig-object py" id="avatars.client.ApiClient">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.client.</span></span><span class="sig-name descname"><span class="pre">ApiClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.client.ApiClient" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py method">
@@ -320,7 +313,17 @@ For regular use, use the methods described below.</p>
 <p>Here below are the methods provided that communicate with the engine.
 The API they expose uses <a class="reference external" href="https://pydantic-docs.helpmanual.io/">pydantic</a>
 objects to help you pass in the correct arguments to the methods.</p>
-<span class="target" id="module-avatars.api"></span><dl class="py class">
+<span class="target" id="module-avatars.api"></span><dl class="py exception">
+<dt class="sig sig-object py" id="avatars.api.FileTooLarge">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.api.</span></span><span class="sig-name descname"><span class="pre">FileTooLarge</span></span><a class="headerlink" href="#avatars.api.FileTooLarge" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="avatars.api.Timeout">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.api.</span></span><span class="sig-name descname"><span class="pre">Timeout</span></span><a class="headerlink" href="#avatars.api.Timeout" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="avatars.api.Compatibility">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.api.</span></span><span class="sig-name descname"><span class="pre">Compatibility</span></span><a class="headerlink" href="#avatars.api.Compatibility" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py method">

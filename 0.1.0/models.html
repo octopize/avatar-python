@@ -169,6 +169,9 @@
   </p>
   <ul>
     <li class="toctree-l1">
+      <a class="reference internal" href="../0.3.1/models.html">0.3.1</a>
+    </li>
+    <li class="toctree-l1">
       <a class="reference internal" href="../0.3.0/models.html">0.3.0</a>
     </li>
     <li class="toctree-l1">
@@ -1493,7 +1496,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationPipelineResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationPipelineResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">privacy_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.PrivacyMetrics" title="avatars.models.PrivacyMetrics"><span class="pre">PrivacyMetrics</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.SignalMetrics" title="avatars.models.SignalMetrics"><span class="pre">SignalMetrics</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_processed_avatars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationPipelineResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">privacy_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.PrivacyMetrics" title="avatars.models.PrivacyMetrics"><span class="pre">PrivacyMetrics</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.SignalMetrics" title="avatars.models.SignalMetrics"><span class="pre">SignalMetrics</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_processed_avatars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avatarization_job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">privacy_job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py class">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationPipelineResult.Config">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult.Config" title="Permalink to this definition">#</a></dt>
@@ -1517,6 +1520,21 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationPipelineResult.post_processed_avatars">
 <span class="sig-name descname"><span class="pre">post_processed_avatars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pandas.core.frame.DataFrame</span></em><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult.post_processed_avatars" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationPipelineResult.avatarization_job_id">
+<span class="sig-name descname"><span class="pre">avatarization_job_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult.avatarization_job_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationPipelineResult.signal_job_id">
+<span class="sig-name descname"><span class="pre">signal_job_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult.signal_job_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationPipelineResult.privacy_job_id">
+<span class="sig-name descname"><span class="pre">privacy_job_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.AvatarizationPipelineResult.privacy_job_id" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
