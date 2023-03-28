@@ -744,6 +744,8 @@ class Pipelines:
         avatarization_job = self.client.jobs.create_avatarization_job(
             request.avatarization_job_create
         )
+        print(f"launching avatarization job with id={avatarization_job.id}")
+
         avatarization_job = self.client.jobs.get_avatarization_job(
             str(avatarization_job.id),
             timeout=timeout,
@@ -789,6 +791,7 @@ class Pipelines:
             ),
             timeout=per_request_timeout,
         )
+        print(f"launching privacy metrics job with id={privacy_job.id}")
 
         # Calculate signal metrics
         signal_job = self.client.jobs.create_signal_metrics_job(
@@ -799,6 +802,7 @@ class Pipelines:
             ),
             timeout=per_request_timeout,
         )
+        print(f"launching signal metrics job with id={signal_job.id}")
 
         # Get the job results
         signal_job = self.client.jobs.get_signal_metrics(
