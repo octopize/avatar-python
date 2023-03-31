@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- catch JSONDecodeError and re-raise with more info
+
 ## 0.3.1
 
 - add `should_verify_ssl` to allow usage of self-signed certificate on server side

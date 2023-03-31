@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.3.2
+-----
+
+-  catch JSONDecodeError and re-raise with more info
+
+.. _section-1:
+
 0.3.1
 -----
 
@@ -11,7 +18,7 @@ Changelog
 -  improve logging and error handling in avatarization_pipeline to
    resume easier on failure
 
-.. _section-1:
+.. _section-2:
 
 0.3.0
 -----
@@ -72,7 +79,7 @@ Others
 -  fix: fixed a bug where computing privacy metrics with distinct
    missing values was impossible
 
-.. _section-2:
+.. _section-3:
 
 0.2.2
 -----
@@ -86,7 +93,7 @@ Others
    ``categorical_hidden_rate``
 -  Add the ``DatetimeProcessor``
 
-.. _section-3:
+.. _section-4:
 
 0.2.1
 -----
@@ -95,7 +102,7 @@ Others
 -  Make the ``toolz`` package a mandatory dependency
 -  Fix a handling of a target variable equaling zero
 
-.. _section-4:
+.. _section-5:
 
 0.2.0
 -----
@@ -117,7 +124,7 @@ Others
 -  Add ExcludeCategoricalParameters to use embedded processor on the
    server side
 
-.. _section-5:
+.. _section-6:
 
 0.1.16
 ------
@@ -127,7 +134,7 @@ Others
 -  JobParameters becomes AvatarizationParameters
 -  Add DCR and NNDR to privacy metrics
 
-.. _section-6:
+.. _section-7:
 
 0.1.15
 ------
@@ -151,14 +158,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
-.. _section-7:
+.. _section-8:
 
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-8:
+.. _section-9:
 
 0.1.13
 ------
