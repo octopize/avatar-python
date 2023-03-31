@@ -5,6 +5,7 @@ import sys
 from collections.abc import Mapping, Sequence
 from enum import Enum
 from io import BytesIO, StringIO
+from json import JSONDecodeError
 from json import loads as json_loads
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
@@ -167,7 +168,18 @@ class ApiClient:
                 ) from None
 
         if result.status_code != 200:
-            json = result.json()
+            try:
+                json = result.json()
+            except JSONDecodeError as e:
+                message = (
+                    "Could not decode response as JSON.",
+                    f"The error message is: {str(e.args)}",
+                    "The complete response is",
+                    f"{result.text}",
+                )
+                message_str = "\n".join(message)
+                raise Exception(message_str)
+
             value = json.get("detail")  # type: ignore[union-attr]
             if (
                 result.status_code == 401
