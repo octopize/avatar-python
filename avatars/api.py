@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.3
+# API Version : 0.5.4
 
 
 import itertools
@@ -384,6 +384,26 @@ class Jobs:
         }
         return AvatarizationJob(
             **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+        )
+
+    def add_avatarization_batch_job(
+        self,
+        reference_job_id: str,
+        dataset_id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationJob:
+        """Create an avatarization job on a batch."""
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/avatarization_batch",
+            "params": dict(
+                reference_job_id=reference_job_id,
+                dataset_id=dataset_id,
+            ),
+        }
+        return AvatarizationJob(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
         )
 
     def get_avatarization_job(
