@@ -75,8 +75,9 @@ print(dataset)
 
 dataset
 
+dataset = client.datasets.analyze_dataset(dataset.id)
 while dataset.summary is None:
-    dataset = client.datasets.analyze_dataset(dataset.id)
+    dataset = client.datasets.get_dataset(dataset.id)
 
 print(dataset.summary)
 
