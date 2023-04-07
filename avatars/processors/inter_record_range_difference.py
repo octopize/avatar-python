@@ -227,7 +227,7 @@ class InterRecordRangeDifferenceProcessor:
 
         if self.keep_record_order and len(set(source.index) ^ set(dest.index)) > 0:
             raise ValueError(
-                "Expected no missing values for `keep_record_order` to be `True` only if source and dest have same indices, got source and dest with different indices"
+                "Expected `keep_record_order` to be `True` only if source and dest have same indices, got source and dest with different indices"
             )
 
         df = dest.copy()

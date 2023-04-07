@@ -250,6 +250,6 @@ def test_postprocess_raises_error_with_keep_order_and_different_indices(
 
     with pytest.raises(
         ValueError,
-        match="Expected no missing values for `keep_record_order` to be `True`",
+        match="Expected `keep_record_order` to be `True` only if",
     ):
         processor.postprocess(df_with_cumulated, processed_df)
