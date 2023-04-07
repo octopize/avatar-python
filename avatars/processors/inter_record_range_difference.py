@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pandas as pd
 
 
@@ -34,7 +36,11 @@ class InterRecordRangeDifferenceProcessor:
             name of the variable to be created to contain the range value
         new_difference_variable:
             name of the variable to be created to contain the difference value
-
+        keep_record_order:
+            If set to `True`, the postprocess will decode values respecting the record order given
+            by `id_variable` and `sort_by_variable` from the source dataframe. This can only be set
+            to `True` if the indices are the same between the source and dest dataframes passed as
+            arguments to `postprocess`.
     Examples
     --------
     >>> df = pd.DataFrame(
@@ -52,6 +58,7 @@ class InterRecordRangeDifferenceProcessor:
     ...     new_first_variable="first_value",
     ...     new_range_variable='range_value',
     ...     new_difference_variable="value_difference",
+    ...     keep_record_order=True
     ... )
     >>> processor.preprocess(df)
        id  range_value  first_value  value_difference
@@ -80,6 +87,39 @@ class InterRecordRangeDifferenceProcessor:
     3   1   12.0  15.0
     4   2   10.0  12.0
     5   2   23.0  24.0
+
+    The postprocess can also be used on data where the number of records per individual is
+    different than the original one. In such cases, the processor should instantiated with the
+    `keep_record_order` argument set to its default value `False`.
+    In the example below, there is an extra record with the id 2.
+
+    >>> processor = InterRecordRangeDifferenceProcessor(
+    ...     id_variable="id",
+    ...     target_start_variable='start',
+    ...     target_end_variable='end',
+    ...     sort_by_variable="start",
+    ...     new_first_variable="first_value",
+    ...     new_range_variable='range_value',
+    ...     new_difference_variable="value_difference",
+    ...     keep_record_order=False
+    ... )
+    >>> preprocessed_df = pd.DataFrame(
+    ...     {
+    ...         "id": [1, 2, 1, 1, 2, 2, 2],
+    ...         "range_value": [1, 4, 1, 3, 2, 1, 2],
+    ...         "first_value": [6, 10, 6, 6, 10, 10, 10],
+    ...         "value_difference": [0, 2, 0, 4, 0, 5, 1],
+    ...     }
+    ... )
+    >>> processor.postprocess(df, preprocessed_df)
+       id  start   end
+    0   1    6.0   7.0
+    1   2   12.0  16.0
+    2   1    7.0   8.0
+    3   1   12.0  15.0
+    4   2   16.0  18.0
+    5   2   23.0  24.0
+    6   2   25.0  27.0
     """
 
     def __init__(
@@ -92,6 +132,7 @@ class InterRecordRangeDifferenceProcessor:
         new_first_variable: str,
         new_range_variable: str,
         new_difference_variable: str,
+        keep_record_order: bool = False,
     ):
         self.id_variable = id_variable
         self.target_start_variable = target_start_variable
@@ -100,6 +141,7 @@ class InterRecordRangeDifferenceProcessor:
         self.new_first_variable = new_first_variable
         self.new_range_variable = new_range_variable
         self.new_difference_variable = new_difference_variable
+        self.keep_record_order = keep_record_order
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         variables_to_check = [
@@ -185,13 +227,19 @@ class InterRecordRangeDifferenceProcessor:
                 "Expected no missing values for `sort_by_variable` in source, got column with nulls instead"
             )
 
+        if self.keep_record_order and len(set(source.index) ^ set(dest.index)) > 0:
+            raise ValueError(
+                "Expected no missing values for `keep_record_order` to be `True` only if source and dest have same indices, got source and dest with different indices"
+            )
+
         df = dest.copy()
 
         # sort values in the same way as they were ordered in preprocess
-        ordered_indices = source.sort_values(
-            [self.id_variable, self.sort_by_variable]
-        ).index
-        df = df.loc[ordered_indices]
+        if self.keep_record_order:
+            ordered_indices = source.sort_values(
+                [self.id_variable, self.sort_by_variable]
+            ).index
+            df = df.loc[ordered_indices]
 
         # calculate for each row the sum of ranges of all previous records
         df["__range_tmp__"] = df.groupby(self.id_variable)[
