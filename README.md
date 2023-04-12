@@ -24,6 +24,28 @@ Simply run the following command:
 make notebook
 ```
 
+If you don't have access to `make` or you want to setup the tutorial requirements manually, you can follow the following commands:
+
+These have to be run from the root of the `avatar-python` repo.
+
+```shell
+# Create and activate a new virtual environment.
+python -m venv notebooks/env
+source notebooks/env/bin/activate
+
+# Install the necessary dependencies
+pip install -r requirements-tutorial.txt
+pip install . # installing avatars
+
+#Exporting the necessary environment variables
+export AVATAR_BASE_URL="https://yourcompany.octopize.app"
+export AVATAR_USERNAME="your_username"
+export AVATAR_PASSWORD="your_password"
+
+# Launch the notebooks
+jupyter notebook notebooks
+```
+
 ## License
 
 This software is made available through the Apache License 2.0
