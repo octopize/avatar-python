@@ -198,9 +198,9 @@ class ReportFromDataCreate(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     email: str = Field(..., title="Email")
-    new_password: str = Field(..., min_length=12, title="New Password")
+    new_password: str = Field(..., max_length=128, min_length=12, title="New Password")
     new_password_repeated: str = Field(
-        ..., min_length=12, title="New Password Repeated"
+        ..., max_length=128, min_length=12, title="New Password Repeated"
     )
     token: UUID = Field(..., title="Token")
 
@@ -261,7 +261,9 @@ class CreateUser(BaseModel):
     username: Optional[str] = Field(None, title="Username")
     email: Optional[str] = Field(None, title="Email")
     role: Optional[UserRole] = UserRole.user
-    password: Optional[str] = Field(None, min_length=12, title="Password")
+    password: Optional[str] = Field(
+        None, max_length=128, min_length=12, title="Password"
+    )
 
 
 class Dataset(BaseModel):
