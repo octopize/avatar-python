@@ -461,14 +461,14 @@ Example:
        )
    )
 
-   print(job.id) # make sure to gather the ID
+   print(job.id)  # make sure to gather the ID
 
-   print(job.status) # JobStatus.pending
+   print(job.status)  # JobStatus.pending
    # Take a coffee break, close the script, come back in 10 minutes
 
    finished_job = client.jobs.get_avatarization_job(job.id)
 
-   print(finished_job.status) # JobStatus.success
+   print(finished_job.status)  # JobStatus.success
 
 However, sometimes you want your code to be blocking and wait for the
 job to finish, and only then return the result.
