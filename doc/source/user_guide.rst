@@ -334,9 +334,12 @@ you can import from ``avatars.models``:
 How to generate the report
 --------------------------
 
-You can create an avatarization report after having executed an
-avatarization job, and well as a signal metrics and a privacy metrics
-job.
+You can create an avatarization report after having executed all of the
+following jobs:
+
+-  an avatarization job
+-  a signal metrics job
+-  a privacy metrics job
 
 .. code:: python
 
