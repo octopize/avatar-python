@@ -412,7 +412,7 @@ finished_job = client.jobs.get_avatarization_job(job.id, timeout=600)
 
 Synchronous calls are calls that are blocking, which means that the interpreter runs your line of code and waits until there is a result before continuing on with the rest of the script.
 
-Uploading or downloading a dataset is one of those calls that is particularly time consuming, especially for large datasets.
+For instance, uploading or downloading a dataset can be time-consuming if the dataset is large.
 
 Should you encounter issues with the upload timing out, you can increase the timeout like so:
 
