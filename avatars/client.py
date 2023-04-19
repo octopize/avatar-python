@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 from uuid import UUID
 
 import httpx
-from httpx import ReadTimeout, WriteTimeout
+from httpx import ReadTimeout, Response, WriteTimeout
 from pydantic import BaseModel
 from toolz.dicttoolz import valfilter
 
@@ -146,58 +146,36 @@ class ApiClient:
         # Even while using self-signed certificate streams remain encrypted.
         should_verify_ssl = bool(kwargs.get("verify_ssl", True))
 
+        should_stream = bool(kwargs.get("should_stream", False))
+
         with httpx.Client(
             timeout=timeout or self.timeout,
             base_url=self.base_url,
             verify=should_verify_ssl,
         ) as client:
+            request = client.build_request(
+                method=method,
+                url=url,
+                params=params,
+                json=json_arg,
+                data=form_data_arg,
+                files=files_arg,
+                headers=self._headers,
+            )
             try:
-                result = client.request(
-                    method,
-                    url,
-                    params=params,
-                    json=json_arg,
-                    data=form_data_arg,
-                    files=files_arg,
-                    headers=self._headers,
+                result = client.send(
+                    request=request,
+                    stream=should_stream,
                 )
+
+                if should_stream:
+                    return self._handle_streaming_response(result)
+                else:
+                    return self._handle_standard_response(result)
             except (WriteTimeout, ReadTimeout):
                 raise Timeout(
                     "The call timed out. Consider increasing the timeout with the `timeout` parameter."
                 ) from None
-
-        if result.status_code != 200:
-            json = result.json()
-            value = json.get("detail")  # type: ignore[union-attr]
-            if (
-                result.status_code == 401
-                and isinstance(value, str)
-                and "authenticated" in value
-            ):
-                raise Exception("You are not authenticated.")
-            standard_error = _get_nested_value(json, "message")  # type: ignore[arg-type]
-
-            if standard_error:
-                error_msg = standard_error
-            elif validation_error := _get_nested_value(json, "msg"):  # type: ignore[arg-type]
-                if detailed_message := _get_nested_value(json, "loc"):  # type: ignore[arg-type]
-                    field = detailed_message[-1]
-                    error_msg = f"{validation_error}: {field}"
-                else:
-                    error_msg = f"Bad Request: {validation_error}"
-            else:
-                error_msg = "Internal error"
-
-            raise Exception(
-                f"Got error in HTTP request: {method} {url}. Error status {result.status_code} - {error_msg}"
-            )
-
-        if result.headers["content-type"] == "application/json":
-            return result.json()
-        elif result.headers["content-type"] == "application/pdf":
-            return result.content
-        else:
-            return result.text
 
     def _get_file_argument(
         self, file: Optional[Union[StringIO, BytesIO]]
@@ -221,3 +199,58 @@ class ApiClient:
         # The dictionary key must be 'file' and you MUST pass in a filename
         # else there is a request ValidationError on the server side
         return {"file": (filename, encoded_content, "text/csv")}
+
+    def _handle_standard_response(
+        self, result: Response
+    ) -> Union[Dict[str, Any], bytes, str]:
+        if not result.is_success:
+            self._raise_on_status(result, result.json())
+
+        if result.headers["content-type"] == "application/json":
+            as_json: Dict[str, Any] = result.json()
+            return as_json
+        elif result.headers["content-type"] == "application/pdf":
+            return result.content
+        else:
+            return result.text
+
+    def _handle_streaming_response(self, result: Response) -> StringIO:
+        if not result.is_success:
+            content = result.read()
+            encoding = result.encoding or "utf-8"
+            as_json: Dict[str, Any] = json_loads(content.decode(encoding))
+            self._raise_on_status(result, as_json)
+
+        buffer = StringIO()
+        try:
+            for chunk in result.iter_text():
+                buffer.write(chunk)
+        finally:
+            result.close()
+
+        return buffer
+
+    def _raise_on_status(self, result: Response, content: Dict[str, Any]) -> None:
+        value = content.get("detail")
+        if (
+            result.status_code == 401
+            and isinstance(value, str)
+            and "authenticated" in value
+        ):
+            raise Exception("You are not authenticated.")
+        standard_error = _get_nested_value(content, "message")
+
+        if standard_error:
+            error_msg = standard_error
+        elif validation_error := _get_nested_value(content, "msg"):
+            if detailed_message := _get_nested_value(content, "loc"):
+                field = detailed_message[-1]
+                error_msg = f"{validation_error}: {field}"
+            else:
+                error_msg = f"Bad Request: {validation_error}"
+        else:
+            error_msg = "Internal error"
+
+        raise Exception(
+            f"Got error in HTTP request: {result.request.method} {result.request.url}. Error status {result.status_code} - {error_msg}"
+        )

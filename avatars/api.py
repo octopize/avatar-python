@@ -205,6 +205,23 @@ class Datasets:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
+    def create_dataset_from_stream(
+        self,
+        request: Union[StringIO, BytesIO],
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Dataset:
+        """Create a dataset by streaming chunks of the dataset."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/datasets/stream",
+            "timeout": timeout,
+            "file": request,
+        }
+
+        return Dataset(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
     def create_dataset(
         self,
         request: Union[StringIO, BytesIO],
@@ -297,6 +314,23 @@ class Datasets:
             "method": "get",
             "url": f"/datasets/{id}/correlations",
             "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)  # type: ignore[arg-type]
+
+    def download_dataset_as_stream(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Download a dataset by streaming chunks of it."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/datasets/{id}/download/stream",
+            "timeout": timeout,
+            "should_stream": True,
         }
 
         return self.client.request(**kwargs)  # type: ignore[arg-type]
@@ -772,7 +806,11 @@ class PandasIntegration:
         self.client = client
 
     def upload_dataframe(
-        self, request: "pd.DataFrame", *, timeout: Optional[int] = DEFAULT_TIMEOUT
+        self,
+        request: "pd.DataFrame",
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        should_stream: bool = False,
     ) -> Dataset:
         df_types = request.dtypes
         buffer = StringIO()
@@ -780,24 +818,40 @@ class PandasIntegration:
         buffer.seek(0)
         del request
 
-        patch = PatchDataset(
-            columns=[
-                ColumnDetail(type=to_common_type(str(e)), label=i)
-                for i, e in zip(df_types.index, df_types)
-            ]
-        )
-        dataset = self.client.datasets.create_dataset(
-            buffer, patch=patch, timeout=timeout
-        )
+        if should_stream:
+            dataset = self.client.datasets.create_dataset_from_stream(
+                buffer, timeout=timeout
+            )
+        else:
+            patch = PatchDataset(
+                columns=[
+                    ColumnDetail(type=to_common_type(str(e)), label=i)
+                    for i, e in zip(df_types.index, df_types)
+                ]
+            )
+            dataset = self.client.datasets.create_dataset(
+                buffer, patch=patch, timeout=timeout
+            )
 
         return dataset
 
     def download_dataframe(
-        self, id: str, *, timeout: Optional[int] = DEFAULT_TIMEOUT
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        should_stream: bool = False,
     ) -> pd.DataFrame:
         dataset_info = self.client.datasets.get_dataset(id, timeout=timeout)
-        dataset = self.client.datasets.download_dataset(id, timeout=timeout)
-        dataset_io = StringIO(dataset)
+        dataset_io: StringIO
+        if should_stream:
+            dataset_io = self.client.datasets.download_dataset_as_stream(
+                id, timeout=timeout
+            )
+        else:
+            dataset = self.client.datasets.download_dataset(id, timeout=timeout)
+            dataset_io = StringIO(dataset)
+
         dataset_io.seek(0)
 
         # We apply datetime columns separately as 'datetime' is not a valid pandas dtype
