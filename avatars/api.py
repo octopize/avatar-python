@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.3
+# API Version : 0.5.4
 
 
 import itertools
@@ -39,6 +39,7 @@ from avatars.models import (
     Projections,
     Report,
     ReportCreate,
+    ReportFromDataCreate,
     ResetPasswordRequest,
     SignalMetrics,
     SignalMetricsJob,
@@ -496,6 +497,26 @@ class Metrics:
             **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
         )
 
+    def get_job_projections_from_data(
+        self,
+        dataset_id: str,
+        avatars_dataset_id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Projections:
+        """Get the projections of records and avatars in 3D."""
+        kwargs = {
+            "method": "get",
+            "url": f"/projections",
+            "params": dict(
+                dataset_id=dataset_id,
+                avatars_dataset_id=avatars_dataset_id,
+            ),
+        }
+        return Projections(
+            **self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+        )
+
     def get_variable_contributions(
         self,
         job_id: str,
@@ -561,6 +582,21 @@ class Reports:
             "url": f"/reports/{id}/download",
         }
         return self.client.request(**kwargs, timeout=timeout)  # type: ignore[arg-type]
+
+    def create_report_from_data(
+        self,
+        request: ReportFromDataCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report."""
+        kwargs = {
+            "method": "post",
+            "url": f"/reports/from_data",
+        }
+        return Report(
+            **self.client.request(**kwargs, json=request, timeout=timeout)  # type: ignore[arg-type]
+        )
 
 
 class Stats:
