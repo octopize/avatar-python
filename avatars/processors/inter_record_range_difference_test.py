@@ -232,7 +232,6 @@ def test_postprocess_raises_error_when_missing_values(
 def test_postprocess_raises_error_with_keep_order_and_different_indices(
     df_with_cumulated: pd.DataFrame,
 ) -> None:
-
     processor = InterRecordRangeDifferenceProcessor(
         id_variable="id",
         target_start_variable="start",

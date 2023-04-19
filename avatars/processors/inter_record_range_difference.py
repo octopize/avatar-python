@@ -225,7 +225,10 @@ class InterRecordRangeDifferenceProcessor:
                 "Expected no missing values for `sort_by_variable` in source, got column with nulls instead"
             )
 
-        if self.keep_record_order and len(set(source.index).symmetric_difference(dest.index)) > 0:
+        if (
+            self.keep_record_order
+            and len(set(source.index).symmetric_difference(dest.index)) > 0
+        ):
             raise ValueError(
                 "Expected `keep_record_order` to be `True` only if source and dest have same indices, got source and dest with different indices"
             )
