@@ -319,6 +319,9 @@ class PrivacyMetricsParameters(BaseModel):
     avatarization_job_id: Optional[UUID] = Field(None, title="Avatarization Job Id")
     imputation: Optional[ImputationParameters] = None
     ncp: Optional[int] = Field(None, title="Ncp")
+    use_categorical_reduction: Optional[bool] = Field(
+        None, title="Use Categorical Reduction"
+    )
     known_variables: Optional[List[str]] = Field(None, title="Known Variables")
     target: Optional[str] = Field(None, title="Target")
     closest_rate_percentage_threshold: Optional[float] = Field(
@@ -369,6 +372,9 @@ class AvatarizationParameters(BaseModel):
     ncp: Optional[int] = Field(None, title="Ncp")
     seed: Optional[int] = Field(None, title="Seed")
     imputation: Optional[ImputationParameters] = None
+    use_categorical_reduction: Optional[bool] = Field(
+        None, title="Use Categorical Reduction"
+    )
     to_categorical_threshold: Optional[int] = Field(
         None, title="To Categorical Threshold"
     )
