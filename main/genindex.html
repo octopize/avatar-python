@@ -375,6 +375,8 @@
         </ul></li>
         <li><a href="models.html#avatars.models.AvatarizationResult.avatars_dataset">avatars_dataset (avatars.models.AvatarizationResult attribute)</a>
 </li>
+        <li><a href="models.html#avatars.models.ReportFromDataCreate.avatars_dataset_id">avatars_dataset_id (avatars.models.ReportFromDataCreate attribute)</a>
+</li>
         <li><a href="models.html#avatars.models.SignalMetricsParameters.avatars_id">avatars_id (avatars.models.SignalMetricsParameters attribute)</a>
 </li>
     </ul></td>
@@ -433,10 +435,10 @@
 </li>
         <li><a href="models.html#avatars.models.CompatibilityResponse">CompatibilityResponse (class in avatars.models)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="models.html#avatars.models.JobProgress.completion_rate_100">completion_rate_100 (avatars.models.JobProgress attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="models.html#avatars.models.ExcludeCategoricalMethod.coordinate_similarity">coordinate_similarity (avatars.models.ExcludeCategoricalMethod attribute)</a>
 </li>
         <li><a href="models.html#avatars.models.SignalMetrics.correlation_difference_ratio">correlation_difference_ratio (avatars.models.SignalMetrics attribute)</a>
@@ -447,11 +449,15 @@
 </li>
         <li><a href="client_and_api.html#avatars.api.Datasets.create_dataset">create_dataset() (avatars.api.Datasets method)</a>
 </li>
+        <li><a href="client_and_api.html#avatars.api.Datasets.create_dataset_from_stream">create_dataset_from_stream() (avatars.api.Datasets method)</a>
+</li>
         <li><a href="client_and_api.html#avatars.api.Jobs.create_full_avatarization_job">create_full_avatarization_job() (avatars.api.Jobs method)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Jobs.create_privacy_metrics_job">create_privacy_metrics_job() (avatars.api.Jobs method)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Reports.create_report">create_report() (avatars.api.Reports method)</a>
+</li>
+        <li><a href="client_and_api.html#avatars.api.Reports.create_report_from_data">create_report_from_data() (avatars.api.Reports method)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Jobs.create_signal_metrics_job">create_signal_metrics_job() (avatars.api.Jobs method)</a>
 </li>
@@ -488,7 +494,11 @@
         <li><a href="models.html#avatars.models.Dataset">Dataset (class in avatars.models)</a>
 </li>
         <li><a href="models.html#avatars.models.AvatarizationParameters.dataset_id">dataset_id (avatars.models.AvatarizationParameters attribute)</a>
+
+        <ul>
+          <li><a href="models.html#avatars.models.ReportFromDataCreate.dataset_id">(avatars.models.ReportFromDataCreate attribute)</a>
 </li>
+        </ul></li>
         <li><a href="client_and_api.html#avatars.api.Datasets">Datasets (class in avatars.api)</a>
 </li>
         <li><a href="models.html#avatars.models.DatasetSummary">DatasetSummary (class in avatars.models)</a>
@@ -510,6 +520,8 @@
         <li><a href="client_and_api.html#avatars.api.PandasIntegration.download_dataframe">download_dataframe() (avatars.api.PandasIntegration method)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Datasets.download_dataset">download_dataset() (avatars.api.Datasets method)</a>
+</li>
+        <li><a href="client_and_api.html#avatars.api.Datasets.download_dataset_as_stream">download_dataset_as_stream() (avatars.api.Datasets method)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Reports.download_report">download_report() (avatars.api.Reports method)</a>
 </li>
@@ -619,11 +631,13 @@
 </li>
         <li><a href="client_and_api.html#avatars.api.Health.get_health">get_health() (avatars.api.Health method)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="client_and_api.html#avatars.api.Health.get_health_db">get_health_db() (avatars.api.Health method)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="client_and_api.html#avatars.api.Metrics.get_job_projections">get_job_projections() (avatars.api.Metrics method)</a>
+</li>
+        <li><a href="client_and_api.html#avatars.api.Metrics.get_job_projections_from_data">get_job_projections_from_data() (avatars.api.Metrics method)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Users.get_me">get_me() (avatars.api.Users method)</a>
 </li>
@@ -1003,6 +1017,8 @@
         <ul>
           <li><a href="models.html#avatars.models.ReportCreate.privacy_job_id">(avatars.models.ReportCreate attribute)</a>
 </li>
+          <li><a href="models.html#avatars.models.ReportFromDataCreate.privacy_job_id">(avatars.models.ReportFromDataCreate attribute)</a>
+</li>
         </ul></li>
         <li><a href="models.html#avatars.models.AvatarizationPipelineResult.privacy_metrics">privacy_metrics (avatars.models.AvatarizationPipelineResult attribute)</a>
 
@@ -1055,6 +1071,8 @@
         <li><a href="models.html#avatars.models.Report">Report (class in avatars.models)</a>
 </li>
         <li><a href="models.html#avatars.models.ReportCreate">ReportCreate (class in avatars.models)</a>
+</li>
+        <li><a href="models.html#avatars.models.ReportFromDataCreate">ReportFromDataCreate (class in avatars.models)</a>
 </li>
         <li><a href="client_and_api.html#avatars.api.Reports">Reports (class in avatars.api)</a>
 </li>
@@ -1111,6 +1129,8 @@
         <ul>
           <li><a href="models.html#avatars.models.ReportCreate.signal_job_id">(avatars.models.ReportCreate attribute)</a>
 </li>
+          <li><a href="models.html#avatars.models.ReportFromDataCreate.signal_job_id">(avatars.models.ReportFromDataCreate attribute)</a>
+</li>
         </ul></li>
         <li><a href="models.html#avatars.models.AvatarizationPipelineResult.signal_metrics">signal_metrics (avatars.models.AvatarizationPipelineResult attribute)</a>
 
@@ -1124,10 +1144,10 @@
 </li>
         <li><a href="models.html#avatars.models.SignalMetricsJob">SignalMetricsJob (class in avatars.models)</a>
 </li>
-        <li><a href="models.html#avatars.models.SignalMetricsJobCreate">SignalMetricsJobCreate (class in avatars.models)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="models.html#avatars.models.SignalMetricsJobCreate">SignalMetricsJobCreate (class in avatars.models)</a>
+</li>
         <li><a href="models.html#avatars.models.SignalMetricsParameters">SignalMetricsParameters (class in avatars.models)</a>
 </li>
         <li><a href="models.html#avatars.models.ColumnStats.standard_deviation">standard_deviation (avatars.models.ColumnStats attribute)</a>
@@ -1216,12 +1236,18 @@
 </li>
         <li><a href="client_and_api.html#avatars.api.PandasIntegration.upload_dataframe">upload_dataframe() (avatars.api.PandasIntegration method)</a>
 </li>
-        <li><a href="models.html#avatars.models.UserRole.user">user (avatars.models.UserRole attribute)</a>
+        <li><a href="models.html#avatars.models.AvatarizationParameters.use_categorical_reduction">use_categorical_reduction (avatars.models.AvatarizationParameters attribute)</a>
+
+        <ul>
+          <li><a href="models.html#avatars.models.PrivacyMetricsParameters.use_categorical_reduction">(avatars.models.PrivacyMetricsParameters attribute)</a>
 </li>
-        <li><a href="models.html#avatars.models.User">User (class in avatars.models)</a>
+        </ul></li>
+        <li><a href="models.html#avatars.models.UserRole.user">user (avatars.models.UserRole attribute)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="models.html#avatars.models.User">User (class in avatars.models)</a>
+</li>
         <li><a href="models.html#avatars.models.Report.user_id">user_id (avatars.models.Report attribute)</a>
 </li>
         <li><a href="models.html#avatars.models.CreateUser.username">username (avatars.models.CreateUser attribute)</a>

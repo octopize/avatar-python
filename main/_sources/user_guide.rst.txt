@@ -1,6 +1,47 @@
 User guide
 ==========
 
+-  `User guide <#user-guide>`__
+
+   -  `How to setup your email
+      account <#how-to-setup-your-email-account>`__
+   -  `How to reset your password <#how-to-reset-your-password>`__
+   -  `How to log in to the server <#how-to-log-in-to-the-server>`__
+   -  `How to check compatibility <#how-to-check-compatibility>`__
+   -  `How to upload a data <#how-to-upload-a-data>`__
+
+      -  `As a pandas dataframe <#as-a-pandas-dataframe>`__
+      -  `As a .csv file <#as-a-csv-file>`__
+
+   -  `How to do a first analysis of your
+      dataset <#how-to-do-a-first-analysis-of-your-dataset>`__
+   -  `How to launch an avatarization with
+      metrics <#how-to-launch-an-avatarization-with-metrics>`__
+   -  `How to launch an avatarization job
+      only <#how-to-launch-an-avatarization-job-only>`__
+   -  `How to launch privacy metrics <#how-to-launch-privacy-metrics>`__
+   -  `How to launch signal metrics <#how-to-launch-signal-metrics>`__
+
+      -  `How to set the avatarization
+         parameters <#how-to-set-the-avatarization-parameters>`__
+
+   -  `How to generate the report <#how-to-generate-the-report>`__
+   -  `How to launch a whole
+      pipeline <#how-to-launch-a-whole-pipeline>`__
+   -  `How to download an avatar
+      dataset <#how-to-download-an-avatar-dataset>`__
+
+      -  `As a pandas dataframe <#as-a-pandas-dataframe-1>`__
+      -  `As a .csv formatted string <#as-a-csv-formatted-string>`__
+
+   -  `Handling timeouts <#handling-timeouts>`__
+
+      -  `Asynchronous calls <#asynchronous-calls>`__
+      -  `Synchronous calls <#synchronous-calls>`__
+
+   -  `SENSITIVE: how to access the results
+      unshuffled <#sensitive-how-to-access-the-results-unshuffled>`__
+
 How to setup your email account
 -------------------------------
 
@@ -117,12 +158,27 @@ As a ``.csv`` file
    with open(filename, "r") as f:
        dataset = client.datasets.create_dataset(request=f)
 
-How to do first analysis on your dataset
-----------------------------------------
+How to do a first analysis of your dataset
+------------------------------------------
+
+Sometimes it’s useful to gather information about the dataset and how it
+will be perceived by the avatarization engine.
+
+For that, you can use the ``analyze_dataset`` method that will analyze
+the dataset and return useful information, such as the dimensions of the
+data.
 
 .. code:: python
 
+   import time
+   from avatars.models import AnalysisStatus
+
    dataset = client.datasets.analyze_dataset(dataset.id)
+
+   while dataset.analysis_status != AnalysisStatus.done:
+       dataset = client.datasets.get_dataset(dataset.id)
+       time.sleep(1)
+
    print(f"Lines: {dataset.nb_lines}, dimensions: {dataset.nb_dimensions}")
 
 How to launch an avatarization with metrics
@@ -145,9 +201,6 @@ metrics.
 You can retrieve the result and the status of the job (if it is running,
 has stopped, etc…). This call will block until the job is done or a
 timeout is expired. You can call this function as often as you want.
-
-You can modify this timeout by passing the ``timeout`` keyword to
-``get_avatarization_job``.
 
 How to launch an avatarization job only
 ---------------------------------------
@@ -281,7 +334,12 @@ you can import from ``avatars.models``:
 How to generate the report
 --------------------------
 
-You can create an avatarization report.
+You can create an avatarization report after having executed all of the
+following jobs:
+
+-  an avatarization job
+-  a signal metrics job
+-  a privacy metrics job
 
 .. code:: python
 
@@ -293,7 +351,7 @@ You can create an avatarization report.
            privacy_job_id=privacy_job.id,
            signal_job_id=signal_job.id,
        ),
-       timeout=1000,
+       timeout=30,
    )
    result = client.reports.download_report(id=report.id)
    with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
@@ -374,8 +432,98 @@ As a ``.csv`` formatted string
    avatar_df = pd.read_csv(io.StringIO(avatars_dataset))
    print(avatar_df.head())
 
-⚠ Sensitive ⚠ how to access the results unshuffled
---------------------------------------------------
+Handling timeouts
+-----------------
+
+Asynchronous calls
+~~~~~~~~~~~~~~~~~~
+
+A lot of endpoints of the Avatar API are asynchronous, meaning that you
+request something that will run in the background, and will return a
+result after some time using another method, like
+``get_avatarization_job`` for ``create_avatarization_job``.
+
+The default timeout for most of the calls to the engine is not very
+high, i.e. a few seconds long. You will quite quickly reach a point
+where a job on the server is taking longer than that to run.
+
+The calls being asynchronous, you don’t need to sit and wait for the job
+to finish, you can simply take a break, come back after some time, and
+run the method requesting the result again.
+
+Example:
+
+.. code:: python
+
+   job = client.jobs.create_avatarization_job(
+       AvatarizationJobCreate(
+           parameters=AvatarizationParameters(
+               k=20,
+               dataset_id=dataset.id,
+           ),
+       )
+   )
+
+   print(job.id)  # make sure to gather the ID
+
+   print(job.status)  # JobStatus.pending
+   # Take a coffee break, close the script, come back in 10 minutes
+
+   finished_job = client.jobs.get_avatarization_job(job.id)
+
+   print(finished_job.status)  # JobStatus.success
+
+However, sometimes you want your code to be blocking and wait for the
+job to finish, and only then return the result.
+
+For that, you can simply increase the timeout:
+
+.. code:: python
+
+   # Will retry for 10 minutes, or until the job is finished.
+   finished_job = client.jobs.get_avatarization_job(job.id, timeout=600)
+
+Synchronous calls
+~~~~~~~~~~~~~~~~~
+
+Synchronous calls are calls that are blocking, which means that the
+interpreter runs your line of code and waits until there is a result
+before continuing on with the rest of the script.
+
+Uploading or downloading a dataset is one of those calls that is
+particularly time consuming, especially for large datasets.
+
+Should you encounter issues with the upload timing out, you can increase
+the timeout like so:
+
+.. code:: python
+
+   dataset = client.pandas_integration.upload_dataframe(df, timeout=20)
+
+Under normal circumstances, that should be sufficient.
+
+However, if your file is particularly big, or the server is under high
+load, the call might be interupted and you will be left with a nasty
+exception, similar to:
+
+-  ``stream timeout``
+-  ``RemoteProtocolError: peer closed connection without sending complete message body (received XXXXXX bytes, expected YYYYYY)``
+
+Under these circumstances, we recommend uploading the file as stream,
+which you can do by setting the flag ``should_stream`` to ``True`` on
+``upload_dataframe``/``download_dataframe`` or
+``create_dataset``/``download_dataset``.
+
+.. code:: python
+
+   dataset = client.pandas_integration.upload_dataframe(df, should_stream=True)
+
+This will make sure that the file is not stored in it’s entirety on the
+server’s memory, but only chunks of it, which will reduce the likelihood
+of a timeout occurring during the file transfer.
+
+SENSITIVE: how to access the results unshuffled
+-----------------------------------------------
 
 You might want to access the avatars dataset prior to being shuffled.
 **WARNING**: There is no protection at all, as the linkage between the

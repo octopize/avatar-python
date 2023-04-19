@@ -290,6 +290,54 @@
         <article role="main">
           <section id="user-guide">
 <h1>User guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">#</a></h1>
+<ul class="simple">
+<li><p><a class="reference external" href="#user-guide">User guide</a></p>
+<ul>
+<li><p><a class="reference external" href="#how-to-setup-your-email-account">How to setup your email
+account</a></p></li>
+<li><p><a class="reference external" href="#how-to-reset-your-password">How to reset your password</a></p></li>
+<li><p><a class="reference external" href="#how-to-log-in-to-the-server">How to log in to the server</a></p></li>
+<li><p><a class="reference external" href="#how-to-check-compatibility">How to check compatibility</a></p></li>
+<li><p><a class="reference external" href="#how-to-upload-a-data">How to upload a data</a></p>
+<ul>
+<li><p><a class="reference external" href="#as-a-pandas-dataframe">As a pandas dataframe</a></p></li>
+<li><p><a class="reference external" href="#as-a-csv-file">As a .csv file</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="#how-to-do-a-first-analysis-of-your-dataset">How to do a first analysis of your
+dataset</a></p></li>
+<li><p><a class="reference external" href="#how-to-launch-an-avatarization-with-metrics">How to launch an avatarization with
+metrics</a></p></li>
+<li><p><a class="reference external" href="#how-to-launch-an-avatarization-job-only">How to launch an avatarization job
+only</a></p></li>
+<li><p><a class="reference external" href="#how-to-launch-privacy-metrics">How to launch privacy metrics</a></p></li>
+<li><p><a class="reference external" href="#how-to-launch-signal-metrics">How to launch signal metrics</a></p>
+<ul>
+<li><p><a class="reference external" href="#how-to-set-the-avatarization-parameters">How to set the avatarization
+parameters</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="#how-to-generate-the-report">How to generate the report</a></p></li>
+<li><p><a class="reference external" href="#how-to-launch-a-whole-pipeline">How to launch a whole
+pipeline</a></p></li>
+<li><p><a class="reference external" href="#how-to-download-an-avatar-dataset">How to download an avatar
+dataset</a></p>
+<ul>
+<li><p><a class="reference external" href="#as-a-pandas-dataframe-1">As a pandas dataframe</a></p></li>
+<li><p><a class="reference external" href="#as-a-csv-formatted-string">As a .csv formatted string</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="#handling-timeouts">Handling timeouts</a></p>
+<ul>
+<li><p><a class="reference external" href="#asynchronous-calls">Asynchronous calls</a></p></li>
+<li><p><a class="reference external" href="#synchronous-calls">Synchronous calls</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="#sensitive-how-to-access-the-results-unshuffled">SENSITIVE: how to access the results
+unshuffled</a></p></li>
+</ul>
+</li>
+</ul>
 <section id="how-to-setup-your-email-account">
 <h2>How to setup your email account<a class="headerlink" href="#how-to-setup-your-email-account" title="Permalink to this headline">#</a></h2>
 <p><em>This section is only needed if the use of emails to login is activated
@@ -385,9 +433,22 @@ feature improvements, so be on the look out for these updates.</p>
 </div>
 </section>
 </section>
-<section id="how-to-do-first-analysis-on-your-dataset">
-<h2>How to do first analysis on your dataset<a class="headerlink" href="#how-to-do-first-analysis-on-your-dataset" title="Permalink to this headline">#</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">analyze_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<section id="how-to-do-a-first-analysis-of-your-dataset">
+<h2>How to do a first analysis of your dataset<a class="headerlink" href="#how-to-do-a-first-analysis-of-your-dataset" title="Permalink to this headline">#</a></h2>
+<p>Sometimes it’s useful to gather information about the dataset and how it
+will be perceived by the avatarization engine.</p>
+<p>For that, you can use the <code class="docutils literal notranslate"><span class="pre">analyze_dataset</span></code> method that will analyze
+the dataset and return useful information, such as the dimensions of the
+data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AnalysisStatus</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">analyze_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+<span class="k">while</span> <span class="n">dataset</span><span class="o">.</span><span class="n">analysis_status</span> <span class="o">!=</span> <span class="n">AnalysisStatus</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">get_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lines: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">nb_lines</span><span class="si">}</span><span class="s2">, dimensions: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">nb_dimensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -409,8 +470,6 @@ metrics.</p>
 <p>You can retrieve the result and the status of the job (if it is running,
 has stopped, etc…). This call will block until the job is done or a
 timeout is expired. You can call this function as often as you want.</p>
-<p>You can modify this timeout by passing the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> keyword to
-<code class="docutils literal notranslate"><span class="pre">get_avatarization_job</span></code>.</p>
 </section>
 <section id="how-to-launch-an-avatarization-job-only">
 <h2>How to launch an avatarization job only<a class="headerlink" href="#how-to-launch-an-avatarization-job-only" title="Permalink to this headline">#</a></h2>
@@ -531,7 +590,13 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </section>
 <section id="how-to-generate-the-report">
 <h2>How to generate the report<a class="headerlink" href="#how-to-generate-the-report" title="Permalink to this headline">#</a></h2>
-<p>You can create an avatarization report.</p>
+<p>You can create an avatarization report after having executed all of the
+following jobs:</p>
+<ul class="simple">
+<li><p>an avatarization job</p></li>
+<li><p>a signal metrics job</p></li>
+<li><p>a privacy metrics job</p></li>
+</ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">ReportCreate</span>
 
 <span class="n">report</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">create_report</span><span class="p">(</span>
@@ -540,7 +605,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
         <span class="n">privacy_job_id</span><span class="o">=</span><span class="n">privacy_job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
         <span class="n">signal_job_id</span><span class="o">=</span><span class="n">signal_job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
     <span class="p">),</span>
-    <span class="n">timeout</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">download_report</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">report</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;./tmp/my_avatarization_report.pdf&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -614,8 +679,82 @@ the link between original and avatar individuals cannot be made.</p>
 </div>
 </section>
 </section>
+<section id="handling-timeouts">
+<h2>Handling timeouts<a class="headerlink" href="#handling-timeouts" title="Permalink to this headline">#</a></h2>
+<section id="asynchronous-calls">
+<h3>Asynchronous calls<a class="headerlink" href="#asynchronous-calls" title="Permalink to this headline">#</a></h3>
+<p>A lot of endpoints of the Avatar API are asynchronous, meaning that you
+request something that will run in the background, and will return a
+result after some time using another method, like
+<code class="docutils literal notranslate"><span class="pre">get_avatarization_job</span></code> for <code class="docutils literal notranslate"><span class="pre">create_avatarization_job</span></code>.</p>
+<p>The default timeout for most of the calls to the engine is not very
+high, i.e. a few seconds long. You will quite quickly reach a point
+where a job on the server is taking longer than that to run.</p>
+<p>The calls being asynchronous, you don’t need to sit and wait for the job
+to finish, you can simply take a break, come back after some time, and
+run the method requesting the result again.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
+    <span class="n">AvatarizationJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationParameters</span><span class="p">(</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>  <span class="c1"># make sure to gather the ID</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>  <span class="c1"># JobStatus.pending</span>
+<span class="c1"># Take a coffee break, close the script, come back in 10 minutes</span>
+
+<span class="n">finished_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">finished_job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>  <span class="c1"># JobStatus.success</span>
+</pre></div>
+</div>
+<p>However, sometimes you want your code to be blocking and wait for the
+job to finish, and only then return the result.</p>
+<p>For that, you can simply increase the timeout:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Will retry for 10 minutes, or until the job is finished.</span>
+<span class="n">finished_job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="synchronous-calls">
+<h3>Synchronous calls<a class="headerlink" href="#synchronous-calls" title="Permalink to this headline">#</a></h3>
+<p>Synchronous calls are calls that are blocking, which means that the
+interpreter runs your line of code and waits until there is a result
+before continuing on with the rest of the script.</p>
+<p>Uploading or downloading a dataset is one of those calls that is
+particularly time consuming, especially for large datasets.</p>
+<p>Should you encounter issues with the upload timing out, you can increase
+the timeout like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Under normal circumstances, that should be sufficient.</p>
+<p>However, if your file is particularly big, or the server is under high
+load, the call might be interupted and you will be left with a nasty
+exception, similar to:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">stream</span> <span class="pre">timeout</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RemoteProtocolError:</span> <span class="pre">peer</span> <span class="pre">closed</span> <span class="pre">connection</span> <span class="pre">without</span> <span class="pre">sending</span> <span class="pre">complete</span> <span class="pre">message</span> <span class="pre">body</span> <span class="pre">(received</span> <span class="pre">XXXXXX</span> <span class="pre">bytes,</span> <span class="pre">expected</span> <span class="pre">YYYYYY)</span></code></p></li>
+</ul>
+<p>Under these circumstances, we recommend uploading the file as stream,
+which you can do by setting the flag <code class="docutils literal notranslate"><span class="pre">should_stream</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> on
+<code class="docutils literal notranslate"><span class="pre">upload_dataframe</span></code>/<code class="docutils literal notranslate"><span class="pre">download_dataframe</span></code> or
+<code class="docutils literal notranslate"><span class="pre">create_dataset</span></code>/<code class="docutils literal notranslate"><span class="pre">download_dataset</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">should_stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will make sure that the file is not stored in it’s entirety on the
+server’s memory, but only chunks of it, which will reduce the likelihood
+of a timeout occurring during the file transfer.</p>
+</section>
+</section>
 <section id="sensitive-how-to-access-the-results-unshuffled">
-<h2>⚠ Sensitive ⚠ how to access the results unshuffled<a class="headerlink" href="#sensitive-how-to-access-the-results-unshuffled" title="Permalink to this headline">#</a></h2>
+<h2>SENSITIVE: how to access the results unshuffled<a class="headerlink" href="#sensitive-how-to-access-the-results-unshuffled" title="Permalink to this headline">#</a></h2>
 <p>You might want to access the avatars dataset prior to being shuffled.
 <strong>WARNING</strong>: There is no protection at all, as the linkage between the
 unshuffled avatars dataset and the original data is obvious. <strong>This
@@ -702,7 +841,7 @@ to make it safe.</p>
 <li><a class="reference internal" href="#as-a-csv-file">As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#how-to-do-first-analysis-on-your-dataset">How to do first analysis on your dataset</a></li>
+<li><a class="reference internal" href="#how-to-do-a-first-analysis-of-your-dataset">How to do a first analysis of your dataset</a></li>
 <li><a class="reference internal" href="#how-to-launch-an-avatarization-with-metrics">How to launch an avatarization with metrics</a></li>
 <li><a class="reference internal" href="#how-to-launch-an-avatarization-job-only">How to launch an avatarization job only</a></li>
 <li><a class="reference internal" href="#how-to-launch-privacy-metrics">How to launch privacy metrics</a></li>
@@ -717,7 +856,12 @@ to make it safe.</p>
 <li><a class="reference internal" href="#as-a-csv-formatted-string">As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> formatted string</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#sensitive-how-to-access-the-results-unshuffled">⚠ Sensitive ⚠ how to access the results unshuffled</a></li>
+<li><a class="reference internal" href="#handling-timeouts">Handling timeouts</a><ul>
+<li><a class="reference internal" href="#asynchronous-calls">Asynchronous calls</a></li>
+<li><a class="reference internal" href="#synchronous-calls">Synchronous calls</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sensitive-how-to-access-the-results-unshuffled">SENSITIVE: how to access the results unshuffled</a></li>
 </ul>
 </li>
 </ul>

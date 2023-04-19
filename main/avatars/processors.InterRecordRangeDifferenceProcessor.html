@@ -292,7 +292,7 @@
 <h1>processors.InterRecordRangeDifferenceProcessor<a class="headerlink" href="#processors-interrecordrangedifferenceprocessor" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="processors.InterRecordRangeDifferenceProcessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">processors.</span></span><span class="sig-name descname"><span class="pre">InterRecordRangeDifferenceProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_start_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_end_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_first_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_range_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_difference_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#processors.InterRecordRangeDifferenceProcessor" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">processors.</span></span><span class="sig-name descname"><span class="pre">InterRecordRangeDifferenceProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_start_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_end_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_first_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_range_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_difference_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_record_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#processors.InterRecordRangeDifferenceProcessor" title="Permalink to this definition">#</a></dt>
 <dd><p>Processor to express the values of two related variables relative to previous records.</p>
 <p>This processor can be used only on data where there are several records for each individual.
 By this transformation, variables such as <cite>var_a</cite> and <cite>var_b</cite> whose values are cumulative over
@@ -315,6 +315,10 @@ missing values.</p>
 <li><p><strong>new_first_variable</strong> – name of the variable to be created to contain the first value of the target variable</p></li>
 <li><p><strong>new_range_variable</strong> – name of the variable to be created to contain the range value</p></li>
 <li><p><strong>new_difference_variable</strong> – name of the variable to be created to contain the difference value</p></li>
+<li><p><strong>keep_record_order</strong> – If set to <cite>True</cite>, the postprocess will decode values respecting the record order given
+by <cite>id_variable</cite> and <cite>sort_by_variable</cite> from the source dataframe. This can only be set
+to <cite>True</cite> if the indices are the same between the source and dest dataframes passed as
+arguments to <cite>postprocess</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -334,6 +338,7 @@ missing values.</p>
 <span class="gp">... </span>    <span class="n">new_first_variable</span><span class="o">=</span><span class="s2">&quot;first_value&quot;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">new_range_variable</span><span class="o">=</span><span class="s1">&#39;range_value&#39;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">new_difference_variable</span><span class="o">=</span><span class="s2">&quot;value_difference&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">keep_record_order</span><span class="o">=</span><span class="kc">True</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 <span class="go">   id  range_value  first_value  value_difference</span>
@@ -362,6 +367,39 @@ missing values.</p>
 <span class="go">3   1   12.0  15.0</span>
 <span class="go">4   2   10.0  12.0</span>
 <span class="go">5   2   23.0  24.0</span>
+</pre></div>
+</div>
+<p>The postprocess can also be used on data where the number of records per individual is
+different than the original one. In such cases, the processor should instantiated with the
+<cite>keep_record_order</cite> argument set to its default value <cite>False</cite>.
+In the example below, there is an extra record with the id 2.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">InterRecordRangeDifferenceProcessor</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">id_variable</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">target_start_variable</span><span class="o">=</span><span class="s1">&#39;start&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">target_end_variable</span><span class="o">=</span><span class="s1">&#39;end&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">sort_by_variable</span><span class="o">=</span><span class="s2">&quot;start&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">new_first_variable</span><span class="o">=</span><span class="s2">&quot;first_value&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">new_range_variable</span><span class="o">=</span><span class="s1">&#39;range_value&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">new_difference_variable</span><span class="o">=</span><span class="s2">&quot;value_difference&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">keep_record_order</span><span class="o">=</span><span class="kc">False</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preprocessed_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="s2">&quot;range_value&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="s2">&quot;first_value&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="s2">&quot;value_difference&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">preprocessed_df</span><span class="p">)</span>
+<span class="go">   id  start   end</span>
+<span class="go">0   1    6.0   7.0</span>
+<span class="go">1   2   12.0  16.0</span>
+<span class="go">2   1    7.0   8.0</span>
+<span class="go">3   1   12.0  15.0</span>
+<span class="go">4   2   16.0  18.0</span>
+<span class="go">5   2   23.0  24.0</span>
+<span class="go">6   2   25.0  27.0</span>
 </pre></div>
 </div>
 <dl class="py method">
