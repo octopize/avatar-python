@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.3
+
+- Add `should_stream` parameter to `{upload,download}_dataframe` and `{create,download}_dataset`.
+  This should prevent issues with timeouts during upload and download, as well as lessen the load on the server for big files.
+- Add `jobs.cancel_job` method to cancel a job
+- Add `use_categorical_reduction` parameter
+- Add maximum password length of 128 characters
+- Add report creation without avatarization job
+- Remove re-raise of JSONDecodeError
+- Add commit hash to generated files
+- Fix: verify that `known_variables` and `target` are known when launching a privacy metrics job
+- Fix: call analyze_dataset only once in notebooks
+
 ## 0.3.2
 
 - catch JSONDecodeError and re-raise with more info
