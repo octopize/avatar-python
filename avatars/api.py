@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.4-efe225add470794bfb5d972693557ca51c8d0b48
+# API Version : 0.5.4-6f36d9019b76fe2b40fc6ed14f5537131e98919c
 
 
 import itertools
@@ -445,6 +445,27 @@ class Jobs:
         }
 
         return AvatarizationJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def cancel_job(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> GenericJob:
+        """Cancel any kind of job.
+
+        If the job hadn't been started yet, revoke it.
+        If the job is ongoing, gently kill it.
+        If the job is done, do nothing.
+        """
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/{id}/cancel",
+            "timeout": timeout,
+        }
+
+        return GenericJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
     def create_avatarization_job(
         self,
