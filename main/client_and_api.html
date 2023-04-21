@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Models" href="models.html" /><link rel="prev" title="API reference" href="api_reference.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
-        <title>Client - avatars 0.3.2 documentation</title>
+        <title>Client - avatars 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.3.2 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.3.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.3.2 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.3.3 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -186,6 +186,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.3.3/client_and_api.html">0.3.3</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.3.2/client_and_api.html">0.3.2</a>
     </li>
@@ -447,6 +450,15 @@ a parameter can be provided to go further back in time.</p>
 <dt class="sig sig-object py" id="avatars.api.Jobs.create_full_avatarization_job">
 <span class="sig-name descname"><span class="pre">create_full_avatarization_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#avatars.models.AvatarizationJobCreate" title="avatars.models.AvatarizationJobCreate"><span class="pre">AvatarizationJobCreate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.AvatarizationJob" title="avatars.models.AvatarizationJob"><span class="pre">AvatarizationJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.create_full_avatarization_job" title="Permalink to this definition">#</a></dt>
 <dd><p>Create an avatarization job, then calculate metrics.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.cancel_job">
+<span class="sig-name descname"><span class="pre">cancel_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.GenericJob" title="avatars.models.GenericJob"><span class="pre">GenericJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.cancel_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Cancel any kind of job.</p>
+<p>If the job hadn’t been started yet, revoke it.
+If the job is ongoing, gently kill it.
+If the job is done, do nothing.</p>
 </dd></dl>
 
 <dl class="py method">

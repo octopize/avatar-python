@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="processors.InterRecordCumulatedDifferenceProcessor" href="avatars/processors.InterRecordCumulatedDifferenceProcessor.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
-        <title>Changelog - avatars 0.3.2 documentation</title>
+        <title>Changelog - avatars 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
@@ -123,7 +123,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.3.2 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.3.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -146,7 +146,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.3.2 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.3.3 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -186,6 +186,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.3.3/changelog.html">0.3.3</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.3.2/changelog.html">0.3.2</a>
     </li>
@@ -291,13 +294,31 @@
           <section id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">#</a></h1>
 <section id="id1">
-<h2>0.3.2<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<h2>0.3.3<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<ul class="simple">
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">should_stream</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">{upload,download}_dataframe</span></code>
+and <code class="docutils literal notranslate"><span class="pre">{create,download}_dataset</span></code>. This should prevent issues with
+timeouts during upload and download, as well as lessen the load on
+the server for big files.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">jobs.cancel_job</span></code> method to cancel a job</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> parameter</p></li>
+<li><p>Add maximum password length of 128 characters</p></li>
+<li><p>Add report creation without avatarization job</p></li>
+<li><p>Remove re-raise of JSONDecodeError</p></li>
+<li><p>Add commit hash to generated files</p></li>
+<li><p>Fix: verify that <code class="docutils literal notranslate"><span class="pre">known_variables</span></code> and <code class="docutils literal notranslate"><span class="pre">target</span></code> are known when
+launching a privacy metrics job</p></li>
+<li><p>Fix: call analyze_dataset only once in notebooks</p></li>
+</ul>
+</section>
+<section id="section-1">
+<span id="id2"></span><h2>0.3.2<a class="headerlink" href="#section-1" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>catch JSONDecodeError and re-raise with more info</p></li>
 </ul>
 </section>
-<section id="section-1">
-<span id="id2"></span><h2>0.3.1<a class="headerlink" href="#section-1" title="Permalink to this headline">#</a></h2>
+<section id="section-2">
+<span id="id3"></span><h2>0.3.1<a class="headerlink" href="#section-2" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>add <code class="docutils literal notranslate"><span class="pre">should_verify_ssl</span></code> to allow usage of self-signed certificate
 on server side</p></li>
@@ -307,8 +328,8 @@ on server side</p></li>
 resume easier on failure</p></li>
 </ul>
 </section>
-<section id="section-2">
-<span id="id3"></span><h2>0.3.0<a class="headerlink" href="#section-2" title="Permalink to this headline">#</a></h2>
+<section id="section-3">
+<span id="id4"></span><h2>0.3.0<a class="headerlink" href="#section-3" title="Permalink to this headline">#</a></h2>
 <section id="breaking">
 <h3>BREAKING<a class="headerlink" href="#breaking" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
@@ -370,8 +391,8 @@ missing values was impossible</p></li>
 </ul>
 </section>
 </section>
-<section id="section-3">
-<span id="id4"></span><h2>0.2.2<a class="headerlink" href="#section-3" title="Permalink to this headline">#</a></h2>
+<section id="section-4">
+<span id="id5"></span><h2>0.2.2<a class="headerlink" href="#section-4" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Improve type hints of the method</p></li>
 <li><p>Update tutorial notebooks with smaller datasets</p></li>
@@ -383,16 +404,16 @@ missing values was impossible</p></li>
 <li><p>Add the <code class="docutils literal notranslate"><span class="pre">DatetimeProcessor</span></code></p></li>
 </ul>
 </section>
-<section id="section-4">
-<span id="id5"></span><h2>0.2.1<a class="headerlink" href="#section-4" title="Permalink to this headline">#</a></h2>
+<section id="section-5">
+<span id="id6"></span><h2>0.2.1<a class="headerlink" href="#section-5" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Fix to processor taking the wrong number of arguments</p></li>
 <li><p>Make the <code class="docutils literal notranslate"><span class="pre">toolz</span></code> package a mandatory dependency</p></li>
 <li><p>Fix a handling of a target variable equaling zero</p></li>
 </ul>
 </section>
-<section id="section-5">
-<span id="id6"></span><h2>0.2.0<a class="headerlink" href="#section-5" title="Permalink to this headline">#</a></h2>
+<section id="section-6">
+<span id="id7"></span><h2>0.2.0<a class="headerlink" href="#section-6" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Drop support for python3.8 # BREAKING CHANGE</p></li>
 <li><p>Drop <code class="docutils literal notranslate"><span class="pre">jobs.get_job</span></code> and <code class="docutils literal notranslate"><span class="pre">job.create_job</span></code>. # BREAKING CHANGE</p></li>
@@ -412,8 +433,8 @@ avatarization for custom use-cases. These are accessible under
 server side</p></li>
 </ul>
 </section>
-<section id="section-6">
-<span id="id7"></span><h2>0.1.16<a class="headerlink" href="#section-6" title="Permalink to this headline">#</a></h2>
+<section id="section-7">
+<span id="id8"></span><h2>0.1.16<a class="headerlink" href="#section-7" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Add forgotten password endpoint</p></li>
 <li><p>Add reset password endpoint</p></li>
@@ -421,8 +442,8 @@ server side</p></li>
 <li><p>Add DCR and NNDR to privacy metrics</p></li>
 </ul>
 </section>
-<section id="section-7">
-<span id="id8"></span><h2>0.1.15<a class="headerlink" href="#section-7" title="Permalink to this headline">#</a></h2>
+<section id="section-8">
+<span id="id9"></span><h2>0.1.15<a class="headerlink" href="#section-8" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Handle category dtype</p></li>
 <li><p>Fix dtype casting of datetime columns</p></li>
@@ -437,20 +458,20 @@ deprecated but still work.</p></li>
 instead.</p></li>
 </ul>
 <section id="breaking-1">
-<span id="id9"></span><h3>BREAKING<a class="headerlink" href="#breaking-1" title="Permalink to this headline">#</a></h3>
+<span id="id10"></span><h3>BREAKING<a class="headerlink" href="#breaking-1" title="Permalink to this headline">#</a></h3>
 <ul class="simple">
 <li><p>Remove <code class="docutils literal notranslate"><span class="pre">get_health_config</span></code> call.</p></li>
 </ul>
 </section>
 </section>
-<section id="section-8">
-<span id="id10"></span><h2>0.1.14<a class="headerlink" href="#section-8" title="Permalink to this headline">#</a></h2>
+<section id="section-9">
+<span id="id11"></span><h2>0.1.14<a class="headerlink" href="#section-9" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Give access to avatars unshuffled avatars dataset</p></li>
 </ul>
 </section>
-<section id="section-9">
-<span id="id11"></span><h2>0.1.13<a class="headerlink" href="#section-9" title="Permalink to this headline">#</a></h2>
+<section id="section-10">
+<span id="id12"></span><h2>0.1.13<a class="headerlink" href="#section-10" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Remove default value for <code class="docutils literal notranslate"><span class="pre">to_categorical_threshold</span></code></p></li>
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">logger.info</span></code> instead of <code class="docutils literal notranslate"><span class="pre">print</span></code></p></li>
@@ -508,23 +529,24 @@ instead.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Changelog</a><ul>
-<li><a class="reference internal" href="#id1">0.3.2</a></li>
-<li><a class="reference internal" href="#section-1">0.3.1</a></li>
-<li><a class="reference internal" href="#section-2">0.3.0</a><ul>
+<li><a class="reference internal" href="#id1">0.3.3</a></li>
+<li><a class="reference internal" href="#section-1">0.3.2</a></li>
+<li><a class="reference internal" href="#section-2">0.3.1</a></li>
+<li><a class="reference internal" href="#section-3">0.3.0</a><ul>
 <li><a class="reference internal" href="#breaking">BREAKING</a></li>
 <li><a class="reference internal" href="#others">Others</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#section-3">0.2.2</a></li>
-<li><a class="reference internal" href="#section-4">0.2.1</a></li>
-<li><a class="reference internal" href="#section-5">0.2.0</a></li>
-<li><a class="reference internal" href="#section-6">0.1.16</a></li>
-<li><a class="reference internal" href="#section-7">0.1.15</a><ul>
+<li><a class="reference internal" href="#section-4">0.2.2</a></li>
+<li><a class="reference internal" href="#section-5">0.2.1</a></li>
+<li><a class="reference internal" href="#section-6">0.2.0</a></li>
+<li><a class="reference internal" href="#section-7">0.1.16</a></li>
+<li><a class="reference internal" href="#section-8">0.1.15</a><ul>
 <li><a class="reference internal" href="#breaking-1">BREAKING</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#section-8">0.1.14</a></li>
-<li><a class="reference internal" href="#section-9">0.1.13</a></li>
+<li><a class="reference internal" href="#section-9">0.1.14</a></li>
+<li><a class="reference internal" href="#section-10">0.1.13</a></li>
 </ul>
 </li>
 </ul>
