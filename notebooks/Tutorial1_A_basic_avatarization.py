@@ -60,6 +60,7 @@ print(dataset)
 
 # +
 filename = "../fixtures/iris.csv"
+import time
 
 with open(filename, "r") as f:
 
@@ -75,9 +76,18 @@ print(dataset)
 
 dataset
 
+# +
+import time
+from avatars.models import AnalysisStatus
+
 dataset = client.datasets.analyze_dataset(dataset.id)
-while dataset.summary is None:
+
+while dataset.analysis_status != AnalysisStatus.done:
     dataset = client.datasets.get_dataset(dataset.id)
+    time.sleep(1)
+
+print(f"Lines: {dataset.nb_lines}, dimensions: {dataset.nb_dimensions}")
+# -
 
 print(dataset.summary)
 
