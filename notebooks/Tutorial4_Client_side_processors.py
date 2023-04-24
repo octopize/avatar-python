@@ -469,7 +469,7 @@ report = client.reports.create_report(
         privacy_job_id=result.privacy_job_id,
         signal_job_id=result.signal_job_id,
     ),
-    timeout=10,
+    timeout=30,
 )
 result = client.reports.download_report(id=report.id)
 
