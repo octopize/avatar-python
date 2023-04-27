@@ -1,9 +1,34 @@
 # User guide
 
+- [User guide](#user-guide)
+  - [How to setup your email account](#how-to-setup-your-email-account)
+  - [How to reset your password](#how-to-reset-your-password)
+  - [How to log in to the server](#how-to-log-in-to-the-server)
+  - [How to check compatibility](#how-to-check-compatibility)
+  - [How to upload a data](#how-to-upload-a-data)
+    - [As a `pandas` dataframe](#as-a-pandas-dataframe)
+    - [As a `.csv` file](#as-a-csv-file)
+  - [How to do a first analysis of your dataset](#how-to-do-a-first-analysis-of-your-dataset)
+  - [How to launch an avatarization with metrics](#how-to-launch-an-avatarization-with-metrics)
+  - [How to launch an avatarization job only](#how-to-launch-an-avatarization-job-only)
+  - [How to launch privacy metrics](#how-to-launch-privacy-metrics)
+  - [How to launch signal metrics](#how-to-launch-signal-metrics)
+    - [How to set the avatarization parameters](#how-to-set-the-avatarization-parameters)
+  - [How to generate the report](#how-to-generate-the-report)
+    - [Create report from jobs](#create-report-from-jobs)
+    - [Create report from data](#create-report-from-data)
+  - [How to launch a whole pipeline](#how-to-launch-a-whole-pipeline)
+  - [How to download an avatar dataset](#how-to-download-an-avatar-dataset)
+    - [As a pandas dataframe](#as-a-pandas-dataframe-1)
+    - [As a `.csv` formatted string](#as-a-csv-formatted-string)
+  - [Handling timeouts](#handling-timeouts)
+    - [Asynchronous calls](#asynchronous-calls)
+    - [Synchronous calls](#synchronous-calls)
+  - [SENSITIVE: how to access the results unshuffled](#sensitive-how-to-access-the-results-unshuffled)
 
 ## How to setup your email account
 
-*This section is only needed if the use of emails to login is activated in the global configuration. It is not the case by default.*
+_This section is only needed if the use of emails to login is activated in the global configuration. It is not the case by default._
 
 At the moment, you have to get in touch with your Octopize contact so that they can
 create your account.
@@ -14,7 +39,6 @@ can send emails to it.
 You'll thus get an email from AWS asking you to verify your email by clicking on a link.
 Once you have verified your email address by clicking on that link,
 you can follow the steps in the section about [reset password](#how-to-reset-your-password).
-
 
 ## How to reset your password
 
@@ -104,10 +128,22 @@ with open(filename, "r") as f:
     dataset = client.datasets.create_dataset(request=f)
 ```
 
-## How to do first analysis on your dataset
+## How to do a first analysis of your dataset
+
+Sometimes it's useful to gather information about the dataset and how it will be perceived by the avatarization engine.
+
+For that, you can use the `analyze_dataset` method that will analyze the dataset and return useful information, such as the dimensions of the data.
 
 ```python
+import time
+from avatars.models import AnalysisStatus
+
 dataset = client.datasets.analyze_dataset(dataset.id)
+
+while dataset.analysis_status != AnalysisStatus.done:
+    dataset = client.datasets.get_dataset(dataset.id)
+    time.sleep(1)
+
 print(f"Lines: {dataset.nb_lines}, dimensions: {dataset.nb_dimensions}")
 ```
 
@@ -129,8 +165,6 @@ print(job.result.avatars)
 You can retrieve the result and the status of the job (if it is running, has stopped, etc...).
 This call will block until the job is done or a timeout is expired.
 You can call this function as often as you want.
-
-You can modify this timeout by passing the `timeout` keyword to `get_avatarization_job`.
 
 ## How to launch an avatarization job only
 
@@ -249,10 +283,13 @@ parameters = AvatarizationParameters(
 ```
 
 ## How to generate the report
-
 ### Create report from jobs
 
-You can create an avatarization report from avatarization and metric jobs.
+You can create an avatarization report after having executed all of the following jobs:
+
+- an avatarization job
+- a signal metrics job
+- a privacy metrics job
 
 ```python
 from avatars.models import ReportCreate
@@ -280,17 +317,18 @@ from avatar.models import ReportFromDataCreate
 report = client.reports.create_report_from_data(
     ReportFromDataCreate(
         dataset_id=dataset.id,
-        avatar_dataset_id=avatar_dataset.id, 
+        avatar_dataset_id=avatar_dataset.id,
         privacy_job_id=privacy_job.id,
         signal_job_id=signal_job.id,
     ),
     timeout=30,
 )
-
 result = client.reports.download_report(id=report.id)
 with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
     f.write(result)
 ```
+
+
 
 ## How to launch a whole pipeline
 
@@ -358,8 +396,77 @@ avatar_df = pd.read_csv(io.StringIO(avatars_dataset))
 print(avatar_df.head())
 ```
 
-## ⚠ Sensitive ⚠ how to access the results unshuffled
-avatars/processors/relative_difference.py
+## Handling timeouts
+
+### Asynchronous calls
+
+A lot of endpoints of the Avatar API are asynchronous, meaning that you request something that will run in the background, and will return a result after some time using another method, like `get_avatarization_job` for `create_avatarization_job`.
+
+The default timeout for most of the calls to the engine is not very high, i.e. a few seconds long.
+You will quite quickly reach a point where a job on the server is taking longer than that to run.
+
+The calls being asynchronous, you don't need to sit and wait for the job to finish, you can simply take a break, come back after some time, and run the method requesting the result again.
+
+Example:
+
+```python
+job = client.jobs.create_avatarization_job(
+    AvatarizationJobCreate(
+        parameters=AvatarizationParameters(
+            k=20,
+            dataset_id=dataset.id,
+        ),
+    )
+)
+
+print(job.id)  # make sure to gather the ID
+
+print(job.status)  # JobStatus.pending
+# Take a coffee break, close the script, come back in 10 minutes
+
+finished_job = client.jobs.get_avatarization_job(job.id)
+
+print(finished_job.status)  # JobStatus.success
+```
+
+However, sometimes you want your code to be blocking and wait for the job to finish, and only then return the result.
+
+For that, you can simply increase the timeout:
+
+```python
+# Will retry for 10 minutes, or until the job is finished.
+finished_job = client.jobs.get_avatarization_job(job.id, timeout=600)
+```
+
+### Synchronous calls
+
+Synchronous calls are calls that are blocking, which means that the interpreter runs your line of code and waits until there is a result before continuing on with the rest of the script.
+
+For instance, uploading or downloading a dataset can be time-consuming if the dataset is large.
+
+Should you encounter issues with the upload timing out, you can increase the timeout like so:
+
+```python
+dataset = client.pandas_integration.upload_dataframe(df, timeout=20)
+```
+
+Under normal circumstances, that should be sufficient.
+
+However, if your file is particularly big, or the server is under high load, the call might be interupted and you will be left with a nasty exception, similar to:
+
+- `stream timeout`
+- `RemoteProtocolError: peer closed connection without sending complete message body (received XXXXXX bytes, expected YYYYYY)`
+
+Under these circumstances, we recommend uploading the file as stream, which you can do by setting the flag `should_stream` to `True` on `upload_dataframe`/`download_dataframe` or `create_dataset`/`download_dataset`.
+
+```python
+dataset = client.pandas_integration.upload_dataframe(df, should_stream=True)
+```
+
+This will make sure that the file is not stored in it's entirety on the server's memory, but only chunks of it, which will reduce the likelihood of a timeout occurring during the file transfer.
+
+## SENSITIVE: how to access the results unshuffled
+
 You might want to access the avatars dataset prior to being shuffled.
 **WARNING**: There is no protection at all, as the linkage between the
 unshuffled avatars dataset and the original data is obvious. **This
