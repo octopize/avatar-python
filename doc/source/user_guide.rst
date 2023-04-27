@@ -10,8 +10,8 @@ User guide
    -  `How to check compatibility <#how-to-check-compatibility>`__
    -  `How to upload a data <#how-to-upload-a-data>`__
 
-      -  `As a ``pandas`` dataframe <#as-a-pandas-dataframe>`__
-      -  `As a ``.csv`` file <#as-a-csv-file>`__
+      -  `As a pandas dataframe <#as-a-pandas-dataframe>`__
+      -  `As a csv file <#as-a-csv-file>`__
 
    -  `How to do a first analysis of your
       dataset <#how-to-do-a-first-analysis-of-your-dataset>`__
@@ -36,7 +36,7 @@ User guide
       dataset <#how-to-download-an-avatar-dataset>`__
 
       -  `As a pandas dataframe <#as-a-pandas-dataframe-1>`__
-      -  `As a ``.csv`` formatted string <#as-a-csv-formatted-string>`__
+      -  `As a csv formatted string <#as-a-csv-formatted-string>`__
 
    -  `Handling timeouts <#handling-timeouts>`__
 
@@ -139,8 +139,8 @@ feature improvements, so be on the look out for these updates.
 How to upload a data
 --------------------
 
-As a ``pandas`` dataframe
-~~~~~~~~~~~~~~~~~~~~~~~~~
+As a pandas dataframe
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -152,8 +152,8 @@ As a ``pandas`` dataframe
 
    dataset = client.pandas_integration.upload_dataframe(df)
 
-As a ``.csv`` file
-~~~~~~~~~~~~~~~~~~
+As a csv file
+~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -450,8 +450,8 @@ the link between original and avatar individuals cannot be made.
    avatar_df = client.pandas_integration.download_dataframe(avatars_dataset_id)
    print(avatar_df.head())
 
-As a ``.csv`` formatted string
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+As a csv formatted string
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
