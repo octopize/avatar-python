@@ -376,7 +376,7 @@ You can create an avatarization report from datasets and metric jobs.
    report = client.reports.create_report_from_data(
        ReportFromDataCreate(
            dataset_id=dataset.id,
-           avatar_dataset_id=avatar_dataset.id,
+           avatars_dataset_id=avatar_dataset.id,
            privacy_job_id=privacy_job.id,
            signal_job_id=signal_job.id,
        ),
