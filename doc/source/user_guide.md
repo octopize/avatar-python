@@ -7,7 +7,7 @@
   - [How to check compatibility](#how-to-check-compatibility)
   - [How to upload a data](#how-to-upload-a-data)
     - [As a pandas dataframe](#as-a-pandas-dataframe)
-    - [As a .csv file](#as-a-csv-file)
+    - [As a csv file](#as-a-csv-file)
   - [How to do a first analysis of your dataset](#how-to-do-a-first-analysis-of-your-dataset)
   - [How to launch an avatarization with metrics](#how-to-launch-an-avatarization-with-metrics)
   - [How to launch an avatarization job only](#how-to-launch-an-avatarization-job-only)
@@ -15,10 +15,12 @@
   - [How to launch signal metrics](#how-to-launch-signal-metrics)
     - [How to set the avatarization parameters](#how-to-set-the-avatarization-parameters)
   - [How to generate the report](#how-to-generate-the-report)
+    - [Create report from jobs](#create-report-from-jobs)
+    - [Create report from data](#create-report-from-data)
   - [How to launch a whole pipeline](#how-to-launch-a-whole-pipeline)
   - [How to download an avatar dataset](#how-to-download-an-avatar-dataset)
     - [As a pandas dataframe](#as-a-pandas-dataframe-1)
-    - [As a .csv formatted string](#as-a-csv-formatted-string)
+    - [As a csv formatted string](#as-a-csv-formatted-string)
   - [Handling timeouts](#handling-timeouts)
     - [Asynchronous calls](#asynchronous-calls)
     - [Synchronous calls](#synchronous-calls)
@@ -105,7 +107,7 @@ client.compatibility.is_client_compatible()
 
 ## How to upload a data
 
-### As a `pandas` dataframe
+### As a pandas dataframe
 
 ```python
 import pandas as pd
@@ -117,7 +119,7 @@ df = pd.read_csv("fixtures/iris.csv")
 dataset = client.pandas_integration.upload_dataframe(df)
 ```
 
-### As a `.csv` file
+### As a csv file
 
 ```python
 filename = "fixtures/iris.csv"
@@ -281,6 +283,7 @@ parameters = AvatarizationParameters(
 ```
 
 ## How to generate the report
+### Create report from jobs
 
 You can create an avatarization report after having executed all of the following jobs:
 
@@ -303,6 +306,29 @@ result = client.reports.download_report(id=report.id)
 with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
     f.write(result)
 ```
+
+### Create report from data
+
+You can create an avatarization report from datasets and metric jobs.
+
+```python
+from avatar.models import ReportFromDataCreate
+
+report = client.reports.create_report_from_data(
+    ReportFromDataCreate(
+        dataset_id=dataset.id,
+        avatars_dataset_id=avatar_dataset.id,
+        privacy_job_id=privacy_job.id,
+        signal_job_id=signal_job.id,
+    ),
+    timeout=30,
+)
+result = client.reports.download_report(id=report.id)
+with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
+    f.write(result)
+```
+
+
 
 ## How to launch a whole pipeline
 
@@ -360,7 +386,7 @@ avatar_df = client.pandas_integration.download_dataframe(avatars_dataset_id)
 print(avatar_df.head())
 ```
 
-### As a `.csv` formatted string
+### As a csv formatted string
 
 ```python
 result = job.result

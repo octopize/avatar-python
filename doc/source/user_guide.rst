@@ -11,7 +11,7 @@ User guide
    -  `How to upload a data <#how-to-upload-a-data>`__
 
       -  `As a pandas dataframe <#as-a-pandas-dataframe>`__
-      -  `As a .csv file <#as-a-csv-file>`__
+      -  `As a csv file <#as-a-csv-file>`__
 
    -  `How to do a first analysis of your
       dataset <#how-to-do-a-first-analysis-of-your-dataset>`__
@@ -26,13 +26,17 @@ User guide
          parameters <#how-to-set-the-avatarization-parameters>`__
 
    -  `How to generate the report <#how-to-generate-the-report>`__
+
+      -  `Create report from jobs <#create-report-from-jobs>`__
+      -  `Create report from data <#create-report-from-data>`__
+
    -  `How to launch a whole
       pipeline <#how-to-launch-a-whole-pipeline>`__
    -  `How to download an avatar
       dataset <#how-to-download-an-avatar-dataset>`__
 
       -  `As a pandas dataframe <#as-a-pandas-dataframe-1>`__
-      -  `As a .csv formatted string <#as-a-csv-formatted-string>`__
+      -  `As a csv formatted string <#as-a-csv-formatted-string>`__
 
    -  `Handling timeouts <#handling-timeouts>`__
 
@@ -135,8 +139,8 @@ feature improvements, so be on the look out for these updates.
 How to upload a data
 --------------------
 
-As a ``pandas`` dataframe
-~~~~~~~~~~~~~~~~~~~~~~~~~
+As a pandas dataframe
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -148,8 +152,8 @@ As a ``pandas`` dataframe
 
    dataset = client.pandas_integration.upload_dataframe(df)
 
-As a ``.csv`` file
-~~~~~~~~~~~~~~~~~~
+As a csv file
+~~~~~~~~~~~~~
 
 .. code:: python
 
@@ -334,6 +338,9 @@ you can import from ``avatars.models``:
 How to generate the report
 --------------------------
 
+Create report from jobs
+~~~~~~~~~~~~~~~~~~~~~~~
+
 You can create an avatarization report after having executed all of the
 following jobs:
 
@@ -348,6 +355,28 @@ following jobs:
    report = client.reports.create_report(
        ReportCreate(
            avatarization_job_id=job.id,
+           privacy_job_id=privacy_job.id,
+           signal_job_id=signal_job.id,
+       ),
+       timeout=30,
+   )
+   result = client.reports.download_report(id=report.id)
+   with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
+       f.write(result)
+
+Create report from data
+~~~~~~~~~~~~~~~~~~~~~~~
+
+You can create an avatarization report from datasets and metric jobs.
+
+.. code:: python
+
+   from avatar.models import ReportFromDataCreate
+
+   report = client.reports.create_report_from_data(
+       ReportFromDataCreate(
+           dataset_id=dataset.id,
+           avatars_dataset_id=avatar_dataset.id,
            privacy_job_id=privacy_job.id,
            signal_job_id=signal_job.id,
        ),
@@ -421,8 +450,8 @@ the link between original and avatar individuals cannot be made.
    avatar_df = client.pandas_integration.download_dataframe(avatars_dataset_id)
    print(avatar_df.head())
 
-As a ``.csv`` formatted string
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+As a csv formatted string
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: python
 
