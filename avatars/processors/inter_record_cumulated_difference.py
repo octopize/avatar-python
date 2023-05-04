@@ -66,7 +66,7 @@ class InterRecordCumulatedDifferenceProcessor:
     5   2  20040
 
     The postprocess can also be used on data where the number of records per individual is
-    different than the original one. In such cases, the processor should instantiated with the
+    different than the original one. In such cases, the processor should be instantiated with the
     `keep_record_order` argument set to its default value `False`.
     In the example below, there is an extra record with the id 2.
 
