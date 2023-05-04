@@ -22,7 +22,11 @@ class InterRecordCumulatedDifferenceProcessor:
             name of the variable to be created to contain the first value of the target variable
         new_difference_variable_name:
             name of the variable to be created to contain the difference value
-
+        keep_record_order:
+            If set to `True`, the postprocess will decode values respecting the record order given
+            by `id_variable` and `sort_by_variable` from the source dataframe. This can only be set
+            to `True` if the indices are the same between the source and dest dataframes passed as
+            arguments to `postprocess`.
     Examples
     --------
     >>> df = pd.DataFrame({
@@ -33,7 +37,8 @@ class InterRecordCumulatedDifferenceProcessor:
     ...    id_variable='id',
     ...    target_variable='value',
     ...    new_first_variable_name='first_value',
-    ...    new_difference_variable_name='value_difference'
+    ...    new_difference_variable_name='value_difference',
+    ...    keep_record_order=True
     ...    )
     >>> processor.preprocess(df)
        id  first_value  value_difference
@@ -59,6 +64,33 @@ class InterRecordCumulatedDifferenceProcessor:
     3   1   1130
     4   2  20000
     5   2  20040
+
+    The postprocess can also be used on data where the number of records per individual is
+    different than the original one. In such cases, the processor should instantiated with the
+    `keep_record_order` argument set to its default value `False`.
+    In the example below, there is an extra record with the id 2.
+
+    >>> processor = InterRecordCumulatedDifferenceProcessor(
+    ...    id_variable='id',
+    ...    target_variable='value',
+    ...    new_first_variable_name='first_value',
+    ...    new_difference_variable_name='value_difference',
+    ...    keep_record_order=False
+    ... )
+    >>> preprocessed_df = pd.DataFrame({
+    ...    "id": [1, 2, 1, 1, 2, 2, 2],
+    ...    "first_value": [1000, 20000, 1000, 1000, 20000, 20000, 20000],
+    ...    "value_difference": [25, 2, 0, 105, 0, 40, 8],
+    ... })
+    >>> processor.postprocess(df, preprocessed_df)
+       id  value
+    0   1   1025
+    1   2  20002
+    2   1   1025
+    3   1   1130
+    4   2  20002
+    5   2  20042
+    6   2  20050
     """
 
     def __init__(
@@ -68,11 +100,13 @@ class InterRecordCumulatedDifferenceProcessor:
         target_variable: str,
         new_first_variable_name: str,
         new_difference_variable_name: str,
+        keep_record_order: bool = False,
     ):
         self.id_variable = id_variable
         self.target_variable = target_variable
         self.new_first_variable_name = new_first_variable_name
         self.new_difference_variable_name = new_difference_variable_name
+        self.keep_record_order = keep_record_order
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.id_variable not in df.columns.values:
@@ -153,13 +187,22 @@ class InterRecordCumulatedDifferenceProcessor:
                 "Expected no missing values for `new_first_variable_name`, got column with nulls instead"
             )
 
+        if (
+            self.keep_record_order
+            and len(set(source.index).symmetric_difference(dest.index)) > 0
+        ):
+            raise ValueError(
+                "Expected `keep_record_order` to be `True` only if source and dest have same indices, got source and dest with different indices"
+            )
+
         df = dest.copy()
 
         # sort values in the same way as they were ordered in preprocess
-        ordered_indices = source.sort_values(
-            [self.id_variable, self.target_variable]
-        ).index
-        df = df.loc[ordered_indices]
+        if self.keep_record_order:
+            ordered_indices = source.sort_values(
+                [self.id_variable, self.target_variable]
+            ).index
+            df = df.loc[ordered_indices]
 
         # calculate target value as first value + cumulated sum of the differences
         df[self.target_variable] = df[self.new_first_variable_name] + df.groupby(
