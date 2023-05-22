@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Models" href="models.html" /><link rel="prev" title="avatars" href="index.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>Client - avatars documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -274,9 +275,9 @@
         </div>
         <article role="main">
           <section id="client">
-<h1>Client<a class="headerlink" href="#client" title="Permalink to this headline">#</a></h1>
+<h1>Client<a class="headerlink" href="#client" title="Permalink to this heading">#</a></h1>
 <section id="the-apiclient-object">
-<h2>The ApiClient object<a class="headerlink" href="#the-apiclient-object" title="Permalink to this headline">#</a></h2>
+<h2>The ApiClient object<a class="headerlink" href="#the-apiclient-object" title="Permalink to this heading">#</a></h2>
 <p>The Python client acts as an interface that communicates with the avatarization engine.
 For more information about the concepts and avatarization, checkout our main docs.</p>
 <p>The <a class="reference internal" href="#avatars.client.ApiClient" title="avatars.client.ApiClient"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApiClient</span></code></a> is the main interfaces that you should use.
@@ -310,7 +311,7 @@ For regular use, use the methods described below.</p>
 
 </section>
 <section id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">#</a></h2>
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading">#</a></h2>
 <p>Here below are the methods provided that communicate with the engine.
 The API they expose uses <a class="reference external" href="https://pydantic-docs.helpmanual.io/">pydantic</a>
 objects to help you pass in the correct arguments to the methods.</p>
@@ -516,9 +517,7 @@ objects to help you pass in the correct arguments to the methods.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -537,8 +536,60 @@ objects to help you pass in the correct arguments to the methods.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Client</a><ul>
-<li><a class="reference internal" href="#the-apiclient-object">The ApiClient object</a></li>
-<li><a class="reference internal" href="#methods">Methods</a></li>
+<li><a class="reference internal" href="#the-apiclient-object">The ApiClient object</a><ul>
+<li><a class="reference internal" href="#avatars.client.FileTooLarge"><code class="docutils literal notranslate"><span class="pre">FileTooLarge</span></code></a></li>
+<li><a class="reference internal" href="#avatars.client.ApiClient"><code class="docutils literal notranslate"><span class="pre">ApiClient</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.client.ApiClient.authenticate"><code class="docutils literal notranslate"><span class="pre">ApiClient.authenticate()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.client.ApiClient.request"><code class="docutils literal notranslate"><span class="pre">ApiClient.request()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#avatars.api.Datasets"><code class="docutils literal notranslate"><span class="pre">Datasets</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Datasets.create_dataset"><code class="docutils literal notranslate"><span class="pre">Datasets.create_dataset()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Datasets.get_dataset"><code class="docutils literal notranslate"><span class="pre">Datasets.get_dataset()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Datasets.patch_dataset"><code class="docutils literal notranslate"><span class="pre">Datasets.patch_dataset()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Datasets.analyze_dataset"><code class="docutils literal notranslate"><span class="pre">Datasets.analyze_dataset()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Datasets.get_dataset_correlations"><code class="docutils literal notranslate"><span class="pre">Datasets.get_dataset_correlations()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Datasets.download_dataset"><code class="docutils literal notranslate"><span class="pre">Datasets.download_dataset()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.api.Health"><code class="docutils literal notranslate"><span class="pre">Health</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Health.get_health"><code class="docutils literal notranslate"><span class="pre">Health.get_health()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Health.get_health_config"><code class="docutils literal notranslate"><span class="pre">Health.get_health_config()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Health.get_health_task"><code class="docutils literal notranslate"><span class="pre">Health.get_health_task()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Health.get_health_db"><code class="docutils literal notranslate"><span class="pre">Health.get_health_db()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.api.Jobs"><code class="docutils literal notranslate"><span class="pre">Jobs</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Jobs.create_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_job()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.api.Metrics"><code class="docutils literal notranslate"><span class="pre">Metrics</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Metrics.get_job_projections"><code class="docutils literal notranslate"><span class="pre">Metrics.get_job_projections()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Metrics.get_variable_contributions"><code class="docutils literal notranslate"><span class="pre">Metrics.get_variable_contributions()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Metrics.get_explained_variance"><code class="docutils literal notranslate"><span class="pre">Metrics.get_explained_variance()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.api.Reports"><code class="docutils literal notranslate"><span class="pre">Reports</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Reports.create_report"><code class="docutils literal notranslate"><span class="pre">Reports.create_report()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Reports.download_report"><code class="docutils literal notranslate"><span class="pre">Reports.download_report()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.api.Stats"><code class="docutils literal notranslate"><span class="pre">Stats</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Stats.get_cluster_stats"><code class="docutils literal notranslate"><span class="pre">Stats.get_cluster_stats()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.api.Users"><code class="docutils literal notranslate"><span class="pre">Users</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.api.Users.find_users"><code class="docutils literal notranslate"><span class="pre">Users.find_users()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Users.create_user"><code class="docutils literal notranslate"><span class="pre">Users.create_user()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Users.get_me"><code class="docutils literal notranslate"><span class="pre">Users.get_me()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Users.get_user"><code class="docutils literal notranslate"><span class="pre">Users.get_user()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -553,7 +604,9 @@ objects to help you pass in the correct arguments to the methods.</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

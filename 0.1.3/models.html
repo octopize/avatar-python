@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Tutorial" href="tutorial.html" /><link rel="prev" title="Client" href="client_and_api.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>Models - avatars documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -274,10 +275,10 @@
         </div>
         <article role="main">
           <section id="models">
-<h1>Models<a class="headerlink" href="#models" title="Permalink to this headline">#</a></h1>
+<h1>Models<a class="headerlink" href="#models" title="Permalink to this heading">#</a></h1>
 <p>These models are used for argument and return value validation. They are based on the <a class="reference external" href="https://pydantic-docs.helpmanual.io/">pydantic</a> package.</p>
 <section id="module-avatars.models">
-<span id="definitions"></span><h2>Definitions<a class="headerlink" href="#module-avatars.models" title="Permalink to this headline">#</a></h2>
+<span id="definitions"></span><h2>Definitions<a class="headerlink" href="#module-avatars.models" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="avatars.models.AnalysisStatus">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AnalysisStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.AnalysisStatus" title="Permalink to this definition">#</a></dt>
@@ -320,47 +321,47 @@
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.ExplainedVariance">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ExplainedVariance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.ExplainedVariance" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.ExplainedVariance.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.ExplainedVariance.raw" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ExplainedVariance</span></span><a class="headerlink" href="#avatars.models.ExplainedVariance" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.ExplainedVariance.ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ExplainedVariance.ratio" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.ExplainedVariance.ratio">
-<span class="sig-name descname"><span class="pre">ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.ExplainedVariance.ratio" title="Permalink to this definition">#</a></dt>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.ExplainedVariance.raw">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ExplainedVariance.raw" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.JobParameters">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">JobParameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_weights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ncp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_impute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.JobParameters" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.JobParameters.k">
-<span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#avatars.models.JobParameters.k" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">JobParameters</span></span><a class="headerlink" href="#avatars.models.JobParameters" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobParameters.column_weights">
-<span class="sig-name descname"><span class="pre">column_weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.JobParameters.column_weights" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_weights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.JobParameters.column_weights" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.JobParameters.ncp">
-<span class="sig-name descname"><span class="pre">ncp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.JobParameters.ncp" title="Permalink to this definition">#</a></dt>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.JobParameters.k">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">k</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.JobParameters.k" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobParameters.k_impute">
-<span class="sig-name descname"><span class="pre">k_impute</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.JobParameters.k_impute" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">k_impute</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.JobParameters.k_impute" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.JobParameters.ncp">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">ncp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.JobParameters.ncp" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobParameters.seed">
-<span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.JobParameters.seed" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">seed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.JobParameters.seed" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -396,47 +397,47 @@
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.LoginResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">LoginResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.LoginResponse" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">LoginResponse</span></span><a class="headerlink" href="#avatars.models.LoginResponse" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.LoginResponse.access_token">
-<span class="sig-name descname"><span class="pre">access_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.LoginResponse.access_token" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">access_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.LoginResponse.access_token" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.LoginResponse.token_type">
-<span class="sig-name descname"><span class="pre">token_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.LoginResponse.token_type" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">token_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.LoginResponse.token_type" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.Projections">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">Projections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">records</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avatars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.Projections" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.Projections.records">
-<span class="sig-name descname"><span class="pre">records</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.Projections.records" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">Projections</span></span><a class="headerlink" href="#avatars.models.Projections" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Projections.avatars">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">avatars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Projections.avatars" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.Projections.avatars">
-<span class="sig-name descname"><span class="pre">avatars</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.Projections.avatars" title="Permalink to this definition">#</a></dt>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Projections.records">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">records</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Projections.records" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.SecurityMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SecurityMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_rate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_cloaking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.SecurityMetrics" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SecurityMetrics</span></span><a class="headerlink" href="#avatars.models.SecurityMetrics" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.SecurityMetrics.hidden_rate">
-<span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#avatars.models.SecurityMetrics.hidden_rate" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SecurityMetrics.hidden_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.SecurityMetrics.local_cloaking">
-<span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#avatars.models.SecurityMetrics.local_cloaking" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SecurityMetrics.local_cloaking" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -457,227 +458,241 @@
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.ValidationError">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.ValidationError" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ValidationError</span></span><a class="headerlink" href="#avatars.models.ValidationError" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ValidationError.loc">
-<span class="sig-name descname"><span class="pre">loc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.ValidationError.loc" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">loc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ValidationError.loc" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ValidationError.msg">
-<span class="sig-name descname"><span class="pre">msg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.ValidationError.msg" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">msg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ValidationError.msg" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ValidationError.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.ValidationError.type" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ValidationError.type" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.Login">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">Login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grant_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ConstrainedStrValue</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_secret</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.Login" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.Login.grant_type">
-<span class="sig-name descname"><span class="pre">grant_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">avatars.models.ConstrainedStrValue</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.Login.grant_type" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.Login.username">
-<span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.Login.username" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.Login.password">
-<span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.Login.password" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.Login.scope">
-<span class="sig-name descname"><span class="pre">scope</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.Login.scope" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">Login</span></span><a class="headerlink" href="#avatars.models.Login" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.Login.client_id">
-<span class="sig-name descname"><span class="pre">client_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.Login.client_id" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">client_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.Login.client_id" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.Login.client_secret">
-<span class="sig-name descname"><span class="pre">client_secret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.Login.client_secret" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">client_secret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.Login.client_secret" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Login.grant_type">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">grant_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">ConstrainedStrValue</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.Login.grant_type" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> = password</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Login.password">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Login.password" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Login.scope">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">scope</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#avatars.models.Login.scope" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Login.username">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Login.username" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.CreateDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">CreateDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.CreateDataset" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">CreateDataset</span></span><a class="headerlink" href="#avatars.models.CreateDataset" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.CreateDataset.file">
-<span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#avatars.models.CreateDataset.file" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.CreateDataset.file" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.ColumnDetail">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ColumnDetail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.ColumnType" title="avatars.models.ColumnType"><span class="pre">ColumnType</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.ColumnDetail" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.ColumnDetail.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.ColumnType" title="avatars.models.ColumnType"><span class="pre">ColumnType</span></a></em><a class="headerlink" href="#avatars.models.ColumnDetail.type" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ColumnDetail</span></span><a class="headerlink" href="#avatars.models.ColumnDetail" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnDetail.label">
-<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.ColumnDetail.label" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnDetail.label" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.ColumnDetail.type">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.ColumnType" title="avatars.models.ColumnType"><span class="pre">ColumnType</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnDetail.type" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.CreateUser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">CreateUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.UserRole" title="avatars.models.UserRole"><span class="pre">UserRole</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'user'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ConstrainedStrValue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.CreateUser" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.CreateUser.username">
-<span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.CreateUser.username" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.CreateUser.role">
-<span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.UserRole" title="avatars.models.UserRole"><span class="pre">UserRole</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.CreateUser.role" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">CreateUser</span></span><a class="headerlink" href="#avatars.models.CreateUser" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.CreateUser.password">
-<span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">avatars.models.ConstrainedStrValue</span></em><a class="headerlink" href="#avatars.models.CreateUser.password" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ConstrainedStrValue</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.CreateUser.password" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minLength</strong> = 12</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.CreateUser.role">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">role</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.UserRole" title="avatars.models.UserRole"><span class="pre">UserRole</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'user'</span></em><a class="headerlink" href="#avatars.models.CreateUser.role" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.CreateUser.username">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">username</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.CreateUser.username" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.DatasetResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">DatasetResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ColumnDetail" title="avatars.models.ColumnDetail"><span class="pre">ColumnDetail</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AnalysisStatus" title="avatars.models.AnalysisStatus"><span class="pre">AnalysisStatus</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">analysis_duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_lines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.DatasetResponse" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.DatasetResponse.id">
-<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.id" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.DatasetResponse.hash">
-<span class="sig-name descname"><span class="pre">hash</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.hash" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.DatasetResponse.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.DatasetResponse.name" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.DatasetResponse.columns">
-<span class="sig-name descname"><span class="pre">columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ColumnDetail" title="avatars.models.ColumnDetail"><span class="pre">ColumnDetail</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.DatasetResponse.columns" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.DatasetResponse.download_url">
-<span class="sig-name descname"><span class="pre">download_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.download_url" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.DatasetResponse.analysis_status">
-<span class="sig-name descname"><span class="pre">analysis_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AnalysisStatus" title="avatars.models.AnalysisStatus"><span class="pre">AnalysisStatus</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.DatasetResponse.analysis_status" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">DatasetResponse</span></span><a class="headerlink" href="#avatars.models.DatasetResponse" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.DatasetResponse.analysis_duration">
-<span class="sig-name descname"><span class="pre">analysis_duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.DatasetResponse.analysis_duration" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">analysis_duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.analysis_duration" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.DatasetResponse.analysis_status">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">analysis_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AnalysisStatus" title="avatars.models.AnalysisStatus"><span class="pre">AnalysisStatus</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.analysis_status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.DatasetResponse.columns">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ColumnDetail" title="avatars.models.ColumnDetail"><span class="pre">ColumnDetail</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.columns" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.DatasetResponse.download_url">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">download_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.download_url" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.DatasetResponse.hash">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hash</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.hash" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.DatasetResponse.id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.DatasetResponse.name">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.name" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.DatasetResponse.nb_lines">
-<span class="sig-name descname"><span class="pre">nb_lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.DatasetResponse.nb_lines" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_lines</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.DatasetResponse.nb_lines" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.HTTPValidationError">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">HTTPValidationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">detail</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ValidationError" title="avatars.models.ValidationError"><span class="pre">ValidationError</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.HTTPValidationError" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">HTTPValidationError</span></span><a class="headerlink" href="#avatars.models.HTTPValidationError" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.HTTPValidationError.detail">
-<span class="sig-name descname"><span class="pre">detail</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ValidationError" title="avatars.models.ValidationError"><span class="pre">ValidationError</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.HTTPValidationError.detail" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">detail</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ValidationError" title="avatars.models.ValidationError"><span class="pre">ValidationError</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.HTTPValidationError.detail" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.JobCreate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">JobCreate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.JobParameters" title="avatars.models.JobParameters"><span class="pre">JobParameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.JobCreate" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">JobCreate</span></span><a class="headerlink" href="#avatars.models.JobCreate" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobCreate.dataset_id">
-<span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.JobCreate.dataset_id" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.JobCreate.dataset_id" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobCreate.parameters">
-<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobParameters" title="avatars.models.JobParameters"><span class="pre">JobParameters</span></a></em><a class="headerlink" href="#avatars.models.JobCreate.parameters" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobParameters" title="avatars.models.JobParameters"><span class="pre">JobParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.JobCreate.parameters" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.PatchDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PatchDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ColumnDetail" title="avatars.models.ColumnDetail"><span class="pre">ColumnDetail</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.PatchDataset" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PatchDataset</span></span><a class="headerlink" href="#avatars.models.PatchDataset" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.PatchDataset.columns">
-<span class="sig-name descname"><span class="pre">columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ColumnDetail" title="avatars.models.ColumnDetail"><span class="pre">ColumnDetail</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.PatchDataset.columns" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.ColumnDetail" title="avatars.models.ColumnDetail"><span class="pre">ColumnDetail</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PatchDataset.columns" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationResultResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationResultResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.SecurityMetrics" title="avatars.models.SecurityMetrics"><span class="pre">SecurityMetrics</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">avatars_dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.DatasetResponse" title="avatars.models.DatasetResponse"><span class="pre">DatasetResponse</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.AvatarizationResultResponse" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.AvatarizationResultResponse.metrics">
-<span class="sig-name descname"><span class="pre">metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SecurityMetrics" title="avatars.models.SecurityMetrics"><span class="pre">SecurityMetrics</span></a></em><a class="headerlink" href="#avatars.models.AvatarizationResultResponse.metrics" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationResultResponse</span></span><a class="headerlink" href="#avatars.models.AvatarizationResultResponse" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationResultResponse.avatars_dataset">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">avatars_dataset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.DatasetResponse" title="avatars.models.DatasetResponse"><span class="pre">DatasetResponse</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationResultResponse.avatars_dataset" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.AvatarizationResultResponse.avatars_dataset">
-<span class="sig-name descname"><span class="pre">avatars_dataset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.DatasetResponse" title="avatars.models.DatasetResponse"><span class="pre">DatasetResponse</span></a></em><a class="headerlink" href="#avatars.models.AvatarizationResultResponse.avatars_dataset" title="Permalink to this definition">#</a></dt>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationResultResponse.metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SecurityMetrics" title="avatars.models.SecurityMetrics"><span class="pre">SecurityMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationResultResponse.metrics" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.JobResponse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">JobResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">UUID</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AvatarizationResultResponse" title="avatars.models.AvatarizationResultResponse"><span class="pre">AvatarizationResultResponse</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.JobResponse" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.JobResponse.id">
-<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.JobResponse.id" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.JobResponse.status">
-<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><a class="headerlink" href="#avatars.models.JobResponse.status" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.JobResponse.error_message">
-<span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.JobResponse.error_message" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">JobResponse</span></span><a class="headerlink" href="#avatars.models.JobResponse" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobResponse.dataset_id">
-<span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">uuid.UUID</span></em><a class="headerlink" href="#avatars.models.JobResponse.dataset_id" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.JobResponse.dataset_id" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.JobResponse.error_message">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.JobResponse.error_message" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.JobResponse.id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.JobResponse.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.JobResponse.result">
-<span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AvatarizationResultResponse" title="avatars.models.AvatarizationResultResponse"><span class="pre">AvatarizationResultResponse</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#avatars.models.JobResponse.result" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AvatarizationResultResponse" title="avatars.models.AvatarizationResultResponse"><span class="pre">AvatarizationResultResponse</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.JobResponse.result" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.JobResponse.status">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.JobResponse.status" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -722,9 +737,7 @@
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -743,7 +756,129 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Models</a><ul>
-<li><a class="reference internal" href="#module-avatars.models">Definitions</a></li>
+<li><a class="reference internal" href="#module-avatars.models">Definitions</a><ul>
+<li><a class="reference internal" href="#avatars.models.AnalysisStatus"><code class="docutils literal notranslate"><span class="pre">AnalysisStatus</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.AnalysisStatus.started"><code class="docutils literal notranslate"><span class="pre">AnalysisStatus.started</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AnalysisStatus.done"><code class="docutils literal notranslate"><span class="pre">AnalysisStatus.done</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.ColumnType"><code class="docutils literal notranslate"><span class="pre">ColumnType</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.ColumnType.int"><code class="docutils literal notranslate"><span class="pre">ColumnType.int</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ColumnType.bool"><code class="docutils literal notranslate"><span class="pre">ColumnType.bool</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ColumnType.category"><code class="docutils literal notranslate"><span class="pre">ColumnType.category</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ColumnType.float"><code class="docutils literal notranslate"><span class="pre">ColumnType.float</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.ExplainedVariance"><code class="docutils literal notranslate"><span class="pre">ExplainedVariance</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.ExplainedVariance.ratio"><code class="docutils literal notranslate"><span class="pre">ExplainedVariance.ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ExplainedVariance.raw"><code class="docutils literal notranslate"><span class="pre">ExplainedVariance.raw</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.JobParameters"><code class="docutils literal notranslate"><span class="pre">JobParameters</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.JobParameters.column_weights"><code class="docutils literal notranslate"><span class="pre">JobParameters.column_weights</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobParameters.k"><code class="docutils literal notranslate"><span class="pre">JobParameters.k</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobParameters.k_impute"><code class="docutils literal notranslate"><span class="pre">JobParameters.k_impute</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobParameters.ncp"><code class="docutils literal notranslate"><span class="pre">JobParameters.ncp</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobParameters.seed"><code class="docutils literal notranslate"><span class="pre">JobParameters.seed</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.JobStatus"><code class="docutils literal notranslate"><span class="pre">JobStatus</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.JobStatus.pending"><code class="docutils literal notranslate"><span class="pre">JobStatus.pending</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobStatus.started"><code class="docutils literal notranslate"><span class="pre">JobStatus.started</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobStatus.success"><code class="docutils literal notranslate"><span class="pre">JobStatus.success</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobStatus.failure"><code class="docutils literal notranslate"><span class="pre">JobStatus.failure</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobStatus.unknown"><code class="docutils literal notranslate"><span class="pre">JobStatus.unknown</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.LoginResponse"><code class="docutils literal notranslate"><span class="pre">LoginResponse</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.LoginResponse.access_token"><code class="docutils literal notranslate"><span class="pre">LoginResponse.access_token</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.LoginResponse.token_type"><code class="docutils literal notranslate"><span class="pre">LoginResponse.token_type</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.Projections"><code class="docutils literal notranslate"><span class="pre">Projections</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.Projections.avatars"><code class="docutils literal notranslate"><span class="pre">Projections.avatars</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Projections.records"><code class="docutils literal notranslate"><span class="pre">Projections.records</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.SecurityMetrics"><code class="docutils literal notranslate"><span class="pre">SecurityMetrics</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.SecurityMetrics.hidden_rate"><code class="docutils literal notranslate"><span class="pre">SecurityMetrics.hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SecurityMetrics.local_cloaking"><code class="docutils literal notranslate"><span class="pre">SecurityMetrics.local_cloaking</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.UserRole"><code class="docutils literal notranslate"><span class="pre">UserRole</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.UserRole.admin"><code class="docutils literal notranslate"><span class="pre">UserRole.admin</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.UserRole.user"><code class="docutils literal notranslate"><span class="pre">UserRole.user</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.ValidationError"><code class="docutils literal notranslate"><span class="pre">ValidationError</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.ValidationError.loc"><code class="docutils literal notranslate"><span class="pre">ValidationError.loc</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ValidationError.msg"><code class="docutils literal notranslate"><span class="pre">ValidationError.msg</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ValidationError.type"><code class="docutils literal notranslate"><span class="pre">ValidationError.type</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.Login"><code class="docutils literal notranslate"><span class="pre">Login</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.Login.client_id"><code class="docutils literal notranslate"><span class="pre">Login.client_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Login.client_secret"><code class="docutils literal notranslate"><span class="pre">Login.client_secret</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Login.grant_type"><code class="docutils literal notranslate"><span class="pre">Login.grant_type</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Login.password"><code class="docutils literal notranslate"><span class="pre">Login.password</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Login.scope"><code class="docutils literal notranslate"><span class="pre">Login.scope</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Login.username"><code class="docutils literal notranslate"><span class="pre">Login.username</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.CreateDataset"><code class="docutils literal notranslate"><span class="pre">CreateDataset</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.CreateDataset.file"><code class="docutils literal notranslate"><span class="pre">CreateDataset.file</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.ColumnDetail"><code class="docutils literal notranslate"><span class="pre">ColumnDetail</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.ColumnDetail.label"><code class="docutils literal notranslate"><span class="pre">ColumnDetail.label</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.ColumnDetail.type"><code class="docutils literal notranslate"><span class="pre">ColumnDetail.type</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.CreateUser"><code class="docutils literal notranslate"><span class="pre">CreateUser</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.CreateUser.password"><code class="docutils literal notranslate"><span class="pre">CreateUser.password</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.CreateUser.role"><code class="docutils literal notranslate"><span class="pre">CreateUser.role</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.CreateUser.username"><code class="docutils literal notranslate"><span class="pre">CreateUser.username</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse"><code class="docutils literal notranslate"><span class="pre">DatasetResponse</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.analysis_duration"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.analysis_duration</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.analysis_status"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.analysis_status</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.columns"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.columns</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.download_url"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.download_url</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.hash"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.hash</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.id"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.name"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.name</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.DatasetResponse.nb_lines"><code class="docutils literal notranslate"><span class="pre">DatasetResponse.nb_lines</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.HTTPValidationError"><code class="docutils literal notranslate"><span class="pre">HTTPValidationError</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.HTTPValidationError.detail"><code class="docutils literal notranslate"><span class="pre">HTTPValidationError.detail</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.JobCreate"><code class="docutils literal notranslate"><span class="pre">JobCreate</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.JobCreate.dataset_id"><code class="docutils literal notranslate"><span class="pre">JobCreate.dataset_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">JobCreate.parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PatchDataset"><code class="docutils literal notranslate"><span class="pre">PatchDataset</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PatchDataset.columns"><code class="docutils literal notranslate"><span class="pre">PatchDataset.columns</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationResultResponse"><code class="docutils literal notranslate"><span class="pre">AvatarizationResultResponse</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.AvatarizationResultResponse.avatars_dataset"><code class="docutils literal notranslate"><span class="pre">AvatarizationResultResponse.avatars_dataset</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationResultResponse.metrics"><code class="docutils literal notranslate"><span class="pre">AvatarizationResultResponse.metrics</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.JobResponse"><code class="docutils literal notranslate"><span class="pre">JobResponse</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.JobResponse.dataset_id"><code class="docutils literal notranslate"><span class="pre">JobResponse.dataset_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobResponse.error_message"><code class="docutils literal notranslate"><span class="pre">JobResponse.error_message</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobResponse.id"><code class="docutils literal notranslate"><span class="pre">JobResponse.id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobResponse.result"><code class="docutils literal notranslate"><span class="pre">JobResponse.result</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobResponse.status"><code class="docutils literal notranslate"><span class="pre">JobResponse.status</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -758,7 +893,9 @@
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

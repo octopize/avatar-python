@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Changelog" href="../changelog.html" /><link rel="prev" title="processors.InterRecordRangeDifferenceProcessor" href="processors.InterRecordRangeDifferenceProcessor.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>processors.InterRecordCumulatedDifferenceProcessor - avatars 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -134,7 +135,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars 0.3.3 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -285,17 +286,17 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
           <section id="processors-interrecordcumulateddifferenceprocessor">
-<h1>processors.InterRecordCumulatedDifferenceProcessor<a class="headerlink" href="#processors-interrecordcumulateddifferenceprocessor" title="Permalink to this headline">#</a></h1>
+<h1>processors.InterRecordCumulatedDifferenceProcessor<a class="headerlink" href="#processors-interrecordcumulateddifferenceprocessor" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="processors.InterRecordCumulatedDifferenceProcessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">processors.</span></span><span class="sig-name descname"><span class="pre">InterRecordCumulatedDifferenceProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_first_variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_difference_variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#processors.InterRecordCumulatedDifferenceProcessor" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">processors.</span></span><span class="sig-name descname"><span class="pre">InterRecordCumulatedDifferenceProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_first_variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_difference_variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_record_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#processors.InterRecordCumulatedDifferenceProcessor" title="Permalink to this definition">#</a></dt>
 <dd><p>Processor to express the value of a variable as the difference from the previous value.</p>
 <p>This processor can be used only on data where there are several records for each individual.
 By this transformation, a variable whose value is cumulative will be expressed as:
@@ -304,12 +305,16 @@ By this transformation, a variable whose value is cumulative will be expressed a
 <p>This processor is not suitable for data where the target or the id variable contain missing
 values.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id_variable</strong> – variable indicating which individual each row belongs to</p></li>
 <li><p><strong>target_variable</strong> – variable to transform</p></li>
 <li><p><strong>new_first_variable_name</strong> – name of the variable to be created to contain the first value of the target variable</p></li>
 <li><p><strong>new_difference_variable_name</strong> – name of the variable to be created to contain the difference value</p></li>
+<li><p><strong>keep_record_order</strong> – If set to <cite>True</cite>, the postprocess will decode values respecting the record order given
+by <cite>id_variable</cite> and <cite>sort_by_variable</cite> from the source dataframe. This can only be set
+to <cite>True</cite> if the indices are the same between the source and dest dataframes passed as
+arguments to <cite>postprocess</cite>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -322,7 +327,8 @@ values.</p>
 <span class="gp">... </span>   <span class="n">id_variable</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span>
 <span class="gp">... </span>   <span class="n">target_variable</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span>
 <span class="gp">... </span>   <span class="n">new_first_variable_name</span><span class="o">=</span><span class="s1">&#39;first_value&#39;</span><span class="p">,</span>
-<span class="gp">... </span>   <span class="n">new_difference_variable_name</span><span class="o">=</span><span class="s1">&#39;value_difference&#39;</span>
+<span class="gp">... </span>   <span class="n">new_difference_variable_name</span><span class="o">=</span><span class="s1">&#39;value_difference&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">keep_record_order</span><span class="o">=</span><span class="kc">True</span>
 <span class="gp">... </span>   <span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 <span class="go">   id  first_value  value_difference</span>
@@ -348,6 +354,33 @@ values.</p>
 <span class="go">3   1   1130</span>
 <span class="go">4   2  20000</span>
 <span class="go">5   2  20040</span>
+</pre></div>
+</div>
+<p>The postprocess can also be used on data where the number of records per individual is
+different than the original one. In such cases, the processor should be instantiated with the
+<cite>keep_record_order</cite> argument set to its default value <cite>False</cite>.
+In the example below, there is an extra record with the id 2.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">InterRecordCumulatedDifferenceProcessor</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">id_variable</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">target_variable</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">new_first_variable_name</span><span class="o">=</span><span class="s1">&#39;first_value&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">new_difference_variable_name</span><span class="o">=</span><span class="s1">&#39;value_difference&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">keep_record_order</span><span class="o">=</span><span class="kc">False</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preprocessed_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>   <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>   <span class="s2">&quot;first_value&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">],</span>
+<span class="gp">... </span>   <span class="s2">&quot;value_difference&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">preprocessed_df</span><span class="p">)</span>
+<span class="go">   id  value</span>
+<span class="go">0   1   1025</span>
+<span class="go">1   2  20002</span>
+<span class="go">2   1   1025</span>
+<span class="go">3   1   1130</span>
+<span class="go">4   2  20002</span>
+<span class="go">5   2  20042</span>
+<span class="go">6   2  20050</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -401,16 +434,37 @@ values.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">processors.InterRecordCumulatedDifferenceProcessor</a><ul>
+<li><a class="reference internal" href="#processors.InterRecordCumulatedDifferenceProcessor"><code class="docutils literal notranslate"><span class="pre">InterRecordCumulatedDifferenceProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#processors.InterRecordCumulatedDifferenceProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">InterRecordCumulatedDifferenceProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#processors.InterRecordCumulatedDifferenceProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">InterRecordCumulatedDifferenceProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
@@ -418,7 +472,9 @@ values.</p>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     </body>
 </html>

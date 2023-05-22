@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API reference" href="api_reference.html" /><link rel="prev" title="Tutorial" href="tutorial.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>User guide - avatars 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars 0.3.3 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -292,7 +293,7 @@
         </div>
         <article role="main">
           <section id="user-guide">
-<h1>User guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">#</a></h1>
+<h1>User guide<a class="headerlink" href="#user-guide" title="Permalink to this heading">#</a></h1>
 <ul class="simple">
 <li><p><a class="reference external" href="#user-guide">User guide</a></p>
 <ul>
@@ -342,7 +343,7 @@ unshuffled</a></p></li>
 </li>
 </ul>
 <section id="how-to-setup-your-email-account">
-<h2>How to setup your email account<a class="headerlink" href="#how-to-setup-your-email-account" title="Permalink to this headline">#</a></h2>
+<h2>How to setup your email account<a class="headerlink" href="#how-to-setup-your-email-account" title="Permalink to this heading">#</a></h2>
 <p><em>This section is only needed if the use of emails to login is activated
 in the global configuration. It is not the case by default.</em></p>
 <p>At the moment, you have to get in touch with your Octopize contact so
@@ -355,7 +356,7 @@ clicking on that link, you can follow the steps in the section about
 <a class="reference external" href="#how-to-reset-your-password">reset password</a>.</p>
 </section>
 <section id="how-to-reset-your-password">
-<h2>How to reset your password<a class="headerlink" href="#how-to-reset-your-password" title="Permalink to this headline">#</a></h2>
+<h2>How to reset your password<a class="headerlink" href="#how-to-reset-your-password" title="Permalink to this heading">#</a></h2>
 <p><strong>NB</strong>: This section is only available if the use of emails to login is
 activated in the global configuration. It is not the case by default.</p>
 <p>If you forgot your password or if you need to set one, first call the
@@ -377,7 +378,7 @@ valid once, and expires after 24 hours. Use it to reset your password:</p>
 <p>You’ll receive an email confirming your password was reset.</p>
 </section>
 <section id="how-to-log-in-to-the-server">
-<h2>How to log in to the server<a class="headerlink" href="#how-to-log-in-to-the-server" title="Permalink to this headline">#</a></h2>
+<h2>How to log in to the server<a class="headerlink" href="#how-to-log-in-to-the-server" title="Permalink to this heading">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 
 <span class="c1"># This is the client that you&#39;ll be using for all of your requests</span>
@@ -396,7 +397,7 @@ valid once, and expires after 24 hours. Use it to reset your password:</p>
 </div>
 </section>
 <section id="how-to-check-compatibility">
-<h2>How to check compatibility<a class="headerlink" href="#how-to-check-compatibility" title="Permalink to this headline">#</a></h2>
+<h2>How to check compatibility<a class="headerlink" href="#how-to-check-compatibility" title="Permalink to this heading">#</a></h2>
 <p>After authentication, you can check whether you can communicate with the
 server with</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Verify that we can connect to the API server</span>
@@ -413,9 +414,9 @@ feature improvements, so be on the look out for these updates.</p>
 </div>
 </section>
 <section id="how-to-upload-a-data">
-<h2>How to upload a data<a class="headerlink" href="#how-to-upload-a-data" title="Permalink to this headline">#</a></h2>
+<h2>How to upload a data<a class="headerlink" href="#how-to-upload-a-data" title="Permalink to this heading">#</a></h2>
 <section id="as-a-pandas-dataframe">
-<h3>As a <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframe<a class="headerlink" href="#as-a-pandas-dataframe" title="Permalink to this headline">#</a></h3>
+<h3>As a <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframe<a class="headerlink" href="#as-a-pandas-dataframe" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;fixtures/iris.csv&quot;</span><span class="p">)</span>
@@ -427,7 +428,7 @@ feature improvements, so be on the look out for these updates.</p>
 </div>
 </section>
 <section id="as-a-csv-file">
-<h3>As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file<a class="headerlink" href="#as-a-csv-file" title="Permalink to this headline">#</a></h3>
+<h3>As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> file<a class="headerlink" href="#as-a-csv-file" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;fixtures/iris.csv&quot;</span>
 
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -437,7 +438,7 @@ feature improvements, so be on the look out for these updates.</p>
 </section>
 </section>
 <section id="how-to-do-a-first-analysis-of-your-dataset">
-<h2>How to do a first analysis of your dataset<a class="headerlink" href="#how-to-do-a-first-analysis-of-your-dataset" title="Permalink to this headline">#</a></h2>
+<h2>How to do a first analysis of your dataset<a class="headerlink" href="#how-to-do-a-first-analysis-of-your-dataset" title="Permalink to this heading">#</a></h2>
 <p>Sometimes it’s useful to gather information about the dataset and how it
 will be perceived by the avatarization engine.</p>
 <p>For that, you can use the <code class="docutils literal notranslate"><span class="pre">analyze_dataset</span></code> method that will analyze
@@ -457,7 +458,7 @@ data.</p>
 </div>
 </section>
 <section id="how-to-launch-an-avatarization-with-metrics">
-<h2>How to launch an avatarization with metrics<a class="headerlink" href="#how-to-launch-an-avatarization-with-metrics" title="Permalink to this headline">#</a></h2>
+<h2>How to launch an avatarization with metrics<a class="headerlink" href="#how-to-launch-an-avatarization-with-metrics" title="Permalink to this heading">#</a></h2>
 <p>You can launch an avatarization with some simple privacy and signal
 metrics.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationJobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
@@ -475,7 +476,7 @@ has stopped, etc…). This call will block until the job is done or a
 timeout is expired. You can call this function as often as you want.</p>
 </section>
 <section id="how-to-launch-an-avatarization-job-only">
-<h2>How to launch an avatarization job only<a class="headerlink" href="#how-to-launch-an-avatarization-job-only" title="Permalink to this headline">#</a></h2>
+<h2>How to launch an avatarization job only<a class="headerlink" href="#how-to-launch-an-avatarization-job-only" title="Permalink to this heading">#</a></h2>
 <p>You can launch a simple avatarization job without any metrics
 computation.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_job</span><span class="p">(</span>
@@ -493,7 +494,7 @@ computation.</p>
 </div>
 </section>
 <section id="how-to-launch-privacy-metrics">
-<h2>How to launch privacy metrics<a class="headerlink" href="#how-to-launch-privacy-metrics" title="Permalink to this headline">#</a></h2>
+<h2>How to launch privacy metrics<a class="headerlink" href="#how-to-launch-privacy-metrics" title="Permalink to this heading">#</a></h2>
 <p>You can launch a privacy metrics job with two datasets, the original and
 the anonymized.</p>
 <p>You need to enter some parameters to launch some specifics privacy
@@ -528,7 +529,7 @@ documentation</a>
 for more details on all privacy metrics.</p>
 </section>
 <section id="how-to-launch-signal-metrics">
-<h2>How to launch signal metrics<a class="headerlink" href="#how-to-launch-signal-metrics" title="Permalink to this headline">#</a></h2>
+<h2>How to launch signal metrics<a class="headerlink" href="#how-to-launch-signal-metrics" title="Permalink to this heading">#</a></h2>
 <p>You can evaluate your avatarization on different criteria:</p>
 <ul class="simple">
 <li><p>univariate</p></li>
@@ -559,7 +560,7 @@ a jupyter notebook example to evaluate the quality of an avatarization.</p>
 documentation</a>
 for more details on all signal metrics.</p>
 <section id="how-to-set-the-avatarization-parameters">
-<h3>How to set the avatarization parameters<a class="headerlink" href="#how-to-set-the-avatarization-parameters" title="Permalink to this headline">#</a></h3>
+<h3>How to set the avatarization parameters<a class="headerlink" href="#how-to-set-the-avatarization-parameters" title="Permalink to this heading">#</a></h3>
 <p>See our <a class="reference external" href="https://docs.octopize.io/docs/using/running">Avatarization
 parameters</a>
 documentation for more information about the parameters.</p>
@@ -592,7 +593,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </section>
 </section>
 <section id="how-to-generate-the-report">
-<h2>How to generate the report<a class="headerlink" href="#how-to-generate-the-report" title="Permalink to this headline">#</a></h2>
+<h2>How to generate the report<a class="headerlink" href="#how-to-generate-the-report" title="Permalink to this heading">#</a></h2>
 <p>You can create an avatarization report after having executed all of the
 following jobs:</p>
 <ul class="simple">
@@ -617,7 +618,7 @@ following jobs:</p>
 </div>
 </section>
 <section id="how-to-launch-a-whole-pipeline">
-<h2>How to launch a whole pipeline<a class="headerlink" href="#how-to-launch-a-whole-pipeline" title="Permalink to this headline">#</a></h2>
+<h2>How to launch a whole pipeline<a class="headerlink" href="#how-to-launch-a-whole-pipeline" title="Permalink to this heading">#</a></h2>
 <p>We have implemented the concept of pipelines.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationPipelineCreate</span>
 <span class="kn">from</span> <span class="nn">avatars.processors</span> <span class="kn">import</span> <span class="n">ProportionProcessor</span>
@@ -657,9 +658,9 @@ notebook</a>
 for an advanced usage of the pipeline.</p>
 </section>
 <section id="how-to-download-an-avatar-dataset">
-<h2>How to download an avatar dataset<a class="headerlink" href="#how-to-download-an-avatar-dataset" title="Permalink to this headline">#</a></h2>
+<h2>How to download an avatar dataset<a class="headerlink" href="#how-to-download-an-avatar-dataset" title="Permalink to this heading">#</a></h2>
 <section id="as-a-pandas-dataframe-1">
-<span id="id1"></span><h3>As a pandas dataframe<a class="headerlink" href="#as-a-pandas-dataframe-1" title="Permalink to this headline">#</a></h3>
+<span id="id1"></span><h3>As a pandas dataframe<a class="headerlink" href="#as-a-pandas-dataframe-1" title="Permalink to this heading">#</a></h3>
 <p>The dtypes will be copied over from the original dataframe.</p>
 <p>Note that the order of the lines have been shuffled, which means that
 the link between original and avatar individuals cannot be made.</p>
@@ -672,7 +673,7 @@ the link between original and avatar individuals cannot be made.</p>
 </div>
 </section>
 <section id="as-a-csv-formatted-string">
-<h3>As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> formatted string<a class="headerlink" href="#as-a-csv-formatted-string" title="Permalink to this headline">#</a></h3>
+<h3>As a <code class="docutils literal notranslate"><span class="pre">.csv</span></code> formatted string<a class="headerlink" href="#as-a-csv-formatted-string" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
 <span class="n">avatars_dataset_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">avatars_dataset</span><span class="o">.</span><span class="n">id</span>
 <span class="n">avatars_dataset</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">datasets</span><span class="o">.</span><span class="n">download_dataset</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">avatars_dataset_id</span><span class="p">)</span>
@@ -683,9 +684,9 @@ the link between original and avatar individuals cannot be made.</p>
 </section>
 </section>
 <section id="handling-timeouts">
-<h2>Handling timeouts<a class="headerlink" href="#handling-timeouts" title="Permalink to this headline">#</a></h2>
+<h2>Handling timeouts<a class="headerlink" href="#handling-timeouts" title="Permalink to this heading">#</a></h2>
 <section id="asynchronous-calls">
-<h3>Asynchronous calls<a class="headerlink" href="#asynchronous-calls" title="Permalink to this headline">#</a></h3>
+<h3>Asynchronous calls<a class="headerlink" href="#asynchronous-calls" title="Permalink to this heading">#</a></h3>
 <p>A lot of endpoints of the Avatar API are asynchronous, meaning that you
 request something that will run in the background, and will return a
 result after some time using another method, like
@@ -725,7 +726,7 @@ job to finish, and only then return the result.</p>
 </div>
 </section>
 <section id="synchronous-calls">
-<h3>Synchronous calls<a class="headerlink" href="#synchronous-calls" title="Permalink to this headline">#</a></h3>
+<h3>Synchronous calls<a class="headerlink" href="#synchronous-calls" title="Permalink to this heading">#</a></h3>
 <p>Synchronous calls are calls that are blocking, which means that the
 interpreter runs your line of code and waits until there is a result
 before continuing on with the rest of the script.</p>
@@ -757,7 +758,7 @@ of a timeout occurring during the file transfer.</p>
 </section>
 </section>
 <section id="sensitive-how-to-access-the-results-unshuffled">
-<h2>SENSITIVE: how to access the results unshuffled<a class="headerlink" href="#sensitive-how-to-access-the-results-unshuffled" title="Permalink to this headline">#</a></h2>
+<h2>SENSITIVE: how to access the results unshuffled<a class="headerlink" href="#sensitive-how-to-access-the-results-unshuffled" title="Permalink to this heading">#</a></h2>
 <p>You might want to access the avatars dataset prior to being shuffled.
 <strong>WARNING</strong>: There is no protection at all, as the linkage between the
 unshuffled avatars dataset and the original data is obvious. <strong>This
@@ -814,9 +815,7 @@ to make it safe.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -879,7 +878,9 @@ to make it safe.</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Client" href="client_and_api.html" /><link rel="prev" title="avatars" href="index.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>Tutorial - avatars documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -275,12 +276,12 @@
         </div>
         <article role="main">
           <section id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">#</a></h1>
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">#</a></h1>
 <p>This Python client communicates with the Avatar platform.</p>
 <p>For more information about the Avatar method and process, check out our
 main docs at <a class="reference external" href="https://docs.octopize.io">https://docs.octopize.io</a></p>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h2>
 <p>Choose the latest version at
 <a class="reference external" href="https://github.com/octopize/avatar-python/releases">https://github.com/octopize/avatar-python/releases</a></p>
 <p>Install the package by pointing to the .whl file (replace with correct
@@ -292,7 +293,7 @@ poetry<span class="w"> </span>add<span class="w"> </span>https://github.com/octo
 </div>
 </section>
 <section id="setup">
-<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">#</a></h2>
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this heading">#</a></h2>
 <p>The only remaining step before using the API is setting the endpoint and
 authenticating. We recommend using environment variables to provide the
 password.</p>
@@ -317,7 +318,7 @@ password.</p>
 interface hints from your IDE.</p>
 </section>
 <section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">#</a></h2>
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">#</a></h2>
 <p>This is all you need to run and evaluate an avatarization:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
 <span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
@@ -347,12 +348,12 @@ interface hints from your IDE.</p>
 </div>
 </section>
 <section id="avatarization-step-by-step">
-<h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this headline">#</a></h2>
+<h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this heading">#</a></h2>
 <section id="manipulate-datasets">
-<h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this headline">#</a></h3>
+<h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this heading">#</a></h3>
 <p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.</p>
 <section id="using-csv-files">
-<h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this headline">#</a></h4>
+<h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this heading">#</a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;fixtures/iris.csv&quot;</span>
 
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -361,7 +362,7 @@ interface hints from your IDE.</p>
 </div>
 </section>
 <section id="using-pandas-dataframes">
-<h4>Using <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes<a class="headerlink" href="#using-pandas-dataframes" title="Permalink to this headline">#</a></h4>
+<h4>Using <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes<a class="headerlink" href="#using-pandas-dataframes" title="Permalink to this heading">#</a></h4>
 <p>If you are using <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, and want to manipulate the dataframe before
 sending it to the engine, here’s how you should proceed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -389,7 +390,7 @@ sending it to the engine, here’s how you should proceed.</p>
 </section>
 </section>
 <section id="setting-the-avatarization-parameters">
-<h3>Setting the avatarization parameters<a class="headerlink" href="#setting-the-avatarization-parameters" title="Permalink to this headline">#</a></h3>
+<h3>Setting the avatarization parameters<a class="headerlink" href="#setting-the-avatarization-parameters" title="Permalink to this heading">#</a></h3>
 <p>Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.</p>
 <ul class="simple">
@@ -417,7 +418,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </div>
 </section>
 <section id="launch-a-job">
-<h3>Launch a job<a class="headerlink" href="#launch-a-job" title="Permalink to this headline">#</a></h3>
+<h3>Launch a job<a class="headerlink" href="#launch-a-job" title="Permalink to this heading">#</a></h3>
 <p>One job corresponds to one avatarization.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span>
 
@@ -435,7 +436,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </pre></div>
 </div>
 <section id="retry-mechanism">
-<h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this headline">#</a></h4>
+<h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this heading">#</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">get_job</span></code> function periodically queries the avatarization engine
 to check if a given job is finished. This call will block until a given
 timeout has expired, and then return. However, the job is still running
@@ -464,7 +465,7 @@ available as only a single call is made.</p>
 </section>
 </section>
 <section id="retrieving-results">
-<h3>Retrieving results<a class="headerlink" href="#retrieving-results" title="Permalink to this headline">#</a></h3>
+<h3>Retrieving results<a class="headerlink" href="#retrieving-results" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Once the avatarization is finished, you can retrieve the results of the avatarization,</span>
 <span class="c1"># most notably the privacy metrics</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
@@ -486,7 +487,7 @@ available as only a single call is made.</p>
 </div>
 </section>
 <section id="evaluate-privacy">
-<h3>Evaluate privacy<a class="headerlink" href="#evaluate-privacy" title="Permalink to this headline">#</a></h3>
+<h3>Evaluate privacy<a class="headerlink" href="#evaluate-privacy" title="Permalink to this heading">#</a></h3>
 <p>You can retrieve the privacy metrics from the result object (see our
 main docs for details about each metric):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="o">.</span><span class="n">hidden_rate</span><span class="p">)</span>
@@ -495,7 +496,7 @@ main docs for details about each metric):</p>
 </div>
 </section>
 <section id="evaluate-utility">
-<h3>Evaluate utility<a class="headerlink" href="#evaluate-utility" title="Permalink to this headline">#</a></h3>
+<h3>Evaluate utility<a class="headerlink" href="#evaluate-utility" title="Permalink to this heading">#</a></h3>
 <p>You can evaluate your avatarization on different criteria:</p>
 <ul class="simple">
 <li><p>univariate</p></li>
@@ -507,7 +508,7 @@ main docs for details about each metric):</p>
 a jupyter notebook example to evaluate the quality of an avatarization.</p>
 </section>
 <section id="sensitive-access-the-results-unshuffled">
-<h3>⚠ Sensitive ⚠ Access the results unshuffled<a class="headerlink" href="#sensitive-access-the-results-unshuffled" title="Permalink to this headline">#</a></h3>
+<h3>⚠ Sensitive ⚠ Access the results unshuffled<a class="headerlink" href="#sensitive-access-the-results-unshuffled" title="Permalink to this heading">#</a></h3>
 <p>You might want to access the avatars dataset prior to being shuffled.
 <strong>WARNING</strong>: There is no protection at all, as the linkage between the
 unshuffled avatars dataset and the original data is obvious. <strong>This
@@ -566,9 +567,7 @@ to make it safe.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -621,7 +620,9 @@ to make it safe.</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

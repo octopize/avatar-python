@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Models" href="models.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>Tutorial - avatars documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -274,12 +275,12 @@
         </div>
         <article role="main">
           <section id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">#</a></h1>
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this heading">#</a></h1>
 <p>This Python client communicates with the avatarization engine. For more
 information about the concepts and avatarization, check out our main
 docs at <a class="reference external" href="https://docs.octopize.io">https://docs.octopize.io</a>.</p>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h2>
 <p>Install the package by pointing to the .whl file (replace path below).</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;~/Downloads/avatars-0.X.X-py3-none-any.whl&quot;</span>
 <span class="c1"># or, if you&#39;re using poetry (recommended)</span>
@@ -289,7 +290,7 @@ poetry<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;
 <p>to install the project dependencies.</p>
 </section>
 <section id="loading-the-library">
-<h2>Loading the library<a class="headerlink" href="#loading-the-library" title="Permalink to this headline">#</a></h2>
+<h2>Loading the library<a class="headerlink" href="#loading-the-library" title="Permalink to this heading">#</a></h2>
 <p>Once installed, load the library:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This is the client that you&#39;ll be using for all of your requests</span>
 <span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
@@ -301,7 +302,7 @@ poetry<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;
 </div>
 </section>
 <section id="preliminary-steps">
-<h2>Preliminary steps<a class="headerlink" href="#preliminary-steps" title="Permalink to this headline">#</a></h2>
+<h2>Preliminary steps<a class="headerlink" href="#preliminary-steps" title="Permalink to this heading">#</a></h2>
 <p>The only remaining step before using the API is setting the API endpoint
 and authenticating:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -316,7 +317,7 @@ and authenticating:</p>
 </div>
 </section>
 <section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">#</a></h2>
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">#</a></h2>
 <p>This is all you need to run and evaluate an avatarization:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.client</span> <span class="kn">import</span> <span class="n">ApiClient</span>
 <span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
@@ -346,14 +347,14 @@ and authenticating:</p>
 </div>
 </section>
 <section id="avatarization-step-by-step">
-<h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this headline">#</a></h2>
+<h2>Avatarization step by step<a class="headerlink" href="#avatarization-step-by-step" title="Permalink to this heading">#</a></h2>
 <section id="manipulate-datasets">
-<h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this headline">#</a></h3>
+<h3>Manipulate datasets<a class="headerlink" href="#manipulate-datasets" title="Permalink to this heading">#</a></h3>
 <p>You can pass the data to <code class="docutils literal notranslate"><span class="pre">create_dataset()</span></code> directly as a file handle.
 The file can be opened as bytes (<code class="docutils literal notranslate"><span class="pre">&quot;rb&quot;</span></code>) or as string <code class="docutils literal notranslate"><span class="pre">&quot;r&quot;</span></code> with
 <code class="docutils literal notranslate"><span class="pre">utf-8</span></code> encoding.</p>
 <section id="using-csv-files">
-<h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this headline">#</a></h4>
+<h4>Using CSV files<a class="headerlink" href="#using-csv-files" title="Permalink to this heading">#</a></h4>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;fixtures/iris.csv&quot;</span>
 
 <span class="c1"># Using a context manager</span>
@@ -367,7 +368,7 @@ The file can be opened as bytes (<code class="docutils literal notranslate"><spa
 </div>
 </section>
 <section id="with-pandas-dataframes">
-<h4>With <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes<a class="headerlink" href="#with-pandas-dataframes" title="Permalink to this headline">#</a></h4>
+<h4>With <code class="docutils literal notranslate"><span class="pre">pandas</span></code> dataframes<a class="headerlink" href="#with-pandas-dataframes" title="Permalink to this heading">#</a></h4>
 <p>If you are using <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, and want to manipulate the dataframe before
 sending it to the engine, here’s how you should proceed.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -394,7 +395,7 @@ DataFrame, you can do it like this</p>
 </div>
 </section>
 <section id="alternative-way-with-pandas-dataframe">
-<h4>Alternative way with pandas dataframe<a class="headerlink" href="#alternative-way-with-pandas-dataframe" title="Permalink to this headline">#</a></h4>
+<h4>Alternative way with pandas dataframe<a class="headerlink" href="#alternative-way-with-pandas-dataframe" title="Permalink to this heading">#</a></h4>
 <p>Note that this method will keep the dtypes of your dataframe.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;fixtures/iris.csv&quot;</span><span class="p">)</span>
 
@@ -410,7 +411,7 @@ DataFrame, you can do it like this</p>
 </section>
 </section>
 <section id="set-parameters">
-<h3>Set parameters<a class="headerlink" href="#set-parameters" title="Permalink to this headline">#</a></h3>
+<h3>Set parameters<a class="headerlink" href="#set-parameters" title="Permalink to this heading">#</a></h3>
 <p>Here’s the list of parameters you can use for avatarization. The
 description for each parameter is available in our main docs.</p>
 <ul class="simple">
@@ -438,7 +439,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </div>
 </section>
 <section id="launch-a-job">
-<h3>Launch a job<a class="headerlink" href="#launch-a-job" title="Permalink to this headline">#</a></h3>
+<h3>Launch a job<a class="headerlink" href="#launch-a-job" title="Permalink to this heading">#</a></h3>
 <p>One job corresponds to one avatarization.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">JobCreate</span>
 
@@ -456,7 +457,7 @@ you can import from <code class="docutils literal notranslate"><span class="pre"
 </pre></div>
 </div>
 <section id="retry-mechanism">
-<h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this headline">#</a></h4>
+<h4>Retry mechanism<a class="headerlink" href="#retry-mechanism" title="Permalink to this heading">#</a></h4>
 <p>The <code class="docutils literal notranslate"><span class="pre">get_job</span></code> function periodically queries the avatarization engine
 to check if a given job is finished. This call will block until a given
 timeout has expired, and then return. However, the job is still running
@@ -485,7 +486,7 @@ available as only a single call is made.</p>
 </section>
 </section>
 <section id="retrieving-results">
-<h3>Retrieving results<a class="headerlink" href="#retrieving-results" title="Permalink to this headline">#</a></h3>
+<h3>Retrieving results<a class="headerlink" href="#retrieving-results" title="Permalink to this heading">#</a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Once the avatarization is finished, you can retrieve the results of the avatarization,</span>
 <span class="c1"># most notably the privacy metrics</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">result</span>
@@ -507,7 +508,7 @@ available as only a single call is made.</p>
 </div>
 </section>
 <section id="evaluate-privacy-and-utility">
-<h3>Evaluate privacy and utility<a class="headerlink" href="#evaluate-privacy-and-utility" title="Permalink to this headline">#</a></h3>
+<h3>Evaluate privacy and utility<a class="headerlink" href="#evaluate-privacy-and-utility" title="Permalink to this heading">#</a></h3>
 <p>You can retrieve the privacy metrics from the result object (see our
 main docs for details about each metric):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">privacy_metrics</span><span class="o">.</span><span class="n">hidden_rate</span><span class="p">)</span>
@@ -547,9 +548,7 @@ main docs for details about each metric):</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -602,7 +601,9 @@ main docs for details about each metric):</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>

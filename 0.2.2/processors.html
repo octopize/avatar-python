@@ -1,14 +1,15 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Changelog" href="changelog.html" /><link rel="prev" title="Models" href="models.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
         <title>Processors - avatars documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -149,7 +150,7 @@
   <span class="sidebar-brand-text">avatars  documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -276,10 +277,10 @@
         </div>
         <article role="main">
           <section id="processors">
-<h1>Processors<a class="headerlink" href="#processors" title="Permalink to this headline">#</a></h1>
+<h1>Processors<a class="headerlink" href="#processors" title="Permalink to this heading">#</a></h1>
 <p>These processors are used to process data before and after avatarization.</p>
 <section id="module-avatars.processors.expected_mean">
-<span id="definitions"></span><h2>Definitions<a class="headerlink" href="#module-avatars.processors.expected_mean" title="Permalink to this headline">#</a></h2>
+<span id="definitions"></span><h2>Definitions<a class="headerlink" href="#module-avatars.processors.expected_mean" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="avatars.processors.expected_mean.ExpectedMeanProcessor">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.processors.expected_mean.</span></span><span class="sig-name descname"><span class="pre">ExpectedMeanProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby_variables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">same_std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.processors.expected_mean.ExpectedMeanProcessor" title="Permalink to this definition">#</a></dt>
@@ -293,7 +294,7 @@ the original data for each group.
 Care should be taken when using this processor as it only targets enhancement of unimodal
 utility. This may occur at the expense of multi-modal utility and privacy.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target_variables</strong> – variables to transform</p></li>
 <li><p><strong>groupby_variables</strong> – variables to use to group values in different distributions</p></li>
@@ -309,13 +310,13 @@ standard deviation as the reference data. default: False.</p></li>
 <span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.preprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Compute the reference mean and standard deviations.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>df</strong> – reference dataframe</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the unaltered reference dataframe.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>df</p>
 </dd>
 </dl>
@@ -326,16 +327,16 @@ standard deviation as the reference data. default: False.</p></li>
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Force the data to have the reference mean.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>source</strong> – not used</p></li>
 <li><p><strong>dest</strong> – dataframe to transform</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a dataframe with the transformed target columns</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>dest</p>
 </dd>
 </dl>
@@ -353,12 +354,12 @@ standard deviation as the reference data. default: False.</p></li>
 <p>Use the parameter <cite>variables</cite> if you want to apply a custom threshold to each variable.
 Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want to apply a generic threshold.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>variable_thresholds</strong> (<em>dictionary of variables and thresholds to apply</em><em>,</em>) – </p></li>
+<li><p><strong>variable_thresholds</strong> (<em>dictionary</em><em> of </em><em>variables and thresholds to apply</em><em>,</em>) – </p></li>
 <li><p><strong>below.</strong> (<em>see global_threshold</em>) – </p></li>
-<li><p><strong>min_unique</strong> (<em>number of unique modalities by variable needed to be transformed.</em>) – </p></li>
-<li><p><strong>global_threshold</strong> (<em>limit of the number of individuals in each category</em>) – </p></li>
+<li><p><strong>min_unique</strong> (<em>number</em><em> of </em><em>unique modalities by variable needed to be transformed.</em>) – </p></li>
+<li><p><strong>global_threshold</strong> (<em>limit</em><em> of </em><em>the number</em><em> of </em><em>individuals in each category</em>) – </p></li>
 <li><p><strong>it.</strong> (<em>to rename</em>) – </p></li>
 <li><p><strong>new_category</strong> (<em>new modality name</em><em> (</em><em>default=&quot;other&quot;</em><em>)</em><em>.</em>) – </p></li>
 </ul>
@@ -406,12 +407,12 @@ Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sum_to_one</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimal_count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.processors.proportions.ProportionProcessor.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Processor to express numeric variables as proportion of another variable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>variable_names</strong> (<em>variables to transform</em>) – </p></li>
-<li><p><strong>reference</strong> (<em>the variable of reference</em>) – </p></li>
-<li><p><strong>sum_to_one</strong> (<em>set to True to ensure the sum of the variables sum to 1 once transformed.</em>) – default: True</p></li>
-<li><p><strong>decimal_count</strong> (<em>the number of decimals postprocessed variables should have</em>) – </p></li>
+<li><p><strong>reference</strong> (<em>the variable</em><em> of </em><em>reference</em>) – </p></li>
+<li><p><strong>sum_to_one</strong> (<em>set to True to ensure the sum</em><em> of </em><em>the variables sum to 1 once transformed.</em>) – default: True</p></li>
+<li><p><strong>decimal_count</strong> (<em>the number</em><em> of </em><em>decimals postprocessed variables should have</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -425,13 +426,13 @@ Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want
 into nan and will be considered as a 0% proportion of the reference when transforming
 values of other variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a dataframe with the transformed version of wanted columns</p>
 </dd>
 </dl>
@@ -442,16 +443,16 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.proportions.ProportionProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Transform proportion of another variable into an absolute numeric value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>source</strong> (<em>not used</em>) – </p></li>
 <li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a dataframe with the transformed version of wanted columns</p>
 </dd>
 </dl>
@@ -467,10 +468,10 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">references</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_unit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_rename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_original_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Processor to express numeric variables as a difference relative to the sum of other variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target</strong> (<em>variables to transform</em>) – </p></li>
-<li><p><strong>references</strong> (<em>the variable of reference</em>) – </p></li>
+<li><p><strong>references</strong> (<em>the variable</em><em> of </em><em>reference</em>) – </p></li>
 <li><p><strong>target_rename</strong> (<em>target name after preprocess.</em>) – </p></li>
 <li><p><strong>scaling_unit</strong> (<em>divide difference by factor to handle unit variation.</em>) – Eg. if 1000, a difference in meters will be expressed in kilometers.</p></li>
 <li><p><strong>drop_original_target</strong> (drop original_target. Can only be set to <code class="docutils literal notranslate"><span class="pre">True</span></code>) – if <code class="docutils literal notranslate"><span class="pre">target_rename</span></code> is specified</p></li>
@@ -484,10 +485,10 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.preprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Transform a numeric variable into a difference relative to the sum of other variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>a dataframe with the transformed version of wanted columns</p>
 </dd>
 </dl>
@@ -498,13 +499,13 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Transform a difference relative to the sum of other variables into an absolute numeric value.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>source</strong> (<em>not used</em>) – </p></li>
 <li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>a dataframe with the transformed version of wanted columns</p>
 </dd>
 </dl>
@@ -520,7 +521,7 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_references</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">SeedSequence</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.__init__" title="Permalink to this definition">#</a></dt>
 <dd><p>Processor to express a numeric variables as within a range defined by two other variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>target</strong> (<em>variable to transform</em>) – </p></li>
 <li><p><strong>bounds</strong> (<em>the variables defining the upper and lower bounds</em>) – </p></li>
@@ -537,13 +538,13 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.preprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Set a numeric variable as within a range defined by two other variables.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>df</strong> (<em>dataframe to transform</em>) – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a dataframe with the transformed version of wanted columns</p>
 </dd>
 </dl>
@@ -554,16 +555,16 @@ values of other variables.</p>
 <span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.processors.relative_range.RelativeRangeProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd><p>Sample values for the target variable within the range defined.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>source</strong> (<em>not used</em>) – </p></li>
 <li><p><strong>dest</strong> (<em>dataframe to transform</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>DataFrame</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>a dataframe with the transformed version of wanted columns</p>
 </dd>
 </dl>
@@ -611,9 +612,7 @@ values of other variables.</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -632,7 +631,45 @@ values of other variables.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Processors</a><ul>
-<li><a class="reference internal" href="#module-avatars.processors.expected_mean">Definitions</a></li>
+<li><a class="reference internal" href="#module-avatars.processors.expected_mean">Definitions</a><ul>
+<li><a class="reference internal" href="#avatars.processors.expected_mean.ExpectedMeanProcessor"><code class="docutils literal notranslate"><span class="pre">ExpectedMeanProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">ExpectedMeanProcessor.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">ExpectedMeanProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.expected_mean.ExpectedMeanProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">ExpectedMeanProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.processors.group_modalities.GroupModalitiesProcessor"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.group_modalities.GroupModalitiesProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.processors.perturbation.PerturbationProcessor"><code class="docutils literal notranslate"><span class="pre">PerturbationProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.processors.perturbation.PerturbationProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">PerturbationProcessor.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.perturbation.PerturbationProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">PerturbationProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.perturbation.PerturbationProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">PerturbationProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.processors.proportions.ProportionProcessor"><code class="docutils literal notranslate"><span class="pre">ProportionProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.processors.proportions.ProportionProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">ProportionProcessor.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.proportions.ProportionProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">ProportionProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.proportions.ProportionProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">ProportionProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor"><code class="docutils literal notranslate"><span class="pre">RelativeDifferenceProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">RelativeDifferenceProcessor.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">RelativeDifferenceProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.relative_difference.RelativeDifferenceProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">RelativeDifferenceProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.processors.relative_range.RelativeRangeProcessor"><code class="docutils literal notranslate"><span class="pre">RelativeRangeProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.processors.relative_range.RelativeRangeProcessor.__init__"><code class="docutils literal notranslate"><span class="pre">RelativeRangeProcessor.__init__()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.relative_range.RelativeRangeProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">RelativeRangeProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.processors.relative_range.RelativeRangeProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">RelativeRangeProcessor.postprocess()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -647,7 +684,9 @@ values of other variables.</p>
 </div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/scripts/furo.js"></script>
     </body>
 </html>
