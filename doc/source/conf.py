@@ -41,6 +41,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_multiversion",
     "sphinx.ext.autosummary",
+    "sphinxcontrib.autodoc_pydantic"
 ]
 
 autodoc_default_options = {
@@ -55,6 +56,16 @@ autodoc_member_order = "bysource"
 # See https://github.com/sphinx-doc/sphinx/issues/10290
 python_use_unqualified_type_names = True
 
+# -- Sphinx Multi-version -------------------------------------------------
+# https://autodoc-pydantic.readthedocs.io/en/stable/users/configuration.html
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_model_show_config = False
+autodoc_pydantic_model_signature_prefix = "class"
+autodoc_pydantic_field_doc_policy = "description"
+autodoc_pydantic_field_signature_prefix = " "
+autodoc_pydantic_model_show_field_summary = False
+
+# -------------------------------------------------------------------------
 
 templates_path = ["_templates"]
 
