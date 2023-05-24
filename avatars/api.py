@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.4-6f36d9019b76fe2b40fc6ed14f5537131e98919c
+# API Version : 0.5.5-12014a3966d03221e04c3b7fbf05977c3339c014
 
 
 import itertools
@@ -13,6 +13,8 @@ import pandas as pd
 from pydantic import BaseModel
 
 from avatars.models import (
+    AvatarizationBatchJob,
+    AvatarizationBatchJobCreate,
     AvatarizationJob,
     AvatarizationJobCreate,
     AvatarizationPipelineCreate,
@@ -21,6 +23,7 @@ from avatars.models import (
     ColumnDetail,
     ColumnType,
     CompatibilityResponse,
+    Contributions,
     CreateDataset,
     CreateUser,
     Dataset,
@@ -32,6 +35,8 @@ from avatars.models import (
     LoginResponse,
     PatchDataset,
     PrivacyMetrics,
+    PrivacyMetricsBatchJob,
+    PrivacyMetricsBatchJobCreate,
     PrivacyMetricsJob,
     PrivacyMetricsJobCreate,
     PrivacyMetricsParameters,
@@ -42,6 +47,8 @@ from avatars.models import (
     ReportFromDataCreate,
     ResetPasswordRequest,
     SignalMetrics,
+    SignalMetricsBatchJob,
+    SignalMetricsBatchJobCreate,
     SignalMetricsJob,
     SignalMetricsJobCreate,
     SignalMetricsParameters,
@@ -484,27 +491,22 @@ class Jobs:
 
         return AvatarizationJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
-    def get_avatarization_job(
+    def create_avatarization_batch_job(
         self,
-        id: str,
+        request: AvatarizationBatchJobCreate,
         *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> AvatarizationJob:
-        """Get an avatarization job."""
+    ) -> AvatarizationBatchJob:
+        """Create an avatarization batch job."""
 
         kwargs = {
-            "method": "get",
-            "url": f"/jobs/avatarization/{id}",
+            "method": "post",
+            "url": f"/jobs/avatarization_batch",
             "timeout": timeout,
+            "json": request,
         }
 
-        return get_job(
-            client=self.client,
-            response_cls=AvatarizationJob,
-            per_request_timeout=per_request_timeout,
-            **kwargs,  # type: ignore
-        )
+        return AvatarizationBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
     def create_signal_metrics_job(
         self,
@@ -540,6 +542,84 @@ class Jobs:
 
         return PrivacyMetricsJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
+    def create_privacy_metrics_batch_job(
+        self,
+        request: PrivacyMetricsBatchJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsBatchJob:
+        """Create a privacy metrics batch job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/privacy_batch",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return PrivacyMetricsBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def create_signal_metrics_batch_job(
+        self,
+        request: SignalMetricsBatchJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsBatchJob:
+        """Create a signal metrics batch job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/signal_batch",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return SignalMetricsBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def get_avatarization_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationJob:
+        """Get an avatarization job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/avatarization/{id}",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_avatarization_batch_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationBatchJob:
+        """Get an avatarization batch job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/avatarization_batch/{id}",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationBatchJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
     def get_signal_metrics(
         self,
         id: str,
@@ -562,6 +642,28 @@ class Jobs:
             **kwargs,  # type: ignore
         )
 
+    def get_signal_metrics_batch_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsBatchJob:
+        """Get a signal metrics batch job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/signal_batch",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=SignalMetricsBatchJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
     def get_privacy_metrics(
         self,
         id: str,
@@ -580,6 +682,28 @@ class Jobs:
         return get_job(
             client=self.client,
             response_cls=PrivacyMetricsJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_privacy_metrics_batch_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsBatchJob:
+        """Get a privacy metrics batch job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/privacy_batch",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=PrivacyMetricsBatchJob,
             per_request_timeout=per_request_timeout,
             **kwargs,  # type: ignore
         )
@@ -632,7 +756,7 @@ class Metrics:
         dataset_id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
+    ) -> Contributions:
         """Get the contributions of the dataset variables within the fitted space."""
 
         kwargs = {
@@ -645,7 +769,7 @@ class Metrics:
             ),
         }
 
-        return self.client.request(**kwargs)  # type: ignore[arg-type]
+        return Contributions(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
     def get_explained_variance(
         self,
