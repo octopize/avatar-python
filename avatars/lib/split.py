@@ -1,7 +1,10 @@
 import math
 from typing import Dict, List, Optional, Tuple
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
+
 
 
 def get_split_for_batch(
@@ -32,7 +35,7 @@ def get_split_for_batch(
             splits: all other batches
 
     Examples
-    --------    
+    --------
     >>> df = pd.DataFrame(
     ... data={
     ...     "a": [1, 3, 5, 1, 3, 5, 1, 3, 5, 1, 3, 5],
@@ -66,18 +69,17 @@ def get_split_for_batch(
     if len(first_occurrence) > row_limit * 0.5:
         raise ValueError(
             "You have too much variability in your categorical data."
-            "You can: change your row_limit, reduce your categorical variability, or built "
-            "yur own batch pipeline."
+            "You can increase your `row_limit`, reduce your categorical variability, or built "
+            "your own batch pipeline."
         )
 
-    df_without_first = df.drop(index=first_occurrence.index).reset_index(drop=True)
-    first_occurrence.reset_index(drop=True, inplace=True)
+    df_without_first = df.drop(index=first_occurrence.index)
 
     shuffled = df_without_first.sample(frac=1, random_state=seed)
 
-    all_df = pd.concat([first_occurrence, shuffled]).reset_index(drop=True)
+    all_df = pd.concat([first_occurrence, shuffled])
     splits = np.array_split(all_df, number_of_split)
-    splits = [pd.DataFrame(split).reset_index(drop=True) for split in splits]
+    splits = [pd.DataFrame(split) for split in splits]
     training = splits.pop(0)
 
     return training, splits

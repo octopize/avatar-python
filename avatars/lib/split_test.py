@@ -1,8 +1,9 @@
 import pandas as pd
 import pytest
+
 from avatars.lib.split import (
-    get_split_for_batch,
     get_index_without_duplicated_modalities,
+    get_split_for_batch,
 )
 
 

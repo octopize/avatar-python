@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.5-12014a3966d03221e04c3b7fbf05977c3339c014
+# API Version : 0.5.5-8fcf850f30707eacf1153f95237b4aa01252f4db
 
 
 import itertools
@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from avatars.models import (
     AvatarizationBatchJob,
     AvatarizationBatchJobCreate,
+    AvatarizationBatchResult,
     AvatarizationJob,
     AvatarizationJobCreate,
     AvatarizationPipelineCreate,
@@ -1161,4 +1162,56 @@ class Pipelines:
         )
 
 
+def get_avatar_dataset_from_batch_result(
+    avatarization_batch_result: AvatarizationBatchResult,
+    client: "ApiClient",
+) -> pd.DataFrame:
+    training_df = client.pandas_integration.download_dataframe(
+        avatarization_batch_result.result.training_result.avatars_dataset.id
+    )
+    splits_df = [
+        client.pandas_integration.download_dataframe(batch_results.avatars_dataset.id)
+        for batch_results in avatarization_batch_result.batch_results
+    ]
+    return pd.concat([training_df] + splits_df)
+
+
 # This file has been generated - DO NOT MODIFY
+
+
+def upload_batch_and_get_order(
+    training: pd.DataFrame, splits: pd.DataFrame, client: "ApiClient"
+) -> None:
+    dataset_ref = client.pandas_integration.upload_dataframe(training, timeout=10)
+    datasets_splited_id = [
+        client.pandas_integration.upload_dataframe(split, timeout=10).id
+        for split in splits
+    ]
+    batch_order = {dataset_ref.id: training.index}
+    for dataset, dataframe in zip(datasets_splited_id, splits):
+        batch_order[dataset] = dataframe.index
+
+    return dataset_ref.id, datasets_splited_id, batch_order
+
+
+def get_sensitive_unshuffled_avatar_from_batch(
+    avatarization_batch_result: AvatarizationBatchResult, order, client: "ApiClient"
+) -> None:
+    avatar_training_id =  avatarization_batch_result.training_result.sensitive_unshuffled_avatars_datasets.id
+    original_training_id =  avatarization_batch_result.training_result.original_id
+    training_df = client.pandas_integration.download_dataframe(
+        avatar_training_id
+    )
+    training_df.index = order[original_training_id]
+
+    splits_df = []
+    for batch_results in avatarization_batch_result.batch_results:
+        avatar_dataset_id = batch_results.sensitive_unshuffled_avatars_datasets.id
+        original_dataset_id =  batch_results.original_id
+
+        split = client.pandas_integration.download_dataframe(avatar_dataset_id)
+        split.index = order[original_dataset_id]
+        splits_df.append(split)
+    
+    concatenated = pd.concat([training_df]+splits_df).sort_index()
+    return concatenated
