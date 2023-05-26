@@ -10,7 +10,7 @@
 
 # # Tutorial 7: Batch avatarization
 
-# In this tutorial, we will perform the avatarization on data batches. This can be useful if you have to much data that can be avatarized in one shot.
+# In this tutorial, we will perform the avatarization on data batches. This can be useful if you have a dataset too large to be avatarized in one shot.
 #
 #
 # This is the general workflow of the anonymization using batch.
