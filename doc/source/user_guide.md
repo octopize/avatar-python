@@ -23,7 +23,7 @@
     - [As a csv formatted string](#as-a-csv-formatted-string)
   - [How to handle a large dataset](#how-to-handle-a-large-dataset)
     - [Handle large amount of rows](#handle-large-amount-of-rows)
-    - [Handle a large amount of dimensions](#handle-a-large-amount-of-dimensions)
+    - [Handle large amount of dimensions](#handle-large-amount-of-dimensions)
   - [Handling timeouts](#handling-timeouts)
     - [Asynchronous calls](#asynchronous-calls)
     - [Synchronous calls](#synchronous-calls)
@@ -413,7 +413,7 @@ The average of all the signal metrics is computed. For the privacy metrics, we r
 
 See this [notebook tutorial](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial7-Batch_avatarization.ipynb) for more information about batch use.
 
-### Handle a large amount of dimensions
+### Handle large amount of dimensions
 
 The number of dimensions is the number of continuous variables plus the number of modalities in categorical variables.
 The limit of dimension is frequently reached due to a large number of modalities in one/sample of categorical variables.

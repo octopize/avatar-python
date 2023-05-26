@@ -38,6 +38,12 @@ User guide
       -  `As a pandas dataframe <#as-a-pandas-dataframe-1>`__
       -  `As a csv formatted string <#as-a-csv-formatted-string>`__
 
+   -  `How to handle a large dataset <#how-to-handle-a-large-dataset>`__
+
+      -  `Handle large amount of rows <#handle-large-amount-of-rows>`__
+      -  `Handle large amount of
+         dimensions <#handle-large-amount-of-dimensions>`__
+
    -  `Handling timeouts <#handling-timeouts>`__
 
       -  `Asynchronous calls <#asynchronous-calls>`__
@@ -188,8 +194,7 @@ data.
 How to launch an avatarization with metrics
 -------------------------------------------
 
-You can launch an avatarization with some simple privacy and signal
-metrics.
+You can launch an avatarization with some privacy and signal metrics.
 
 .. code:: python
 
@@ -297,7 +302,7 @@ See
 a jupyter notebook example to evaluate the quality of an avatarization.
 
 See `our technical
-documentation <https://docs.octopize.io/docs/understanding/Privacy/>`__
+documentation <https://docs.octopize.io/docs/understanding/Utility/>`__
 for more details on all signal metrics.
 
 How to set the avatarization parameters
@@ -461,6 +466,47 @@ As a csv formatted string
    avatar_df = pd.read_csv(io.StringIO(avatars_dataset))
    print(avatar_df.head())
 
+How to handle a large dataset
+-----------------------------
+
+Due to the server limit, you can be limited by the number of row and the
+number of dimension.
+
+Handle large amount of rows
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you want to anonymize a large number of records, you can use the
+batch methodology. Your dataset will be split into batches and each
+batch will be anonymized independently from the others.
+
+Metrics are computed on each batch of the data. The average of all the
+signal metrics is computed. For the privacy metrics, we return the worst
+and the mean of all metrics. You can also access to all batch metrics
+for specific use cases (such as debugging).
+
+See this `notebook
+tutorial <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial7-Batch_avatarization.ipynb>`__
+for more information about batch use.
+
+Handle large amount of dimensions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The number of dimensions is the number of continuous variables plus the
+number of modalities in categorical variables. The limit of dimension is
+frequently reached due to a large number of modalities in one/sample of
+categorical variables.
+
+There are several solutions to bypass this limitation: - Encode the
+categorical variable into a continuous variable (frequency encoding,
+target encoding, …). - Reduce the number of modalities by grouping some
+into more general modalities. - Use the argument
+``use_categorical_reduction`` (Beta version)
+
+The parameter ``use_categorical_reduction`` will reduce the dimension of
+the categorical variable by encoding them as vectors. This step is using
+the word embedding cat2vec. This solution could reduce the utility of
+your dataset.
+
 Handling timeouts
 -----------------
 
@@ -532,7 +578,7 @@ the timeout like so:
 Under normal circumstances, that should be sufficient.
 
 However, if your file is particularly big, or the server is under high
-load, the call might be interupted and you will be left with a nasty
+load, the call might be interrupted and you will be left with a nasty
 exception, similar to:
 
 -  ``stream timeout``
