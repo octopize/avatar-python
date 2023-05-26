@@ -17,10 +17,12 @@ def test_get_split_for_batch() -> None:
     result = get_split_for_batch(df, row_limit=6, seed=42)
 
     training = pd.DataFrame(
-        data={"a": [1, 3, 3, 1, 3, 5], "b": ["a", "b", "b", "a", "b", "a"]}
+        data={"a": [1, 3, 3, 1, 3, 5], "b": ["a", "b", "b", "a", "b", "a"]},
+        index=[0, 1, 10, 3, 7, 2],
     )
     batch = pd.DataFrame(
-        data={"a": [1, 3, 5, 1, 5, 5], "b": ["a", "b", "a", "a", "a", "a"]}
+        data={"a": [1, 3, 5, 1, 5, 5], "b": ["a", "b", "a", "a", "a", "a"]},
+        index=[9, 4, 11, 6, 5, 8],
     )
 
     pd.testing.assert_frame_equal(result[0], training)
@@ -36,27 +38,27 @@ def test_get_split_for_batch_with_optimization() -> None:
             "c": ["1", "2", "1", "1", "1", "2", "1", "1", "1", "2", "1", "1"],
         }
     )
-    result = get_split_for_batch(df, row_limit=6, seed=42)
+    training, splits = get_split_for_batch(df, row_limit=6, seed=42)
 
     # the two first record should be the same of the original data and the other ones should be randomly selected
-    training = pd.DataFrame(
+    expected_training = pd.DataFrame(
         data={
             "a": ["a", "b", "b", "a", "a", "b"],
             "b": ["A", "B", "B", "B", "B", "B"],
             "c": ["1", "2", "1", "1", "1", "1"],
-        }
+        },
+        index=[0, 1, 10, 3, 7, 2],
     )
-    batch = pd.DataFrame(
+    expected_batch = pd.DataFrame(
         data={
             "a": ["b", "a", "a", "b", "b", "a"],
             "b": ["B", "A", "B", "B", "B", "A"],
             "c": ["2", "1", "1", "1", "2", "1"],
-        }
+        },
+        index=[9, 4, 11, 6, 5, 8],
     )
-    print(result[1][0])
-    print(training)
-    pd.testing.assert_frame_equal(result[0], training)
-    pd.testing.assert_frame_equal(result[1][0], batch)
+    pd.testing.assert_frame_equal(expected_training, training)
+    pd.testing.assert_frame_equal(expected_batch, splits[0])
 
 
 def test_get_split_for_batch_raise_error() -> None:

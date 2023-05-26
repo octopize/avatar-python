@@ -5,8 +5,6 @@ import numpy as np
 import pandas as pd
 
 
-
-
 def get_split_for_batch(
     df: pd.DataFrame,
     row_limit: int,
@@ -44,22 +42,21 @@ def get_split_for_batch(
     ... )
     >>> training, splits = get_split_for_batch(df, row_limit=6, seed=42)
     >>> training
-       a  b
-    0  1  a
-    1  3  b
-    2  3  b
-    3  1  a
-    4  3  b
-    5  5  a
+        a  b
+    0   1  a
+    1   3  b
+    10  3  b
+    3   1  a
+    7   3  b
+    2   5  a
     >>> splits
-    [   a  b
-    0  1  a
-    1  3  b
-    2  5  a
-    3  1  a
-    4  5  a
-    5  5  a]
-
+    [    a  b
+    9   1  a
+    4   3  b
+    11  5  a
+    6   1  a
+    5   5  a
+    8   5  a]
     """
     number_of_split = math.ceil(len(df) / row_limit)
     categorical_columns = df.select_dtypes(include=["object", "category"]).columns

@@ -1,15 +1,15 @@
+from unittest.mock import Mock
 from uuid import uuid4
-from avatars.api import get_sensitive_unshuffled_avatar_from_batch
 
 import pandas as pd
 
+from avatars.api import download_sensitive_unshuffled_avatar_from_batch
 from avatars.client import ApiClient
 from avatars.models import (
     AvatarizationBatchResult,
     AvatarizationPerBatchResult,
     Dataset,
 )
-from unittest.mock import Mock
 
 batch_result = AvatarizationBatchResult(
     training_result=AvatarizationPerBatchResult(
@@ -35,7 +35,9 @@ batch_result = AvatarizationBatchResult(
 )
 
 
-def test_get_sensitive_unshuffled_avatar_from_batch(batch_result: AvatarizationBatchResult=batch_result) -> None:
+def test_get_sensitive_unshuffled_avatar_from_batch(
+    batch_result: AvatarizationBatchResult = batch_result,
+) -> None:
     train = pd.DataFrame(
         data={
             "a": [1, 3],
@@ -43,11 +45,11 @@ def test_get_sensitive_unshuffled_avatar_from_batch(batch_result: AvatarizationB
         }
     )
     split = pd.DataFrame(
-            data={
-                "a": [4, 2],
-                "b": ["a", "b"],
-            }
-        )
+        data={
+            "a": [4, 2],
+            "b": ["a", "b"],
+        }
+    )
 
     order = {
         batch_result.training_result.original_id: pd.Index([0, 2]),
@@ -56,14 +58,14 @@ def test_get_sensitive_unshuffled_avatar_from_batch(batch_result: AvatarizationB
 
     client = Mock()
     client.pandas_integration.download_dataframe.side_effect = [train, split]
-    result = get_sensitive_unshuffled_avatar_from_batch(
+    result = download_sensitive_unshuffled_avatar_from_batch(
         batch_result, order=order, client=client
-    )   
+    )
     expected = pd.DataFrame(
-            data={
-                "a": [1, 2, 3, 4],
-                "b": ["a", "b", "b", "a"],
-            }
-        )
+        data={
+            "a": [1, 2, 3, 4],
+            "b": ["a", "b", "b", "a"],
+        }
+    )
 
     pd.testing.assert_frame_equal(result, expected)

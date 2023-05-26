@@ -22,6 +22,8 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
+from avatars.client import ApiClient
+
 # +
 import os
 
@@ -31,17 +33,53 @@ password = os.environ.get("AVATAR_PASSWORD")
 
 # +
 # This is the client that you'll be using for all of your requests
-from avatars.client import ApiClient
 from avatars.models import (
     AvatarizationJobCreate,
     AvatarizationParameters,
     ImputationParameters,
 )
 from avatars.lib.split import get_split_for_batch
+from typing import Any, Dict, List, Tuple
+import math
 
-# The following are not necessary to run avatar but are used in this tutorial
+import time
+
+import numpy as np
+
+from avatars.client import ApiClient
+
+from avatars.models import (
+    AvatarizationBatchJobCreate,
+    AvatarizationBatchParameters,
+    AvatarizationBatchResult,
+    AvatarizationJob,
+    PrivacyMetricsBaseParameters,
+    PrivacyMetricsBatchJobCreate,
+    PrivacyMetricsBatchParameters,
+    PrivacyMetricsJob,
+    PrivacyMetricsJobCreate,
+    PrivacyMetricsParameters,
+    PrivacyBatchDatasetMapping,
+    SignalBatchDatasetMapping,
+    SignalMetricsBaseParameters,
+    SignalMetricsBatchJobCreate,
+    SignalMetricsBatchParameters,
+)
+from avatars.models import ImputeMethod
+from avatars.api import (
+    download_sensitive_unshuffled_avatar_from_batch,
+    upload_batch_and_get_order,
+    download_avatar_dataset_from_batch_result,
+)
+
+
+from avatars.lib.split import get_split_for_batch
+
+# The following are not necessary to
+# run avatar but are used in this tutorial
 import pandas as pd
-from sklearn.model_selection import train_test_split
+
+# from sklearn.model_selection import train_test_split
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=url)
@@ -51,161 +89,105 @@ client.authenticate(username=username, password=password)
 client.health.get_health()
 # -
 
-df_1 = pd.read_csv("../fixtures/adult_with_cities.csv")
-df = pd.concat([df_1 for i in range(4)])
+# ## Load the data
+# We will use a subset of the dataset `adult_with_missing`.
+
+df = pd.read_csv("../fixtures/adult_with_missing.csv").iloc[:1000, :]
+print(len(df))
 
 # +
-from typing import Any, Dict, List, Tuple
-import math
+# create some batches with from the df
 
-import time
+RowLimit = 200
 
-
-import numpy as np
-
-from avatars.models import (
-    AvatarizationBatchJobCreate,
-    AvatarizationBatchParameters,
-    AvatarizationBatchResult,
-    AvatarizationJob,
-    PrivacyMetricsBatchJobCreate,
-    PrivacyMetricsBatchParameters,
-    PrivacyMetricsJob,
-    PrivacyMetricsJobCreate,
-    PrivacyMetricsParameters,
-    PrivacyMetricsPerBatchParameters,
-    PrivacyMetricsReferenceParameters,
-    SignalMetricsBatchJobCreate,
-    SignalMetricsBatchParameters,
-    SignalMetricsReferenceParameters,
-)
-
-from avatars.lib.split import get_split_for_batch
-
-
-def get_avatar_using_batch(
-    reference_df: pd.DataFrame, splits: List[pd.DataFrame], parameters: Dict[str, Any]
-) -> AvatarizationBatchResult:
-
-    start = time.time()
-
-    dataset_ref = client.pandas_integration.upload_dataframe(reference_df, timeout=10)
-    dataset_splited_ids = [
-        client.pandas_integration.upload_dataframe(split, timeout=10).id
-        for split in splits
-    ]
-    batch_job = client.jobs.create_avatarization_batch_job(
-        AvatarizationBatchJobCreate(
-            parameters=AvatarizationBatchParameters(
-                reference_dataset_id=dataset_ref.id,
-                dataset_ids=dataset_splited_ids,
-                **parameters,
-            )
-        )
-    )
-    batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=10000)
-    print("time", time.time() - start)
-
-    return batch_job
-
-
-def get_privacy_metrics_with_batch(
-    batch_job: AvatarizationBatchResult, parameters: Dict[str, Any]
-) -> List[PrivacyMetricsJob]:
-    # Initialization
-    start = time.time()
-    privacy_job_ref = client.jobs.create_privacy_metrics_batch_job(
-        PrivacyMetricsBatchJobCreate(
-            parameters=PrivacyMetricsBatchParameters(
-                avatarization_batch_job_id=batch_job.id,
-                reference_parameters=PrivacyMetricsReferenceParameters(**parameters),
-            ),
-        )
-    )
-    print(privacy_job_ref.id)
-    privacy_job = client.jobs.get_privacy_metrics_batch_job(
-        privacy_job_ref.id, timeout=100000
-    )
-    print(time.time() - start)
-
-    return privacy_job
-
-
-def get_signal_metrics_with_batch(
-    batch_job: AvatarizationBatchResult, parameters: Dict[str, Any]
-) -> List[PrivacyMetricsJob]:
-    # Initialization
-    start = time.time()
-    signal_job_ref = client.jobs.create_signal_metrics_batch_job(
-        SignalMetricsBatchJobCreate(
-            parameters=SignalMetricsBatchParameters(
-                avatarization_batch_job_id=batch_job.id,
-                reference_parameters=SignalMetricsReferenceParameters(**parameters),
-            ),
-        )
-    )
-    signal_job = client.jobs.get_signal_metrics_batch_job(signal_job_ref.id)
-    print(time.time() - start)
-
-    return signal_job
-
-
-# -
-
-#
-
-df.dtypes
-
-# +
-RowLimit = 50000
-
-ref, splits = get_split_for_batch(
+training, splits = get_split_for_batch(
     df,
     row_limit=RowLimit,
 )
-
-
-print(len(splits[0]))
-
-# 44875 -> 35974
+print(training.shape)
+print(len(splits))
 # -
 
-splits = get_avatar_using_batch(
-    reference_df=ref,
-    splits=splits,
-    parameters={"k": 20, "imputation": ImputationParameters(method="mean")},
-)
-splits
-
-client.jobs.find_all_jobs_by_user(nb_days=1)
+# ## Launch batch avatarization
+#
 
 # +
-privacy_results = get_privacy_metrics_with_batch(
-    batch_job=splits,
-    parameters={
-        "closest_rate_percentage_threshold": 0.3,
-        "closest_rate_ratio_threshold": 0.3,
-        "known_variables": [
-            "age",
-            "workclass",
-        ],
-        "target": "income",
-        "imputation": ImputationParameters(method="mean"),
-        "seed": 42,
-    },
+dataset_ref_id, dataset_splited_ids, order = upload_batch_and_get_order(
+    training, splits, client=client
 )
 
-privacy_results
+
+batch_job = client.jobs.create_avatarization_batch_job(
+    AvatarizationBatchJobCreate(
+        parameters=AvatarizationBatchParameters(
+            training_dataset_id=dataset_ref_id,
+            dataset_ids=dataset_splited_ids,
+            k=20,
+            imputation=ImputationParameters(method=ImputeMethod.mean),
+        )
+    )
+)
+batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=10)
 # -
 
+batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=10000)
+batch_job
+
+# ## Launch privacy metric per batch
+
+# +
+privacy_job_ref = client.jobs.create_privacy_metrics_batch_job(
+    PrivacyMetricsBatchJobCreate(
+        parameters=PrivacyMetricsBatchParameters(
+            avatarization_batch_job_id=batch_job.id,
+            common_parameters=PrivacyMetricsBaseParameters(
+                imputation=ImputationParameters(method=ImputeMethod.mean)
+            ),
+        ),
+    )
+)
 privacy_job = client.jobs.get_privacy_metrics_batch_job(
-    "2aa81d1a-e2b3-4221-b930-4b64723e1976", timeout=100000
+    privacy_job_ref.id, timeout=100000
 )
+
+print("Mean metrics")
+# print(privacy_job.result.mean_metrics)
+
+print("Worst metrics")
+print(privacy_job.result.worst_metrics)
+# -
+
+# ## Launch signal metrics per batch
+#
 
 # +
-signal_results = get_signal_metrics_with_batch(
-    batch_job=splits,
+signal_job_ref = client.jobs.create_signal_metrics_batch_job(
+    SignalMetricsBatchJobCreate(
+        parameters=SignalMetricsBatchParameters(
+            avatarization_batch_job_id=batch_job.id,
+            common_parameters=SignalMetricsBaseParameters(),
+        ),
+    )
+)
+signal_job = client.jobs.get_signal_metrics_batch_job(signal_job_ref.id)
+
+print("Mean metrics")
+print(signal_job.result.mean_metrics)
+# -
+
+# ## Built the anonymized dataset
+#
+#
+
+# ### Get the shuflle avatar dataframe
+
+avatars = download_avatar_dataset_from_batch_result(batch_job.result, client=client)
+avatars
+
+# ###  Get the sensitive unshuffle avatar dataframe
+
+sensitive_avatars = download_sensitive_unshuffled_avatar_from_batch(
+    batch_job.result, order=order, client=client
 )
 
-signal_results
-# -
+sensitive_avatars
