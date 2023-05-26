@@ -1176,22 +1176,55 @@ class Pipelines:
 def upload_batch_and_get_order(
     training: pd.DataFrame, splits: pd.DataFrame, client: "ApiClient"
 ) -> Tuple[UUID, List[UUID], Dict[UUID, pd.Index]]:
-    dataset_ref = client.pandas_integration.upload_dataframe(training, timeout=10)
+    """Upload batches to the server
+
+    Arguments
+    ---------
+        training:
+            Dataframe used to train the anonymization model. This dataframe should contain all modalities of the categorical variables.
+        splits:
+            All other batches
+        client:
+            Api client
+
+    Returns
+    -------
+        training_dataset_id:
+            The dataset id of the training dataset
+        datasets_splited_id:
+            The dataset id of all other batch
+        batch_order:
+            The index order for each dataset batch
+    """
+    training_dataset = client.pandas_integration.upload_dataframe(training, timeout=10)
 
     datasets_splited_id = [
         client.pandas_integration.upload_dataframe(split, timeout=10).id
         for split in splits
     ]
-    batch_order = {dataset_ref.id: training.index}
+    batch_order = {training_dataset.id: training.index}
     for dataset, dataframe in zip(datasets_splited_id, splits):
         batch_order[dataset] = dataframe.index
 
-    return dataset_ref.id, datasets_splited_id, batch_order
+    return training_dataset.id, datasets_splited_id, batch_order
 
 
 def download_avatar_dataset_from_batch_result(
     avatarization_batch_result: AvatarizationBatchResult, client: "ApiClient"
 ) -> pd.DataFrame:
+    """Download shuffled avatar from batch result.
+
+    Arguments
+    ---------
+        avatarization_batch_result:
+            Result of the batch avatarization
+        client:
+            Api client
+
+    Returns
+    -------
+        the concatenate shuffle avatar dataframe
+    """
     training_df = client.pandas_integration.download_dataframe(
         str(avatarization_batch_result.training_result.avatars_dataset.id)
     )
@@ -1209,6 +1242,22 @@ def download_sensitive_unshuffled_avatar_from_batch(
     order: Dict[UUID, pd.Index],
     client: "ApiClient",
 ) -> pd.DataFrame:
+    """Download sensitive avatar from batch result.
+
+    Arguments
+    ---------
+        avatarization_batch_result:
+            Result of the batch avatarization
+        order:
+            index order for each dataset batch
+        client:
+            Api client
+
+    Returns
+    -------
+        concatenated:
+            the concatenate avatar dataframe with the row order of the original dataframe
+    """
     avatar_training_id = (
         avatarization_batch_result.training_result.sensitive_unshuffled_avatars_datasets.id
     )
