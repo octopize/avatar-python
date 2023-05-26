@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.5-8fcf850f30707eacf1153f95237b4aa01252f4db
+# API Version : 0.5.5-26eca10c32291242b40aedc27c73c31ad9ca7326
 
 
 import itertools
@@ -56,6 +56,7 @@ from avatars.models import (
     Projections,
     Report,
     ReportCreate,
+    ReportFromBatchCreate,
     ReportFromDataCreate,
     ResetPasswordRequest,
     SignalMetrics,
@@ -843,11 +844,28 @@ class Reports:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Report:
-        """Create an anonymization report."""
+        """Create an anonymization report without avatarization job."""
 
         kwargs = {
             "method": "post",
             "url": f"/reports/from_data",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return Report(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def create_report_from_batch(
+        self,
+        request: ReportFromBatchCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report from batch job identifiers."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/reports/from_batch",
             "timeout": timeout,
             "json": request,
         }

@@ -10,9 +10,13 @@
 
 # # Tutorial 7: Batch avatarization
 
-# In this tutorial, we will perform the avatarization on batch of data. This can be useful if you have to much data that can be avatarized in one shot.
+# In this tutorial, we will perform the avatarization on data batches. This can be useful if you have to much data that can be avatarized in one shot.
 #
-# # TODO: add a schema of the process
+#
+# This is the general workflow of the anonymization using batch.
+#
+#
+#  ![image.png](attachment:image.png)
 #
 
 # ## Connection
@@ -93,7 +97,6 @@ client.health.get_health()
 # We will use a subset of the dataset `adult_with_missing`.
 
 df = pd.read_csv("../fixtures/adult_with_missing.csv").iloc[:1000, :]
-print(len(df))
 
 # +
 # create some batches with from the df
@@ -104,8 +107,6 @@ training, splits = get_split_for_batch(
     df,
     row_limit=RowLimit,
 )
-print(training.shape)
-print(len(splits))
 # -
 
 # ## Launch batch avatarization
@@ -149,10 +150,11 @@ privacy_job_ref = client.jobs.create_privacy_metrics_batch_job(
 privacy_job = client.jobs.get_privacy_metrics_batch_job(
     privacy_job_ref.id, timeout=100000
 )
-
+# you can access batch-averaged metrics
 print("Mean metrics")
-# print(privacy_job.result.mean_metrics)
+print(privacy_job.result.mean_metrics)
 
+# you can access to worst metric over all batches
 print("Worst metrics")
 print(privacy_job.result.worst_metrics)
 # -
@@ -182,7 +184,7 @@ print(signal_job.result.mean_metrics)
 # ### Get the shuflle avatar dataframe
 
 avatars = download_avatar_dataset_from_batch_result(batch_job.result, client=client)
-avatars
+avatars.head()
 
 # ###  Get the sensitive unshuffle avatar dataframe
 
@@ -190,4 +192,4 @@ sensitive_avatars = download_sensitive_unshuffled_avatar_from_batch(
     batch_job.result, order=order, client=client
 )
 
-sensitive_avatars
+sensitive_avatars.head()
