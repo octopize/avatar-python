@@ -10,6 +10,7 @@
 
 # # Tutorial 7: Batch avatarization
 
+
 # In this tutorial, we will perform the avatarization on data batches. This can be useful if you have a dataset too large to be avatarized in one shot.
 #
 #

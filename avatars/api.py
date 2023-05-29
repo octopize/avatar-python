@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.5-26eca10c32291242b40aedc27c73c31ad9ca7326
+# API Version : 0.5.5-e898a557a182e9fad0a1c1de702d889e8999ad4d
 
 
 import itertools
@@ -861,7 +861,10 @@ class Reports:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Report:
-        """Create an anonymization report from batch job identifiers."""
+        """Create an anonymization report from batch job identifiers.
+
+        The report will be generated with the worst privacy_metrics and the mean signal_metrics.
+        """
 
         kwargs = {
             "method": "post",
@@ -1195,7 +1198,6 @@ def upload_batch_and_get_order(
     training: pd.DataFrame, splits: pd.DataFrame, client: "ApiClient"
 ) -> Tuple[UUID, List[UUID], Dict[UUID, pd.Index]]:
     """Upload batches to the server
-
     Arguments
     ---------
         training:
@@ -1204,7 +1206,6 @@ def upload_batch_and_get_order(
             All other batches
         client:
             Api client
-
     Returns
     -------
         training_dataset_id:
@@ -1231,14 +1232,12 @@ def download_avatar_dataset_from_batch_result(
     avatarization_batch_result: AvatarizationBatchResult, client: "ApiClient"
 ) -> pd.DataFrame:
     """Download shuffled avatar from batch result.
-
     Arguments
     ---------
         avatarization_batch_result:
             Result of the batch avatarization
         client:
             Api client
-
     Returns
     -------
         the concatenate shuffle avatar dataframe
@@ -1261,7 +1260,6 @@ def download_sensitive_unshuffled_avatar_from_batch(
     client: "ApiClient",
 ) -> pd.DataFrame:
     """Download sensitive avatar from batch result.
-
     Arguments
     ---------
         avatarization_batch_result:
@@ -1270,7 +1268,6 @@ def download_sensitive_unshuffled_avatar_from_batch(
             index order for each dataset batch
         client:
             Api client
-
     Returns
     -------
         concatenated:
