@@ -336,6 +336,13 @@ dataset</a></p>
 <li><p><a class="reference external" href="#as-a-csv-formatted-string">As a csv formatted string</a></p></li>
 </ul>
 </li>
+<li><p><a class="reference external" href="#how-to-handle-a-large-dataset">How to handle a large dataset</a></p>
+<ul>
+<li><p><a class="reference external" href="#handle-large-amount-of-rows">Handle large amount of rows</a></p></li>
+<li><p><a class="reference external" href="#handle-large-amount-of-dimensions">Handle large amount of
+dimensions</a></p></li>
+</ul>
+</li>
 <li><p><a class="reference external" href="#handling-timeouts">Handling timeouts</a></p>
 <ul>
 <li><p><a class="reference external" href="#asynchronous-calls">Asynchronous calls</a></p></li>
@@ -464,8 +471,7 @@ data.</p>
 </section>
 <section id="how-to-launch-an-avatarization-with-metrics">
 <h2>How to launch an avatarization with metrics<a class="headerlink" href="#how-to-launch-an-avatarization-with-metrics" title="Permalink to this heading">#</a></h2>
-<p>You can launch an avatarization with some simple privacy and signal
-metrics.</p>
+<p>You can launch an avatarization with some privacy and signal metrics.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">avatars.models</span> <span class="kn">import</span> <span class="n">AvatarizationJobCreate</span><span class="p">,</span> <span class="n">AvatarizationParameters</span>
 
 <span class="n">job_create</span> <span class="o">=</span> <span class="n">AvatarizationJobCreate</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
@@ -561,7 +567,7 @@ for more details on all privacy metrics.</p>
 <p>See
 <a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/evaluate_quality.ipynb">here</a>
 a jupyter notebook example to evaluate the quality of an avatarization.</p>
-<p>See <a class="reference external" href="https://docs.octopize.io/docs/understanding/Privacy/">our technical
+<p>See <a class="reference external" href="https://docs.octopize.io/docs/understanding/Utility/">our technical
 documentation</a>
 for more details on all signal metrics.</p>
 <section id="how-to-set-the-avatarization-parameters">
@@ -711,6 +717,40 @@ the link between original and avatar individuals cannot be made.</p>
 </div>
 </section>
 </section>
+<section id="how-to-handle-a-large-dataset">
+<h2>How to handle a large dataset<a class="headerlink" href="#how-to-handle-a-large-dataset" title="Permalink to this heading">#</a></h2>
+<p>Due to the server limit, you can be limited by the number of row and the
+number of dimension.</p>
+<section id="handle-large-amount-of-rows">
+<h3>Handle large amount of rows<a class="headerlink" href="#handle-large-amount-of-rows" title="Permalink to this heading">#</a></h3>
+<p>If you want to anonymize a large number of records, you can use the
+batch methodology. Your dataset will be split into batches and each
+batch will be anonymized independently from the others.</p>
+<p>Metrics are computed on each batch of the data. The average of all the
+signal metrics is computed. For the privacy metrics, we return the worst
+and the mean of all metrics. You can also access to all batch metrics
+for specific use cases (such as debugging).</p>
+<p>See this <a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial7-Batch_avatarization.ipynb">notebook
+tutorial</a>
+for more information about batch use.</p>
+</section>
+<section id="handle-large-amount-of-dimensions">
+<h3>Handle large amount of dimensions<a class="headerlink" href="#handle-large-amount-of-dimensions" title="Permalink to this heading">#</a></h3>
+<p>The number of dimensions is the number of continuous variables plus the
+number of modalities in categorical variables. The limit of dimension is
+frequently reached due to a large number of modalities in one/sample of
+categorical variables.</p>
+<p>There are several solutions to bypass this limitation: - Encode the
+categorical variable(s) into a continuous variable (frequency encoding,
+target encoding, …). - Reduce the number of modalities by grouping some
+into more general modalities. - Use the argument
+<code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> (Beta version)</p>
+<p>The parameter <code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> will reduce the dimension of
+the categorical variable(s) by encoding them as vectors. This step is using
+the word embedding cat2vec. This solution could reduce the utility of
+your dataset.</p>
+</section>
+</section>
 <section id="handling-timeouts">
 <h2>Handling timeouts<a class="headerlink" href="#handling-timeouts" title="Permalink to this heading">#</a></h2>
 <section id="asynchronous-calls">
@@ -767,7 +807,7 @@ the timeout like so:</p>
 </div>
 <p>Under normal circumstances, that should be sufficient.</p>
 <p>However, if your file is particularly big, or the server is under high
-load, the call might be interupted and you will be left with a nasty
+load, the call might be interrupted and you will be left with a nasty
 exception, similar to:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">stream</span> <span class="pre">timeout</span></code></p></li>
@@ -888,6 +928,11 @@ to make it safe.</p>
 <li><a class="reference internal" href="#how-to-download-an-avatar-dataset">How to download an avatar dataset</a><ul>
 <li><a class="reference internal" href="#as-a-pandas-dataframe-1">As a pandas dataframe</a></li>
 <li><a class="reference internal" href="#as-a-csv-formatted-string">As a csv formatted string</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to-handle-a-large-dataset">How to handle a large dataset</a><ul>
+<li><a class="reference internal" href="#handle-large-amount-of-rows">Handle large amount of rows</a></li>
+<li><a class="reference internal" href="#handle-large-amount-of-dimensions">Handle large amount of dimensions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#handling-timeouts">Handling timeouts</a><ul>
