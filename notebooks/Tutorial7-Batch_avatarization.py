@@ -10,7 +10,6 @@
 
 # # Tutorial 7: Batch avatarization
 
-
 # In this tutorial, we will perform the avatarization on data batches. This can be useful if you have a dataset too large to be avatarized in one shot.
 #
 #
@@ -21,11 +20,6 @@
 #
 
 # ## Connection
-
-# +
-import warnings
-
-warnings.filterwarnings("ignore")
 
 from avatars.client import ApiClient
 
@@ -72,9 +66,9 @@ from avatars.models import (
 )
 from avatars.models import ImputeMethod
 from avatars.api import (
-    download_sensitive_unshuffled_avatar_from_batch,
+    download_sensitive_unshuffled_avatar_dataframe_from_batch,
     upload_batch_and_get_order,
-    download_avatar_dataset_from_batch_result,
+    download_avatar_dataframe_from_batch,
 )
 
 
@@ -97,16 +91,16 @@ client.health.get_health()
 # ## Load the data
 # We will use a subset of the dataset `adult_with_missing`.
 
-df = pd.read_csv("../fixtures/adult_with_missing.csv").iloc[:1000, :]
+df = pd.read_csv("../fixtures/adult_with_missing.csv").head(1000)
 
 # +
 # create some batches with from the df
 
-RowLimit = 200
+row_limit = 200
 
 training, splits = get_split_for_batch(
     df,
-    row_limit=RowLimit,
+    row_limit=row_limit,
 )
 # -
 
@@ -114,26 +108,26 @@ training, splits = get_split_for_batch(
 #
 
 # +
-dataset_ref_id, dataset_splited_ids, order = upload_batch_and_get_order(
-    training, splits, client=client
+dataset_training_id, dataset_split_ids, order = upload_batch_and_get_order(
+    client=client,
+    training=training,
+    splits=splits,
 )
 
 
 batch_job = client.jobs.create_avatarization_batch_job(
     AvatarizationBatchJobCreate(
         parameters=AvatarizationBatchParameters(
-            training_dataset_id=dataset_ref_id,
-            dataset_ids=dataset_splited_ids,
+            training_dataset_id=dataset_training_id,
+            dataset_ids=dataset_split_ids,
             k=20,
             imputation=ImputationParameters(method=ImputeMethod.mean),
         )
     )
 )
-batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=10)
-# -
-
-batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=10000)
+batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=40)
 batch_job
+# -
 
 # ## Launch privacy metric per batch
 
@@ -155,7 +149,7 @@ privacy_job = client.jobs.get_privacy_metrics_batch_job(
 print("Mean metrics")
 print(privacy_job.result.mean_metrics)
 
-# you can access to worst metric over all batches
+# you can access the worst metrics over all batches
 print("Worst metrics")
 print(privacy_job.result.worst_metrics)
 # -
@@ -164,7 +158,7 @@ print(privacy_job.result.worst_metrics)
 #
 
 # +
-signal_job_ref = client.jobs.create_signal_metrics_batch_job(
+signal_job_training = client.jobs.create_signal_metrics_batch_job(
     SignalMetricsBatchJobCreate(
         parameters=SignalMetricsBatchParameters(
             avatarization_batch_job_id=batch_job.id,
@@ -172,25 +166,27 @@ signal_job_ref = client.jobs.create_signal_metrics_batch_job(
         ),
     )
 )
-signal_job = client.jobs.get_signal_metrics_batch_job(signal_job_ref.id)
+signal_job = client.jobs.get_signal_metrics_batch_job(signal_job_training.id)
 
 print("Mean metrics")
 print(signal_job.result.mean_metrics)
 # -
 
-# ## Built the anonymized dataset
+# ## Build the anonymized dataset
 #
 #
 
-# ### Get the shuflle avatar dataframe
+# ### Get the shuffled avatar dataframe
 
-avatars = download_avatar_dataset_from_batch_result(batch_job.result, client=client)
+avatars = download_avatar_dataframe_from_batch(
+    client=client,
+    avatarization_batch_result=batch_job.result,
+)
 avatars.head()
 
-# ###  Get the sensitive unshuffle avatar dataframe
+# ###  Get the sensitive unshuffled avatar dataframe
 
-sensitive_avatars = download_sensitive_unshuffled_avatar_from_batch(
-    batch_job.result, order=order, client=client
+sensitive_avatars = download_sensitive_unshuffled_avatar_dataframe_from_batch(
+    client=client, avatarization_batch_result=batch_job.result, order=order
 )
-
 sensitive_avatars.head()

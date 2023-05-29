@@ -90,7 +90,7 @@ def get_index_without_duplicated_modalities(df: pd.DataFrame) -> List[int]:
     # We travel all the rows and the columns
     # for each case, we check if we have already have seen this value
     # if the value was never seen, we save it into a dictionary
-    # and save it's index 
+    # and save it's index
     for i in range(df_array.shape[0]):
         should_keep_row = False
         for j in range(df_array.shape[1]):

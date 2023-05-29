@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pandas as pd
 
-from avatars.api import download_sensitive_unshuffled_avatar_from_batch
+from avatars.api import download_sensitive_unshuffled_avatar_dataframe_from_batch
 from avatars.client import ApiClient
 from avatars.models import (
     AvatarizationBatchResult,
@@ -59,8 +59,10 @@ def test_get_sensitive_unshuffled_avatar_from_batch(
     client = Mock()
     # this is mocking the two first calls to the function download_dataframe
     client.pandas_integration.download_dataframe.side_effect = [train, split]
-    result = download_sensitive_unshuffled_avatar_from_batch(
-        batch_result, order=order, client=client
+    result = download_sensitive_unshuffled_avatar_dataframe_from_batch(
+        client=client,
+        avatarization_batch_result=batch_result,
+        order=order,
     )
     expected = pd.DataFrame(
         data={

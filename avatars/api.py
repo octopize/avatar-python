@@ -1195,7 +1195,10 @@ class Pipelines:
 
 
 def upload_batch_and_get_order(
-    training: pd.DataFrame, splits: pd.DataFrame, client: "ApiClient"
+    client: "ApiClient",
+    training: pd.DataFrame,
+    splits: List[pd.DataFrame],
+    timeout: int = 10,
 ) -> Tuple[UUID, List[UUID], Dict[UUID, pd.Index]]:
     """Upload batches to the server
     Arguments
@@ -1210,28 +1213,32 @@ def upload_batch_and_get_order(
     -------
         training_dataset_id:
             The dataset id of the training dataset
-        datasets_splited_id:
-            The dataset id of all other batch
-        batch_order:
-            The index order for each dataset batch
+        datasets_split_ids:
+            The dataset id of all other batches
+        batch_mapping:
+            The index mapping for each dataset batch
     """
-    training_dataset = client.pandas_integration.upload_dataframe(training, timeout=10)
+    training_dataset = client.pandas_integration.upload_dataframe(
+        training, timeout=timeout
+    )
 
-    datasets_splited_id = [
-        client.pandas_integration.upload_dataframe(split, timeout=10).id
+    datasets_split_ids = [
+        client.pandas_integration.upload_dataframe(split, timeout=timeout).id
         for split in splits
     ]
-    batch_order = {training_dataset.id: training.index}
-    for dataset, dataframe in zip(datasets_splited_id, splits):
-        batch_order[dataset] = dataframe.index
+    batch_mapping: Dict[UUID, pd.Index] = {training_dataset.id: training.index}
+    for dataset, dataframe in zip(datasets_split_ids, splits):
+        batch_mapping[dataset] = dataframe.index
 
-    return training_dataset.id, datasets_splited_id, batch_order
+    return training_dataset.id, datasets_split_ids, batch_mapping
 
 
-def download_avatar_dataset_from_batch_result(
-    avatarization_batch_result: AvatarizationBatchResult, client: "ApiClient"
+def download_avatar_dataframe_from_batch(
+    client: "ApiClient",
+    avatarization_batch_result: AvatarizationBatchResult,
+    timeout: int = 10,
 ) -> pd.DataFrame:
-    """Download shuffled avatar from batch result.
+    """Download the shuffled avatar dataframe from batch result.
     Arguments
     ---------
         avatarization_batch_result:
@@ -1240,26 +1247,31 @@ def download_avatar_dataset_from_batch_result(
             Api client
     Returns
     -------
-        the concatenate shuffle avatar dataframe
+        the concatenated shuffled avatar dataframe
     """
     training_df = client.pandas_integration.download_dataframe(
-        str(avatarization_batch_result.training_result.avatars_dataset.id)
+        str(avatarization_batch_result.training_result.avatars_dataset.id),
+        timeout=timeout,
     )
     splits_df = [
         client.pandas_integration.download_dataframe(
-            str(batch_results.avatars_dataset.id)
+            str(batch_results.avatars_dataset.id),
+            timeout=timeout,
         )
         for batch_results in avatarization_batch_result.batch_results
     ]
     return pd.concat([training_df] + splits_df)
 
 
-def download_sensitive_unshuffled_avatar_from_batch(
+def download_sensitive_unshuffled_avatar_dataframe_from_batch(
+    client: "ApiClient",
     avatarization_batch_result: AvatarizationBatchResult,
     order: Dict[UUID, pd.Index],
-    client: "ApiClient",
+    timeout: int = 10,
 ) -> pd.DataFrame:
-    """Download sensitive avatar from batch result.
+    """Download the sensitive unshuffled avatar dataframe from batch result.
+
+    The avatar dataframe is ordered in the original dataframe order.
     Arguments
     ---------
         avatarization_batch_result:
@@ -1271,25 +1283,29 @@ def download_sensitive_unshuffled_avatar_from_batch(
     Returns
     -------
         concatenated:
-            the concatenate avatar dataframe with the row order of the original dataframe
+            the concatenated avatar dataframe with the row order of the original dataframe
     """
     avatar_training_id = (
         avatarization_batch_result.training_result.sensitive_unshuffled_avatars_datasets.id
     )
     original_training_id = avatarization_batch_result.training_result.original_id
-    training_df = client.pandas_integration.download_dataframe(str(avatar_training_id))
+    training_df = client.pandas_integration.download_dataframe(
+        str(avatar_training_id), timeout=timeout
+    )
     training_df.index = order[original_training_id]
 
-    splits_df = []
+    split_dfs = []
     for batch_results in avatarization_batch_result.batch_results:
         avatar_dataset_id = batch_results.sensitive_unshuffled_avatars_datasets.id
         original_dataset_id = batch_results.original_id
 
-        split = client.pandas_integration.download_dataframe(str(avatar_dataset_id))
+        split = client.pandas_integration.download_dataframe(
+            str(avatar_dataset_id), timeout=timeout
+        )
         split.index = order[original_dataset_id]
-        splits_df.append(split)
+        split_dfs.append(split)
 
-    concatenated = pd.concat([training_df] + splits_df).sort_index()
+    concatenated = pd.concat([training_df] + split_dfs).sort_index()
     return concatenated
 
 
