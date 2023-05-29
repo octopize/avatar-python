@@ -497,7 +497,7 @@ frequently reached due to a large number of modalities in one/sample of
 categorical variables.
 
 There are several solutions to bypass this limitation: - Encode the
-categorical variable into a continuous variable (frequency encoding,
+categorical variable(s) into a continuous variable (frequency encoding,
 target encoding, …). - Reduce the number of modalities by grouping some
 into more general modalities. - Use the argument
 ``use_categorical_reduction`` (Beta version)
