@@ -503,7 +503,7 @@ into more general modalities. - Use the argument
 ``use_categorical_reduction`` (Beta version)
 
 The parameter ``use_categorical_reduction`` will reduce the dimension of
-the categorical variable by encoding them as vectors. This step is using
+the categorical variable(s) by encoding them as vectors. This step is using
 the word embedding cat2vec. This solution could reduce the utility of
 your dataset.
 
