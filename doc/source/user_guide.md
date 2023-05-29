@@ -416,7 +416,7 @@ See this [notebook tutorial](https://github.com/octopize/avatar-python/blob/main
 ### Handle large amount of dimensions
 
 The number of dimensions is the number of continuous variables plus the number of modalities in categorical variables.
-The limit of dimension is frequently reached due to a large number of modalities in one/sample of categorical variables.
+The limit of dimension is frequently reached due to a large number of modalities in one/sample of categorical variables (high cardinality variables).
 
 There are several solutions to bypass this limitation:
 - Encode the categorical variable into a continuous variable (frequency encoding, target encoding, ...).
