@@ -18,7 +18,7 @@ def get_split_for_batch(
         df:
             dataframe to split into batch
         row_limit:
-            maximum number of row by batch, this parameter determine the number of batch that will be created
+            maximum number of rows per batch, this parameter determines the number of batches that will be created
 
     Keyword Arguments
     -----------------
@@ -29,8 +29,8 @@ def get_split_for_batch(
     -------
         training:
             the training batch that will be used to fit the anonymization
-        training:
-            splits: all other batches
+        splits:
+            all other batches
 
     Examples
     --------
@@ -83,16 +83,22 @@ def get_split_for_batch(
 
 
 def get_index_without_duplicated_modalities(df: pd.DataFrame) -> List[int]:
-    values: Dict[str, Dict[str, bool]] = {col: {} for col in df.columns}
-    df_array = np.array(df)
+    """Get a small number of indexes to subset a dataframe by selecting all modalities."""
+    already_seen: Dict[str, Dict[str, bool]] = {col: {} for col in df.columns}
+    df_array = df.to_numpy()
     index_to_keep = []
+    # We travel all the rows and the columns
+    # for each case, we check if we have already have seen this value
+    # if the value was never seen, we save it into a dictionary
+    # and save it's index 
     for i in range(df_array.shape[0]):
         should_keep_row = False
         for j in range(df_array.shape[1]):
+            column = df.columns[j]
             try:
-                values[df.columns[j]][df_array[i, j]]
+                already_seen[column][df_array[i, j]]
             except KeyError:
-                values[df.columns[j]][df_array[i, j]] = True
+                already_seen[column][df_array[i, j]] = True
                 should_keep_row = True
         if should_keep_row:
             index_to_keep.append(i)
