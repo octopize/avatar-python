@@ -1198,17 +1198,17 @@ def upload_batch_and_get_order(
     client: "ApiClient",
     training: pd.DataFrame,
     splits: List[pd.DataFrame],
-    timeout: int = 10,
+    timeout: int = DEFAULT_TIMEOUT,
 ) -> Tuple[UUID, List[UUID], Dict[UUID, pd.Index]]:
     """Upload batches to the server
     Arguments
     ---------
+        client:
+            Api client
         training:
             Dataframe used to train the anonymization model. This dataframe should contain all modalities of the categorical variables.
         splits:
             All other batches
-        client:
-            Api client
     Returns
     -------
         training_dataset_id:
@@ -1236,15 +1236,15 @@ def upload_batch_and_get_order(
 def download_avatar_dataframe_from_batch(
     client: "ApiClient",
     avatarization_batch_result: AvatarizationBatchResult,
-    timeout: int = 10,
+    timeout: int = DEFAULT_TIMEOUT,
 ) -> pd.DataFrame:
     """Download the shuffled avatar dataframe from batch result.
     Arguments
     ---------
-        avatarization_batch_result:
-            Result of the batch avatarization
         client:
             Api client
+        avatarization_batch_result:
+            Result of the batch avatarization
     Returns
     -------
         the concatenated shuffled avatar dataframe
@@ -1267,19 +1267,19 @@ def download_sensitive_unshuffled_avatar_dataframe_from_batch(
     client: "ApiClient",
     avatarization_batch_result: AvatarizationBatchResult,
     order: Dict[UUID, pd.Index],
-    timeout: int = 10,
+    timeout: int = DEFAULT_TIMEOUT,
 ) -> pd.DataFrame:
     """Download the sensitive unshuffled avatar dataframe from batch result.
 
     The avatar dataframe is ordered in the original dataframe order.
     Arguments
     ---------
+        client:
+            Api client
         avatarization_batch_result:
             Result of the batch avatarization
         order:
             index order for each dataset batch
-        client:
-            Api client
     Returns
     -------
         concatenated:

@@ -65,8 +65,8 @@ def get_split_for_batch(
     first_occurrence = df.loc[index, :]
     if len(first_occurrence) > row_limit * 0.5:
         raise ValueError(
-            "You have too much variability in your categorical data."
-            "You can increase your `row_limit`, reduce your categorical variability, or built "
+            "You have too much variability in your categorical data. "
+            "You can increase your `row_limit`, reduce your categorical variability, or build "
             "your own batch pipeline."
         )
 

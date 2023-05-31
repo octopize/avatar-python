@@ -2,6 +2,7 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pandas as pd
+import pytest
 
 from avatars.api import download_sensitive_unshuffled_avatar_dataframe_from_batch
 from avatars.client import ApiClient
@@ -11,18 +12,11 @@ from avatars.models import (
     Dataset,
 )
 
-batch_result = AvatarizationBatchResult(
-    training_result=AvatarizationPerBatchResult(
-        avatars_dataset=Dataset(
-            id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
-        ),
-        sensitive_unshuffled_avatars_datasets=Dataset(
-            id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
-        ),
-        original_id=uuid4(),
-    ),
-    batch_results=[
-        AvatarizationPerBatchResult(
+
+@pytest.fixture
+def batch_result() -> AvatarizationBatchResult:
+    batch = AvatarizationBatchResult(
+        training_result=AvatarizationPerBatchResult(
             avatars_dataset=Dataset(
                 id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
             ),
@@ -30,13 +24,24 @@ batch_result = AvatarizationBatchResult(
                 id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
             ),
             original_id=uuid4(),
-        )
-    ],
-)
+        ),
+        batch_results=[
+            AvatarizationPerBatchResult(
+                avatars_dataset=Dataset(
+                    id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
+                ),
+                sensitive_unshuffled_avatars_datasets=Dataset(
+                    id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
+                ),
+                original_id=uuid4(),
+            )
+        ],
+    )
+    return batch
 
 
 def test_get_sensitive_unshuffled_avatar_from_batch(
-    batch_result: AvatarizationBatchResult = batch_result,
+    batch_result: AvatarizationBatchResult,
 ) -> None:
     train = pd.DataFrame(
         data={

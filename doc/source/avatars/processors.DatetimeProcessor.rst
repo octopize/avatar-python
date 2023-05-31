@@ -5,4 +5,4 @@ processors.DatetimeProcessor
 ============================
 
 .. autoclass:: processors.DatetimeProcessor
-   :members:@
+   :members:
