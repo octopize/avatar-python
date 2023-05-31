@@ -41,7 +41,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx_multiversion",
     "sphinx.ext.autosummary",
-    "sphinxcontrib.autodoc_pydantic"
+    "sphinxcontrib.autodoc_pydantic",
 ]
 
 autodoc_default_options = {

@@ -68,7 +68,6 @@ class InterRecordRangeDifferenceProcessor:
     5   2            1           10               5.0
 
     The postprocess allows you to transform some preprocessed data back into its original format
-
     >>> preprocessed_df = pd.DataFrame(
     ...     {
     ...         "id": [1, 2, 1, 1, 2, 2],

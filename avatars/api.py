@@ -1,18 +1,32 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.4-6f36d9019b76fe2b40fc6ed14f5537131e98919c
+# API Version : 0.5.5-e898a557a182e9fad0a1c1de702d889e8999ad4d
 
 
 import itertools
 import logging
 import time
 from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
+from uuid import UUID
 
 import numpy as np
 import pandas as pd
 from pydantic import BaseModel
 
 from avatars.models import (
+    AvatarizationBatchJob,
+    AvatarizationBatchJobCreate,
+    AvatarizationBatchResult,
     AvatarizationJob,
     AvatarizationJobCreate,
     AvatarizationPipelineCreate,
@@ -21,6 +35,7 @@ from avatars.models import (
     ColumnDetail,
     ColumnType,
     CompatibilityResponse,
+    Contributions,
     CreateDataset,
     CreateUser,
     Dataset,
@@ -32,6 +47,8 @@ from avatars.models import (
     LoginResponse,
     PatchDataset,
     PrivacyMetrics,
+    PrivacyMetricsBatchJob,
+    PrivacyMetricsBatchJobCreate,
     PrivacyMetricsJob,
     PrivacyMetricsJobCreate,
     PrivacyMetricsParameters,
@@ -39,9 +56,12 @@ from avatars.models import (
     Projections,
     Report,
     ReportCreate,
+    ReportFromBatchCreate,
     ReportFromDataCreate,
     ResetPasswordRequest,
     SignalMetrics,
+    SignalMetricsBatchJob,
+    SignalMetricsBatchJobCreate,
     SignalMetricsJob,
     SignalMetricsJobCreate,
     SignalMetricsParameters,
@@ -484,27 +504,22 @@ class Jobs:
 
         return AvatarizationJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
-    def get_avatarization_job(
+    def create_avatarization_batch_job(
         self,
-        id: str,
+        request: AvatarizationBatchJobCreate,
         *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> AvatarizationJob:
-        """Get an avatarization job."""
+    ) -> AvatarizationBatchJob:
+        """Create an avatarization batch job."""
 
         kwargs = {
-            "method": "get",
-            "url": f"/jobs/avatarization/{id}",
+            "method": "post",
+            "url": f"/jobs/avatarization_batch",
             "timeout": timeout,
+            "json": request,
         }
 
-        return get_job(
-            client=self.client,
-            response_cls=AvatarizationJob,
-            per_request_timeout=per_request_timeout,
-            **kwargs,  # type: ignore
-        )
+        return AvatarizationBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
     def create_signal_metrics_job(
         self,
@@ -540,6 +555,84 @@ class Jobs:
 
         return PrivacyMetricsJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
+    def create_privacy_metrics_batch_job(
+        self,
+        request: PrivacyMetricsBatchJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsBatchJob:
+        """Create a privacy metrics batch job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/privacy_batch",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return PrivacyMetricsBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def create_signal_metrics_batch_job(
+        self,
+        request: SignalMetricsBatchJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsBatchJob:
+        """Create a signal metrics batch job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/signal_batch",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return SignalMetricsBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def get_avatarization_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationJob:
+        """Get an avatarization job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/avatarization/{id}",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_avatarization_batch_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationBatchJob:
+        """Get an avatarization batch job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/avatarization_batch/{id}",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationBatchJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
     def get_signal_metrics(
         self,
         id: str,
@@ -562,6 +655,28 @@ class Jobs:
             **kwargs,  # type: ignore
         )
 
+    def get_signal_metrics_batch_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsBatchJob:
+        """Get a signal metrics batch job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/signal_batch",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=SignalMetricsBatchJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
     def get_privacy_metrics(
         self,
         id: str,
@@ -580,6 +695,28 @@ class Jobs:
         return get_job(
             client=self.client,
             response_cls=PrivacyMetricsJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_privacy_metrics_batch_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsBatchJob:
+        """Get a privacy metrics batch job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/privacy_batch",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=PrivacyMetricsBatchJob,
             per_request_timeout=per_request_timeout,
             **kwargs,  # type: ignore
         )
@@ -632,7 +769,7 @@ class Metrics:
         dataset_id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
+    ) -> Contributions:
         """Get the contributions of the dataset variables within the fitted space."""
 
         kwargs = {
@@ -645,7 +782,7 @@ class Metrics:
             ),
         }
 
-        return self.client.request(**kwargs)  # type: ignore[arg-type]
+        return Contributions(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
     def get_explained_variance(
         self,
@@ -707,11 +844,31 @@ class Reports:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Report:
-        """Create an anonymization report."""
+        """Create an anonymization report without avatarization job."""
 
         kwargs = {
             "method": "post",
             "url": f"/reports/from_data",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return Report(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def create_report_from_batch(
+        self,
+        request: ReportFromBatchCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report from batch job identifiers.
+
+        The report will be generated with the worst privacy_metrics and the mean signal_metrics.
+        """
+
+        kwargs = {
+            "method": "post",
+            "url": f"/reports/from_batch",
             "timeout": timeout,
             "json": request,
         }
@@ -1035,6 +1192,121 @@ class Pipelines:
             signal_job_id=signal_job.id,
             privacy_job_id=privacy_job.id,
         )
+
+
+def upload_batch_and_get_order(
+    client: "ApiClient",
+    training: pd.DataFrame,
+    splits: List[pd.DataFrame],
+    timeout: int = DEFAULT_TIMEOUT,
+) -> Tuple[UUID, List[UUID], Dict[UUID, pd.Index]]:
+    """Upload batches to the server
+    Arguments
+    ---------
+        client:
+            Api client
+        training:
+            Dataframe used to train the anonymization model. This dataframe should contain all modalities of the categorical variables.
+        splits:
+            All other batches
+    Returns
+    -------
+        training_dataset_id:
+            The dataset id of the training dataset
+        datasets_split_ids:
+            The dataset id of all other batches
+        batch_mapping:
+            The index mapping for each dataset batch
+    """
+    training_dataset = client.pandas_integration.upload_dataframe(
+        training, timeout=timeout
+    )
+
+    datasets_split_ids = [
+        client.pandas_integration.upload_dataframe(split, timeout=timeout).id
+        for split in splits
+    ]
+    batch_mapping: Dict[UUID, pd.Index] = {training_dataset.id: training.index}
+    for dataset, dataframe in zip(datasets_split_ids, splits):
+        batch_mapping[dataset] = dataframe.index
+
+    return training_dataset.id, datasets_split_ids, batch_mapping
+
+
+def download_avatar_dataframe_from_batch(
+    client: "ApiClient",
+    avatarization_batch_result: AvatarizationBatchResult,
+    timeout: int = DEFAULT_TIMEOUT,
+) -> pd.DataFrame:
+    """Download the shuffled avatar dataframe from batch result.
+    Arguments
+    ---------
+        client:
+            Api client
+        avatarization_batch_result:
+            Result of the batch avatarization
+    Returns
+    -------
+        the concatenated shuffled avatar dataframe
+    """
+    training_df = client.pandas_integration.download_dataframe(
+        str(avatarization_batch_result.training_result.avatars_dataset.id),
+        timeout=timeout,
+    )
+    splits_df = [
+        client.pandas_integration.download_dataframe(
+            str(batch_results.avatars_dataset.id),
+            timeout=timeout,
+        )
+        for batch_results in avatarization_batch_result.batch_results
+    ]
+    return pd.concat([training_df] + splits_df)
+
+
+def download_sensitive_unshuffled_avatar_dataframe_from_batch(
+    client: "ApiClient",
+    avatarization_batch_result: AvatarizationBatchResult,
+    order: Dict[UUID, pd.Index],
+    timeout: int = DEFAULT_TIMEOUT,
+) -> pd.DataFrame:
+    """Download the sensitive unshuffled avatar dataframe from batch result.
+
+    The avatar dataframe is ordered in the original dataframe order.
+    Arguments
+    ---------
+        client:
+            Api client
+        avatarization_batch_result:
+            Result of the batch avatarization
+        order:
+            index order for each dataset batch
+    Returns
+    -------
+        concatenated:
+            the concatenated avatar dataframe with the row order of the original dataframe
+    """
+    avatar_training_id = (
+        avatarization_batch_result.training_result.sensitive_unshuffled_avatars_datasets.id
+    )
+    original_training_id = avatarization_batch_result.training_result.original_id
+    training_df = client.pandas_integration.download_dataframe(
+        str(avatar_training_id), timeout=timeout
+    )
+    training_df.index = order[original_training_id]
+
+    split_dfs = []
+    for batch_results in avatarization_batch_result.batch_results:
+        avatar_dataset_id = batch_results.sensitive_unshuffled_avatars_datasets.id
+        original_dataset_id = batch_results.original_id
+
+        split = client.pandas_integration.download_dataframe(
+            str(avatar_dataset_id), timeout=timeout
+        )
+        split.index = order[original_dataset_id]
+        split_dfs.append(split)
+
+    concatenated = pd.concat([training_df] + split_dfs).sort_index()
+    return concatenated
 
 
 # This file has been generated - DO NOT MODIFY

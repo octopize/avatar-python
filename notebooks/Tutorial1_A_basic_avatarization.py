@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.2
+#       jupytext_version: 1.14.5
 # ---
 
 # # Tutorial 1: A basic avatarization
@@ -155,8 +155,8 @@ avatarization_job = client.jobs.create_avatarization_job(
 
 
 avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=10)
-print(job.status)
-print(job.result)  # there is no metrics
+print(avatarization_job.status)
+print(avatarization_job.result)  # there is no metrics
 
 # +
 from avatars.models import PrivacyMetricsJobCreate, PrivacyMetricsParameters
