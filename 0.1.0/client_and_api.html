@@ -451,9 +451,9 @@ If the job is done, do nothing.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="avatars.api.Jobs.get_avatarization_job">
-<span class="sig-name descname"><span class="pre">get_avatarization_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.AvatarizationJob" title="avatars.models.AvatarizationJob"><span class="pre">AvatarizationJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_avatarization_job" title="Permalink to this definition">#</a></dt>
-<dd><p>Get an avatarization job.</p>
+<dt class="sig sig-object py" id="avatars.api.Jobs.create_avatarization_batch_job">
+<span class="sig-name descname"><span class="pre">create_avatarization_batch_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#avatars.models.AvatarizationBatchJobCreate" title="avatars.models.AvatarizationBatchJobCreate"><span class="pre">AvatarizationBatchJobCreate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.AvatarizationBatchJob" title="avatars.models.AvatarizationBatchJob"><span class="pre">AvatarizationBatchJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.create_avatarization_batch_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Create an avatarization batch job.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -469,15 +469,51 @@ If the job is done, do nothing.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.create_privacy_metrics_batch_job">
+<span class="sig-name descname"><span class="pre">create_privacy_metrics_batch_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#avatars.models.PrivacyMetricsBatchJobCreate" title="avatars.models.PrivacyMetricsBatchJobCreate"><span class="pre">PrivacyMetricsBatchJobCreate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.PrivacyMetricsBatchJob" title="avatars.models.PrivacyMetricsBatchJob"><span class="pre">PrivacyMetricsBatchJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.create_privacy_metrics_batch_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a privacy metrics batch job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.create_signal_metrics_batch_job">
+<span class="sig-name descname"><span class="pre">create_signal_metrics_batch_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#avatars.models.SignalMetricsBatchJobCreate" title="avatars.models.SignalMetricsBatchJobCreate"><span class="pre">SignalMetricsBatchJobCreate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.SignalMetricsBatchJob" title="avatars.models.SignalMetricsBatchJob"><span class="pre">SignalMetricsBatchJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.create_signal_metrics_batch_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Create a signal metrics batch job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.get_avatarization_job">
+<span class="sig-name descname"><span class="pre">get_avatarization_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.AvatarizationJob" title="avatars.models.AvatarizationJob"><span class="pre">AvatarizationJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_avatarization_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Get an avatarization job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.get_avatarization_batch_job">
+<span class="sig-name descname"><span class="pre">get_avatarization_batch_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.AvatarizationBatchJob" title="avatars.models.AvatarizationBatchJob"><span class="pre">AvatarizationBatchJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_avatarization_batch_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Get an avatarization batch job.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Jobs.get_signal_metrics">
 <span class="sig-name descname"><span class="pre">get_signal_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.SignalMetricsJob" title="avatars.models.SignalMetricsJob"><span class="pre">SignalMetricsJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_signal_metrics" title="Permalink to this definition">#</a></dt>
 <dd><p>Get a signal metrics job.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.get_signal_metrics_batch_job">
+<span class="sig-name descname"><span class="pre">get_signal_metrics_batch_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.SignalMetricsBatchJob" title="avatars.models.SignalMetricsBatchJob"><span class="pre">SignalMetricsBatchJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_signal_metrics_batch_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Get a signal metrics batch job.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Jobs.get_privacy_metrics">
 <span class="sig-name descname"><span class="pre">get_privacy_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.PrivacyMetricsJob" title="avatars.models.PrivacyMetricsJob"><span class="pre">PrivacyMetricsJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_privacy_metrics" title="Permalink to this definition">#</a></dt>
 <dd><p>Get a privacy metrics job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Jobs.get_privacy_metrics_batch_job">
+<span class="sig-name descname"><span class="pre">get_privacy_metrics_batch_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_request_timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.PrivacyMetricsBatchJob" title="avatars.models.PrivacyMetricsBatchJob"><span class="pre">PrivacyMetricsBatchJob</span></a></span></span><a class="headerlink" href="#avatars.api.Jobs.get_privacy_metrics_batch_job" title="Permalink to this definition">#</a></dt>
+<dd><p>Get a privacy metrics batch job.</p>
 </dd></dl>
 
 </dd></dl>
@@ -499,7 +535,7 @@ If the job is done, do nothing.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Metrics.get_variable_contributions">
-<span class="sig-name descname"><span class="pre">get_variable_contributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="headerlink" href="#avatars.api.Metrics.get_variable_contributions" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_variable_contributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Contributions" title="avatars.models.Contributions"><span class="pre">Contributions</span></a></span></span><a class="headerlink" href="#avatars.api.Metrics.get_variable_contributions" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the contributions of the dataset variables within the fitted space.</p>
 </dd></dl>
 
@@ -529,7 +565,14 @@ If the job is done, do nothing.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Reports.create_report_from_data">
 <span class="sig-name descname"><span class="pre">create_report_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#avatars.models.ReportFromDataCreate" title="avatars.models.ReportFromDataCreate"><span class="pre">ReportFromDataCreate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Report" title="avatars.models.Report"><span class="pre">Report</span></a></span></span><a class="headerlink" href="#avatars.api.Reports.create_report_from_data" title="Permalink to this definition">#</a></dt>
-<dd><p>Create an anonymization report.</p>
+<dd><p>Create an anonymization report without avatarization job.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="avatars.api.Reports.create_report_from_batch">
+<span class="sig-name descname"><span class="pre">create_report_from_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="models.html#avatars.models.ReportFromBatchCreate" title="avatars.models.ReportFromBatchCreate"><span class="pre">ReportFromBatchCreate</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Report" title="avatars.models.Report"><span class="pre">Report</span></a></span></span><a class="headerlink" href="#avatars.api.Reports.create_report_from_batch" title="Permalink to this definition">#</a></dt>
+<dd><p>Create an anonymization report from batch job identifiers.</p>
+<p>The report will be generated with the worst privacy_metrics and the mean signal_metrics.</p>
 </dd></dl>
 
 </dd></dl>
@@ -601,6 +644,56 @@ If the job is done, do nothing.</p>
 <dd><p>Create a Pipeline of avatarization with processors.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="avatars.api.upload_batch_and_get_order">
+<span class="sig-prename descclassname"><span class="pre">avatars.api.</span></span><span class="sig-name descname"><span class="pre">upload_batch_and_get_order</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">UUID</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">UUID</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">UUID</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Index</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#avatars.api.upload_batch_and_get_order" title="Permalink to this definition">#</a></dt>
+<dd><p>Upload batches to the server
+:param client: Api client
+:param training: Dataframe used to train the anonymization model. This dataframe should contain all modalities of the categorical variables.
+:param splits: All other batches</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><em>training_dataset_id</em> – The dataset id of the training dataset</p></li>
+<li><p><em>datasets_split_ids</em> – The dataset id of all other batches</p></li>
+<li><p><em>batch_mapping</em> – The index mapping for each dataset batch</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="avatars.api.download_avatar_dataframe_from_batch">
+<span class="sig-prename descclassname"><span class="pre">avatars.api.</span></span><span class="sig-name descname"><span class="pre">download_avatar_dataframe_from_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.api.download_avatar_dataframe_from_batch" title="Permalink to this definition">#</a></dt>
+<dd><p>Download the shuffled avatar dataframe from batch result.
+:param client: Api client
+:param avatarization_batch_result: Result of the batch avatarization</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the concatenated shuffled avatar dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="avatars.api.download_sensitive_unshuffled_avatar_dataframe_from_batch">
+<span class="sig-prename descclassname"><span class="pre">avatars.api.</span></span><span class="sig-name descname"><span class="pre">download_sensitive_unshuffled_avatar_dataframe_from_batch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#avatars.api.download_sensitive_unshuffled_avatar_dataframe_from_batch" title="Permalink to this definition">#</a></dt>
+<dd><p>Download the sensitive unshuffled avatar dataframe from batch result.</p>
+<p>The avatar dataframe is ordered in the original dataframe order.
+:param client: Api client
+:param avatarization_batch_result: Result of the batch avatarization
+:param order: index order for each dataset batch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the concatenated avatar dataframe with the row order of the original dataframe</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>concatenated</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -701,11 +794,17 @@ If the job is done, do nothing.</p>
 <li><a class="reference internal" href="#avatars.api.Jobs.create_full_avatarization_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_full_avatarization_job()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Jobs.cancel_job"><code class="docutils literal notranslate"><span class="pre">Jobs.cancel_job()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Jobs.create_avatarization_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_avatarization_job()</span></code></a></li>
-<li><a class="reference internal" href="#avatars.api.Jobs.get_avatarization_job"><code class="docutils literal notranslate"><span class="pre">Jobs.get_avatarization_job()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.create_avatarization_batch_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_avatarization_batch_job()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Jobs.create_signal_metrics_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_signal_metrics_job()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Jobs.create_privacy_metrics_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_privacy_metrics_job()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.create_privacy_metrics_batch_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_privacy_metrics_batch_job()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.create_signal_metrics_batch_job"><code class="docutils literal notranslate"><span class="pre">Jobs.create_signal_metrics_batch_job()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.get_avatarization_job"><code class="docutils literal notranslate"><span class="pre">Jobs.get_avatarization_job()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.get_avatarization_batch_job"><code class="docutils literal notranslate"><span class="pre">Jobs.get_avatarization_batch_job()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Jobs.get_signal_metrics"><code class="docutils literal notranslate"><span class="pre">Jobs.get_signal_metrics()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.get_signal_metrics_batch_job"><code class="docutils literal notranslate"><span class="pre">Jobs.get_signal_metrics_batch_job()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Jobs.get_privacy_metrics"><code class="docutils literal notranslate"><span class="pre">Jobs.get_privacy_metrics()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Jobs.get_privacy_metrics_batch_job"><code class="docutils literal notranslate"><span class="pre">Jobs.get_privacy_metrics_batch_job()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.api.Metrics"><code class="docutils literal notranslate"><span class="pre">Metrics</span></code></a><ul>
@@ -719,6 +818,7 @@ If the job is done, do nothing.</p>
 <li><a class="reference internal" href="#avatars.api.Reports.create_report"><code class="docutils literal notranslate"><span class="pre">Reports.create_report()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Reports.download_report"><code class="docutils literal notranslate"><span class="pre">Reports.download_report()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Reports.create_report_from_data"><code class="docutils literal notranslate"><span class="pre">Reports.create_report_from_data()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.Reports.create_report_from_batch"><code class="docutils literal notranslate"><span class="pre">Reports.create_report_from_batch()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.api.Stats"><code class="docutils literal notranslate"><span class="pre">Stats</span></code></a><ul>
@@ -741,6 +841,9 @@ If the job is done, do nothing.</p>
 <li><a class="reference internal" href="#avatars.api.Pipelines.avatarization_pipeline_with_processors"><code class="docutils literal notranslate"><span class="pre">Pipelines.avatarization_pipeline_with_processors()</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.api.upload_batch_and_get_order"><code class="docutils literal notranslate"><span class="pre">upload_batch_and_get_order()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.download_avatar_dataframe_from_batch"><code class="docutils literal notranslate"><span class="pre">download_avatar_dataframe_from_batch()</span></code></a></li>
+<li><a class="reference internal" href="#avatars.api.download_sensitive_unshuffled_avatar_dataframe_from_batch"><code class="docutils literal notranslate"><span class="pre">download_sensitive_unshuffled_avatar_dataframe_from_batch()</span></code></a></li>
 </ul>
 </li>
 </ul>
