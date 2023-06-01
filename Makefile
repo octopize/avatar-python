@@ -95,8 +95,8 @@ pip-requirements: ## Export the packages for the tutorials as a pip requirements
 
 pip-install-tutorial: pip-requirements ## Install the dependecies of the tutorial via pip
 	python3.9 -m venv $(VENV_NAME)
-	"$(abspath $(VENV_NAME))/bin/pip3" install -r $(TUTORIAL_REQUIREMENTS)
-	"$(abspath $(VENV_NAME))/bin/pip3" install . ## Installing the avatars package
+	"$(abspath $(VENV_NAME))/bin/python3" -m pip install -r $(TUTORIAL_REQUIREMENTS)
+	"$(abspath $(VENV_NAME))/bin/python3" -m pip install . ## Installing the avatars package
 .PHONY: pip-install-tutorial
 
 
