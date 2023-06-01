@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.5-e898a557a182e9fad0a1c1de702d889e8999ad4d
+# API Version : 0.5.7-7d3854cbc2abe0d4f4e73ebd931e42544dae10ba
 
 
 import itertools
@@ -246,7 +246,6 @@ class Datasets:
         self,
         request: Union[StringIO, BytesIO],
         *,
-        patch: Optional[PatchDataset] = None,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
         """Create a dataset from file upload.
@@ -254,19 +253,10 @@ class Datasets:
         The file should be in CSV format.
         """
 
-        if patch:
-            d = patch.dict()
-            types = [("types", e["type"].value) for e in d["columns"]]
-            labels = [("labels", e["label"]) for e in d["columns"]]
-            params = types + labels
-        else:
-            params = None
-
         kwargs = {
             "method": "post",
             "url": f"/datasets",
             "timeout": timeout,
-            "params": params,
             "file": request,
         }
 
@@ -1001,14 +991,15 @@ class PandasIntegration:
                 buffer, timeout=timeout
             )
         else:
-            patch = PatchDataset(
-                columns=[
-                    ColumnDetail(type=to_common_type(str(e)), label=i)
-                    for i, e in zip(df_types.index, df_types)
-                ]
-            )
-            dataset = self.client.datasets.create_dataset(
-                buffer, patch=patch, timeout=timeout
+            dataset = self.client.datasets.create_dataset(buffer, timeout=timeout)
+            self.client.datasets.patch_dataset(
+                id=str(dataset.id),
+                request=PatchDataset(
+                    columns=[
+                        ColumnDetail(type=to_common_type(str(e)), label=i)
+                        for i, e in zip(df_types.index, df_types)
+                    ]
+                ),
             )
 
         return dataset
