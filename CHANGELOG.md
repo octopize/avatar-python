@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0
+
+- feat: Limit the size of `nb_days` in `find_all_jobs_by_user`
+- feat: implement anonymization, metrics and report generation as a batch
+- feat: apply license check only during anonymization, not during upload
+- fix: Prevent user from uploaded a dataframe with `bool` dtype
+- fix: Correctly handle error on missing job
+- fix: standardize metrics in the anonymization report
+
+### BREAKING CHANGE
+
+- remove `patch` parameter from `create_dataset`
+
 ## 0.3.3
 
 - Add `should_stream` parameter to `{upload,download}_dataframe` and `{create,download}_dataset`.
