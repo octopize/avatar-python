@@ -111,7 +111,7 @@ generate-py:  ## Generate .py files from notebooks
 .PHONY: generate-py
 
 
-test-tutorial: generate-py ## Verify that all tutorials run without errors
+test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run without errors
 	echo "You must install the pip venv first. Run make pip-install-tutorial."
 	SYSTEM=$$(uname -s)
 	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
