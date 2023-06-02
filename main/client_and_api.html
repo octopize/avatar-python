@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Models" href="models.html" /><link rel="prev" title="API reference" href="api_reference.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>Client - avatars 0.3.3 documentation</title>
+        <title>Client - avatars 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.3.3 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.4.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.3.3 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.4.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -187,6 +187,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.4.0/client_and_api.html">0.4.0</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.3.3/client_and_api.html">0.3.3</a>
     </li>
@@ -370,7 +373,7 @@ objects to help you pass in the correct arguments to the methods.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Datasets.create_dataset">
-<span class="sig-name descname"><span class="pre">create_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">StringIO</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">BytesIO</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="models.html#avatars.models.PatchDataset" title="avatars.models.PatchDataset"><span class="pre">PatchDataset</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Dataset" title="avatars.models.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#avatars.api.Datasets.create_dataset" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">create_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">StringIO</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">BytesIO</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Dataset" title="avatars.models.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#avatars.api.Datasets.create_dataset" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a dataset from file upload.</p>
 <p>The file should be in CSV format.</p>
 </dd></dl>

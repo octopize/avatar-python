@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API reference" href="api_reference.html" /><link rel="prev" title="Tutorial" href="tutorial.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>User guide - avatars 0.3.3 documentation</title>
+        <title>User guide - avatars 0.4.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.3.3 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.4.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.3.3 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.4.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -187,6 +187,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.4.0/user_guide.html">0.4.0</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.3.3/user_guide.html">0.3.3</a>
     </li>
@@ -739,14 +742,14 @@ for more information about batch use.</p>
 <p>The number of dimensions is the number of continuous variables plus the
 number of modalities in categorical variables. The limit of dimension is
 frequently reached due to a large number of modalities in one/sample of
-categorical variables.</p>
+categorical variables (high cardinality variables).</p>
 <p>There are several solutions to bypass this limitation: - Encode the
-categorical variable(s) into a continuous variable (frequency encoding,
+categorical variable into a continuous variable (frequency encoding,
 target encoding, …). - Reduce the number of modalities by grouping some
 into more general modalities. - Use the argument
 <code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> (Beta version)</p>
 <p>The parameter <code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> will reduce the dimension of
-the categorical variable(s) by encoding them as vectors. This step is using
+the categorical variable by encoding them as vectors. This step is using
 the word embedding cat2vec. This solution could reduce the utility of
 your dataset.</p>
 </section>
