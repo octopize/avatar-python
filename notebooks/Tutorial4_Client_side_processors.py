@@ -74,7 +74,11 @@ client.health.get_health()
 #
 # Because this is an irreversible operation, this transformation of the data should be done outside the pipeline. The transformed data will be used as a basis for comparison when computing utility and privacy metrics.
 
-df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000)
+df = (
+    pd.read_csv("../fixtures/adult_with_cities.csv")
+    .head(1000)
+    .drop(["native-country"], axis=1)
+)
 dataset = client.pandas_integration.upload_dataframe(df)
 print(df.shape)
 df.head()
