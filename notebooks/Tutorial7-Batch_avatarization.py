@@ -85,7 +85,7 @@ training, splits = get_split_for_batch(
 
 # +
 dataset_training_id, dataset_split_ids, order = upload_batch_and_get_order(
-    client=client, training=training, splits=splits, timeout=1000
+    client=client, training=training, splits=splits, timeout=100
 )
 
 
@@ -97,10 +97,10 @@ batch_job = client.jobs.create_avatarization_batch_job(
             k=20,
             imputation=ImputationParameters(method=ImputeMethod.mean),
         ),
-        timeout=1000,
+        timeout=100,
     )
 )
-batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=1000)
+batch_job = client.jobs.get_avatarization_batch_job(batch_job.id, timeout=100)
 batch_job
 # -
 
@@ -116,11 +116,9 @@ privacy_job_ref = client.jobs.create_privacy_metrics_batch_job(
             ),
         ),
     ),
-    timeout=1000,
+    timeout=100,
 )
-privacy_job = client.jobs.get_privacy_metrics_batch_job(
-    privacy_job_ref.id, timeout=1000
-)
+privacy_job = client.jobs.get_privacy_metrics_batch_job(privacy_job_ref.id, timeout=100)
 # you can access batch-averaged metrics
 print("Mean metrics")
 print(privacy_job.result.mean_metrics)
@@ -141,10 +139,10 @@ signal_job_training = client.jobs.create_signal_metrics_batch_job(
             common_parameters=SignalMetricsBaseParameters(),
         ),
     ),
-    timeout=1000,
+    timeout=100,
 )
 signal_job = client.jobs.get_signal_metrics_batch_job(
-    signal_job_training.id, timeout=1000
+    signal_job_training.id, timeout=100
 )
 
 print("Mean metrics")
@@ -158,7 +156,7 @@ print(signal_job.result.mean_metrics)
 # ### Get the shuffled avatar dataframe
 
 avatars = download_avatar_dataframe_from_batch(
-    client=client, avatarization_batch_result=batch_job.result, timeout=1000
+    client=client, avatarization_batch_result=batch_job.result, timeout=100
 )
 avatars.head()
 
@@ -168,6 +166,6 @@ sensitive_avatars = download_sensitive_unshuffled_avatar_dataframe_from_batch(
     client=client,
     avatarization_batch_result=batch_job.result,
     order=order,
-    timeout=1000,
+    timeout=100,
 )
 sensitive_avatars.head()
