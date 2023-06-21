@@ -179,6 +179,7 @@ def push() -> None:
 
 def check_preconditions() -> None:
     preconditions = [
+        "Did you commit everything that needs to be in the new version?",
         f"Have you updated the changelog at {CHANGELOG}?",
         "Have you generated the doc using `make doc`?",
         "Have you added the new version to the compatibility mapping in the API?",
