@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+- fix: compatibility mapping due to breaking change
+
+### BREAKING CHANGE
+- remove broken endpoint `/projections`
+
 ## 0.4.0
 
 - feat: Limit the size of `nb_days` in `find_all_jobs_by_user`
