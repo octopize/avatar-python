@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Models" href="models.html" /><link rel="prev" title="API reference" href="api_reference.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>Client - avatars 0.4.0 documentation</title>
+        <title>Client - avatars 0.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.4.0 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.5.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.4.0 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.5.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -187,6 +187,12 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.5.1/client_and_api.html">0.5.1</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.5.0/client_and_api.html">0.5.0</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.4.0/client_and_api.html">0.4.0</a>
     </li>
@@ -546,24 +552,36 @@ If the job is done, do nothing.</p>
 <dt class="sig sig-object py" id="avatars.api.Metrics.get_job_projections">
 <span class="sig-name descname"><span class="pre">get_job_projections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Projections" title="avatars.models.Projections"><span class="pre">Projections</span></a></span></span><a class="headerlink" href="#avatars.api.Metrics.get_job_projections" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the projections of records and avatars in 3D.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="avatars.api.Metrics.get_job_projections_from_data">
-<span class="sig-name descname"><span class="pre">get_job_projections_from_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avatars_dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Projections" title="avatars.models.Projections"><span class="pre">Projections</span></a></span></span><a class="headerlink" href="#avatars.api.Metrics.get_job_projections_from_data" title="Permalink to this definition">#</a></dt>
-<dd><p>Get the projections of records and avatars in 3D.</p>
+<p>See <a class="reference external" href="https://saiph.readthedocs.io/en/latest/">https://saiph.readthedocs.io/en/latest/</a> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job_id</strong> – avatarization or privacy job id used to fit the model</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Metrics.get_variable_contributions">
 <span class="sig-name descname"><span class="pre">get_variable_contributions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.Contributions" title="avatars.models.Contributions"><span class="pre">Contributions</span></a></span></span><a class="headerlink" href="#avatars.api.Metrics.get_variable_contributions" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the contributions of the dataset variables within the fitted space.</p>
+<p>See <a class="reference external" href="https://saiph.readthedocs.io/en/latest">https://saiph.readthedocs.io/en/latest</a> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job_id</strong> – avatarization or privacy job id used to fit the model</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="avatars.api.Metrics.get_explained_variance">
 <span class="sig-name descname"><span class="pre">get_explained_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="models.html#avatars.models.ExplainedVariance" title="avatars.models.ExplainedVariance"><span class="pre">ExplainedVariance</span></a></span></span><a class="headerlink" href="#avatars.api.Metrics.get_explained_variance" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the explained variance of records.</p>
+<p>See <a class="reference external" href="https://saiph.readthedocs.io/en/latest/">https://saiph.readthedocs.io/en/latest/</a> for more information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>job_id</strong> – avatarization or privacy job id used to fit the model</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -830,7 +848,6 @@ If the job is done, do nothing.</p>
 </li>
 <li><a class="reference internal" href="#avatars.api.Metrics"><code class="docutils literal notranslate"><span class="pre">Metrics</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.api.Metrics.get_job_projections"><code class="docutils literal notranslate"><span class="pre">Metrics.get_job_projections()</span></code></a></li>
-<li><a class="reference internal" href="#avatars.api.Metrics.get_job_projections_from_data"><code class="docutils literal notranslate"><span class="pre">Metrics.get_job_projections_from_data()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Metrics.get_variable_contributions"><code class="docutils literal notranslate"><span class="pre">Metrics.get_variable_contributions()</span></code></a></li>
 <li><a class="reference internal" href="#avatars.api.Metrics.get_explained_variance"><code class="docutils literal notranslate"><span class="pre">Metrics.get_explained_variance()</span></code></a></li>
 </ul>

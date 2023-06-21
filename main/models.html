@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Processors" href="processors.html" /><link rel="prev" title="Client" href="client_and_api.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>Models - avatars 0.4.0 documentation</title>
+        <title>Models - avatars 0.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.4.0 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.5.1 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.4.0 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.5.1 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -187,6 +187,12 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.5.1/models.html">0.5.1</a>
+    </li>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.5.0/models.html">0.5.0</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.4.0/models.html">0.4.0</a>
     </li>
@@ -475,7 +481,17 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalMethod">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ExcludeCategoricalMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.ExcludeCategoricalMethod" title="Permalink to this definition">#</a></dt>
-<dd><p>An enumeration.</p>
+<dd><blockquote>
+<div><p>The method to exclude categorical column.</p>
+</div></blockquote>
+<p>There are several possible choices:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">row_order</span></code>: <strong>SENSITIVE</strong> The excluded column will be linked to the original row order.</p></li>
+</ul>
+<p>This is a violation of privacy.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">coordinate_similarity</span></code>: The excluded column will be linked by individual similarity.</p></li>
+</ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalMethod.row_order">
 <span class="sig-name descname"><span class="pre">row_order</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'row_order'</span></em><a class="headerlink" href="#avatars.models.ExcludeCategoricalMethod.row_order" title="Permalink to this definition">#</a></dt>
@@ -677,131 +693,61 @@
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetrics</span></span><a class="headerlink" href="#avatars.models.PrivacyMetrics" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsTargets</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.categorical_hidden_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.categorical_hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.closest_distances_ratio">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.closest_distances_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.closest_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.closest_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.closest_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.closest_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.column_direct_match_protection">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.column_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.correlation_protection_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.correlation_protection_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.distance_to_closest">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.distance_to_closest" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.distance_to_closest">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.distance_to_closest" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.hidden_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.hidden_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.hidden_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.inference_categorical">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.inference_categorical" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.inference_categorical">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.inference_categorical" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.inference_continuous">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.inference_continuous" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.inference_continuous">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.inference_continuous" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.local_cloaking">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.local_cloaking" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.local_cloaking">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.local_cloaking" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.row_direct_match_protection">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsPerBatchResult</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.categorical_hidden_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.closest_distances_ratio">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.closest_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_rate" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.column_direct_match_protection">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.correlation_protection_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.distance_to_closest">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.distance_to_closest" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.hidden_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.hidden_rate" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.inference_categorical">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_categorical" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.inference_continuous">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_continuous" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.local_cloaking">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.local_cloaking" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.original_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.original_id" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.row_direct_match_protection">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unshuffled_avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsTargets.row_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsTargets.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -824,7 +770,24 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="avatars.models.RareCategoricalMethod">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">RareCategoricalMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.RareCategoricalMethod" title="Permalink to this definition">#</a></dt>
-<dd><p>An enumeration.</p>
+<dd><blockquote>
+<div><p>The method to replace rare modalities.</p>
+</div></blockquote>
+<p>Available rare modality replacement strategies are:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">most_similar</span></code>: Rare modalities will be replaced with the modality of the most similar</dt><dd><p>records.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">probabilistic</span></code>: Probabilities will be defined for each potential replacement value and</dt><dd><p>the rare modalities will be replaced following these probabilities in a
+non-deterministic way.</p>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">missing</span></code>: Rare modalities will be replace with missing values.</p></li>
+</ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="avatars.models.RareCategoricalMethod.most_similar">
 <span class="sig-name descname"><span class="pre">most_similar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'most_similar'</span></em><a class="headerlink" href="#avatars.models.RareCategoricalMethod.most_similar" title="Permalink to this definition">#</a></dt>
@@ -994,26 +957,6 @@
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.SignalMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetrics</span></span><a class="headerlink" href="#avatars.models.SignalMetrics" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetrics.correlation_difference_ratio">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_difference_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.correlation_difference_ratio" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetrics.hellinger_mean">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_mean</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.hellinger_mean" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetrics.hellinger_std">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_std</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.hellinger_std" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.SignalMetricsBaseParameters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsBaseParameters</span></span><a class="headerlink" href="#avatars.models.SignalMetricsBaseParameters" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
@@ -1161,31 +1104,16 @@ computation to use with an instance of <code class="docutils literal notranslate
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsPerBatchResult</span></span><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsTargets">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsTargets</span></span><a class="headerlink" href="#avatars.models.SignalMetricsTargets" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.avatars_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.avatars_id" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsTargets.correlation_difference_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_difference_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsTargets.correlation_difference_ratio" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.correlation_difference_ratio">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_difference_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.correlation_difference_ratio" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.hellinger_mean">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_mean</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_mean" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.hellinger_std">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_std</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_std" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.original_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.original_id" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsTargets.hellinger_mean">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_mean</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsTargets.hellinger_mean" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1388,10 +1316,16 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalParameters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ExcludeCategoricalParameters</span></span><a class="headerlink" href="#avatars.models.ExcludeCategoricalParameters" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
+<dd><blockquote>
+<div><p>Parameters to exclude some variables from the anonymization before re-assigning.</p>
+</div></blockquote>
+<p>The use of this parameter is recommended when the data contains categorical variables
+with a large number of modalities.</p>
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalParameters.exclude_cardinality_threshold">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">exclude_cardinality_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ExcludeCategoricalParameters.exclude_cardinality_threshold" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Threshold defining the minimum cardinality of a variable to be excluded. Any categorical variable with a number of modalities greater or equal to this threshold will be excluded from the anonymization and re-assigned probabilistically.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Constraints<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>minimum</strong> = 1.0</p></li>
@@ -1403,17 +1337,20 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalParameters.exclude_replacement_strategy">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">exclude_replacement_strategy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.ExcludeCategoricalMethod" title="avatars.models.ExcludeCategoricalMethod"><span class="pre">ExcludeCategoricalMethod</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ExcludeCategoricalParameters.exclude_replacement_strategy" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>See <code class="docutils literal notranslate"><span class="pre">ExcludeCategoricalMethod</span></code>.</p>
+</dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalParameters.number_reference_records">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_reference_records</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.ExcludeCategoricalParameters.number_reference_records" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Number of training records to use to compute inter-records distances. Set to <code class="docutils literal notranslate"><span class="pre">None</span></code> to use all records, beware this may lead to long computational time. If <code class="docutils literal notranslate"><span class="pre">number_reference_records</span></code> is too low, it will be corrected to ensure each value combination to be replaced is represented in the sample. If <code class="docutils literal notranslate"><span class="pre">number_reference_records</span></code> is larger than the number of records, it will be corrected to the number of records.</p>
+</dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalParameters.rare_occurence_threshold">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">rare_occurence_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ExcludeCategoricalParameters.rare_occurence_threshold" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Maximum number of occurrences for a modality in an excluded variable to be considered as rare. Modalities considered as rare will be removed and replaced by other modalities prior to being re-assigned. This prevents the risk of re-identification based on rare modalities.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Constraints<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>minimum</strong> = 0.0</p></li>
@@ -1425,7 +1362,8 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ExcludeCategoricalParameters.rare_replacement_strategy">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">rare_replacement_strategy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.RareCategoricalMethod" title="avatars.models.RareCategoricalMethod"><span class="pre">RareCategoricalMethod</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.ExcludeCategoricalParameters.rare_replacement_strategy" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>See <code class="docutils literal notranslate"><span class="pre">RareCategoricalMethod</span></code>.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1495,6 +1433,71 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ImputationParameters.training_fraction">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_fraction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.ImputationParameters.training_fraction" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetrics</span></span><a class="headerlink" href="#avatars.models.PrivacyMetrics" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.categorical_hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.closest_distances_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.closest_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.closest_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.column_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.correlation_protection_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.distance_to_closest">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.distance_to_closest" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.hidden_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.inference_categorical">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.inference_categorical" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.inference_continuous">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.inference_continuous" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.local_cloaking">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.local_cloaking" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.row_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetrics.targets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets" title="avatars.models.PrivacyMetricsTargets"><span class="pre">PrivacyMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetrics.targets" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1655,31 +1658,6 @@ that you want the computation to use with an instance of <code class="docutils l
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsBatchResult</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.batch_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult" title="avatars.models.PrivacyMetricsPerBatchResult"><span class="pre">PrivacyMetricsPerBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.batch_metrics" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.mean_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetrics" title="avatars.models.PrivacyMetrics"><span class="pre">PrivacyMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.mean_metrics" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.training_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult" title="avatars.models.PrivacyMetricsPerBatchResult"><span class="pre">PrivacyMetricsPerBatchResult</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.training_metrics" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.worst_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">worst_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetrics" title="avatars.models.PrivacyMetrics"><span class="pre">PrivacyMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.worst_metrics" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsParameters">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsParameters</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsParameters" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
@@ -1745,6 +1723,106 @@ that you want the computation to use with an instance of <code class="docutils l
 </dd></dl>
 
 <dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsPerBatchResult</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.categorical_hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.closest_distances_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.closest_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.column_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.correlation_protection_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.distance_to_closest">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.distance_to_closest" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.hidden_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.inference_categorical">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_categorical" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.inference_continuous">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_continuous" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.local_cloaking">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.local_cloaking" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.original_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.original_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.row_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.targets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets" title="avatars.models.PrivacyMetricsTargets"><span class="pre">PrivacyMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.targets" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unshuffled_avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.SignalMetrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetrics</span></span><a class="headerlink" href="#avatars.models.SignalMetrics" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetrics.correlation_difference_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_difference_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.correlation_difference_ratio" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetrics.hellinger_mean">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_mean</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.hellinger_mean" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetrics.hellinger_std">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_std</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.hellinger_std" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetrics.targets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsTargets" title="avatars.models.SignalMetricsTargets"><span class="pre">SignalMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetrics.targets" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJobCreate">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsBatchJobCreate</span></span><a class="headerlink" href="#avatars.models.SignalMetricsBatchJobCreate" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
@@ -1755,26 +1833,6 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsBatchParameters" title="avatars.models.SignalMetricsBatchParameters"><span class="pre">SignalMetricsBatchParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJobCreate.parameters" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsBatchResult</span></span><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult.batch_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult" title="avatars.models.SignalMetricsPerBatchResult"><span class="pre">SignalMetricsPerBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult.batch_metrics" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult.mean_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetrics" title="avatars.models.SignalMetrics"><span class="pre">SignalMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult.mean_metrics" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult.training_metrics">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult" title="avatars.models.SignalMetricsPerBatchResult"><span class="pre">SignalMetricsPerBatchResult</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult.training_metrics" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1830,6 +1888,41 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.SignalMetricsJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsParameters" title="avatars.models.SignalMetricsParameters"><span class="pre">SignalMetricsParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsJobCreate.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsPerBatchResult</span></span><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.avatars_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.avatars_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.correlation_difference_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_difference_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.correlation_difference_ratio" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.hellinger_mean">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_mean</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_mean" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.hellinger_std">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hellinger_std</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_std" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.original_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.original_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsPerBatchResult.targets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsTargets" title="avatars.models.SignalMetricsTargets"><span class="pre">SignalMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsPerBatchResult.targets" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2052,46 +2145,6 @@ that you want the computation to use with an instance of <code class="docutils l
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsBatchJob</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.current_progress">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobProgress" title="avatars.models.JobProgress"><span class="pre">JobProgress</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.current_progress" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.error_message">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.error_message" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.id" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.parameters">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchParameters" title="avatars.models.PrivacyMetricsBatchParameters"><span class="pre">PrivacyMetricsBatchParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.parameters" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.result">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult" title="avatars.models.PrivacyMetricsBatchResult"><span class="pre">PrivacyMetricsBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.result" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.status">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.status" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.traceback">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.traceback" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJobCreate">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsBatchJobCreate</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJobCreate" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
@@ -2102,6 +2155,31 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchParameters" title="avatars.models.PrivacyMetricsBatchParameters"><span class="pre">PrivacyMetricsBatchParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJobCreate.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsBatchResult</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.batch_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult" title="avatars.models.PrivacyMetricsPerBatchResult"><span class="pre">PrivacyMetricsPerBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.batch_metrics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.mean_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetrics" title="avatars.models.PrivacyMetrics"><span class="pre">PrivacyMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.mean_metrics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.training_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult" title="avatars.models.PrivacyMetricsPerBatchResult"><span class="pre">PrivacyMetricsPerBatchResult</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.training_metrics" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchResult.worst_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">worst_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetrics" title="avatars.models.PrivacyMetrics"><span class="pre">PrivacyMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchResult.worst_metrics" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2162,41 +2240,21 @@ that you want the computation to use with an instance of <code class="docutils l
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsBatchJob</span></span><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsBatchResult</span></span><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.current_progress">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobProgress" title="avatars.models.JobProgress"><span class="pre">JobProgress</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.current_progress" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult.batch_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">batch_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult" title="avatars.models.SignalMetricsPerBatchResult"><span class="pre">SignalMetricsPerBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult.batch_metrics" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.error_message">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.error_message" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult.mean_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetrics" title="avatars.models.SignalMetrics"><span class="pre">SignalMetrics</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult.mean_metrics" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.id" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.parameters">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsBatchParameters" title="avatars.models.SignalMetricsBatchParameters"><span class="pre">SignalMetricsBatchParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.parameters" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.result">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult" title="avatars.models.SignalMetricsBatchResult"><span class="pre">SignalMetricsBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.result" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.status">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.status" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.traceback">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.traceback" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchResult.training_metrics">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult" title="avatars.models.SignalMetricsPerBatchResult"><span class="pre">SignalMetricsPerBatchResult</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchResult.training_metrics" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2292,6 +2350,86 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.AvatarizationParameters" title="avatars.models.AvatarizationParameters"><span class="pre">AvatarizationParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationJobCreate.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsBatchJob</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.current_progress">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobProgress" title="avatars.models.JobProgress"><span class="pre">JobProgress</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.current_progress" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.error_message">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.error_message" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchParameters" title="avatars.models.PrivacyMetricsBatchParameters"><span class="pre">PrivacyMetricsBatchParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.result">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult" title="avatars.models.PrivacyMetricsBatchResult"><span class="pre">PrivacyMetricsBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.result" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.status">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.traceback">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.traceback" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">SignalMetricsBatchJob</span></span><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.current_progress">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobProgress" title="avatars.models.JobProgress"><span class="pre">JobProgress</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.current_progress" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.error_message">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.error_message" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">UUID</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsBatchParameters" title="avatars.models.SignalMetricsBatchParameters"><span class="pre">SignalMetricsBatchParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.result">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult" title="avatars.models.SignalMetricsBatchResult"><span class="pre">SignalMetricsBatchResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.result" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.status">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.SignalMetricsBatchJob.traceback">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.SignalMetricsBatchJob.traceback" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2586,34 +2724,18 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyBatchDatasetMapping.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyBatchDatasetMapping.unshuffled_avatars_id</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.categorical_hidden_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.closest_distances_ratio</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.closest_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.column_direct_match_protection</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.correlation_protection_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.distance_to_closest</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.hidden_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.inference_categorical</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.inference_continuous</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.local_cloaking</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.row_direct_match_protection</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.categorical_hidden_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.closest_distances_ratio</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.closest_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.column_direct_match_protection</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.correlation_protection_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.distance_to_closest</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.hidden_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.inference_categorical</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.inference_continuous</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.local_cloaking</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.original_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.original_id</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.row_direct_match_protection</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.unshuffled_avatars_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.categorical_hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.closest_distances_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.closest_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.column_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.correlation_protection_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.distance_to_closest</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.inference_categorical</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.inference_continuous</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.local_cloaking</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets.row_direct_match_protection</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.Projections"><code class="docutils literal notranslate"><span class="pre">Projections</span></code></a><ul>
@@ -2666,12 +2788,6 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.SignalBatchDatasetMapping.original_id"><code class="docutils literal notranslate"><span class="pre">SignalBatchDatasetMapping.original_id</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.SignalMetrics"><code class="docutils literal notranslate"><span class="pre">SignalMetrics</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.SignalMetrics.correlation_difference_ratio"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.correlation_difference_ratio</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetrics.hellinger_mean"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.hellinger_mean</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetrics.hellinger_std"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.hellinger_std</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsBaseParameters"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBaseParameters</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsBaseParameters.seed"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBaseParameters.seed</span></code></a></li>
 </ul>
@@ -2691,12 +2807,9 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.SignalMetricsParameters.seed"><code class="docutils literal notranslate"><span class="pre">SignalMetricsParameters.seed</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.avatars_id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.avatars_id</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.correlation_difference_ratio"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.correlation_difference_ratio</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_mean"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.hellinger_mean</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_std"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.hellinger_std</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.original_id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.original_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsTargets"><code class="docutils literal notranslate"><span class="pre">SignalMetricsTargets</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsTargets.correlation_difference_ratio"><code class="docutils literal notranslate"><span class="pre">SignalMetricsTargets.correlation_difference_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsTargets.hellinger_mean"><code class="docutils literal notranslate"><span class="pre">SignalMetricsTargets.hellinger_mean</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.UserRole"><code class="docutils literal notranslate"><span class="pre">UserRole</span></code></a><ul>
@@ -2776,6 +2889,21 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.ImputationParameters.training_fraction"><code class="docutils literal notranslate"><span class="pre">ImputationParameters.training_fraction</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.categorical_hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.closest_distances_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.closest_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.column_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.correlation_protection_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.distance_to_closest</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.inference_categorical</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.inference_continuous</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.local_cloaking</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.row_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetrics.targets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetrics.targets</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBaseParameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBaseParameters</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBaseParameters.closest_rate_percentage_threshold"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBaseParameters.closest_rate_percentage_threshold</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBaseParameters.closest_rate_ratio_threshold"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBaseParameters.closest_rate_ratio_threshold</span></code></a></li>
@@ -2794,13 +2922,6 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchParameters.training_dataset_mapping"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchParameters.training_dataset_mapping</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.batch_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.batch_metrics</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.mean_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.mean_metrics</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.training_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.training_metrics</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.worst_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.worst_metrics</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsParameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsParameters</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsParameters.avatarization_job_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsParameters.avatarization_job_id</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsParameters.closest_rate_percentage_threshold"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsParameters.closest_rate_percentage_threshold</span></code></a></li>
@@ -2816,15 +2937,33 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsParameters.use_categorical_reduction"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsParameters.use_categorical_reduction</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.categorical_hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.closest_distances_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.closest_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.column_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.correlation_protection_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.distance_to_closest</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.inference_categorical</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.inference_continuous</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.local_cloaking</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.original_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.original_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.row_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.targets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.targets</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.unshuffled_avatars_id</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.SignalMetrics"><code class="docutils literal notranslate"><span class="pre">SignalMetrics</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.SignalMetrics.correlation_difference_ratio"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.correlation_difference_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetrics.hellinger_mean"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.hellinger_mean</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetrics.hellinger_std"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.hellinger_std</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetrics.targets"><code class="docutils literal notranslate"><span class="pre">SignalMetrics.targets</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJobCreate"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJobCreate.parameters</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult.batch_metrics"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult.batch_metrics</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult.mean_metrics"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult.mean_metrics</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult.training_metrics"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult.training_metrics</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsJob"><code class="docutils literal notranslate"><span class="pre">SignalMetricsJob</span></code></a><ul>
@@ -2840,6 +2979,15 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.SignalMetricsJobCreate"><code class="docutils literal notranslate"><span class="pre">SignalMetricsJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">SignalMetricsJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">SignalMetricsJobCreate.parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.avatars_id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.avatars_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.correlation_difference_ratio"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.correlation_difference_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_mean"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.hellinger_mean</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.hellinger_std"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.hellinger_std</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.original_id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.original_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsPerBatchResult.targets"><code class="docutils literal notranslate"><span class="pre">SignalMetricsPerBatchResult.targets</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.User"><code class="docutils literal notranslate"><span class="pre">User</span></code></a><ul>
@@ -2896,19 +3044,16 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.AvatarizationResult.signal_metrics"><code class="docutils literal notranslate"><span class="pre">AvatarizationResult.signal_metrics</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.current_progress"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.current_progress</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.error_message"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.error_message</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.id</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.parameters</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.result"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.result</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.status"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.status</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.traceback"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.traceback</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJobCreate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJobCreate.parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.batch_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.batch_metrics</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.mean_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.mean_metrics</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.training_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.training_metrics</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchResult.worst_metrics"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchResult.worst_metrics</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsJob"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsJob</span></code></a><ul>
@@ -2926,14 +3071,10 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsJobCreate.parameters</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.current_progress"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.current_progress</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.error_message"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.error_message</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.id</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.parameters"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.parameters</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.result"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.result</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.status"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.status</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.traceback"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.traceback</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult.batch_metrics"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult.batch_metrics</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult.mean_metrics"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult.mean_metrics</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchResult.training_metrics"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchResult.training_metrics</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationBatchJobCreate"><code class="docutils literal notranslate"><span class="pre">AvatarizationBatchJobCreate</span></code></a><ul>
@@ -2961,6 +3102,26 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.AvatarizationJobCreate"><code class="docutils literal notranslate"><span class="pre">AvatarizationJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.AvatarizationJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">AvatarizationJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationJobCreate.parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.current_progress"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.current_progress</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.error_message"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.error_message</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.parameters</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.result"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.result</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.status"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.status</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.traceback"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.traceback</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.current_progress"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.current_progress</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.error_message"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.error_message</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.parameters"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.parameters</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.result"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.result</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.status"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.status</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.SignalMetricsBatchJob.traceback"><code class="docutils literal notranslate"><span class="pre">SignalMetricsBatchJob.traceback</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationBatchJob"><code class="docutils literal notranslate"><span class="pre">AvatarizationBatchJob</span></code></a><ul>
