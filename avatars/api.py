@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.8-22d4963839eb3a84c2e8ab6c824cecf61141318e
+# API Version : 0.5.9-73f99ea7aa3ea04e3692c303523f75c9660e433a
 
 
 import itertools
@@ -173,6 +173,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs = {
             "method": "post",
             "url": f"/login/forgotten_password",
@@ -189,6 +190,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs = {
             "method": "post",
             "url": f"/login/reset_password",
@@ -722,33 +724,20 @@ class Metrics:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Projections:
-        """Get the projections of records and avatars in 3D."""
+        """Get the projections of records and avatars in 3D.
+
+        See https://saiph.readthedocs.io/en/latest/ for more information.
+
+        Arguments
+        ---------
+            job_id:
+                avatarization or privacy job id used to fit the model
+        """
 
         kwargs = {
             "method": "get",
             "url": f"/projections/{job_id}",
             "timeout": timeout,
-        }
-
-        return Projections(**self.client.request(**kwargs))  # type: ignore[arg-type]
-
-    def get_job_projections_from_data(
-        self,
-        dataset_id: str,
-        avatars_dataset_id: str,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Projections:
-        """Get the projections of records and avatars in 3D."""
-
-        kwargs = {
-            "method": "get",
-            "url": f"/projections",
-            "timeout": timeout,
-            "params": dict(
-                dataset_id=dataset_id,
-                avatars_dataset_id=avatars_dataset_id,
-            ),
         }
 
         return Projections(**self.client.request(**kwargs))  # type: ignore[arg-type]
@@ -760,7 +749,15 @@ class Metrics:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Contributions:
-        """Get the contributions of the dataset variables within the fitted space."""
+        """Get the contributions of the dataset variables within the fitted space.
+
+        See https://saiph.readthedocs.io/en/latest for more information.
+
+        Arguments
+        ---------
+            job_id:
+                avatarization or privacy job id used to fit the model
+        """
 
         kwargs = {
             "method": "get",
@@ -780,7 +777,15 @@ class Metrics:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> ExplainedVariance:
-        """Get the explained variance of records."""
+        """Get the explained variance of records.
+
+        See https://saiph.readthedocs.io/en/latest/ for more information.
+
+        Arguments
+        ---------
+            job_id:
+                avatarization or privacy job id used to fit the model
+        """
 
         kwargs = {
             "method": "get",
