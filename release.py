@@ -191,7 +191,7 @@ def check_preconditions() -> None:
 
 
 @app.command()
-def release(bump_type: BumpType = typer.Option(BumpType.PATCH)) -> Any:
+def release(bump_type: BumpType = typer.Option(BumpType.PATCH.value)) -> Any:
     proc = subprocess.Popen(
         args=("git", "branch", "--show-current"), stdout=PIPE, text=True
     )
