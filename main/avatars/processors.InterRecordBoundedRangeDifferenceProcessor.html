@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="processors.PerturbationProcessor" href="processors.PerturbationProcessor.html" /><link rel="prev" title="processors.DatetimeProcessor" href="processors.DatetimeProcessor.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Changelog" href="../changelog.html" /><link rel="prev" title="processors.InterRecordCumulatedDifferenceProcessor" href="processors.InterRecordCumulatedDifferenceProcessor.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>processors.GroupModalitiesProcessor - avatars 0.5.1 documentation</title>
+        <title>processors.InterRecordBoundedRangeDifferenceProcessor - avatars 0.5.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
@@ -165,14 +165,14 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../processors.html"> Processors</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="processors.ExpectedMeanProcessor.html">processors.ExpectedMeanProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.DatetimeProcessor.html">processors.DatetimeProcessor</a></li>
-<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">processors.GroupModalitiesProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processors.GroupModalitiesProcessor.html">processors.GroupModalitiesProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.PerturbationProcessor.html">processors.PerturbationProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.ProportionProcessor.html">processors.ProportionProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.RelativeDifferenceProcessor.html">processors.RelativeDifferenceProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.ToCategoricalProcessor.html">processors.ToCategoricalProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.InterRecordRangeDifferenceProcessor.html">processors.InterRecordRangeDifferenceProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.InterRecordCumulatedDifferenceProcessor.html">processors.InterRecordCumulatedDifferenceProcessor</a></li>
-<li class="toctree-l3"><a class="reference internal" href="processors.InterRecordBoundedRangeDifferenceProcessor.html">processors.InterRecordBoundedRangeDifferenceProcessor</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">processors.InterRecordBoundedRangeDifferenceProcessor</a></li>
 </ul>
 </li>
 </ul>
@@ -189,25 +189,25 @@
   </p>
   <ul>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.5.1/avatars/processors.GroupModalitiesProcessor.html">0.5.1</a>
+      <a class="reference internal" href="../../0.5.1/index.html">0.5.1</a>
     </li>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.5.0/avatars/processors.GroupModalitiesProcessor.html">0.5.0</a>
+      <a class="reference internal" href="../../0.5.0/index.html">0.5.0</a>
     </li>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.4.0/avatars/processors.GroupModalitiesProcessor.html">0.4.0</a>
+      <a class="reference internal" href="../../0.4.0/index.html">0.4.0</a>
     </li>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.3.3/avatars/processors.GroupModalitiesProcessor.html">0.3.3</a>
+      <a class="reference internal" href="../../0.3.3/index.html">0.3.3</a>
     </li>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.3.2/avatars/processors.GroupModalitiesProcessor.html">0.3.2</a>
+      <a class="reference internal" href="../../0.3.2/index.html">0.3.2</a>
     </li>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.3.1/avatars/processors.GroupModalitiesProcessor.html">0.3.1</a>
+      <a class="reference internal" href="../../0.3.1/index.html">0.3.1</a>
     </li>
     <li class="toctree-l1">
-      <a class="reference internal" href="../../0.3.0/avatars/processors.GroupModalitiesProcessor.html">0.3.0</a>
+      <a class="reference internal" href="../../0.3.0/index.html">0.3.0</a>
     </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../../0.2.2/index.html">0.2.2</a>
@@ -302,56 +302,88 @@
           </label>
         </div>
         <article role="main">
-          <section id="processors-groupmodalitiesprocessor">
-<h1>processors.GroupModalitiesProcessor<a class="headerlink" href="#processors-groupmodalitiesprocessor" title="Permalink to this heading">#</a></h1>
+          <section id="processors-interrecordboundedrangedifferenceprocessor">
+<h1>processors.InterRecordBoundedRangeDifferenceProcessor<a class="headerlink" href="#processors-interrecordboundedrangedifferenceprocessor" title="Permalink to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="processors.GroupModalitiesProcessor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">processors.</span></span><span class="sig-name descname"><span class="pre">GroupModalitiesProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable_thresholds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_unique</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'other'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#processors.GroupModalitiesProcessor" title="Permalink to this definition">#</a></dt>
-<dd><p>Processor to group modalities in order to reduce the dataframe dimension.</p>
-<p>Use the parameter <cite>variables</cite> if you want to apply a custom threshold to each variable.
-Use the parameter <cite>min_unique</cite> and <cite>threshold</cite> if you want to apply a generic threshold.</p>
+<dt class="sig sig-object py" id="processors.InterRecordBoundedRangeDifferenceProcessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">processors.</span></span><span class="sig-name descname"><span class="pre">InterRecordBoundedRangeDifferenceProcessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_start_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_end_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_first_variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_range_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_difference_variable_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by_variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">should_round_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#processors.InterRecordBoundedRangeDifferenceProcessor" title="Permalink to this definition">#</a></dt>
+<dd><p>Processor to express two related bounded variables relative to previous records.</p>
+<p>This processor can be used only on data where there are several records for each individual.
+By this transformation, variables such as <cite>var_a</cite> and <cite>var_b</cite> whose values are cumulative over
+successive records <cite>t</cite> in the following way:
+var_a_t &lt;= var_b_t &lt;= var_a_t+1 &lt;= var_b_t+1 &lt;= var_a_t+2 …</p>
+<p>will be expressed as:
+- a variable containing the first value of <cite>var_a</cite>.
+- a variable containing the difference from the previous record
+- a variable containing the range between the start and end variables</p>
+<p>Difference and range variables are expressed as proportion of possible change between the
+value and the bound (upper or lower). For example, for a variable whose value only spreads from
+10 (lower bound) to 100 (upper bound), if the previous records value is 60 and the new value
+is 30, the proportion will be calculated as (30 - 60) / (60 - 10) = -0.6</p>
+<p>This processor is not suitable for data where any of the variables passed as args contain
+missing values.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>variable_thresholds</strong> – dictionary of variables and thresholds to apply,
-see global_threshold below.</p></li>
-<li><p><strong>min_unique</strong> – number of unique modalities by variable needed to be transformed.</p></li>
-<li><p><strong>global_threshold</strong> – limit of the number of individuals in each category to rename it.</p></li>
-<li><p><strong>new_category</strong> – new modality name (default=”other”).</p></li>
+<li><p><strong>id_variable</strong> – variable indicating which individual each row belongs to</p></li>
+<li><p><strong>target_start_variable</strong> – variable representing the start of the range to transform</p></li>
+<li><p><strong>target_end_variable</strong> – variable representing the end of the range to transform</p></li>
+<li><p><strong>sort_by_variable</strong> – variable used to sort records for each id</p></li>
+<li><p><strong>new_first_variable</strong> – name of the variable to be created to contain the first value of the target variable</p></li>
+<li><p><strong>new_range_variable</strong> – name of the variable to be created to contain the range value</p></li>
+<li><p><strong>new_difference_variable</strong> – name of the variable to be created to contain the difference value</p></li>
+<li><p><strong>should_round_output</strong> – set to True to force post-processed values to be integer.</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
 <span class="gp">... </span>   <span class="p">{</span>
-<span class="gp">... </span>       <span class="s2">&quot;variable_1&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">],</span>
-<span class="gp">... </span>       <span class="s2">&quot;variable_2&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;red&quot;</span><span class="p">],</span>
-<span class="gp">... </span>       <span class="s2">&quot;variable_3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">],</span>
+<span class="gp">... </span>      <span class="s1">&#39;quantity_start&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span>
+<span class="gp">... </span>      <span class="s1">&#39;quantity_end&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+<span class="gp">... </span>      <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+<span class="gp">... </span>      <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
 <span class="gp">... </span>   <span class="p">}</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span>
-<span class="go">  variable_1 variable_2 variable_3</span>
-<span class="go">0        red        red      green</span>
-<span class="go">1       blue       blue      green</span>
-<span class="go">2       blue       blue      green</span>
-<span class="go">3      green        red      green</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">GroupModalitiesProcessor</span><span class="p">(</span><span class="n">min_unique</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">global_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">new_category</span><span class="o">=</span><span class="s2">&quot;other&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-<span class="go">  variable_1 variable_2 variable_3</span>
-<span class="go">0      other        red      green</span>
-<span class="go">1       blue       blue      green</span>
-<span class="go">2       blue       blue      green</span>
-<span class="go">3      other        red      green</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span> <span class="o">=</span> <span class="n">InterRecordBoundedRangeDifferenceProcessor</span><span class="p">(</span>
+<span class="gp">... </span>   <span class="n">id_variable</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">target_start_variable</span><span class="o">=</span><span class="s1">&#39;quantity_start&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">target_end_variable</span><span class="o">=</span><span class="s1">&#39;quantity_end&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">new_first_variable_name</span><span class="o">=</span><span class="s1">&#39;quantity_s_first_val&#39;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">new_difference_variable_name</span><span class="o">=</span><span class="s2">&quot;quantity_diff_to_bound&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">new_range_variable</span><span class="o">=</span><span class="s2">&quot;quantity_range&quot;</span><span class="p">,</span>
+<span class="gp">... </span>   <span class="n">should_round_output</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preprocessed_df</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">preprocessed_df</span><span class="p">)</span>
+<span class="go">   b  id  quantity_range  quantity_s_first_val  quantity_diff_to_bound</span>
+<span class="go">0  4   1       -0.800000                    30                0.000000</span>
+<span class="go">1  3   1       -0.210526                    30                1.000000</span>
+<span class="go">2  0   1       -0.133333                    30                0.000000</span>
+<span class="go">3  0   2       -0.153846                    70                0.000000</span>
+<span class="go">4  2   2       -0.285714                    70               -0.363636</span>
+<span class="go">5  4   2       -1.000000                    70                0.571429</span>
+</pre></div>
+</div>
+<p>The postprocess allows you to transform some preprocessed data back into its original format.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">processor</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">preprocessed_df</span><span class="p">)</span>
+<span class="go">   quantity_start  quantity_end  b  id</span>
+<span class="go">0              30            10  4   1</span>
+<span class="go">1             100            80  3   1</span>
+<span class="go">2              80            70  0   1</span>
+<span class="go">3              70            60  0   2</span>
+<span class="go">4              40            30  2   2</span>
+<span class="go">5              70             5  4   2</span>
 </pre></div>
 </div>
 <dl class="py method">
-<dt class="sig sig-object py" id="processors.GroupModalitiesProcessor.preprocess">
-<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#processors.GroupModalitiesProcessor.preprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="processors.InterRecordBoundedRangeDifferenceProcessor.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#processors.InterRecordBoundedRangeDifferenceProcessor.preprocess" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="processors.GroupModalitiesProcessor.postprocess">
-<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#processors.GroupModalitiesProcessor.postprocess" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="processors.InterRecordBoundedRangeDifferenceProcessor.postprocess">
+<span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#processors.InterRecordBoundedRangeDifferenceProcessor.postprocess" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -363,23 +395,23 @@ see global_threshold below.</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="processors.PerturbationProcessor.html">
+          <a class="next-page" href="../changelog.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">processors.PerturbationProcessor</div>
+                <div class="title">Changelog</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="processors.DatetimeProcessor.html">
+          <a class="prev-page" href="processors.InterRecordCumulatedDifferenceProcessor.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">processors.DatetimeProcessor</div>
+                <div class="title">processors.InterRecordCumulatedDifferenceProcessor</div>
                 
               </div>
             </a>
@@ -413,10 +445,10 @@ see global_threshold below.</p></li>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">processors.GroupModalitiesProcessor</a><ul>
-<li><a class="reference internal" href="#processors.GroupModalitiesProcessor"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor</span></code></a><ul>
-<li><a class="reference internal" href="#processors.GroupModalitiesProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor.preprocess()</span></code></a></li>
-<li><a class="reference internal" href="#processors.GroupModalitiesProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">GroupModalitiesProcessor.postprocess()</span></code></a></li>
+<li><a class="reference internal" href="#">processors.InterRecordBoundedRangeDifferenceProcessor</a><ul>
+<li><a class="reference internal" href="#processors.InterRecordBoundedRangeDifferenceProcessor"><code class="docutils literal notranslate"><span class="pre">InterRecordBoundedRangeDifferenceProcessor</span></code></a><ul>
+<li><a class="reference internal" href="#processors.InterRecordBoundedRangeDifferenceProcessor.preprocess"><code class="docutils literal notranslate"><span class="pre">InterRecordBoundedRangeDifferenceProcessor.preprocess()</span></code></a></li>
+<li><a class="reference internal" href="#processors.InterRecordBoundedRangeDifferenceProcessor.postprocess"><code class="docutils literal notranslate"><span class="pre">InterRecordBoundedRangeDifferenceProcessor.postprocess()</span></code></a></li>
 </ul>
 </li>
 </ul>

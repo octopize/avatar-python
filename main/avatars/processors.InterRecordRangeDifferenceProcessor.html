@@ -172,6 +172,7 @@
 <li class="toctree-l3"><a class="reference internal" href="processors.ToCategoricalProcessor.html">processors.ToCategoricalProcessor</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">processors.InterRecordRangeDifferenceProcessor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="processors.InterRecordCumulatedDifferenceProcessor.html">processors.InterRecordCumulatedDifferenceProcessor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processors.InterRecordBoundedRangeDifferenceProcessor.html">processors.InterRecordBoundedRangeDifferenceProcessor</a></li>
 </ul>
 </li>
 </ul>
@@ -316,6 +317,8 @@ var_a_t &lt;= var_b_t &lt;= var_a_t+1 &lt;= var_b_t+1 &lt;= var_a_t+2 …</p>
 - a variable containing the difference from the previous record (i.e. <cite>var_a_t</cite> - <cite>var_b_t-1</cite>)
 - a variable containing the range between the start and end variables
 (i.e. <cite>var_b_t</cite> - <cite>var_a_t</cite>)</p>
+<p>This processor can be used to express a quantity that varies at each event (variation defined
+by a start and an end) but also that varies across successive events.</p>
 <p>This processor is not suitable for data where any of the variables passed as args contain
 missing values.</p>
 <dl class="field-list simple">
