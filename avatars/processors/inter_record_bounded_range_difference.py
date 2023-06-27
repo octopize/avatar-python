@@ -41,7 +41,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
             name of the variable to be created to contain the range value
         new_difference_variable:
             name of the variable to be created to contain the difference value
-        round_output:
+        should_round_output:
             set to True to force post-processed values to be integer.
 
     Examples
@@ -61,7 +61,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
     ...    new_first_variable_name='a_s_first_val',
     ...    new_difference_variable_name="a_diff_to_bound",
     ...    new_range_variable="a_range",
-    ...    round_output=True
+    ...    should_round_output=True
     ... )
     >>> preprocessed_df = processor.preprocess(df)
     >>> print(preprocessed_df)
@@ -74,7 +74,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
     5  4   2 -1.000000             70         0.571429
 
     The postprocess allows you to transform some preprocessed data back into its original format.
-    
+
     >>> processor.postprocess(df, preprocessed_df)
        a_start  a_end  b  id
     0       30     10  4   1
@@ -87,6 +87,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
 
     def __init__(
         self,
+        *,
         id_variable: str,
         target_start_variable: str,
         target_end_variable: str,
@@ -94,7 +95,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
         new_range_variable: str,
         new_difference_variable_name: str,
         sort_by_variable: Optional[str] = None,
-        round_output: bool = True,
+        should_round_output: bool = True,
     ):
         self.id_variable = id_variable
         self.target_start_variable = target_start_variable
@@ -103,7 +104,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
         self.new_range_variable = new_range_variable
         self.new_difference_variable_name = new_difference_variable_name
         self.sort_by_variable = sort_by_variable
-        self.round_output = round_output
+        self.should_round_output = should_round_output
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         variables_to_check = [
@@ -312,7 +313,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
         working[self.target_end_variable] = vals_e
 
         # optional rounding step
-        if self.round_output:
+        if self.should_round_output:
             working[self.target_start_variable] = working[
                 self.target_start_variable
             ].astype(int)

@@ -29,7 +29,7 @@ def test_process_and_inverse_returns_same_data(df: pd.DataFrame) -> None:
         new_difference_variable_name="a_diff_to_bound",
         new_range_variable="a_range",
         sort_by_variable=None,
-        round_output=False,
+        should_round_output=False,
     )
 
     # Pre-process
@@ -50,7 +50,7 @@ def test_bounds_are_respected(df: pd.DataFrame) -> None:
         new_difference_variable_name="a_diff_to_bound",
         new_range_variable="a_range",
         sort_by_variable=None,
-        round_output=False,
+        should_round_output=False,
     )
 
     # Pre-process
@@ -83,7 +83,7 @@ def test_round_output_produces_integers(df: pd.DataFrame) -> None:
         new_difference_variable_name="a_diff_to_bound",
         new_range_variable="a_range",
         sort_by_variable=None,
-        round_output=True,
+        should_round_output=True,
     )
 
     # Pre-process
@@ -105,7 +105,7 @@ def test_sort_by_at_preprocess(df: pd.DataFrame) -> None:
         new_difference_variable_name="a_diff_to_bound",
         new_range_variable="a_range",
         sort_by_variable="b",
-        round_output=False,
+        should_round_output=False,
     )
 
     # Pre-process
