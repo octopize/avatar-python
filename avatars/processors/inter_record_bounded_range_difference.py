@@ -48,41 +48,41 @@ class InterRecordBoundedRangeDifferenceProcessor:
     --------
     >>> df = pd.DataFrame(
     ...    {
-    ...       'a_start': [30, 100, 80, 70, 40, 70],
-    ...       'a_end': [10, 80, 70, 60, 30, 5],
+    ...       'quantity_start': [30, 100, 80, 70, 40, 70],
+    ...       'quantity_end': [10, 80, 70, 60, 30, 5],
     ...       'b': [4, 3, 0, 0, 2, 4],
     ...       'id': [1,1,1,2,2,2]
     ...    }
     ... )
     >>> processor = InterRecordBoundedRangeDifferenceProcessor(
     ...    id_variable='id',
-    ...    target_start_variable='a_start',
-    ...    target_end_variable='a_end',
-    ...    new_first_variable_name='a_s_first_val',
-    ...    new_difference_variable_name="a_diff_to_bound",
-    ...    new_range_variable="a_range",
+    ...    target_start_variable='quantity_start',
+    ...    target_end_variable='quantity_end',
+    ...    new_first_variable_name='quantity_s_first_val',
+    ...    new_difference_variable_name="quantity_diff_to_bound",
+    ...    new_range_variable="quantity_range",
     ...    should_round_output=True
     ... )
     >>> preprocessed_df = processor.preprocess(df)
     >>> print(preprocessed_df)
-       b  id   a_range  a_s_first_val  a_diff_to_bound
-    0  4   1 -0.800000             30         0.000000
-    1  3   1 -0.210526             30         1.000000
-    2  0   1 -0.133333             30         0.000000
-    3  0   2 -0.153846             70         0.000000
-    4  2   2 -0.285714             70        -0.363636
-    5  4   2 -1.000000             70         0.571429
+       b  id  quantity_range  quantity_s_first_val  quantity_diff_to_bound
+    0  4   1       -0.800000                    30                0.000000
+    1  3   1       -0.210526                    30                1.000000
+    2  0   1       -0.133333                    30                0.000000
+    3  0   2       -0.153846                    70                0.000000
+    4  2   2       -0.285714                    70               -0.363636
+    5  4   2       -1.000000                    70                0.571429
 
     The postprocess allows you to transform some preprocessed data back into its original format.
 
     >>> processor.postprocess(df, preprocessed_df)
-       a_start  a_end  b  id
-    0       30     10  4   1
-    1      100     80  3   1
-    2       80     70  0   1
-    3       70     60  0   2
-    4       40     30  2   2
-    5       70      5  4   2
+       quantity_start  quantity_end  b  id
+    0              30            10  4   1
+    1             100            80  3   1
+    2              80            70  0   1
+    3              70            60  0   2
+    4              40            30  2   2
+    5              70             5  4   2
     """
 
     def __init__(
