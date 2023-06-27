@@ -1,6 +1,9 @@
 from avatars.processors.datetime import DatetimeProcessor
 from avatars.processors.expected_mean import ExpectedMeanProcessor
 from avatars.processors.group_modalities import GroupModalitiesProcessor
+from avatars.processors.inter_record_bounded_range_difference import (
+    InterRecordBoundedRangeDifferenceProcessor,
+)
 from avatars.processors.inter_record_cumulated_difference import (
     InterRecordCumulatedDifferenceProcessor,
 )
@@ -22,4 +25,5 @@ __all__ = [
     "ToCategoricalProcessor",
     "InterRecordRangeDifferenceProcessor",
     "InterRecordCumulatedDifferenceProcessor",
+    "InterRecordBoundedRangeDifferenceProcessor",
 ]

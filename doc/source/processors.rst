@@ -19,3 +19,4 @@ Table of contents
    processors.ToCategoricalProcessor
    processors.InterRecordRangeDifferenceProcessor
    processors.InterRecordCumulatedDifferenceProcessor
+   processors.InterRecordBoundedRangeDifferenceProcessor

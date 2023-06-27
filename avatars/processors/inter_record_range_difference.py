@@ -15,6 +15,9 @@ class InterRecordRangeDifferenceProcessor:
     - a variable containing the range between the start and end variables
     (i.e. `var_b_t` - `var_a_t`)
 
+    This processor can be used to express a quantity that varies at each event (variation defined
+    by a start and an end) but also that varies across successive events.
+
     This processor is not suitable for data where any of the variables passed as args contain
     missing values.
 
