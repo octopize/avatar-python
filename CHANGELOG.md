@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.2
+- feat: add InterRecordBoundedRangeDifferenceProcessor
+
 ## 0.5.1
 - fix: compatibility mapping due to breaking change
 
