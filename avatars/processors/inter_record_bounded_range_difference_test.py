@@ -125,7 +125,6 @@ def test_sort_by_at_preprocess(df: pd.DataFrame) -> None:
 
 
 def test_preprocess_raises_error_when_wrong_variable_name(df: pd.DataFrame) -> None:
-
     processor = InterRecordBoundedRangeDifferenceProcessor(
         id_variable="wrong_id",
         target_start_variable="a_s",
@@ -143,7 +142,6 @@ def test_preprocess_raises_error_when_wrong_variable_name(df: pd.DataFrame) -> N
 
 
 def test_preprocess_raises_error_when_missing_values(df: pd.DataFrame) -> None:
-
     df.loc[1, "a_s"] = np.nan
     processor = InterRecordBoundedRangeDifferenceProcessor(
         id_variable="id",
