@@ -157,3 +157,32 @@ def test_preprocess_raises_error_when_missing_values(df: pd.DataFrame) -> None:
         match="Expected no missing values for",
     ):
         processor.preprocess(df)
+
+
+def test_extra_columns_are_kept_at_postprocess(df: pd.DataFrame) -> None:
+    processor = InterRecordBoundedRangeDifferenceProcessor(
+        id_variable="id",
+        target_start_variable="a_s",
+        target_end_variable="a_e",
+        new_first_variable_name="a_s_first_val",
+        new_difference_variable_name="a_diff_to_bound",
+        new_range_variable="a_range",
+        sort_by_variable=None,
+        should_round_output=False,
+    )
+
+    # Pre-process
+    preprocessed_df = processor.preprocess(df)
+
+    # Add an extra variable (this would typically happen when preprocessing many variables)
+    preprocessed_df["extra_variable_1"] = preprocessed_df["a_range"]
+    df["extra_variable_2"] = df["a_s"]
+
+    postprocessed_df = processor.postprocess(df, preprocessed_df)
+
+    # Post-process df should have the additional variables from dest but not the additional
+    # variables from source
+    should_have_columns = df.columns.to_list() + ["extra_variable_1"]
+    should_have_columns.remove("extra_variable_2")
+
+    assert postprocessed_df.columns.tolist() == should_have_columns

@@ -214,7 +214,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
             + working["increase"] * working["relative_diff_to_ub"]
         )
 
-        # Remove temp variables
+        # Remove tmp variables
         working = working.drop(
             columns=[
                 "relative_diff_to_lb",
@@ -322,6 +322,24 @@ class InterRecordBoundedRangeDifferenceProcessor:
             ].astype(int)
 
         working = working.sort_values(by=["original_order"])
-        working = working[source.columns]
+
+        # remove tmp variables
+        columns_to_remove = [
+            "increase",
+            "decrease",
+            self.new_difference_variable_name,
+            self.new_first_variable_name,
+            self.new_range_variable,
+            "range_increase",
+            "range_decrease",
+            "original_order",
+        ]
+        working = working.drop(columns=columns_to_remove)
+
+        # order columns
+        common_cols = [c for c in source.columns if c in working.columns]
+        other_cols = [c for c in working.columns if c not in source.columns]
+        cols_order = common_cols + other_cols
+        working = working[cols_order]
 
         return working
