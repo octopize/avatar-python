@@ -341,6 +341,6 @@ class InterRecordBoundedRangeDifferenceProcessor:
         common_cols = [c for c in source.columns if c in working.columns]
         other_cols = [c for c in working.columns if c not in source.columns]
         cols_order = common_cols + other_cols
-
         working = working[cols_order]
+
         return working
