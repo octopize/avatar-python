@@ -322,6 +322,25 @@ class InterRecordBoundedRangeDifferenceProcessor:
             ].astype(int)
 
         working = working.sort_values(by=["original_order"])
-        working = working[source.columns]
 
+        # remove temp variables
+        working = working.drop(
+            columns=[
+                "increase",
+                "decrease",
+                self.new_difference_variable_name,
+                self.new_first_variable_name,
+                self.new_range_variable,
+            ]
+        )
+        working = working.drop(
+            columns=["range_increase", "range_decrease", "original_order"]
+        )
+
+        # order columns
+        common_cols = [c for c in source.columns if c in working.columns]
+        other_cols = [c for c in working.columns if c not in source.columns]
+        cols_order = common_cols + other_cols
+
+        working = working[cols_order]
         return working
