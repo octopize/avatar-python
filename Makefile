@@ -10,7 +10,7 @@ AVATAR_USERNAME ?= "user_integration"
 AVATAR_PASSWORD ?= "password_integration"
 
 install:  ## Install the stack
-	poetry install --sync
+	poetry install --sync --no-ansi
 .PHONY: install
 
 release-and-push: ## Prepare a new client release
