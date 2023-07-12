@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.9-73f99ea7aa3ea04e3692c303523f75c9660e433a
+# API Version : 0.5.10-7b671b61c7c2b4b8406f19e68864ac4b7e25303a
 
 
 import sys
@@ -181,7 +181,6 @@ class ApiClient:
     def _get_file_argument(
         self, file: Optional[Union[StringIO, BytesIO]]
     ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
-
         if not file:
             return None
 
