@@ -111,7 +111,7 @@ print(job.status)
 # ## Retrieving the completed avatarization job
 
 # +
-job = client.jobs.get_avatarization_job(id=job.id)
+job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
 
 print(job.status)
 # -
@@ -154,7 +154,7 @@ avatarization_job = client.jobs.create_avatarization_job(
 )
 
 
-avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=10)
+avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=100)
 print(avatarization_job.status)
 print(avatarization_job.result)  # there is no metrics
 
@@ -178,7 +178,7 @@ privacy_job = client.jobs.create_privacy_metrics_job(
     )
 )
 
-privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=10)
+privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=100)
 
 print(privacy_job.status)
 print(privacy_job.result)
@@ -196,7 +196,7 @@ signal_job = client.jobs.create_signal_metrics_job(
     )
 )
 
-signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=10)
+signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=100)
 print(signal_job.status)
 print(signal_job.result)
 # -

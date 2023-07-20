@@ -72,7 +72,7 @@ job_small_k = client.jobs.create_full_avatarization_job(
         parameters=AvatarizationParameters(k=k, dataset_id=dataset.id)
     )
 )
-job_small_k = client.jobs.get_avatarization_job(id=job_small_k.id)
+job_small_k = client.jobs.get_avatarization_job(id=job_small_k.id, timeout=100)
 
 # Retrieve selected metric
 hidden_rate = job_small_k.result.privacy_metrics.hidden_rate
@@ -93,7 +93,7 @@ job_large_k = client.jobs.create_full_avatarization_job(
         parameters=AvatarizationParameters(k=k, dataset_id=dataset.id)
     )
 )
-job_large_k = client.jobs.get_avatarization_job(id=job_large_k.id)
+job_large_k = client.jobs.get_avatarization_job(id=job_large_k.id, timeout=100)
 
 # Retrieve selected metric
 hidden_rate = job_large_k.result.privacy_metrics.hidden_rate
@@ -214,7 +214,7 @@ parameters = AvatarizationParameters(
 job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(parameters=parameters)
 )
-job = client.jobs.get_avatarization_job(id=job.id)
+job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
 # -
 
 # We will now observe the impact of the parameters on the projections. We recommend executing this last part of the tutorial several times with different settings.
