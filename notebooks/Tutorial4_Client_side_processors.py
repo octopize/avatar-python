@@ -261,11 +261,11 @@ job = client.jobs.create_avatarization_job(
         parameters=AvatarizationParameters(k=20, ncp=2, dataset_id=dataset.id)
     )
 )
-job = client.jobs.get_avatarization_job(id=job.id)
+job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
 # -
 
 avatars_noprocessing = client.pandas_integration.download_dataframe(
-    job.result.avatars_dataset.id
+    job.result.avatars_dataset.id, timeout=100
 )
 
 avatars_noprocessing.head(5)
