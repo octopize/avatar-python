@@ -101,7 +101,7 @@ for var in dataset.summary.stats:
 # +
 job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(
-        parameters=AvatarizationParameters(k=20, dataset_id=dataset.id),
+        parameters=AvatarizationParameters(k=5, dataset_id=dataset.id),
     )
 )
 
