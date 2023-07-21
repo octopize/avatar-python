@@ -125,9 +125,7 @@ class JobKind(Enum):
     avatarization_batch = "avatarization_batch"
     privacy_metrics_batch = "privacy_metrics_batch"
     signal_metrics_batch = "signal_metrics_batch"
-    avatarization_with_time_series = "avatarization_with_time_series"
-    privacy_metrics_with_time_series = "privacy_metrics_with_time_series"
-    signal_metrics_with_time_series = "signal_metrics_with_time_series"
+
 
 
 class JobProgress(BaseModel):
@@ -423,7 +421,7 @@ class ExcludeCategoricalParameters(BaseModel):
         title="Exclude Cardinality Threshold",
     )
     exclude_replacement_strategy: ExcludeCategoricalMethod = Field(
-        ..., description="See :class:`ExcludeCategoricalMethod`."
+        ..., description="See `ExcludeCategoricalMethod`."
     )
     rare_occurence_threshold: int = Field(
         ...,
@@ -432,7 +430,7 @@ class ExcludeCategoricalParameters(BaseModel):
         title="Rare Occurence Threshold",
     )
     rare_replacement_strategy: Optional[RareCategoricalMethod] = Field(
-        None, description="See :class:`RareCategoricalMethod`."
+        None, description="See `RareCategoricalMethod`."
     )
     number_reference_records: Optional[int] = Field(
         None,
