@@ -127,7 +127,6 @@ class JobKind(Enum):
     signal_metrics_batch = "signal_metrics_batch"
 
 
-
 class JobProgress(BaseModel):
     completion_rate_100: int = Field(..., title="Completion Rate 100")
     name: Optional[str] = Field(None, title="Name")
@@ -421,7 +420,7 @@ class ExcludeCategoricalParameters(BaseModel):
         title="Exclude Cardinality Threshold",
     )
     exclude_replacement_strategy: ExcludeCategoricalMethod = Field(
-        ..., description="See `ExcludeCategoricalMethod`."
+        ..., description="See ``ExcludeCategoricalMethod``."
     )
     rare_occurence_threshold: int = Field(
         ...,
@@ -430,7 +429,7 @@ class ExcludeCategoricalParameters(BaseModel):
         title="Rare Occurence Threshold",
     )
     rare_replacement_strategy: Optional[RareCategoricalMethod] = Field(
-        None, description="See `RareCategoricalMethod`."
+        None, description="See ``RareCategoricalMethod``."
     )
     number_reference_records: Optional[int] = Field(
         None,
