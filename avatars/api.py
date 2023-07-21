@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.10-7b671b61c7c2b4b8406f19e68864ac4b7e25303a
+# API Version : 0.5.11-277bef0353d35b0dacb126baeff5b9cdea18eceb
 
 
 import itertools
@@ -173,6 +173,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs = {
             "method": "post",
             "url": f"/login/forgotten_password",
@@ -189,6 +190,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs = {
             "method": "post",
             "url": f"/login/reset_password",
@@ -982,6 +984,7 @@ class PandasIntegration:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
         should_stream: bool = False,
+        identifier_variables: Optional[List[str]] = None,
     ) -> Dataset:
         df_types = request.dtypes
         buffer = StringIO()
@@ -1003,6 +1006,16 @@ class PandasIntegration:
                         for i, e in zip(df_types.index, df_types)
                     ]
                 ),
+            )
+
+        if identifier_variables:
+            self.client.datasets.patch_dataset(
+                id=str(dataset.id),
+                request=PatchDataset(
+                    columns=[ColumnDetail(type=ColumnType.identifier, label=i)
+                             for i in identifier_variables
+                    ]
+                )
             )
 
         return dataset
