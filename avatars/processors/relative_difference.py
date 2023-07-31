@@ -167,6 +167,10 @@ class RelativeDifferenceProcessor:
                 "Expected all reference variables in dataset columns, "
                 f"got {wrong_variables} instead."
             )
+        if df[self.references].isnull().values.any():
+            raise ValueError(
+                "Expected no missing values for `references`, got column with missing values instead"
+            )
         df[self.target_rename] = (
             df[self.target].sub(df[self.references].sum(axis=1))
         ) / self.scaling_unit
