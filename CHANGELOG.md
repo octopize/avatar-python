@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0
+- feat: detect potential id columns
+- feat: add created_at, kind to Jobs
+- feat: add time series
+
 ## 0.5.2
 - feat: add InterRecordBoundedRangeDifferenceProcessor
 

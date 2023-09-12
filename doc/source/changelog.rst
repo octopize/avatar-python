@@ -1,12 +1,21 @@
 Changelog
 =========
 
+0.6.0
+-----
+
+-  feat: detect potential id columns
+-  feat: add created_at, kind to Jobs
+-  feat: add time series
+
+.. _section-1:
+
 0.5.2
 -----
 
 -  feat: add InterRecordBoundedRangeDifferenceProcessor
 
-.. _section-1:
+.. _section-2:
 
 0.5.1
 -----
@@ -18,7 +27,7 @@ BREAKING CHANGE
 
 -  remove broken endpoint ``/projections``
 
-.. _section-2:
+.. _section-3:
 
 0.4.0
 -----
@@ -39,7 +48,7 @@ BREAKING CHANGE
 
 -  remove ``patch`` parameter from ``create_dataset``
 
-.. _section-3:
+.. _section-4:
 
 0.3.3
 -----
@@ -58,14 +67,14 @@ BREAKING CHANGE
    launching a privacy metrics job
 -  Fix: call analyze_dataset only once in notebooks
 
-.. _section-4:
+.. _section-5:
 
 0.3.2
 -----
 
 -  catch JSONDecodeError and re-raise with more info
 
-.. _section-5:
+.. _section-6:
 
 0.3.1
 -----
@@ -77,7 +86,7 @@ BREAKING CHANGE
 -  improve logging and error handling in avatarization_pipeline to
    resume easier on failure
 
-.. _section-6:
+.. _section-7:
 
 0.3.0
 -----
@@ -138,7 +147,7 @@ Others
 -  fix: fixed a bug where computing privacy metrics with distinct
    missing values was impossible
 
-.. _section-7:
+.. _section-8:
 
 0.2.2
 -----
@@ -152,7 +161,7 @@ Others
    ``categorical_hidden_rate``
 -  Add the ``DatetimeProcessor``
 
-.. _section-8:
+.. _section-9:
 
 0.2.1
 -----
@@ -161,7 +170,7 @@ Others
 -  Make the ``toolz`` package a mandatory dependency
 -  Fix a handling of a target variable equaling zero
 
-.. _section-9:
+.. _section-10:
 
 0.2.0
 -----
@@ -183,7 +192,7 @@ Others
 -  Add ExcludeCategoricalParameters to use embedded processor on the
    server side
 
-.. _section-10:
+.. _section-11:
 
 0.1.16
 ------
@@ -193,7 +202,7 @@ Others
 -  JobParameters becomes AvatarizationParameters
 -  Add DCR and NNDR to privacy metrics
 
-.. _section-11:
+.. _section-12:
 
 0.1.15
 ------
@@ -217,14 +226,14 @@ BREAKING
 
 -  Remove ``get_health_config`` call.
 
-.. _section-12:
+.. _section-13:
 
 0.1.14
 ------
 
 -  Give access to avatars unshuffled avatars dataset
 
-.. _section-13:
+.. _section-14:
 
 0.1.13
 ------
