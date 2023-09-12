@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.10-7b671b61c7c2b4b8406f19e68864ac4b7e25303a
+# API Version : 0.5.13-0ab3d529c1d47d9c183827bc2d5364dca273697c
 
 
 import itertools
@@ -31,6 +31,8 @@ from avatars.models import (
     AvatarizationJobCreate,
     AvatarizationPipelineCreate,
     AvatarizationPipelineResult,
+    AvatarizationWithTimeSeriesJob,
+    AvatarizationWithTimeSeriesJobCreate,
     ClusterStats,
     ColumnDetail,
     ColumnType,
@@ -52,6 +54,8 @@ from avatars.models import (
     PrivacyMetricsJob,
     PrivacyMetricsJobCreate,
     PrivacyMetricsParameters,
+    PrivacyMetricsWithTimeSeriesJob,
+    PrivacyMetricsWithTimeSeriesJobCreate,
     Processor,
     Projections,
     Report,
@@ -65,6 +69,8 @@ from avatars.models import (
     SignalMetricsJob,
     SignalMetricsJobCreate,
     SignalMetricsParameters,
+    SignalMetricsWithTimeSeriesJob,
+    SignalMetricsWithTimeSeriesJobCreate,
     User,
 )
 
@@ -173,6 +179,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs = {
             "method": "post",
             "url": f"/login/forgotten_password",
@@ -189,6 +196,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs = {
             "method": "post",
             "url": f"/login/reset_password",
@@ -511,6 +519,23 @@ class Jobs:
 
         return AvatarizationBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
+    def create_avatarization_with_time_series_job(
+        self,
+        request: AvatarizationWithTimeSeriesJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationWithTimeSeriesJob:
+        """Create an avatarization with time series job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/avatarization_with_time_series",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return AvatarizationWithTimeSeriesJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
     def create_signal_metrics_job(
         self,
         request: SignalMetricsJobCreate,
@@ -561,6 +586,40 @@ class Jobs:
         }
 
         return PrivacyMetricsBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def create_privacy_metrics_time_series_job(
+        self,
+        request: PrivacyMetricsWithTimeSeriesJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsWithTimeSeriesJob:
+        """Create a privacy metrics with time series job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/privacy_time_series",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return PrivacyMetricsWithTimeSeriesJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def create_signal_metrics_time_series_job(
+        self,
+        request: SignalMetricsWithTimeSeriesJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsWithTimeSeriesJob:
+        """Create a signal metrics with time series job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/signal_time_series",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return SignalMetricsWithTimeSeriesJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
     def create_signal_metrics_batch_job(
         self,
@@ -623,6 +682,28 @@ class Jobs:
             **kwargs,  # type: ignore
         )
 
+    def get_avatarization_time_series_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationWithTimeSeriesJob:
+        """Get an avatarization time series job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/avatarization_with_time_series/{id}",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationWithTimeSeriesJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
     def get_signal_metrics(
         self,
         id: str,
@@ -667,6 +748,28 @@ class Jobs:
             **kwargs,  # type: ignore
         )
 
+    def get_signal_metrics_time_series_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> SignalMetricsWithTimeSeriesJob:
+        """Get a signal metrics time series job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/signal_time_series",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=SignalMetricsWithTimeSeriesJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
     def get_privacy_metrics(
         self,
         id: str,
@@ -707,6 +810,28 @@ class Jobs:
         return get_job(
             client=self.client,
             response_cls=PrivacyMetricsBatchJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_privacy_metrics_time_series_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsWithTimeSeriesJob:
+        """Get a privacy metrics time series job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/privacy_time_series",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=PrivacyMetricsWithTimeSeriesJob,
             per_request_timeout=per_request_timeout,
             **kwargs,  # type: ignore
         )
@@ -982,6 +1107,7 @@ class PandasIntegration:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
         should_stream: bool = False,
+        identifier_variables: List[str] = [],
     ) -> Dataset:
         df_types = request.dtypes
         buffer = StringIO()
@@ -995,16 +1121,22 @@ class PandasIntegration:
             )
         else:
             dataset = self.client.datasets.create_dataset(buffer, timeout=timeout)
-            self.client.datasets.patch_dataset(
-                id=str(dataset.id),
-                request=PatchDataset(
-                    columns=[
-                        ColumnDetail(type=to_common_type(str(e)), label=i)
-                        for i, e in zip(df_types.index, df_types)
-                    ]
-                ),
-            )
+            columns = []
+            for index, dtype in zip(df_types.index, df_types):
+                if index in identifier_variables:
+                    column_detail = ColumnDetail(
+                        type=ColumnType.identifier, label=index
+                    )
+                else:
+                    column_detail = ColumnDetail(
+                        type=to_common_type(str(dtype)), label=index
+                    )
+                columns.append(column_detail)
 
+            dataset = self.client.datasets.patch_dataset(
+                id=str(dataset.id),
+                request=PatchDataset(columns=columns),
+            )
         return dataset
 
     def download_dataframe(
@@ -1027,7 +1159,11 @@ class PandasIntegration:
         dataset_io.seek(0)
 
         # We apply datetime columns separately as 'datetime' is not a valid pandas dtype
-        dtypes = {c.label: c.type.value for c in dataset_info.columns or {}}
+        dtypes = {
+            c.label: c.type.value
+            for c in dataset_info.columns or {}
+            if c.type is not ColumnType.identifier
+        }
         datetime_columns = [
             label for label, type in dtypes.items() if type == ColumnType.datetime.value
         ]
