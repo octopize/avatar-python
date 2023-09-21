@@ -9,7 +9,7 @@ license = "Apache-2.0"
 [tool.poetry.dependencies]
 python = "^3.9"
 httpx = "^0.23.0"
-pydantic = "^1.10.9"
+pydantic = "^2"
 pandas = "^1.4.2"
 toolz = "^0.12.0"
 
