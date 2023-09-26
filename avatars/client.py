@@ -191,7 +191,7 @@ class ApiClient:
 
         if sys.getsizeof(content) >= MAX_FILE_LENGTH:
             raise FileTooLarge(
-                f"The file size must not exceed{MAX_FILE_LENGTH / 1024 : .0f} MB."
+                f"The file size must not exceed{MAX_FILE_LENGTH / 1024 * 1024 : .0f} MB."
             )
 
         encoded_content = (
