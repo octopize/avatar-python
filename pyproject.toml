@@ -20,7 +20,7 @@ sphinx-autodoc-typehints = "^1.18.1"
 beautifulsoup4 = "^4.11.1"
 furo = "^2023.03.27"
 sphinx-multiversion = "^0.2.4"
-autodoc-pydantic = "^1.8.0"
+autodoc-pydantic = "^2"
 
 
 [tool.poetry.group.dev.dependencies]
