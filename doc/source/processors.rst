@@ -20,3 +20,5 @@ Table of contents
    processors.InterRecordRangeDifferenceProcessor
    processors.InterRecordCumulatedDifferenceProcessor
    processors.InterRecordBoundedRangeDifferenceProcessor
+   processors.InterRecordBoundedCumulatedDifferenceProcessor
+
