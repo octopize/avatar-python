@@ -100,7 +100,6 @@ smv_released_pattern = r"^refs/tags/.*$"
 # to build the documentation
 smv_tag_whitelist = r"^(0\.[0-5].[0-9]+|0.6.0)$"
 
-"^(0\.6\.[1-9]+|)$"
 # -------------------------------------------------------------------------
 
 # List of patterns, relative to source directory, that match files and
