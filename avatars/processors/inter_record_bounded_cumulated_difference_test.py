@@ -23,8 +23,8 @@ def preprocessed_df_with_cumulated() -> pd.DataFrame:
     df = pd.DataFrame(
         {
             "id": [1, 2, 1, 1, 2, 2],
-            "first_value": [1000, 20000, 1000, 1000, 20000, 20000],
-            "value_difference": [25, 2, 0, 105, 0, 40],
+            "first_value": [1025, 20042, 1025, 1025, 20042, 20042],
+            "difference_to_bound": [0, 0, -1, 0.006827, -0.002206, 0.952381],
         }
     )
     return df
@@ -38,14 +38,14 @@ def test_preprocess_raises_error_when_missing_ids(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(ValueError, match="Expected no missing values for id variable"):
         processor.preprocess(df_with_cumulated)
 
 
-def test_preprocess_raises_error_when_missing_target(
+def test_preprocess_raises_error_when_missing_in_target(
     df_with_cumulated: pd.DataFrame,
 ) -> None:
     df_with_cumulated.loc[2, "value"] = np.nan
@@ -53,7 +53,7 @@ def test_preprocess_raises_error_when_missing_target(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(
@@ -62,7 +62,7 @@ def test_preprocess_raises_error_when_missing_target(
         processor.preprocess(df_with_cumulated)
 
 
-def test_postprocess_raises_error_when_missing_source_ids(
+def test_postprocess_raises_error_when_missing_in_source_ids(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
     df_with_cumulated.loc[0, "id"] = np.nan
@@ -71,7 +71,7 @@ def test_postprocess_raises_error_when_missing_source_ids(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(
@@ -80,7 +80,7 @@ def test_postprocess_raises_error_when_missing_source_ids(
         processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
 
 
-def test_preprocess_raises_error_when_missing_source_target(
+def test_preprocess_raises_error_when_missing_in_source_target(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
     df_with_cumulated.loc[2, "value"] = np.nan
@@ -89,7 +89,7 @@ def test_preprocess_raises_error_when_missing_source_target(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(
@@ -98,7 +98,7 @@ def test_preprocess_raises_error_when_missing_source_target(
         processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
 
 
-def test_postprocess_raises_error_when_missing_dest_first_var(
+def test_postprocess_raises_error_when_missing_in_dest_first_var(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
     preprocessed_df_with_cumulated.loc[4, "first_value"] = np.nan
@@ -107,7 +107,7 @@ def test_postprocess_raises_error_when_missing_dest_first_var(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(
@@ -116,16 +116,16 @@ def test_postprocess_raises_error_when_missing_dest_first_var(
         processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
 
 
-def test_preprocess_raises_error_when_missing_dest_difference_var(
+def test_preprocess_raises_error_when_missing_in_dest_difference_var(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
-    preprocessed_df_with_cumulated.loc[2, "value_difference"] = np.nan
+    preprocessed_df_with_cumulated.loc[2, "difference_to_bound"] = np.nan
 
     processor = InterRecordBoundedCumulatedDifferenceProcessor(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(
@@ -142,7 +142,7 @@ def test_preprocess_raises_error_when_wrong_id_var(
         id_variable="wrong_id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(ValueError, match="Expected a valid `id_variable`"):
@@ -156,7 +156,7 @@ def test_preprocess_raises_error_when_wrong_target_var(
         id_variable="id",
         target_variable="wrong_value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(ValueError, match="Expected a valid `target_variable`"):
@@ -170,7 +170,7 @@ def test_postprocess_raises_error_when_wrong_first_var(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="wrong_first_value",
-        new_difference_variable_name="value_difference",
+        new_difference_variable_name="difference_to_bound",
     )
 
     with pytest.raises(ValueError, match="Expected a valid `new_first_variable_name`"):
@@ -184,7 +184,7 @@ def test_postprocess_raises_error_when_wrong_difference_var(
         id_variable="id",
         target_variable="value",
         new_first_variable_name="first_value",
-        new_difference_variable_name="wrong_value_difference",
+        new_difference_variable_name="wrong_difference_to_bound",
     )
 
     with pytest.raises(
@@ -193,16 +193,21 @@ def test_postprocess_raises_error_when_wrong_difference_var(
         processor.postprocess(df_with_cumulated, preprocessed_df_with_cumulated)
 
 
-def test_bounds_are_respected(df_with_cumulated: pd.DataFrame) -> None:
+def test_bounds_are_respected(
+    df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
+) -> None:
     processor = InterRecordBoundedCumulatedDifferenceProcessor(
         id_variable="id",
         target_variable="value",
-        new_first_variable_name="first_val",
-        new_difference_variable_name="diff_to_bound",
+        new_first_variable_name="first_value",
+        new_difference_variable_name="difference_to_bound",
         should_round_output=True,
     )
     # Pre-process
     preprocessed_df = processor.preprocess(df_with_cumulated)
+    assert_frame_equal(
+        preprocessed_df, preprocessed_df_with_cumulated, check_dtype=False, atol=0.001
+    )
 
     # Post-process transformed df
     postprocessed_df = processor.postprocess(df_with_cumulated, preprocessed_df)
