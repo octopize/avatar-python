@@ -79,6 +79,7 @@ class InterRecordRangeDifferenceProcessor:
     ...         "value_difference": [0, 2, 0, 4, 0, 5],
     ...     }
     ... )
+
     >>> processor.postprocess(df, preprocessed_df)
        id  start   end
     0   1    7.0   8.0

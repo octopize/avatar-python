@@ -78,8 +78,13 @@ proc = subprocess.Popen(
 )
 current_branch, _ = proc.communicate()
 smv_branch_whitelist = f"^(main|{current_branch.strip()})$"
-# Tags define a release. Releases are the ones being shown publicly.
+# Tags define a release, which are the ones that show up on the sidebar.
+# Add the pattern for which you want the releases to appear.
 smv_released_pattern = r"^refs/tags/.*$"
+
+# See [doc/README.md](doc/README.md) for explanation on the tag
+smv_tag_whitelist = r"^(0\.[0-5].[0-9]+|0.6.0)$"
+
 # -------------------------------------------------------------------------
 
 # List of patterns, relative to source directory, that match files and
