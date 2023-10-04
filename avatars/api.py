@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.13-0ab3d529c1d47d9c183827bc2d5364dca273697c
+# API Version : 0.5.13-4e4457d4bbc31bb659554c1e1dc4627817e52dc6
 
 
 import itertools
@@ -179,7 +179,6 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-
         kwargs = {
             "method": "post",
             "url": f"/login/forgotten_password",
@@ -196,7 +195,6 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-
         kwargs = {
             "method": "post",
             "url": f"/login/reset_password",
@@ -249,6 +247,21 @@ class Datasets:
         }
 
         return Dataset(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
+    def find_all_datasets_by_user(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> List[Dataset]:
+        """List all datasets of the current_user."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/datasets",
+            "timeout": timeout,
+        }
+
+        return [Dataset(**item) for item in self.client.request(**kwargs)]  # type: ignore[arg-type]
 
     def create_dataset(
         self,

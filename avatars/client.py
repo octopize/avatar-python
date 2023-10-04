@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.13-0ab3d529c1d47d9c183827bc2d5364dca273697c
+# API Version : 0.5.13-4e4457d4bbc31bb659554c1e1dc4627817e52dc6
 
 
 import sys
@@ -128,7 +128,9 @@ class ApiClient:
     ) -> Any:
         """Request the API."""
 
-        should_verify = kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True  # type: ignore[comparison-overlap]
+        should_verify = (
+            kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True
+        )
         if should_verify and "Authorization" not in self._headers:
             raise Exception("You are not authenticated.")
 
@@ -136,10 +138,8 @@ class ApiClient:
         if isinstance(params, dict):
             params = valfilter(lambda x: x is not None, params)
 
-        # Custom encoder because UUID is not JSON serializable by httpx
-        # and Enums need their value to be sent, e.g. 'int' instead of 'ColumnType.int'
-        json_arg = json_loads(json.json(encoder=_default_encoder)) if json else None
-        form_data_arg = form_data.dict() if form_data else None
+        json_arg = json_loads(json.model_dump_json()) if json else None
+        form_data_arg = form_data.model_dump() if form_data else None
 
         files_arg = self._get_file_argument(file)
 
@@ -181,7 +181,6 @@ class ApiClient:
     def _get_file_argument(
         self, file: Optional[Union[StringIO, BytesIO]]
     ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
-
         if not file:
             return None
 
@@ -191,7 +190,7 @@ class ApiClient:
 
         if sys.getsizeof(content) >= MAX_FILE_LENGTH:
             raise FileTooLarge(
-                f"The file size must not exceed{MAX_FILE_LENGTH / 1024 * 1024 : .0f} MB."
+                f"The file size must not exceed{MAX_FILE_LENGTH / (1024*1024) : .0f} MB."
             )
 
         encoded_content = (
