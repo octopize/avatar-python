@@ -28,6 +28,12 @@ We use `sphinx` to build our documentation, along with a few extensions.
 
   This is used to generate documentation from `pydantic` models which come with useful information such as constrained values and a docstring per variable.
 
+## Versioning
+
+We want to show the documentation of all the different Python client versions. We thus use `sphinx-multiversion` to generate one version of the documentation for each release.
+
+To show a sidebar to the user, we override the `ethical-ads.html` page that serves as a sidebar when deploying on ReadTheDocs. As we are only deploying on Github Pages, we can safely override this.
+
 ## Build process
 
 Use `make doc-build` to build the documentation. Be on the lookout for errors during the build process, as `sphinx-multiversion` will not stop the build process on errors.

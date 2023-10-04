@@ -82,7 +82,7 @@ smv_branch_whitelist = f"^(main|{current_branch.strip()})$"
 # Add the pattern for which you want the releases to appear.
 smv_released_pattern = r"^(refs/tags/.*|main$)"
 
-# See [doc/README.md](doc/README.md) for explanation on the tag
+# See [doc/README.md](doc/README.md) for explanation on the regex.
 smv_tag_whitelist = r"^(0\.[0-5].[0-9]+|0.6.0)$"
 
 # -------------------------------------------------------------------------

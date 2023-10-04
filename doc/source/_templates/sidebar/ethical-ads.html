@@ -1,5 +1,5 @@
 <!-- We are overriding the ethical-ads.html file form the furo theme to display versions.
-  This file is only used on ReadTheDocs. -->
+  This file is only used on ReadTheDocs. As we are not using ReadTheDocs, we can override it no problem. -->
 {% if versions %}
 <div class="sidebar-tree">
   <p class="caption" role="heading">
@@ -7,7 +7,12 @@
   </p>
   <ul>
   <!-- https://holzhaus.github.io/sphinx-multiversion/master/templates.html#list-branches-and-tags-separately -->
-    {%- for item in versions| sort(reverse = True) %}
+    {%- for item in versions.branches %}
+    <li class="toctree-l1">
+      <a class="reference internal" href="{{ item.url }}">{{ item.name }}</a>
+    </li>
+    {%- endfor %}
+    {%- for item in versions.tags| sort(reverse = True) %}
     <li class="toctree-l1">
       <a class="reference internal" href="{{ item.url }}">{{ item.name }}</a>
     </li>
