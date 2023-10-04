@@ -82,22 +82,7 @@ smv_branch_whitelist = f"^(main|{current_branch.strip()})$"
 # Add the pattern for which you want the releases to appear.
 smv_released_pattern = r"^refs/tags/.*$"
 
-# At version 0.6.0 and before, we were using `pydantic` version 1, which
-# combined with `sphinxcontrib.autodoc_pydantic` generates beautiful documentation
-# for pydantic.
-# Above 0.6.0, we switched to pydantic version 2. The problem arises that
-# `sphinx-multiversion` does not allow to run a pre-build callable that could install
-# the necessary dependencies depending on the current state of the repo,
-# and, although we can put custom code in `conf.py` that get's executed at
-# import, `sphinx-multiversion` only takes `conf.py` of the version you're building
-# _from_.
-# To circumvent that, we whitelist the tags that were at pydantic1 and have the following
-# workflow:
-# - Uninstall pydantic2 and install pydantic1
-# - Run `sphinx-multiversion` with the default values (the tag whitelist here below)
-# - Uninstall pydantic1 and install pydantic2
-# - Run `sphinx-multiversion` with a configuration override via the CLI
-# to build the documentation
+# See [doc/README.md](doc/README.md) for explanation on the tag
 smv_tag_whitelist = r"^(0\.[0-5].[0-9]+|0.6.0)$"
 
 # -------------------------------------------------------------------------
