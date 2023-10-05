@@ -1,10 +1,11 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.13-4e4457d4bbc31bb659554c1e1dc4627817e52dc6
+# API Version : 0.5.13-4433091460dbc9f45d247c8ac55be163da6d4102
 
 
 import itertools
 import logging
 import time
+from copy import copy
 from io import BytesIO, StringIO
 from typing import (
     TYPE_CHECKING,
@@ -21,6 +22,7 @@ from uuid import UUID
 
 import numpy as np
 import pandas as pd
+import pyarrow
 from pydantic import BaseModel
 
 from avatars.models import (
@@ -1122,9 +1124,19 @@ class PandasIntegration:
         should_stream: bool = False,
         identifier_variables: List[str] = [],
     ) -> Dataset:
+        for col in request.columns:
+            if pd.api.types.infer_dtype(request[col], skipna=True) in (
+                "mixed-integer",
+                "mixed",
+            ):
+                raise ValueError(
+                    f"Expected column '{col}' should have either str or numeric values."
+                    " Consider harmonizing columns prior to upload."
+                )
+
         df_types = request.dtypes
-        buffer = StringIO()
-        request.to_csv(buffer, index=False)
+        buffer = BytesIO()
+        request.to_parquet(buffer, index=False, engine="pyarrow")
         buffer.seek(0)
         del request
 
@@ -1160,14 +1172,16 @@ class PandasIntegration:
         should_stream: bool = False,
     ) -> pd.DataFrame:
         dataset_info = self.client.datasets.get_dataset(id, timeout=timeout)
-        dataset_io: StringIO
+        dataset_io: BytesIO
         if should_stream:
             dataset_io = self.client.datasets.download_dataset_as_stream(
                 id, timeout=timeout
             )
         else:
             dataset = self.client.datasets.download_dataset(id, timeout=timeout)
-            dataset_io = StringIO(dataset)
+            dataset_io = BytesIO(
+                dataset.encode("utf-8") if isinstance(dataset, str) else dataset
+            )
 
         dataset_io.seek(0)
 
@@ -1182,12 +1196,22 @@ class PandasIntegration:
         ]
 
         # Remove datetime columns
-        keys = list(dtypes.keys())
-        for label in keys:
+        for label in list(dtypes.keys()):
             if label in datetime_columns:
                 dtypes.pop(label, None)
+        try:
+            # We do copy() because read_parquet consumes the buffer, even on failure.
+            df = pd.read_parquet(copy(dataset_io), engine="pyarrow")
+        except pyarrow.lib.ArrowInvalid as e:
+            if (
+                not "Either the file is corrupted or this is not a parquet file."
+                in str(e.args)
+            ):
+                raise e
+            df = pd.read_csv(dataset_io)
 
-        df = pd.read_csv(dataset_io, dtype=dtypes)
+        for name, dtype in dtypes.items():
+            df[name] = df[name].astype(dtype)
 
         df[datetime_columns] = df[datetime_columns].astype("datetime64[ns]")
 

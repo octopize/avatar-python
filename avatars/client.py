@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.13-4e4457d4bbc31bb659554c1e1dc4627817e52dc6
+# API Version : 0.5.13-4433091460dbc9f45d247c8ac55be163da6d4102
 
 
 import sys
@@ -210,21 +210,24 @@ class ApiClient:
         if result.headers["content-type"] == "application/json":
             as_json: Dict[str, Any] = result.json()
             return as_json
-        elif result.headers["content-type"] == "application/pdf":
+        elif result.headers["content-type"] in (
+            "application/pdf",
+            "application/octet-stream",
+        ):
             return result.content
         else:
             return result.text
 
-    def _handle_streaming_response(self, result: Response) -> StringIO:
+    def _handle_streaming_response(self, result: Response) -> BytesIO:
         if not result.is_success:
             content = result.read()
             encoding = result.encoding or "utf-8"
             as_json: Dict[str, Any] = json_loads(content.decode(encoding))
             self._raise_on_status(result, as_json)
 
-        buffer = StringIO()
+        buffer = BytesIO()
         try:
-            for chunk in result.iter_text():
+            for chunk in result.iter_bytes():
                 buffer.write(chunk)
         finally:
             result.close()
