@@ -100,12 +100,8 @@ def get_current_and_bumped_version(bump_type: BumpType) -> Tuple[str, str]:
 
 
 def bump_version_with_confirm_prompt(bump_type: BumpType) -> None:
-    current_version, next_version = get_current_and_bumped_version(bump_type)
-
-    should_bump = typer.confirm(
-        f"Upgrade version from {current_version} to {next_version}?"
-    )
-    if not should_bump:
+    should_proceed = typer.confirm("Proceed ?")
+    if not should_proceed:
         raise typer.Abort()
 
     bump_version_in_file(PYPROJECT_TOML, key="version", bump_type=bump_type)
@@ -183,22 +179,19 @@ def push() -> None:
             raise typer.Exit(result)
 
 
-def ensure_all_committed_files() -> Optional[List[str]]:
+def check_for_uncommitted_files() -> None:
     command = ("git", "ls-files", "-m")
     typer.echo(" ".join(command))
     result = subprocess.run(command, capture_output=True, text=True)
 
     uncommitted_files = result.stdout.split("\n")[:-1]
-    while len(uncommitted_files) > 0:
+    if len(uncommitted_files) == 0:
+        typer.echo("All files are committed, proceeding")
+    else:
         typer.echo(f"There are some uncommitted files: {uncommitted_files}.")
-        typer.echo("You may commit or stash them in another tab and retry")
-        should_retry = typer.confirm("Only committed changes will be released. Retry ?")
-        if not should_retry:
-            raise typer.Abort()
-        uncommitted_files = result.stdout.split("\n")[:-1]
-
-    typer.echo("All files are committed, proceeding")
-    return True
+        typer.confirm(
+            "You may commit some of them in another tab before proceeding. Proceed ?"
+        )
 
 
 def generate_doc() -> None:
@@ -259,7 +252,7 @@ def release(bump_type: BumpType = typer.Option(BumpType.PATCH.value)) -> Any:
         raise typer.Exit(1)
 
     ask_check_preconditions(bump_type)
-    ensure_all_committed_files()
+    check_for_uncommitted_files()
     bump_version_with_confirm_prompt(bump_type)
     commit_and_tag()
     push()
