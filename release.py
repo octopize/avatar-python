@@ -189,9 +189,11 @@ def check_for_uncommitted_files() -> None:
         typer.echo("All files are committed, proceeding")
     else:
         typer.echo(f"There are some uncommitted files: {uncommitted_files}.")
-        typer.confirm(
+        result = typer.confirm(
             "You may commit some of them in another tab before proceeding. Proceed ?"
         )
+        if not result:
+            raise typer.Abort()
 
 
 def generate_doc() -> None:
@@ -245,11 +247,11 @@ def release(bump_type: BumpType = typer.Option(BumpType.PATCH.value)) -> Any:
     )
     current_branch, _ = proc.communicate()
 
-    if not current_branch.strip() == "main":
-        typer.echo(
-            f"You can only run this on the 'main' branch. You are on '{current_branch}'."
-        )
-        raise typer.Exit(1)
+    # if not current_branch.strip() == "main":
+    #     typer.echo(
+    #         f"You can only run this on the 'main' branch. You are on '{current_branch}'."
+    #     )
+    #     raise typer.Exit(1)
 
     ask_check_preconditions(bump_type)
     check_for_uncommitted_files()
