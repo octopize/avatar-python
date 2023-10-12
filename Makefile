@@ -34,7 +34,7 @@ test-integration: ## Do a simple integration test
 lci: lint-fix ci ## Apply the whole integration pipeline
 .PHONY: lci
 
-ci : lint generate-py typecheck doc-build pip-requirements test test-integration pip-install-tutorial test-tutorial ## Run all checks
+ci: lint generate-py typecheck doc-build pip-requirements test test-integration pip-install-tutorial test-tutorial ## Run all checks
 .PHONY: ci
 
 lint-fix: ## Fix linting

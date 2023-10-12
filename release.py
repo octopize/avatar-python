@@ -1,3 +1,4 @@
+from typing import List
 from subprocess import PIPE
 import subprocess
 from pathlib import Path
@@ -86,7 +87,7 @@ def get_version_from_file(filename: Path) -> Optional[Match]:  # type: ignore[ty
         return get_version_match(file.read(), KEY_MAPPING[filename])
 
 
-def bump_version(bump_type: BumpType) -> None:
+def get_current_and_bumped_version(bump_type: BumpType):
     version = get_version_from_file(PYPROJECT_TOML)
 
     if not version:
@@ -95,6 +96,11 @@ def bump_version(bump_type: BumpType) -> None:
     current_version = ".".join(version.groups())
 
     next_version = bump(version, bump_type)
+    return current_version, next_version
+
+
+def bump_version_with_confirm_prompt(bump_type: BumpType) -> None:
+    current_version, next_version = get_current_and_bumped_version(bump_type)
 
     should_bump = typer.confirm(
         f"Upgrade version from {current_version} to {next_version}?"
@@ -177,18 +183,66 @@ def push() -> None:
             raise typer.Exit(result)
 
 
-def check_preconditions() -> None:
+def ensure_all_committed_files() -> Optional[List[str]]:
+    command = ("git", "ls-files", "-m")
+    typer.echo(" ".join(command))
+    result = subprocess.run(command, capture_output=True)
+
+    uncommitted_files = result.stdout.decode("UTF-8").split("\n")[:-1]
+    while len(uncommitted_files) > 0:
+        typer.echo(f"There are some uncommitted files: {uncommitted_files}.")
+        typer.echo("You may commit or stash them in another tab and retry")
+        should_retry = typer.confirm("Only committed changes will be released. Retry ?")
+        if not should_retry:
+            raise typer.Abort()
+        uncommitted_files = result.stdout.decode("UTF-8").split("\n")[:-1]
+
+    typer.echo("All files are committed, proceeding")
+    return True
+
+
+def generate_doc() -> None:
+    command = ("make", "doc")
+    typer.echo(" ".join(command))
+    return subprocess.run(command)
+
+
+def ask_check_preconditions(bump_type) -> None:
+    """
+    Check preconditions that cannot be checked from this script.
+    """
+    current_version, bumped_version = get_current_and_bumped_version(bump_type)
     preconditions = [
-        "Did you commit everything that needs to be in the new version?",
-        f"Did you update the changelog at {CHANGELOG}?",
-        "Did you generate the doc using `make doc`?",
-        "Did you add the new version to the compatibility mapping in the API?",
+        {
+            "message": f"Going to update from version {current_version} to {bumped_version}"
+        },
+        {
+            "message": f"Did you add {bumped_version} to the compatibility mapping in the API?"
+            + " NB: you can edit it in another tab and press Y after that"
+        },
+        {
+            "message": f"Did you update the changelog at {CHANGELOG}?"
+            + " NB: you can edit it in another tab and press Y after that"
+        },
+        {
+            "message": "Did you generate the doc using `make doc`? "
+            + "NB: if no, this script can generate it for you",
+            "confirm": "Do you want this script to generate the doc ?",
+            "action": generate_doc,
+        },
     ]
 
     for condition in preconditions:
-        result = typer.confirm(condition)
+        result = typer.confirm(condition["message"])
         if not result:
-            raise typer.Abort()
+            if "confirm" and "action" in condition:
+                result = typer.confirm(condition["confirm"])
+                if result:
+                    (condition["action"])()
+                else:
+                    raise typer.Abort()
+            else:
+                raise typer.Abort()
 
 
 @app.command()
@@ -204,8 +258,9 @@ def release(bump_type: BumpType = typer.Option(BumpType.PATCH.value)) -> Any:
         )
         raise typer.Exit(1)
 
-    check_preconditions()
-    bump_version(bump_type)
+    ask_check_preconditions(bump_type)
+    ensure_all_committed_files()
+    bump_version_with_confirm_prompt(bump_type)
     commit_and_tag()
     push()
 
