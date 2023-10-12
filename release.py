@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from subprocess import PIPE
 import subprocess
 from pathlib import Path
@@ -86,7 +87,7 @@ def get_version_from_file(filename: Path) -> Optional[Match]:  # type: ignore[ty
         return get_version_match(file.read(), KEY_MAPPING[filename])
 
 
-def bump_version(bump_type: BumpType) -> None:
+def get_current_and_bumped_version(bump_type: BumpType) -> Tuple[str, str]:
     version = get_version_from_file(PYPROJECT_TOML)
 
     if not version:
@@ -95,11 +96,12 @@ def bump_version(bump_type: BumpType) -> None:
     current_version = ".".join(version.groups())
 
     next_version = bump(version, bump_type)
+    return current_version, next_version
 
-    should_bump = typer.confirm(
-        f"Upgrade version from {current_version} to {next_version}?"
-    )
-    if not should_bump:
+
+def bump_version_with_confirm_prompt(bump_type: BumpType) -> None:
+    should_proceed = typer.confirm("Proceed ?")
+    if not should_proceed:
         raise typer.Abort()
 
     bump_version_in_file(PYPROJECT_TOML, key="version", bump_type=bump_type)
@@ -177,18 +179,65 @@ def push() -> None:
             raise typer.Exit(result)
 
 
-def check_preconditions() -> None:
+def check_for_uncommitted_files() -> None:
+    command = ("git", "ls-files", "-m")
+    typer.echo(" ".join(command))
+    result = subprocess.run(command, capture_output=True, text=True)
+
+    uncommitted_files = result.stdout.split("\n")[:-1]
+    if len(uncommitted_files) == 0:
+        typer.echo("All files are committed, proceeding")
+    else:
+        typer.echo(f"There are some uncommitted files: {uncommitted_files}.")
+        result = typer.confirm(
+            "You may commit some of them in another tab before proceeding. Proceed ?"
+        )
+        if not result:
+            raise typer.Abort()
+
+
+def generate_doc() -> None:
+    command = ("make", "doc")
+    typer.echo(" ".join(command))
+    return subprocess.run(command)
+
+
+def ask_check_preconditions(bump_type) -> None:
+    """
+    Check preconditions that cannot be checked from this script.
+    """
+    current_version, bumped_version = get_current_and_bumped_version(bump_type)
     preconditions = [
-        "Did you commit everything that needs to be in the new version?",
-        f"Did you update the changelog at {CHANGELOG}?",
-        "Did you generate the doc using `make doc`?",
-        "Did you add the new version to the compatibility mapping in the API?",
+        {
+            "message": f"Going to update from version {current_version} to {bumped_version}"
+        },
+        {
+            "message": f"Did you add {bumped_version} to the compatibility mapping in the API?"
+            + " You can edit it in another tab and press Y after that"
+        },
+        {
+            "message": f"Did you update the changelog at {CHANGELOG}?"
+            + " You can edit it in another tab and press Y after that"
+        },
+        {
+            "message": "Did you generate the doc using `make doc`? "
+            + "NB: if no, this script can generate it for you",
+            "confirm": "Do you want this script to generate the doc ?",
+            "action": generate_doc,
+        },
     ]
 
     for condition in preconditions:
-        result = typer.confirm(condition)
+        result = typer.confirm(condition["message"])
         if not result:
-            raise typer.Abort()
+            if "confirm" and "action" in condition:
+                result = typer.confirm(condition["confirm"])
+                if result:
+                    condition["action"]()
+                else:
+                    raise typer.Abort()
+            else:
+                raise typer.Abort()
 
 
 @app.command()
@@ -204,8 +253,9 @@ def release(bump_type: BumpType = typer.Option(BumpType.PATCH.value)) -> Any:
         )
         raise typer.Exit(1)
 
-    check_preconditions()
-    bump_version(bump_type)
+    ask_check_preconditions(bump_type)
+    check_for_uncommitted_files()
+    bump_version_with_confirm_prompt(bump_type)
     commit_and_tag()
     push()
 
