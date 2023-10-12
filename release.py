@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from subprocess import PIPE
 import subprocess
 from pathlib import Path
@@ -87,7 +87,7 @@ def get_version_from_file(filename: Path) -> Optional[Match]:  # type: ignore[ty
         return get_version_match(file.read(), KEY_MAPPING[filename])
 
 
-def get_current_and_bumped_version(bump_type: BumpType):
+def get_current_and_bumped_version(bump_type: BumpType) -> Tuple[str, str]:
     version = get_version_from_file(PYPROJECT_TOML)
 
     if not version:
@@ -186,16 +186,16 @@ def push() -> None:
 def ensure_all_committed_files() -> Optional[List[str]]:
     command = ("git", "ls-files", "-m")
     typer.echo(" ".join(command))
-    result = subprocess.run(command, capture_output=True)
+    result = subprocess.run(command, capture_output=True, text=True)
 
-    uncommitted_files = result.stdout.decode("UTF-8").split("\n")[:-1]
+    uncommitted_files = result.stdout.split("\n")[:-1]
     while len(uncommitted_files) > 0:
         typer.echo(f"There are some uncommitted files: {uncommitted_files}.")
         typer.echo("You may commit or stash them in another tab and retry")
         should_retry = typer.confirm("Only committed changes will be released. Retry ?")
         if not should_retry:
             raise typer.Abort()
-        uncommitted_files = result.stdout.decode("UTF-8").split("\n")[:-1]
+        uncommitted_files = result.stdout.split("\n")[:-1]
 
     typer.echo("All files are committed, proceeding")
     return True
@@ -218,11 +218,11 @@ def ask_check_preconditions(bump_type) -> None:
         },
         {
             "message": f"Did you add {bumped_version} to the compatibility mapping in the API?"
-            + " NB: you can edit it in another tab and press Y after that"
+            + " You can edit it in another tab and press Y after that"
         },
         {
             "message": f"Did you update the changelog at {CHANGELOG}?"
-            + " NB: you can edit it in another tab and press Y after that"
+            + " You can edit it in another tab and press Y after that"
         },
         {
             "message": "Did you generate the doc using `make doc`? "
@@ -238,7 +238,7 @@ def ask_check_preconditions(bump_type) -> None:
             if "confirm" and "action" in condition:
                 result = typer.confirm(condition["confirm"])
                 if result:
-                    (condition["action"])()
+                    condition["action"]()
                 else:
                     raise typer.Abort()
             else:
