@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+- feat: enable parquet format for
+- feat: use pydantic v2
+- feat: add InterRecordBoundedCumulatedDifferenceProcessor
+- fix: max file size error message
+
 ## 0.6.0
 - feat: detect potential id columns
 - feat: add created_at, kind to Jobs
