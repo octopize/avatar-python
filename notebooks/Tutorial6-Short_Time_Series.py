@@ -6,13 +6,9 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
 
-# # Tutorial 6: Time Series
+# # Tutorial 6: Short Time Series
 
 # In this tutorial, we will perform the avatarization of data that contains time series. The approach presented here can be used to anonymize time series that contain a small number of data points.
 
@@ -75,8 +71,6 @@ df = pd.read_csv("../fixtures/sensors.csv")
 
 df
 
-df.to_csv("../fixtures/sensors.csv", index=False)
-
 sns.lineplot(
     df, x="t", y="sensor1", hue="id", palette=sns.color_palette(), legend=False
 )
@@ -94,10 +88,10 @@ sns.lineplot(
 #
 # To perform the transformation which consists in pivotting the table and sampling a given number of time points, we will use a processor.
 #
-# We can call this processor `SimpleTimeSeriesProcessor`.
+# We can call this processor `PivotTimeSeriesProcessor`.
 
 
-class SimpleTimeSeriesProcessor:
+class PivotTimeSeriesProcessor:
     def __init__(
         self,
         n_points: int,
@@ -193,7 +187,7 @@ class SimpleTimeSeriesProcessor:
 
 # We can check that the behavior of the processor is as expected: after preprocessing, we should have *n_points* variables for each sensor and the static variables (i.e. the *model* variable)
 
-timeseries_processor = SimpleTimeSeriesProcessor(
+timeseries_processor = PivotTimeSeriesProcessor(
     n_points=10,
     id_variable="id",
     time_variable="t",
