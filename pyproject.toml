@@ -35,6 +35,7 @@ pytest = "^7.2.0"
 jupytext = "^1.14.2"
 nbconvert = "^7.2.6"
 flake8 = "^6.0.0"
+pytest-cov = "^4.1.0"
 
 [tool.poetry.group.tutorial.dependencies]
 seaborn = "^0.12.1"
@@ -59,6 +60,21 @@ plugins = [
 strict = true
 exclude = "(tmp|.venv)"
 
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "nocov",
+    "if TYPE_CHECKING:",
+]
+omit = [
+    "**/*_test.py",
+    ]
+
+[tool.coverage.run]
+branch = true
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

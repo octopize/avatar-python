@@ -23,13 +23,19 @@ test: typecheck  ## Run all the tests
 	poetry run pytest --doctest-modules avatars
 .PHONY: test
 
-typecheck:  ## Run the type checker
-	poetry run mypy avatars/ bin/ --show-error-codes --pretty
-.PHONY: typecheck
-
 test-integration: ## Do a simple integration test
 	poetry run python ./bin/markdowncode.py  doc/source/**.md | AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) PYTHONPATH="avatars/" poetry run python --
 .PHONY: test-integration
+
+test-cov:
+	poetry run pytest --doctest-modules avatars --cov=avatars --cov-report=html:htmlcov
+	@echo "Coverage report written to ./.htmlcov/"
+	python3 -m webbrowser -t "file://$(abspath htmlcov)/index.html"
+.PHONY: test-cov
+
+typecheck:  ## Run the type checker
+	poetry run mypy avatars/ bin/ --show-error-codes --pretty
+.PHONY: typecheck
 
 lci: lint-fix ci ## Apply the whole integration pipeline
 .PHONY: lci
