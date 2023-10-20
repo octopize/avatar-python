@@ -28,8 +28,7 @@
     - [Asynchronous calls](#asynchronous-calls)
     - [Synchronous calls](#synchronous-calls)
   - [SENSITIVE: how to access the results unshuffled](#sensitive-how-to-access-the-results-unshuffled)
-  - [How to launch an avatarization with time series](#how-to-launch-an-avatarization-with-time-series)
-  - [How to launch an avatarization with time series without vanilla data](#how-to-launch-an-avatarization-with-time-series-without-any-vanilla-data)
+  - [How to anonymize time series](#how-to-anonymize-time-series)
 
 
 ## How to setup your email account
@@ -517,9 +516,9 @@ sensitive_unshuffled_avatars_df = client.pandas_integration.download_dataframe(
 print(sensitive_unshuffled_avatars_df.head())
 ```
 
-## How to launch an avatarization with time series
+## How to anonymize time series
 
-An avatarization job can be launched on data containing time series. For more details on time series avatarization, see the [dedicated notebook tutorial on time series]((https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb)). 
+An avatarization job can be launched on data containing time series. For more details on time series avatarization, see the [dedicated notebook tutorial on time series](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb) and the [dedicated page in our public documentation](https://docs.octopize.io/docs/understanding/timeseries/). 
 
 ```python
 # upload vanilla data (where 1 line = 1 individual)
@@ -553,36 +552,4 @@ print(job.status)
 print(job.result)
 ```
 
-
-## How to launch an avatarization with time series without any vanilla data
-
-When the data only consists in time series data, you can specify that there is no vanilla data and launch an avatarization job using only the dataset that contain time series. For more details on time series avatarization, see the [dedicated notebook tutorial on time series]((https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb)). 
-
-```python
-# upload time series data (potentially from many dataframe)
-timeseries_dataset1 = client.pandas_integration.upload_dataframe(ts_df1)
-timeseries_dataset2 = client.pandas_integration.upload_dataframe(ts_df2)
-datasets_ts = [timeseries_dataset1, timeseries_dataset2]
-
-job = client.jobs.create_avatarization_with_time_series_job(
-    AvatarizationWithTimeSeriesJobCreate(
-        parameters=AvatarizationWithTimeSeriesParameters(
-            vanilla_dataset_id=None,
-            k=5,
-            time_series=[
-                AvatarizationTimeSeriesParameters(
-                    dataset_id=dataset_ts.id,
-                    projection_parameters=FPCAParameters(
-                        nf=10,
-                    ),
-                )
-                for dataset_ts in datasets_ts
-            ],
-        )
-    ),
-    timeout=10,
-)
-job = client.jobs.get_avatarization_time_series_job(job.id, timeout=10)
-print(job.status)
-print(job.result)
-```
+When the data only consists in time series data (i.e. no vanilla data), you can set `vanilla_dataset_id=None`.
