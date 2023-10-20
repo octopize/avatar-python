@@ -38,6 +38,10 @@ from avatars.models import (
     PrivacyMetricsWithTimeSeriesParameters,
     PrivacyMetricsParameters,
     PrivacyMetricsTimeSeriesParameters,
+    SignalMetricsTimeSeriesParameters,
+    SignalMetricsWithTimeSeriesJobCreate,
+    SignalMetricsWithTimeSeriesParameters,
+    TimeSeriesSignalMetricsPerDataset,
 )
 
 # -
@@ -60,7 +64,7 @@ client.health.get_health()
 # In this tutorial, we use data that contains readings from 3 sensors for 200 individuals. The data is divided into 3 datasets as follows:
 # - `example_vanilla.csv`: demographic data on individuals, each line refers to one individual and contains 15 variables (similar to adult data seen in previous tutorials)
 # - `example_ts1.csv`: time series data for `sensor1` and `sensor2`. The data contains an identifier variable (`id`) and a time variable (`t`). There are several lines for each individual.
-# - `example_ts2.csv`: time series data for `sensor3`.
+# - `example_ts2.csv`: time series data for `sensor3`. Note that this time series data can have different timestamps than the other time series and a different number of measurements.
 
 vanilla_df = pd.read_csv("../fixtures/example_vanilla.csv")
 ts1_df = pd.read_csv("../fixtures/example_ts1.csv")
@@ -190,7 +194,7 @@ for ts_df in ts_dfs:
 #
 # Each `AvatarizationTimeSeriesParameters` specifies the dataset_id of the time series data and the projection parameters. The projection parameters defines how the data will be transformed (aka projected) so that avatars can be generated.
 #
-# There are currently only one type of projection, Functional Principal Component Analysis (FPCA) and so the `projection_parameters` should be a `FPCAParameters`. Additional projectors will be made available to enable better handling of certain types of time series data. Finally, the `nf` attribute defines how many components should be used to represent each time series variable when generating avatars.
+# Supported time series projection is Functional Principal Component Analysis (FPCA). `nf` is the number of components used to represent each time series variable in the projection.
 #
 # Note that it is possible to generate avatars of data containing only time series dataset (i.e. without any vanilla data). In this case, dataset_id can be set to `None`
 
@@ -284,4 +288,85 @@ plot = plot_series(
 )
 plot.show()
 
-# As for any data, privacy metrics need to be computed on the output time series data to confirm that it is anonymous.
+# ## Privacy metrics for time series
+
+# As for any data, privacy metrics need to be computed on the output time series data to confirm that it is anonymous. We first retrieve the data required by the privacy metrics, that is the original datasets and their sensitive unshuffled counterparts. The unshuffled datasets are only used for computing the privacy metrics
+
+# +
+# we get the unshuffled vanilla avatars from the job result based on the original id
+vanilla_unshuffled_avatars = [
+    result.sensitive_unshuffled_avatars_datasets
+    for result in job.result.datasets
+    if result.original_id == dataset_vanilla.id
+][0]
+
+# we get the unshuffled time series avatars from the job result based on their original ids
+ts_unshuffled_avatars = [
+    result.sensitive_unshuffled_avatars_datasets
+    for result in job.result.datasets
+    if result.original_id != dataset_vanilla.id
+]
+ts_original_ids = [
+    result.original_id
+    for result in job.result.datasets
+    if result.original_id != dataset_vanilla.id
+]
+
+# +
+privacy_job = client.jobs.create_privacy_metrics_time_series_job(
+    PrivacyMetricsWithTimeSeriesJobCreate(
+        parameters=PrivacyMetricsWithTimeSeriesParameters(
+            vanilla_original_id=dataset_vanilla.id,
+            vanilla_unshuffled_avatars_id=vanilla_unshuffled_avatars.id,
+            time_series=[
+                PrivacyMetricsTimeSeriesParameters(
+                    dataset_id=original_id,
+                    unshuffled_avatar_dataset_id=avatar.id,
+                    projection_parameters=FPCAParameters(nf=3),
+                )
+                for original_id, avatar in zip(ts_original_ids, ts_unshuffled_avatars)
+            ],
+        )
+    )
+)
+
+privacy_job = client.jobs.get_privacy_metrics_time_series_job(
+    privacy_job.id, timeout=10
+)
+# -
+
+# Metric results are calculated for each dataset and are stored in `privacy_job.result`
+
+for metric_details in privacy_job.result.details:
+    print("-------------")
+    print(f"Metrics for avatar of original dataset {metric_details.original_id} are: ")
+    print(metric_details)
+
+# ## Signal metrics for time series data
+
+# +
+signal_job = client.jobs.create_signal_metrics_time_series_job(
+    SignalMetricsWithTimeSeriesJobCreate(
+        parameters=SignalMetricsWithTimeSeriesParameters(
+            vanilla_original_id=dataset_vanilla.id,
+            vanilla_avatars_id=vanilla_unshuffled_avatars.id,
+            time_series=[
+                SignalMetricsTimeSeriesParameters(
+                    dataset_id=original_id,
+                    avatar_dataset_id=avatar.id,
+                )
+                for original_id, avatar in zip(ts_original_ids, ts_unshuffled_avatars)
+            ],
+        )
+    )
+)
+
+signal_job = client.jobs.get_signal_metrics_time_series_job(signal_job.id, timeout=10)
+# -
+
+# Metric results are calculated for each dataset and are stored in `signal_job.result`
+
+for metric_details in signal_job.result.details:
+    print("-------------")
+    print(f"Metrics for avatar of original dataset {metric_details.original_id} are: ")
+    print(metric_details)
