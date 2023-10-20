@@ -51,8 +51,11 @@ jobs:
       - name: Install app
         run: poetry install --no-interaction
 
+      - name: Lint
+        run: make lint
+        
       - name: Test
-        run: 	poetry run pytest --doctest-modules avatars
+        run: 	make test
 
       - name: Build latest doc version
         run: make doc-fast
