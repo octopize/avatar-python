@@ -284,6 +284,7 @@ dimensions</a></p></li>
 </li>
 <li><p><a class="reference external" href="#sensitive-how-to-access-the-results-unshuffled">SENSITIVE: how to access the results
 unshuffled</a></p></li>
+<li><p><a class="reference external" href="#how-to-anonymize-time-series">How to anonymize time series</a></p></li>
 </ul>
 </li>
 </ul>
@@ -777,6 +778,48 @@ to make it safe.</p>
 </pre></div>
 </div>
 </section>
+<section id="how-to-anonymize-time-series">
+<h2>How to anonymize time series<a class="headerlink" href="#how-to-anonymize-time-series" title="Permalink to this heading">#</a></h2>
+<p>An avatarization job can be launched on data containing time series. For
+more details on time series avatarization, see the <a class="reference external" href="https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb">dedicated notebook
+tutorial on time
+series</a>
+and the <a class="reference external" href="https://docs.octopize.io/docs/understanding/timeseries/">dedicated page in our public
+documentation</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># upload vanilla data (where 1 line = 1 individual)</span>
+<span class="n">dataset_vanilla</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">vanilla_df</span><span class="p">)</span>
+
+<span class="c1"># upload time series data (potentially from many dataframe)</span>
+<span class="n">timeseries_dataset1</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">ts_df1</span><span class="p">)</span>
+<span class="n">timeseries_dataset2</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">pandas_integration</span><span class="o">.</span><span class="n">upload_dataframe</span><span class="p">(</span><span class="n">ts_df2</span><span class="p">)</span>
+<span class="n">datasets_ts</span> <span class="o">=</span> <span class="p">[</span><span class="n">timeseries_dataset1</span><span class="p">,</span> <span class="n">timeseries_dataset2</span><span class="p">]</span>
+
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">create_avatarization_with_time_series_job</span><span class="p">(</span>
+    <span class="n">AvatarizationWithTimeSeriesJobCreate</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">AvatarizationWithTimeSeriesParameters</span><span class="p">(</span>
+            <span class="n">vanilla_dataset_id</span><span class="o">=</span><span class="n">dataset_vanilla</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">time_series</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">AvatarizationTimeSeriesParameters</span><span class="p">(</span>
+                    <span class="n">dataset_id</span><span class="o">=</span><span class="n">dataset_ts</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                    <span class="n">projection_parameters</span><span class="o">=</span><span class="n">FPCAParameters</span><span class="p">(</span>
+                        <span class="n">nf</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">dataset_ts</span> <span class="ow">in</span> <span class="n">datasets_ts</span>
+            <span class="p">],</span>
+        <span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_time_series_job</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When the data only consists in time series data (i.e. no vanilla data),
+you can set <code class="docutils literal notranslate"><span class="pre">vanilla_dataset_id=None</span></code>.</p>
+</section>
 </section>
 
         </article>
@@ -874,6 +917,7 @@ to make it safe.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#sensitive-how-to-access-the-results-unshuffled">SENSITIVE: how to access the results unshuffled</a></li>
+<li><a class="reference internal" href="#how-to-anonymize-time-series">How to anonymize time series</a></li>
 </ul>
 </li>
 </ul>
