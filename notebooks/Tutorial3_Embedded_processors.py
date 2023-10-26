@@ -97,7 +97,7 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 print("Proportion of missing values per variable in avatars")
 avatars.isna().sum() / len(avatars)
 
-# We observe that the avatarization keeps aproximatively the same proportion of missing values. But the location of the missing value cells in the dataset is not similar. This is because the missing value characteristics has also been anonymized.
+# We observe that the avatarization keeps approximately the same proportion of missing values. But the location of the missing value cells in the dataset is not similar. This is because the missing value characteristics has also been anonymized.
 
 msno.matrix(df)
 
@@ -109,9 +109,9 @@ msno.matrix(avatars)
 #
 # To reduce the runtime caused by the imputation, it is possible to use an alternative imputation such as:
 # - `ImputeMethod.fast_knn`, an appromixation of a knn imputer
-# - `ImputeMethod.mean` which imputes using the mean of each variable (or mode if non-numeric)
-# - `ImputeMethod.mode` which imputes using the mode of each variable
-# - `ImputeMethod.median` which imputes using the median of each variable
+# - `ImputeMethod.mean` that imputes using the mean of each variable (or mode if non-numeric)
+# - `ImputeMethod.mode` that imputes using the mode of each variable
+# - `ImputeMethod.median` that imputes using the median of each variable
 #
 # We can also use only a fraction of the data for the impute step. This is controlled by the parameter `training_fraction` (the fraction of the dataset used to train the knn imputer).
 
@@ -220,10 +220,9 @@ avatars_categorical["Clump_Thickness"].hist()
 
 # ## Categorical variables with large cardinality
 
-# The anonymization of datasets containing categorical variables with large cardinality is not trivial. We recommend to exclude the variable from the avatarization before re-assigning it by individual similarity (`coordinate_similarity`) or by the original row order (`row_order`) which is very **SENSITIVE** and a **violation of privacy**.
+# The anonymization of datasets containing categorical variables with large cardinality is not trivial. We recommend to exclude the variable from the avatarization before [re-assigning it by individual similarity](https://python.docs.octopize.io/latest/models.html#avatars.models.ExcludeCategoricalMethod) (`coordinate_similarity`) or by the original row order (`row_order`). Using row order is more likely to preserve identifying information than coordinate similarity. Privacy metrics must be calculated at the end of the process to confirm that the data generated is anonymous.
 #
-#
-# This necessary step is included in the avatarization job and can be managed via a set of parameters `ExcludeCategoricalParameters`.
+# This necessary step is included in the avatarization job and can be managed via a set of parameters `ExcludeCategoricalMethod`.
 #
 # Metrics are computed after re-assignment of the excluded variables, so a variable that has been excluded is still anonymized as long as the privacy targets are reached.
 #

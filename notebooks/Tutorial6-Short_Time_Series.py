@@ -82,7 +82,7 @@ sns.lineplot(
 
 # ## Prepare data for avatarization
 
-# The avatarization takes as input : tabular data where each row contains the data relative to an individual. In the present example, each row should ideally refer to a device.
+# The avatarization takes as input tabular data where each row contains the data relative to an individual. In the present example, each row should ideally refer to a device.
 #
 # The number of time points to include in the avatarization can also have an impact and it is currently recommended to use a small number of data points (~ 5 to 10 points) to prevent cases where the data has more variables than individuals.
 #

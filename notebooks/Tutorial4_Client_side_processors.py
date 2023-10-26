@@ -192,7 +192,7 @@ relative_difference_processor = RelativeDifferenceProcessor(
 #
 # The relative difference processor can be used to express a date relative to another. To do so, it is required to use the `DatetimeProcessor` that will transform datetime variables into numeric values, by computing the differences between date variables.
 #
-# As the `DatetimeProcessor` has a post-processing function, the data produced by the avtarization pipeline will contain the datetime variables in their original format (i.e. as datetime values rather than numerical values).
+# As the `DatetimeProcessor` has a post-processing function, the data produced by the avatarization pipeline will contain the datetime variables in their original format (i.e. as datetime values rather than numerical values).
 
 datetime_processor = DatetimeProcessor()
 
@@ -265,9 +265,7 @@ df2["club_signing_date"] = pd.to_datetime(
 dataset = client.pandas_integration.upload_dataframe(df2)
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
-        parameters=AvatarizationParameters(
-            k=20, ncp=2, dataset_id=dataset.id, seed=1234
-        )
+        parameters=AvatarizationParameters(k=20, ncp=2, dataset_id=dataset.id)
     )
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
@@ -346,7 +344,7 @@ print(
 #
 # Post-processors do not transform the data prior to the avatarization but after only. These can be used to fix some variables that could have been altered beyond acceptable.
 #
-# Care should always be taken when using such processors because they are likely to **decrease the level of privacy**.
+# Care should always be taken when using post-processors because they are likely to **decrease the level of privacy**.
 # Using these processors via the pipeline feature, ensure that metrics are computed after application of the post-process step. This also make sure that privacy and utility metrics have taken these processors into consideration.
 
 # ### Expected mean
@@ -411,7 +409,7 @@ avatars.head()
 
 # ### Perturbation level
 #
-# The perturbation processor can be used to control how close to the avatarized values, the final values of a variable will be. At the extremes, if using a perturbation level of zero, the avatarized values will not contribute at all to the final values. On the other hand, with a perturbation level of 1, the original values will not contribute. A perturbation level of 0.3 will means that the final value will be closer to the original values than it is from the avatraized values. By default, the perturbation level is set to 1.
+# The perturbation processor can be used to control how close to the avatarized values, the final values of a variable will be. At the extremes, if using a perturbation level of zero, the avatarized values will not contribute at all to the final values. On the other hand, with a perturbation level of 1, the original values will not contribute. A perturbation level of 0.3 will mean that the final value will be closer to the original values than it is from the anonymized values. By default, the perturbation level is set to 1.
 
 perturbation_processor = PerturbationProcessor(perturbation_level={"age": 1})
 
