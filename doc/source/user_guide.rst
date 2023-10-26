@@ -51,6 +51,7 @@ User guide
 
    -  `SENSITIVE: how to access the results
       unshuffled <#sensitive-how-to-access-the-results-unshuffled>`__
+   -  `How to anonymize time series <#how-to-anonymize-time-series>`__
 
 How to setup your email account
 -------------------------------
@@ -617,3 +618,48 @@ to make it safe.
        sensitive_unshuffled_avatars_datasets_id
    )
    print(sensitive_unshuffled_avatars_df.head())
+
+How to anonymize time series
+----------------------------
+
+An avatarization job can be launched on data containing time series. For
+more details on time series avatarization, see the `dedicated notebook
+tutorial on time
+series <https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb>`__
+and the `dedicated page in our public
+documentation <https://docs.octopize.io/docs/understanding/timeseries/>`__.
+
+.. code:: python
+
+   # upload vanilla data (where 1 line = 1 individual)
+   dataset_vanilla = client.pandas_integration.upload_dataframe(vanilla_df)
+
+   # upload time series data (potentially from many dataframe)
+   timeseries_dataset1 = client.pandas_integration.upload_dataframe(ts_df1)
+   timeseries_dataset2 = client.pandas_integration.upload_dataframe(ts_df2)
+   datasets_ts = [timeseries_dataset1, timeseries_dataset2]
+
+   job = client.jobs.create_avatarization_with_time_series_job(
+       AvatarizationWithTimeSeriesJobCreate(
+           parameters=AvatarizationWithTimeSeriesParameters(
+               vanilla_dataset_id=dataset_vanilla.id,
+               k=5,
+               time_series=[
+                   AvatarizationTimeSeriesParameters(
+                       dataset_id=dataset_ts.id,
+                       projection_parameters=FPCAParameters(
+                           nf=10,
+                       ),
+                   )
+                   for dataset_ts in datasets_ts
+               ],
+           )
+       ),
+       timeout=10,
+   )
+   job = client.jobs.get_avatarization_time_series_job(job.id, timeout=10)
+   print(job.status)
+   print(job.result)
+
+When the data only consists in time series data (i.e. no vanilla data),
+you can set ``vanilla_dataset_id=None``.
