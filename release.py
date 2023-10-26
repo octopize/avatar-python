@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Tuple
 from subprocess import PIPE
 import subprocess
 from pathlib import Path

@@ -62,13 +62,13 @@ client.health.get_health()
 # ## Loading data
 
 # In this tutorial, we use data that contains readings from 3 sensors for 200 individuals. The data is divided into 3 datasets as follows:
-# - `example_vanilla.csv`: demographic data on individuals, each line refers to one individual and contains 15 variables (similar to adult data seen in previous tutorials)
-# - `example_ts1.csv`: time series data for `sensor1` and `sensor2`. The data contains an identifier variable (`id`) and a time variable (`t`). There are several lines for each individual.
-# - `example_ts2.csv`: time series data for `sensor3`. Note that this time series data can have different timestamps than the other time series and a different number of measurements.
+# - `sensors_vanilla.csv`: demographic data on individuals, each line refers to one individual and contains 15 variables (similar to adult data seen in previous tutorials)
+# - `sensors_timeseries1.csv`: time series data for `sensor1` and `sensor2`. The data contains an identifier variable (`id`) and a time variable (`t`). There are several lines for each individual.
+# - `sensors_timeseries2.csv`: time series data for `sensor3`. Note that this time series data can have different timestamps than the other time series and a different number of measurements.
 
-vanilla_df = pd.read_csv("../fixtures/example_vanilla.csv")
-ts1_df = pd.read_csv("../fixtures/example_ts1.csv")
-ts2_df = pd.read_csv("../fixtures/example_ts2.csv")
+vanilla_df = pd.read_csv("../fixtures/sensors_vanilla.csv")
+ts1_df = pd.read_csv("../fixtures/sensors_timeseries1.csv")
+ts2_df = pd.read_csv("../fixtures/sensors_timeseries2.csv")
 
 vanilla_df.head()
 
@@ -301,16 +301,13 @@ vanilla_unshuffled_avatars = [
 ][0]
 
 # we get the unshuffled time series avatars from the job result based on their original ids
-ts_unshuffled_avatars = [
-    result.sensitive_unshuffled_avatars_datasets
+dataset_pairs = [
+    (result.original_id, result.sensitive_unshuffled_avatars_datasets)
     for result in job.result.datasets
     if result.original_id != dataset_vanilla.id
 ]
-ts_original_ids = [
-    result.original_id
-    for result in job.result.datasets
-    if result.original_id != dataset_vanilla.id
-]
+ts_original_ids = [pair[0] for pair in dataset_pairs]
+ts_unshuffled_avatars = [pair[1] for pair in dataset_pairs]
 
 # +
 privacy_job = client.jobs.create_privacy_metrics_time_series_job(
