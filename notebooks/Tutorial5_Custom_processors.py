@@ -71,7 +71,7 @@ df.head()
 df["relationship"].value_counts()
 
 
-# To be compatible with the avatarization pipeline, a processor must be defined following the structure:
+# To be compatible with the avatarization pipeline, a processor must be defined following this structure:
 #
 # ```python
 # class MyCustomProcessor:
@@ -202,3 +202,5 @@ print("\n*** Utility metrics ***")
 for metric in utility_metrics:
     print(metric)
 # -
+
+# *In the next tutorial, we will show how to avatarize a time series dataset with a custom processor.*

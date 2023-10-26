@@ -49,7 +49,7 @@ client.compatibility.is_client_compatible()
 
 df = pd.read_csv("../fixtures/iris.csv")
 
-df
+df.head()
 
 dataset = client.pandas_integration.upload_dataframe(df)
 print(dataset)

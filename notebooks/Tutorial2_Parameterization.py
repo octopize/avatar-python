@@ -109,7 +109,7 @@ print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
 # ## Visualization of originals and avatars
 
-# By looking at original and avatars in the projected space, we can understand the area covered by avatars and if it covers the same space as the original data.
+# By looking at originals and avatars in the projected space, we can observe the area covered by avatars and if it covers the same space as the original data.
 
 projections = client.metrics.get_job_projections(job_id=job_small_k.id)
 projections_records = np.array(projections.records)[
@@ -141,7 +141,7 @@ sns.scatterplot(
     label="Avatars",
 )
 
-ax.set_title("Projections of original and avatars produced with small k")
+ax.set_title("Projection of originals and avatars produced with small k")
 
 # +
 projections = client.metrics.get_job_projections(job_id=job_large_k.id)
@@ -171,12 +171,12 @@ sns.scatterplot(
     label="Avatars",
 )
 
-ax.set_title("Projections of original and avatars produced with large k")
+ax.set_title("Projection of originals and avatars produced with large k")
 # -
 
 # We observe that the area covered by avatars generated with a low *k* is much closer to the area covered by original data points. We can also see that with a low *k*, some avatars are close to original points that are isolated. This may pose a risk of re-identification. This explains the drop in privacy level when reducing *k*.
 #
-# Avatars produced with a large *k* are significantly further away from isolated originals and so ensure their privacy. However care should be taken in setting *k*  with values that are not too high to prevent a drop in utility level. The drop in utility level is represented by the area covered by avatars being much smaller than the ones of originals.
+# Avatars produced with a large *k* are significantly further away from isolated originals and so ensure their privacy. However **care should be taken in setting *k***  with values that are not too high to prevent a drop in utility level. The drop in utility level is represented by the area covered by avatars being much smaller than the ones of originals.
 
 # ## Other parameters
 
@@ -247,7 +247,7 @@ sns.scatterplot(
     label="Avatars",
 )
 
-ax.set_title("Projections of original and avatars produced with custom settings")
+ax.set_title("Projection of originals and avatars produced with custom settings")
 # -
 
 # *In the next tutorial, we will show how to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities.*

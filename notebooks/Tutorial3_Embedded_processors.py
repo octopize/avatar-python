@@ -97,7 +97,7 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 print("Proportion of missing values per variable in avatars")
 avatars.isna().sum() / len(avatars)
 
-# We observe that we the avatarization keeps the same proportion of missing values. But the location of the missing value cells in the data is not similar. This is because the missing value characteristics has also been anonymized.
+# We observe that the avatarization keeps aproximatively the same proportion of missing values. But the location of the missing value cells in the dataset is not similar. This is because the missing value characteristics has also been anonymized.
 
 msno.matrix(df)
 
@@ -109,11 +109,11 @@ msno.matrix(avatars)
 #
 # To reduce the runtime caused by the imputation, it is possible to use an alternative imputation such as:
 # - `ImputeMethod.fast_knn`, an appromixation of a knn imputer
-# - `ImputeMethod.mean` that imputes using the mean of each variable (or mode if non-numeric)
-# - `ImputeMethod.mode` that imputes using the mode of each variable
-# - `ImputeMethod.median` that imputes using the median of each variable
+# - `ImputeMethod.mean` which imputes using the mean of each variable (or mode if non-numeric)
+# - `ImputeMethod.mode` which imputes using the mode of each variable
+# - `ImputeMethod.median` which imputes using the median of each variable
 #
-# Another alternative is to use a fraction of the data for the impute step. This is controlled by the parameter `training_fraction` (the fraction of the dataset used to train the knn imputer).
+# We can also use only a fraction of the data for the impute step. This is controlled by the parameter `training_fraction` (the fraction of the dataset used to train the knn imputer).
 
 # With this setting, only a 5th of the data will be used for imputation
 imputation_parameters = ImputationParameters(
@@ -161,7 +161,7 @@ dataset = client.pandas_integration.upload_dataframe(df)
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(
-            k=20,
+            k=10,
             dataset_id=dataset.id,
             imputation=ImputationParameters(method=ImputeMethod.mode),
         )
@@ -169,12 +169,17 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
-# Download the avatars a pandas dataframe
-avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
+# Download the avatars as a pandas dataframe
+avatars_numeric = client.pandas_integration.download_dataframe(
+    job.result.avatars_dataset.id
+)
 # -
 
-print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
-avatars["Clump_Thickness"].hist()
+print(
+    "Number of distinct values in avatars:",
+    avatars_numeric["Clump_Thickness"].nunique(),
+)
+avatars_numeric["Clump_Thickness"].hist()
 
 # An avatarization of this dataset without transformation of the low-cardinality numeric variables yields differences in the distribution.
 
@@ -190,7 +195,7 @@ dataset = client.pandas_integration.upload_dataframe(processed)
 job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(
-            k=20,
+            k=10,
             dataset_id=dataset.id,
             imputation=ImputationParameters(method=ImputeMethod.mode),
         )
@@ -199,20 +204,26 @@ job = client.jobs.create_avatarization_job(
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
 # Download the avatars as a pandas dataframe
-avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
-avatars = processor.postprocess(df, avatars)
+avatars_categorical = client.pandas_integration.download_dataframe(
+    job.result.avatars_dataset.id
+)
+avatars_categorical = processor.postprocess(df, avatars_categorical)
 # -
 
-print("Number of distinct values in avatars:", avatars["Clump_Thickness"].nunique())
-avatars["Clump_Thickness"].hist()
+print(
+    "Number of distinct values in avatars:",
+    avatars_categorical["Clump_Thickness"].nunique(),
+)
+avatars_categorical["Clump_Thickness"].hist()
 
-# We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the proportion of each unique value where it may not be the case if we keep the variables as numeric.
+# We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the distribution of the variable where it may not be the case if we keep the variable as numeric.
 
 # ## Categorical variables with large cardinality
 
-# The anonymization of datasets containing categorical variables with large cardinality is not trivial and we recommend to exclude the variable from the avatarization before re-assigning it probabilistically.
+# The anonymization of datasets containing categorical variables with large cardinality is not trivial. We recommend to exclude the variable from the avatarization before re-assigning it by individual similarity (`coordinate_similarity`) or by the original row order (`row_order`) which is very **SENSITIVE** and a **violation of privacy**.
 #
-# This necessary step is included in the avatarization job and can be managed via a set of parameters ExcludeCategoricalParameters.
+#
+# This necessary step is included in the avatarization job and can be managed via a set of parameters `ExcludeCategoricalParameters`.
 #
 # Metrics are computed after re-assignment of the excluded variables, so a variable that has been excluded is still anonymized as long as the privacy targets are reached.
 #
@@ -230,7 +241,7 @@ print("Rare values for variable city are: ", rare_values)
 
 counts
 
-# ### Excluding variables and re-assigning them probabilistically
+# ### Excluding variables and re-assigning them by individual similarity
 
 # +
 # %%time
@@ -263,6 +274,8 @@ avatars.head()
 avatars["city"].value_counts()
 
 # The exclude variable processor also ensures that rare modalities are not kept as they could be re-identifying. We can confirm this by looking at rare values from the original data still present in the avatars.
+
+pd.DataFrame(avatars["city"].value_counts() - df["city"].value_counts())
 
 rare_values.intersection(set(avatars["city"].unique()))
 
