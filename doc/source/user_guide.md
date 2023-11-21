@@ -24,6 +24,7 @@
   - [How to handle a large dataset](#how-to-handle-a-large-dataset)
     - [Handle large amount of rows](#handle-large-amount-of-rows)
     - [Handle large amount of dimensions](#handle-large-amount-of-dimensions)
+  - [Understanding errors](#understanding-errors)
   - [Handling timeouts](#handling-timeouts)
     - [Asynchronous calls](#asynchronous-calls)
     - [Synchronous calls](#synchronous-calls)
@@ -473,7 +474,7 @@ Most of your actions will have a successfull outcome. However, sometimes there w
    These come with a 500 HTTP status code, and the message is `internal error`.
    In these cases, there is not much you can do except trying again with different parameters, hoping to not trigger the error again.
 
-   When these happen, our error monitoring software catches these and notifies us instantly. We will reach out to you to help you circumvent the issue if it's possible, while we investigate on our side. We'll be hard at work trying to resolve the bug, and push out a new version with the fix.
+   When these happen, our error monitoring software catches these and notifies us instantly. You can reach out to your Octopize contact for more information and help for troubleshooting, while we investigate on our side. We'll be hard at work trying to resolve the bug, and push out a new version with the fix.
 
 ## Handling timeouts
 
