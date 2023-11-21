@@ -376,7 +376,7 @@ See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebook
 ## How to download an avatar dataset
 
 This section is responsible for showing you how to download a dataset from our server.
-Note that you can't download an original dataset once it has been uploaded.
+Note that for security reason, you can't download an original dataset once  it's uploaded.
 
 ### As a pandas dataframe
 
