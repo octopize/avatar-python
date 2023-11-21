@@ -11,6 +11,7 @@ AVATAR_PASSWORD ?= "password_integration"
 
 install:  ## Install the stack
 	poetry install --sync --no-ansi
+	pre-commit install --hook-type commit-msg --hook-type pre-commit --hook-type pre-push
 .PHONY: install
 
 release-and-push: ## Prepare a new client release

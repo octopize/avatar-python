@@ -1,0 +1,6 @@
+{
+  "comment": "Default rules, with additional exclusions.",
+  "default": true,
+  "line_length": false,
+  "MD024": { "siblings_only": true }
+}
