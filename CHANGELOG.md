@@ -1,23 +1,28 @@
 # Changelog
 
 ## 0.6.1
+
 - feat: enable parquet format for
 - feat: use pydantic v2
 - feat: add InterRecordBoundedCumulatedDifferenceProcessor
 - fix: max file size error message
 
 ## 0.6.0
+
 - feat: detect potential id columns
 - feat: add created_at, kind to Jobs
 - feat: add time series
 
 ## 0.5.2
+
 - feat: add InterRecordBoundedRangeDifferenceProcessor
 
 ## 0.5.1
+
 - fix: compatibility mapping due to breaking change
 
 ### BREAKING CHANGE
+
 - remove broken endpoint `/projections`
 
 ## 0.4.0

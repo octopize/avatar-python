@@ -1,0 +1,16 @@
+{
+  "ignorePatterns": [
+    {
+      "comment": "https://localhost or https://octopize.local",
+      "pattern": "local"
+    },
+    {
+      "comment": "github links to private repo needs authentication",
+      "pattern": "github.com/octopize/avatar/*"
+    },
+    {
+      "comment": "html links will be linked at sphinx generation time",
+      "pattern": ".html"
+    }
+  ]
+}

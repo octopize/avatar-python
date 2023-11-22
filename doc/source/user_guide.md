@@ -24,12 +24,12 @@
   - [How to handle a large dataset](#how-to-handle-a-large-dataset)
     - [Handle large amount of rows](#handle-large-amount-of-rows)
     - [Handle large amount of dimensions](#handle-large-amount-of-dimensions)
+  - [Understanding errors](#understanding-errors)
   - [Handling timeouts](#handling-timeouts)
     - [Asynchronous calls](#asynchronous-calls)
     - [Synchronous calls](#synchronous-calls)
   - [SENSITIVE: how to access the results unshuffled](#sensitive-how-to-access-the-results-unshuffled)
   - [How to anonymize time series](#how-to-anonymize-time-series)
-
 
 ## How to setup your email account
 
@@ -288,6 +288,7 @@ parameters = AvatarizationParameters(
 ```
 
 ## How to generate the report
+
 ### Create report from jobs
 
 You can create an avatarization report after having executed all of the following jobs:
@@ -333,8 +334,6 @@ with open(f"./tmp/my_avatarization_report.pdf", "wb") as f:
     f.write(result)
 ```
 
-
-
 ## How to launch a whole pipeline
 
 We have implemented the concept of pipelines.
@@ -377,6 +376,9 @@ See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebook
 
 ## How to download an avatar dataset
 
+This section is responsible for showing you how to download a dataset from our server.
+Note that for security reason, you can't download an original dataset once  it's uploaded.
+
 ### As a pandas dataframe
 
 The dtypes will be copied over from the original dataframe.
@@ -403,14 +405,14 @@ print(avatar_df.head())
 
 ## How to handle a large dataset
 
-Due to the server limit, you can be limited by the number of row and the number of dimension. 
+Due to the server limit, you can be limited by the number of rows and the number of dimensions.
 
-### Handle large amount of rows 
+### Handle large amount of rows
 
 If you want to anonymize a large number of records, you can use the batch methodology.
 Your dataset will be split into batches and each batch will be anonymized independently from the others.
 
-Metrics are computed on each batch of the data. 
+Metrics are computed on each batch of the data.
 The average of all the signal metrics is computed. For the privacy metrics, we return the worst and the mean of all metrics. You can also access to all batch metrics for specific use cases (such as debugging).
 
 See this [notebook tutorial](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial7-Batch_avatarization.ipynb) for more information about batch use.
@@ -421,11 +423,58 @@ The number of dimensions is the number of continuous variables plus the number o
 The limit of dimension is frequently reached due to a large number of modalities in one/sample of categorical variables (high cardinality variables).
 
 There are several solutions to bypass this limitation:
+
 - Encode the categorical variable into a continuous variable (frequency encoding, target encoding, ...).
 - Reduce the number of modalities by grouping some into more general modalities.
 - Use the argument `use_categorical_reduction` (Beta version)
-  
+
 The parameter `use_categorical_reduction` will reduce the dimension of the categorical variable by encoding them as vectors. This step is using the word embedding cat2vec. This solution could reduce the utility of your dataset.
+
+## Understanding errors
+
+Most of your actions will have a successfull outcome. However, sometimes there will be errors, and this section is here to explain the kinds of errors that can happen, and how to correct them.
+
+1. `Timeout("The call timed out. Consider increasing the timeout with the 'timeout' parameter.")`
+
+   You'll encounter this error when the call is taking too long to complete on the server.
+   Most of the time, this will be during job execution or dataset upload/download.
+   I'll encourage you to read up on the [`handling timeouts`](#handling-timeouts) section to deal with these kind of errors.
+
+2. Validation errors
+
+   Validation errors happen due to bad user input. Our error message rely heavily on [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes). In short, codes in the 400-499 range are user errors, and 500-599 are server errors. More on those later.
+
+   Here we'll cover the user errors, than you can remedy by modifying your parameters and trying again.
+   The syntax of the error message will always be of the following form:
+
+   ```text
+   Got error in HTTP request: POST https://company.octopize.app/reports. Error status 400 - privacy_metrics job status is not success: JobStatus.FAILURE
+   ```
+
+   You'll have: - the HTTP request method (`POST`, `GET`, etc...) - the endpoint that was affected (`/reports`) - the status (`400`) - an informational message that details the exact error that is happening (`privacy_metrics job status is not success: JobStatus.FAILURE`)
+
+   In this particular case, the user is calling the `/reports` endpoint, trying to generate a report. Generating a report needs a privacy metrics job to be successful to be able to show the metrics. However, in this case, the privacy job was in the `JobStatus.FAILURE` state.
+   The fix is then to go look at the error message that the privacy job threw up, launch another privacy job that is successful, and launch the generation of the report with the new privacy job once it is successful.
+
+3. `JobStatus.FAILURE`
+
+   Jobs that fail do not throw an exception. Rather, you have to inspect the `JobStatus` that is in the `status` property.
+
+   ```python
+   job = client.jobs.get_avatarization_job(job_id)
+   print(job.status) # JobStatus.FAILURE
+   ```
+
+   If the status is `JobStatus.FAILURE`, the `error_message` property will contain an explanation of the error.
+   You'll have to relaunch the job again with the appropriate modifications to your input.
+
+4. Internal error
+
+   Internal errors happen when there is an error on the server, meaning that we did not handle the error on our side, and something unexpected happened, for which we cannot give you an exact error message.
+   These come with a 500 HTTP status code, and the message is `internal error`.
+   In these cases, there is not much you can do except trying again with different parameters, hoping to not trigger the error again.
+
+   When these happen, our error monitoring software catches these and notifies us instantly. You can reach out to your Octopize contact for more information and help for troubleshooting, while we investigate on our side. We'll be hard at work trying to resolve the bug, and push out a new version with the fix.
 
 ## Handling timeouts
 
@@ -518,7 +567,7 @@ print(sensitive_unshuffled_avatars_df.head())
 
 ## How to anonymize time series
 
-An avatarization job can be launched on data containing time series. For more details on time series avatarization, see the [dedicated notebook tutorial on time series](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb) and the [dedicated page in our public documentation](https://docs.octopize.io/docs/understanding/timeseries/). 
+An avatarization job can be launched on data containing time series. For more details on time series avatarization, see the [dedicated notebook tutorial on time series](https://github.com/octopize/avatar-python/blob/main/notebooks/Tutorial8-Time_series.ipynb) and the [dedicated page in our public documentation](https://docs.octopize.io/docs/understanding/timeseries/).
 
 ```python
 # upload vanilla data (where 1 line = 1 individual)
