@@ -64,7 +64,12 @@ def _default_encoder(obj: Any) -> Any:
 
 
 class ApiClient:
-    def __init__(self, base_url: str, timeout: Optional[int] = DEFAULT_TIMEOUT, should_verify_ssl: bool = True) -> None:
+    def __init__(
+        self,
+        base_url: str,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        should_verify_ssl: bool = True,
+    ) -> None:
         self.base_url = base_url
 
         self.auth = Auth(self)
@@ -147,7 +152,11 @@ class ApiClient:
 
         # Allows for using self-signed certificates.
         # Use default from self.shoud_verify_ssl if not specified.
-        _should_verify_ssl = should_verify_ssl if should_verify_ssl is not None else self.should_verify_ssl
+        _should_verify_ssl = (
+            should_verify_ssl
+            if should_verify_ssl is not None
+            else self.should_verify_ssl
+        )
 
         should_stream = bool(kwargs.get("should_stream", False))
 
