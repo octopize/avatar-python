@@ -64,7 +64,7 @@ def _default_encoder(obj: Any) -> Any:
 
 
 class ApiClient:
-    def __init__(self, base_url: str, timeout: Optional[int] = DEFAULT_TIMEOUT) -> None:
+    def __init__(self, base_url: str, timeout: Optional[int] = DEFAULT_TIMEOUT, should_verify_ssl: bool = True) -> None:
         self.base_url = base_url
 
         self.auth = Auth(self)
@@ -80,6 +80,7 @@ class ApiClient:
         self.pipelines = Pipelines(self)
 
         self.timeout = timeout
+        self.should_verify_ssl = should_verify_ssl
         self._headers = {"User-Agent": f"avatar-python/{__version__}"}
 
     def authenticate(
@@ -124,6 +125,7 @@ class ApiClient:
         form_data: Optional[BaseModel] = None,
         file: Optional[Union[StringIO, BytesIO]] = None,
         timeout: Optional[int] = None,
+        should_verify_ssl: Optional[bool] = None,
         **kwargs: Dict[str, Any],
     ) -> Any:
         """Request the API."""
@@ -143,16 +145,16 @@ class ApiClient:
 
         files_arg = self._get_file_argument(file)
 
-        # Forcing that property to allow self-signed certificates.
-        # Even while using self-signed certificate streams remain encrypted.
-        should_verify_ssl = bool(kwargs.get("verify_ssl", True))
+        # Allows for using self-signed certificates.
+        # Use default from self.shoud_verify_ssl if not specified.
+        _should_verify_ssl = should_verify_ssl if should_verify_ssl is not None else self.should_verify_ssl
 
         should_stream = bool(kwargs.get("should_stream", False))
 
         with httpx.Client(
             timeout=timeout or self.timeout,
             base_url=self.base_url,
-            verify=should_verify_ssl,
+            verify=_should_verify_ssl,
         ) as client:
             request = client.build_request(
                 method=method,
