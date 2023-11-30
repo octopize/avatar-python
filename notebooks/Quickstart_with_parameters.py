@@ -6,6 +6,10 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: env
+#     language: python
+#     name: python3
 # ---
 
 # # Quickstart - Avatarization with parameters
@@ -107,17 +111,14 @@ for metric in signal_job.result:
 # ## Retrieve avatars
 
 # +
-# Download the avatars as a string
-avatars_str = client.datasets.download_dataset(
-    avatarization_job.result.avatars_dataset.id
-)
-with open("./avatar_output.csv", "wb") as f:
-    f.write(avatars_str)
-
 # Download the avatars as a pandas dataframe
 avatars_df = client.pandas_integration.download_dataframe(
     avatarization_job.result.avatars_dataset.id
 )
+
+avatars_str = avatars_df.to_csv()
+with open("./avatar_output.csv", "wb") as f:
+    f.write(avatars_str.encode())
 # -
 
 # ## Retrieving the avatarization report
