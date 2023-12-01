@@ -462,7 +462,7 @@ Most of your actions will have a successfull outcome. However, sometimes there w
 
    ```python
    job = client.jobs.get_avatarization_job(job_id)
-   print(job.status) # JobStatus.FAILURE
+   print(job.status)  # JobStatus.FAILURE
    ```
 
    If the status is `JobStatus.FAILURE`, the `error_message` property will contain an explanation of the error.
