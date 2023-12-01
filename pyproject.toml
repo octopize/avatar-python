@@ -12,7 +12,7 @@ httpx = "^0.23.0"
 pydantic = "^2"
 pandas = "^1.4.2"
 toolz = "^0.12.0"
-pyarrow = "^13.0.0"
+pyarrow = "^14.0.1"
 
 
 [tool.poetry.group.doc.dependencies]
