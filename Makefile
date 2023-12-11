@@ -139,7 +139,7 @@ test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run
 	echo "You must install the pip venv first. Run make pip-install-tutorial."
 	SYSTEM=$$(uname -s)
 	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
-	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) $(abspath $(VENV_NAME))/bin/python3.9 {{}} > /dev/null && echo \'Succesfully ran {{}}\'"
+	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) $(abspath $(VENV_NAME))/bin/python3.10 {{}} > /dev/null && echo \'Succesfully ran {{}}\'"
 .PHONY: test-tutorial
 
 
