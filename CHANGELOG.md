@@ -1,8 +1,16 @@
 # Changelog
 
+## 0.6.2
+
+- feat: add should_verify_ssl to ApiClient to bypass
+- refactor: revert to AvatarizationParameters.dataset_id being required
+  feat: add pydantic constraints to privacy metrics fields
+  feat: add multi table avatarization and privacy metrics jobs
+  feat: add 'name' keyword argument to create_dataset
+
 ## 0.6.1
 
-- feat: enable parquet format for
+- feat: enable parquet format for dataset upload
 - feat: use pydantic v2
 - feat: add InterRecordBoundedCumulatedDifferenceProcessor
 - fix: max file size error message

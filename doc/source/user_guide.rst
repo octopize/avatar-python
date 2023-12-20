@@ -44,6 +44,7 @@ User guide
       -  `Handle large amount of
          dimensions <#handle-large-amount-of-dimensions>`__
 
+   -  `Understanding errors <#understanding-errors>`__
    -  `Handling timeouts <#handling-timeouts>`__
 
       -  `Asynchronous calls <#asynchronous-calls>`__
@@ -438,6 +439,10 @@ for an advanced usage of the pipeline.
 How to download an avatar dataset
 ---------------------------------
 
+This section is responsible for showing you how to download a dataset
+from our server. Note that for security reason, you can’t download an
+original dataset once it’s uploaded.
+
 .. _as-a-pandas-dataframe-1:
 
 As a pandas dataframe
@@ -470,8 +475,8 @@ As a csv formatted string
 How to handle a large dataset
 -----------------------------
 
-Due to the server limit, you can be limited by the number of row and the
-number of dimension.
+Due to the server limit, you can be limited by the number of rows and
+the number of dimensions.
 
 Handle large amount of rows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -497,16 +502,95 @@ number of modalities in categorical variables. The limit of dimension is
 frequently reached due to a large number of modalities in one/sample of
 categorical variables (high cardinality variables).
 
-There are several solutions to bypass this limitation: - Encode the
-categorical variable into a continuous variable (frequency encoding,
-target encoding, …). - Reduce the number of modalities by grouping some
-into more general modalities. - Use the argument
-``use_categorical_reduction`` (Beta version)
+There are several solutions to bypass this limitation:
+
+-  Encode the categorical variable into a continuous variable (frequency
+   encoding, target encoding, …).
+-  Reduce the number of modalities by grouping some into more general
+   modalities.
+-  Use the argument ``use_categorical_reduction`` (Beta version)
 
 The parameter ``use_categorical_reduction`` will reduce the dimension of
 the categorical variable by encoding them as vectors. This step is using
 the word embedding cat2vec. This solution could reduce the utility of
 your dataset.
+
+Understanding errors
+--------------------
+
+Most of your actions will have a successfull outcome. However, sometimes
+there will be errors, and this section is here to explain the kinds of
+errors that can happen, and how to correct them.
+
+1. ``Timeout("The call timed out. Consider increasing the timeout with the 'timeout' parameter.")``
+
+   You’ll encounter this error when the call is taking too long to
+   complete on the server. Most of the time, this will be during job
+   execution or dataset upload/download. I’ll encourage you to read up
+   on the ```handling timeouts`` <#handling-timeouts>`__ section to deal
+   with these kind of errors.
+
+2. Validation errors
+
+   Validation errors happen due to bad user input. Our error message
+   rely heavily on `HTTP status
+   codes <https://en.wikipedia.org/wiki/List_of_HTTP_status_codes>`__.
+   In short, codes in the 400-499 range are user errors, and 500-599 are
+   server errors. More on those later.
+
+   Here we’ll cover the user errors, than you can remedy by modifying
+   your parameters and trying again. The syntax of the error message
+   will always be of the following form:
+
+   .. code:: text
+
+      Got error in HTTP request: POST https://company.octopize.app/reports. Error status 400 - privacy_metrics job status is not success: JobStatus.FAILURE
+
+   You’ll have: - the HTTP request method (``POST``, ``GET``, etc…) -
+   the endpoint that was affected (``/reports``) - the status (``400``)
+   - an informational message that details the exact error that is
+   happening
+   (``privacy_metrics job status is not success: JobStatus.FAILURE``)
+
+   In this particular case, the user is calling the ``/reports``
+   endpoint, trying to generate a report. Generating a report needs a
+   privacy metrics job to be successful to be able to show the metrics.
+   However, in this case, the privacy job was in the
+   ``JobStatus.FAILURE`` state. The fix is then to go look at the error
+   message that the privacy job threw up, launch another privacy job
+   that is successful, and launch the generation of the report with the
+   new privacy job once it is successful.
+
+3. ``JobStatus.FAILURE``
+
+   Jobs that fail do not throw an exception. Rather, you have to inspect
+   the ``JobStatus`` that is in the ``status`` property.
+
+   .. code:: python
+
+      job = client.jobs.get_avatarization_job(job_id)
+      print(job.status)  # JobStatus.FAILURE
+
+   If the status is ``JobStatus.FAILURE``, the ``error_message``
+   property will contain an explanation of the error. You’ll have to
+   relaunch the job again with the appropriate modifications to your
+   input.
+
+4. Internal error
+
+   Internal errors happen when there is an error on the server, meaning
+   that we did not handle the error on our side, and something
+   unexpected happened, for which we cannot give you an exact error
+   message. These come with a 500 HTTP status code, and the message is
+   ``internal error``. In these cases, there is not much you can do
+   except trying again with different parameters, hoping to not trigger
+   the error again.
+
+   When these happen, our error monitoring software catches these and
+   notifies us instantly. You can reach out to your Octopize contact for
+   more information and help for troubleshooting, while we investigate
+   on our side. We’ll be hard at work trying to resolve the bug, and
+   push out a new version with the fix.
 
 Handling timeouts
 -----------------
