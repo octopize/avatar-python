@@ -496,6 +496,7 @@ class Login(BaseModel):
 
 class CreateDataset(BaseModel):
     file: Annotated[bytes, Field(title="File")]
+    name: Annotated[Optional[str], Field(title="Name")] = None
 
 
 class GenericJob(BaseModel):

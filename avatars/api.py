@@ -236,6 +236,7 @@ class Datasets:
     def create_dataset_from_stream(
         self,
         request: Union[StringIO, BytesIO],
+        name: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
@@ -245,6 +246,9 @@ class Datasets:
             "method": "post",
             "url": f"/datasets/stream",
             "timeout": timeout,
+            "params": dict(
+                name=name,
+            ),
             "file": request,
         }
 
@@ -268,6 +272,7 @@ class Datasets:
     def create_dataset(
         self,
         request: Union[StringIO, BytesIO],
+        name: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
@@ -281,6 +286,9 @@ class Datasets:
             "url": f"/datasets",
             "timeout": timeout,
             "file": request,
+            "form_data": dict(
+                name=name,
+            ),
         }
 
         return Dataset(**self.client.request(**kwargs))  # type: ignore[arg-type]
@@ -1119,6 +1127,7 @@ class PandasIntegration:
     def upload_dataframe(
         self,
         request: "pd.DataFrame",
+        name: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
         should_stream: bool = False,
@@ -1142,10 +1151,12 @@ class PandasIntegration:
 
         if should_stream:
             dataset = self.client.datasets.create_dataset_from_stream(
-                buffer, timeout=timeout
+                buffer, timeout=timeout, name=name
             )
         else:
-            dataset = self.client.datasets.create_dataset(buffer, timeout=timeout)
+            dataset = self.client.datasets.create_dataset(
+                buffer, timeout=timeout, name=name
+            )
             columns = []
             for index, dtype in zip(df_types.index, df_types):
                 if index in identifier_variables:

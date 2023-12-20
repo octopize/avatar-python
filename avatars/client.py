@@ -127,7 +127,7 @@ class ApiClient:
         *,
         params: Optional[Dict[str, Any]] = None,
         json: Optional[BaseModel] = None,
-        form_data: Optional[BaseModel] = None,
+        form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None,
         file: Optional[Union[StringIO, BytesIO]] = None,
         timeout: Optional[int] = None,
         should_verify_ssl: Optional[bool] = None,
@@ -146,8 +146,12 @@ class ApiClient:
             params = valfilter(lambda x: x is not None, params)
 
         json_arg = json_loads(json.model_dump_json()) if json else None
-        form_data_arg = form_data.model_dump() if form_data else None
+        form_data_arg = (
+            form_data.model_dump() if isinstance(form_data, BaseModel) else form_data
+        )
 
+        if form_data_arg:
+            form_data_arg = valfilter(lambda x: x is not None, form_data_arg)
         files_arg = self._get_file_argument(file)
 
         # Allows for using self-signed certificates.
