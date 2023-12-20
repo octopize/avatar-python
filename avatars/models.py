@@ -1261,7 +1261,7 @@ class AvatarizationParameters(BaseModel):
         Optional[int], Field(title="To Categorical Threshold")
     ] = None
     exclude_categorical: Optional[ExcludeCategoricalParameters] = None
-    dataset_id: Annotated[Optional[UUID], Field(title="Dataset Id")] = None
+    dataset_id: Annotated[UUID, Field(title="Dataset Id")]
 
 
 class AvatarizationPerBatchResult(BaseModel):

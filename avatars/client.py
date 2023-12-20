@@ -86,6 +86,7 @@ class ApiClient:
 
         self.timeout = timeout
         self.should_verify_ssl = should_verify_ssl
+
         self._headers = {"User-Agent": f"avatar-python/{__version__}"}
 
     def authenticate(
