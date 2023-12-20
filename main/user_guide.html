@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API reference" href="api_reference.html" /><link rel="prev" title="Tutorial" href="tutorial.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>User guide - avatars 0.6.1 documentation</title>
+        <title>User guide - avatars 0.6.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.6.1 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.6.2 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.6.1 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.6.2 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -189,6 +189,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.6.2/user_guide.html">0.6.2</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.6.1/user_guide.html">0.6.1</a>
     </li>
@@ -276,6 +279,7 @@ dataset</a></p>
 dimensions</a></p></li>
 </ul>
 </li>
+<li><p><a class="reference external" href="#understanding-errors">Understanding errors</a></p></li>
 <li><p><a class="reference external" href="#handling-timeouts">Handling timeouts</a></p>
 <ul>
 <li><p><a class="reference external" href="#asynchronous-calls">Asynchronous calls</a></p></li>
@@ -627,6 +631,9 @@ for an advanced usage of the pipeline.</p>
 </section>
 <section id="how-to-download-an-avatar-dataset">
 <h2>How to download an avatar dataset<a class="headerlink" href="#how-to-download-an-avatar-dataset" title="Permalink to this heading">#</a></h2>
+<p>This section is responsible for showing you how to download a dataset
+from our server. Note that for security reason, you can’t download an
+original dataset once it’s uploaded.</p>
 <section id="as-a-pandas-dataframe-1">
 <span id="id1"></span><h3>As a pandas dataframe<a class="headerlink" href="#as-a-pandas-dataframe-1" title="Permalink to this heading">#</a></h3>
 <p>The dtypes will be copied over from the original dataframe.</p>
@@ -653,8 +660,8 @@ the link between original and avatar individuals cannot be made.</p>
 </section>
 <section id="how-to-handle-a-large-dataset">
 <h2>How to handle a large dataset<a class="headerlink" href="#how-to-handle-a-large-dataset" title="Permalink to this heading">#</a></h2>
-<p>Due to the server limit, you can be limited by the number of row and the
-number of dimension.</p>
+<p>Due to the server limit, you can be limited by the number of rows and
+the number of dimensions.</p>
 <section id="handle-large-amount-of-rows">
 <h3>Handle large amount of rows<a class="headerlink" href="#handle-large-amount-of-rows" title="Permalink to this heading">#</a></h3>
 <p>If you want to anonymize a large number of records, you can use the
@@ -674,16 +681,86 @@ for more information about batch use.</p>
 number of modalities in categorical variables. The limit of dimension is
 frequently reached due to a large number of modalities in one/sample of
 categorical variables (high cardinality variables).</p>
-<p>There are several solutions to bypass this limitation: - Encode the
-categorical variable into a continuous variable (frequency encoding,
-target encoding, …). - Reduce the number of modalities by grouping some
-into more general modalities. - Use the argument
-<code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> (Beta version)</p>
+<p>There are several solutions to bypass this limitation:</p>
+<ul class="simple">
+<li><p>Encode the categorical variable into a continuous variable (frequency
+encoding, target encoding, …).</p></li>
+<li><p>Reduce the number of modalities by grouping some into more general
+modalities.</p></li>
+<li><p>Use the argument <code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> (Beta version)</p></li>
+</ul>
 <p>The parameter <code class="docutils literal notranslate"><span class="pre">use_categorical_reduction</span></code> will reduce the dimension of
 the categorical variable by encoding them as vectors. This step is using
 the word embedding cat2vec. This solution could reduce the utility of
 your dataset.</p>
 </section>
+</section>
+<section id="understanding-errors">
+<h2>Understanding errors<a class="headerlink" href="#understanding-errors" title="Permalink to this heading">#</a></h2>
+<p>Most of your actions will have a successfull outcome. However, sometimes
+there will be errors, and this section is here to explain the kinds of
+errors that can happen, and how to correct them.</p>
+<ol class="arabic">
+<li><p><code class="docutils literal notranslate"><span class="pre">Timeout(&quot;The</span> <span class="pre">call</span> <span class="pre">timed</span> <span class="pre">out.</span> <span class="pre">Consider</span> <span class="pre">increasing</span> <span class="pre">the</span> <span class="pre">timeout</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">'timeout'</span> <span class="pre">parameter.&quot;)</span></code></p>
+<p>You’ll encounter this error when the call is taking too long to
+complete on the server. Most of the time, this will be during job
+execution or dataset upload/download. I’ll encourage you to read up
+on the <code class="docutils literal notranslate"><span class="pre">`handling</span> <span class="pre">timeouts</span></code> &lt;#handling-timeouts&gt;`__ section to deal
+with these kind of errors.</p>
+</li>
+<li><p>Validation errors</p>
+<p>Validation errors happen due to bad user input. Our error message
+rely heavily on <a class="reference external" href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP status
+codes</a>.
+In short, codes in the 400-499 range are user errors, and 500-599 are
+server errors. More on those later.</p>
+<p>Here we’ll cover the user errors, than you can remedy by modifying
+your parameters and trying again. The syntax of the error message
+will always be of the following form:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Got error in HTTP request: POST https://company.octopize.app/reports. Error status 400 - privacy_metrics job status is not success: JobStatus.FAILURE
+</pre></div>
+</div>
+<p>You’ll have: - the HTTP request method (<code class="docutils literal notranslate"><span class="pre">POST</span></code>, <code class="docutils literal notranslate"><span class="pre">GET</span></code>, etc…) -
+the endpoint that was affected (<code class="docutils literal notranslate"><span class="pre">/reports</span></code>) - the status (<code class="docutils literal notranslate"><span class="pre">400</span></code>)
+- an informational message that details the exact error that is
+happening
+(<code class="docutils literal notranslate"><span class="pre">privacy_metrics</span> <span class="pre">job</span> <span class="pre">status</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">success:</span> <span class="pre">JobStatus.FAILURE</span></code>)</p>
+<p>In this particular case, the user is calling the <code class="docutils literal notranslate"><span class="pre">/reports</span></code>
+endpoint, trying to generate a report. Generating a report needs a
+privacy metrics job to be successful to be able to show the metrics.
+However, in this case, the privacy job was in the
+<code class="docutils literal notranslate"><span class="pre">JobStatus.FAILURE</span></code> state. The fix is then to go look at the error
+message that the privacy job threw up, launch another privacy job
+that is successful, and launch the generation of the report with the
+new privacy job once it is successful.</p>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">JobStatus.FAILURE</span></code></p>
+<p>Jobs that fail do not throw an exception. Rather, you have to inspect
+the <code class="docutils literal notranslate"><span class="pre">JobStatus</span></code> that is in the <code class="docutils literal notranslate"><span class="pre">status</span></code> property.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>  <span class="c1"># JobStatus.FAILURE</span>
+</pre></div>
+</div>
+<p>If the status is <code class="docutils literal notranslate"><span class="pre">JobStatus.FAILURE</span></code>, the <code class="docutils literal notranslate"><span class="pre">error_message</span></code>
+property will contain an explanation of the error. You’ll have to
+relaunch the job again with the appropriate modifications to your
+input.</p>
+</li>
+<li><p>Internal error</p>
+<p>Internal errors happen when there is an error on the server, meaning
+that we did not handle the error on our side, and something
+unexpected happened, for which we cannot give you an exact error
+message. These come with a 500 HTTP status code, and the message is
+<code class="docutils literal notranslate"><span class="pre">internal</span> <span class="pre">error</span></code>. In these cases, there is not much you can do
+except trying again with different parameters, hoping to not trigger
+the error again.</p>
+<p>When these happen, our error monitoring software catches these and
+notifies us instantly. You can reach out to your Octopize contact for
+more information and help for troubleshooting, while we investigate
+on our side. We’ll be hard at work trying to resolve the bug, and
+push out a new version with the fix.</p>
+</li>
+</ol>
 </section>
 <section id="handling-timeouts">
 <h2>Handling timeouts<a class="headerlink" href="#handling-timeouts" title="Permalink to this heading">#</a></h2>
@@ -911,6 +988,7 @@ you can set <code class="docutils literal notranslate"><span class="pre">vanilla
 <li><a class="reference internal" href="#handle-large-amount-of-dimensions">Handle large amount of dimensions</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#understanding-errors">Understanding errors</a></li>
 <li><a class="reference internal" href="#handling-timeouts">Handling timeouts</a><ul>
 <li><a class="reference internal" href="#asynchronous-calls">Asynchronous calls</a></li>
 <li><a class="reference internal" href="#synchronous-calls">Synchronous calls</a></li>

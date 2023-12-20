@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Processors" href="processors.html" /><link rel="prev" title="Client" href="client_and_api.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>Models - avatars 0.6.1 documentation</title>
+        <title>Models - avatars 0.6.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.6.1 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.6.2 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.6.1 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.6.2 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -189,6 +189,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.6.2/models.html">0.6.2</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.6.1/models.html">0.6.1</a>
     </li>
@@ -306,13 +309,28 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnStats.missing_number">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">missing_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[int,</span> <span class="pre">Field(title='Missing</span> <span class="pre">Number')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.missing_number" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">missing_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[int,</span> <span class="pre">Field(ge=0,</span> <span class="pre">title='Missing</span> <span class="pre">Number')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.missing_number" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ge</strong> = 0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnStats.missing_proportion">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">missing_proportion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Missing</span> <span class="pre">Proportion')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.missing_proportion" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">missing_proportion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(ge=0.0,</span> <span class="pre">le=1.0,</span> <span class="pre">title='Missing</span> <span class="pre">Proportion')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.missing_proportion" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ge</strong> = 0.0</p></li>
+<li><p><strong>le</strong> = 1.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnStats.mode">
@@ -326,13 +344,28 @@
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnStats.unique_number">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unique_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[int,</span> <span class="pre">Field(title='Unique</span> <span class="pre">Number')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.unique_number" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unique_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[int,</span> <span class="pre">Field(ge=0,</span> <span class="pre">title='Unique</span> <span class="pre">Number')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.unique_number" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ge</strong> = 0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnStats.unique_proportion">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unique_proportion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Unique</span> <span class="pre">Proportion')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.unique_proportion" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unique_proportion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(ge=0.0,</span> <span class="pre">le=1.0,</span> <span class="pre">title='Unique</span> <span class="pre">Proportion')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnStats.unique_proportion" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ge</strong> = 0.0</p></li>
+<li><p><strong>le</strong> = 1.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -514,6 +547,24 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">GenericResult</span></span><a class="headerlink" href="#avatars.models.GenericResult" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.TrainingFractionItem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">TrainingFractionItem</span></span><a class="headerlink" href="#avatars.models.TrainingFractionItem" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TrainingFractionItem.root">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">root</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(ge=0.0,</span> <span class="pre">le=1.0)]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TrainingFractionItem.root" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ge</strong> = 0.0</p></li>
+<li><p><strong>le</strong> = 1.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="avatars.models.ImputeMethod">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ImputeMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.ImputeMethod" title="Permalink to this definition">#</a></dt>
@@ -585,8 +636,18 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.JobKind.avatarization_multi_table">
+<span class="sig-name descname"><span class="pre">avatarization_multi_table</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'avatarization_multi_table'</span></em><a class="headerlink" href="#avatars.models.JobKind.avatarization_multi_table" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="avatars.models.JobKind.privacy_metrics_with_time_series">
 <span class="sig-name descname"><span class="pre">privacy_metrics_with_time_series</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'privacy_metrics_with_time_series'</span></em><a class="headerlink" href="#avatars.models.JobKind.privacy_metrics_with_time_series" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.JobKind.privacy_metrics_multi_table">
+<span class="sig-name descname"><span class="pre">privacy_metrics_multi_table</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'privacy_metrics_multi_table'</span></em><a class="headerlink" href="#avatars.models.JobKind.privacy_metrics_multi_table" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -648,6 +709,22 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="avatars.models.JobStatus.unknown">
 <span class="sig-name descname"><span class="pre">unknown</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'unknown'</span></em><a class="headerlink" href="#avatars.models.JobStatus.unknown" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="avatars.models.LinkMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">LinkMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.LinkMethod" title="Permalink to this definition">#</a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.LinkMethod.bottom_projection">
+<span class="sig-name descname"><span class="pre">bottom_projection</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'bottom_projection'</span></em><a class="headerlink" href="#avatars.models.LinkMethod.bottom_projection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.LinkMethod.linear_sum_assignement">
+<span class="sig-name descname"><span class="pre">linear_sum_assignement</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'linear_sum_assignement'</span></em><a class="headerlink" href="#avatars.models.LinkMethod.linear_sum_assignement" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -715,6 +792,32 @@
 </dd>
 </dl>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsComputationType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsComputationType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#avatars.models.PrivacyMetricsComputationType" title="Permalink to this definition">#</a></dt>
+<dd><p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsComputationType.standalone">
+<span class="sig-name descname"><span class="pre">standalone</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'standalone'</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsComputationType.standalone" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsComputationType.to_bottom_id_propagated">
+<span class="sig-name descname"><span class="pre">to_bottom_id_propagated</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'to_bottom_id_propagated'</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsComputationType.to_bottom_id_propagated" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsComputationType.to_top_enriched">
+<span class="sig-name descname"><span class="pre">to_top_enriched</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'to_top_enriched'</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsComputationType.to_top_enriched" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsComputationType.full_enriched">
+<span class="sig-name descname"><span class="pre">full_enriched</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'full_enriched'</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsComputationType.full_enriched" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1219,6 +1322,22 @@ computation to use with an instance of <code class="docutils literal notranslate
 </dd></dl>
 
 <dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.TableReference">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">TableReference</span></span><a class="headerlink" href="#avatars.models.TableReference" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableReference.dataset_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Dataset</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableReference.dataset_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableReference.is_individual_level">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_individual_level</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[bool,</span> <span class="pre">Field(description='Whether</span> <span class="pre">the</span> <span class="pre">table</span> <span class="pre">contains</span> <span class="pre">rows</span> <span class="pre">at</span> <span class="pre">the</span> <span class="pre">individual</span> <span class="pre">level.</span> <span class="pre">Individual</span> <span class="pre">level</span> <span class="pre">means</span> <span class="pre">that</span> <span class="pre">each</span> <span class="pre">row</span> <span class="pre">contains</span> <span class="pre">information</span> <span class="pre">about</span> <span class="pre">a</span> <span class="pre">distinct</span> <span class="pre">physical</span> <span class="pre">person.',</span> <span class="pre">title='Is</span> <span class="pre">Individual</span> <span class="pre">Level')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableReference.is_individual_level" title="Permalink to this definition">#</a></dt>
+<dd><p>Whether the table contains rows at the individual level. Individual level means that each row contains information about a distinct physical person.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.TimeSeriesSignalMetricsPerDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">TimeSeriesSignalMetricsPerDataset</span></span><a class="headerlink" href="#avatars.models.TimeSeriesSignalMetricsPerDataset" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
@@ -1347,6 +1466,11 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.CreateDataset.file">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[bytes,</span> <span class="pre">Field(title='File')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.CreateDataset.file" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.CreateDataset.name">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Name')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.CreateDataset.name" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1605,7 +1729,7 @@ with a large number of modalities.</p>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ImputationParameters.training_fraction">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_fraction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Training</span> <span class="pre">Fraction')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.ImputationParameters.training_fraction" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">training_fraction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[TrainingFractionItem],</span> <span class="pre">Field(title='Training</span> <span class="pre">Fraction')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.ImputationParameters.training_fraction" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2000,76 +2124,171 @@ that you want the computation to use with an instance of <code class="docutils l
 </dd></dl>
 
 <dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsPerDataset</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsPerMultiTableDataset</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.categorical_hidden_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Categorical</span> <span class="pre">Hidden</span> <span class="pre">Rate')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.categorical_hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Categorical</span> <span class="pre">Hidden</span> <span class="pre">Rate')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.closest_distances_ratio">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Closest</span> <span class="pre">Distances</span> <span class="pre">Ratio')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.closest_distances_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Closest</span> <span class="pre">Distances</span> <span class="pre">Ratio')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.closest_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Closest</span> <span class="pre">Rate')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.closest_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.closest_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Closest</span> <span class="pre">Rate')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.closest_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.column_direct_match_protection">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Column</span> <span class="pre">Direct</span> <span class="pre">Match</span> <span class="pre">Protection')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.column_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Column</span> <span class="pre">Direct</span> <span class="pre">Match</span> <span class="pre">Protection')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.correlation_protection_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Correlation</span> <span class="pre">Protection</span> <span class="pre">Rate')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.computation_type">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">computation_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsComputationType" title="avatars.models.PrivacyMetricsComputationType"><span class="pre">PrivacyMetricsComputationType</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.computation_type" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.distance_to_closest">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Distance</span> <span class="pre">To</span> <span class="pre">Closest')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.distance_to_closest" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.correlation_protection_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Correlation</span> <span class="pre">Protection</span> <span class="pre">Rate')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.hidden_rate">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Hidden</span> <span class="pre">Rate')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.hidden_rate" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.distance_to_closest">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Distance</span> <span class="pre">To</span> <span class="pre">Closest')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.distance_to_closest" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.inference_categorical">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Inference</span> <span class="pre">Categorical')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.inference_categorical" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Hidden</span> <span class="pre">Rate')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.hidden_rate" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.inference_continuous">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Inference</span> <span class="pre">Continuous')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.inference_continuous" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.individual_identifier_variable">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">individual_identifier_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(title='Individual</span> <span class="pre">Identifier</span> <span class="pre">Variable')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.individual_identifier_variable" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.local_cloaking">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Local</span> <span class="pre">Cloaking')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.local_cloaking" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.inference_categorical">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Inference</span> <span class="pre">Categorical')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.inference_categorical" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.original_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Original</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.original_id" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.inference_continuous">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Inference</span> <span class="pre">Continuous')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.inference_continuous" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.row_direct_match_protection">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Row</span> <span class="pre">Direct</span> <span class="pre">Match</span> <span class="pre">Protection')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.local_cloaking">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Local</span> <span class="pre">Cloaking')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.local_cloaking" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.targets">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets" title="avatars.models.PrivacyMetricsTargets"><span class="pre">PrivacyMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.targets" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.metrics_type">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">metrics_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Literal['multi_table'],</span> <span class="pre">Field(title='Metrics</span> <span class="pre">Type')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'multi_table'</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.metrics_type" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerDataset.unshuffled_avatars_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unshuffled_avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Unshuffled</span> <span class="pre">Avatars</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerDataset.unshuffled_avatars_id" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.original_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Original</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.original_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.row_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Row</span> <span class="pre">Direct</span> <span class="pre">Match</span> <span class="pre">Protection')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.targets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets" title="avatars.models.PrivacyMetricsTargets"><span class="pre">PrivacyMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.targets" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerMultiTableDataset.unshuffled_avatars_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unshuffled_avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Unshuffled</span> <span class="pre">Avatars</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.unshuffled_avatars_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsPerTimeSeriesDataset</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.categorical_hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">categorical_hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Categorical</span> <span class="pre">Hidden</span> <span class="pre">Rate')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.categorical_hidden_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.closest_distances_ratio">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_distances_ratio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Closest</span> <span class="pre">Distances</span> <span class="pre">Ratio')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.closest_distances_ratio" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.closest_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">closest_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Closest</span> <span class="pre">Rate')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.closest_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.column_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">column_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Column</span> <span class="pre">Direct</span> <span class="pre">Match</span> <span class="pre">Protection')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.column_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.correlation_protection_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">correlation_protection_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Correlation</span> <span class="pre">Protection</span> <span class="pre">Rate')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.correlation_protection_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.distance_to_closest">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">distance_to_closest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Distance</span> <span class="pre">To</span> <span class="pre">Closest')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.distance_to_closest" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.hidden_rate">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">hidden_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Hidden</span> <span class="pre">Rate')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.hidden_rate" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.inference_categorical">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_categorical</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Inference</span> <span class="pre">Categorical')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.inference_categorical" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.inference_continuous">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">inference_continuous</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[float],</span> <span class="pre">Field(title='Inference</span> <span class="pre">Continuous')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.inference_continuous" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.local_cloaking">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_cloaking</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Local</span> <span class="pre">Cloaking')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.local_cloaking" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.metrics_type">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">metrics_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Literal['time_series'],</span> <span class="pre">Field(title='Metrics</span> <span class="pre">Type')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'time_series'</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.metrics_type" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.original_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">original_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Original</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.original_id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.row_direct_match_protection">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">row_direct_match_protection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[float,</span> <span class="pre">Field(title='Row</span> <span class="pre">Direct</span> <span class="pre">Match</span> <span class="pre">Protection')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.row_direct_match_protection" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.targets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets" title="avatars.models.PrivacyMetricsTargets"><span class="pre">PrivacyMetricsTargets</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.targets" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsPerTimeSeriesDataset.unshuffled_avatars_id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">unshuffled_avatars_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Unshuffled</span> <span class="pre">Avatars</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.unshuffled_avatars_id" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2282,6 +2501,42 @@ that you want the computation to use with an instance of <code class="docutils l
 <dt class="sig sig-object py" id="avatars.models.SignalMetricsWithTimeSeriesJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.SignalMetricsWithTimeSeriesParameters" title="avatars.models.SignalMetricsWithTimeSeriesParameters"><span class="pre">SignalMetricsWithTimeSeriesParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.SignalMetricsWithTimeSeriesJobCreate.parameters" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.TableLink">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">TableLink</span></span><a class="headerlink" href="#avatars.models.TableLink" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableLink.child_link_key">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">child_link_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(description='Variable</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">linking</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">parent</span> <span class="pre">table.</span> <span class="pre">It</span> <span class="pre">is</span> <span class="pre">most</span> <span class="pre">often</span> <span class="pre">a</span> <span class="pre">foreign</span> <span class="pre">key.</span> <span class="pre">It</span> <span class="pre">needs</span> <span class="pre">to</span> <span class="pre">have</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">ColumnType.IDENTIFIER</span> <span class="pre">when\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">creating</span> <span class="pre">the</span> <span class="pre">dataset.',</span> <span class="pre">title='Child</span> <span class="pre">Link</span> <span class="pre">Key')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.child_link_key" title="Permalink to this definition">#</a></dt>
+<dd><p>Variable to be used for linking with the parent table. It is most often a foreign key. It needs to have the type ColumnType.IDENTIFIER when
+creating the dataset.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableLink.child_table">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">child_table</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[TableReference,</span> <span class="pre">Field(description='Reference</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">child</span> <span class="pre">table.')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.child_table" title="Permalink to this definition">#</a></dt>
+<dd><p>Reference to the child table.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableLink.link_method">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">link_method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.LinkMethod" title="avatars.models.LinkMethod"><span class="pre">LinkMethod</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">LinkMethod.bottom_projection</span></em><a class="headerlink" href="#avatars.models.TableLink.link_method" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableLink.parent_link_key">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_link_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(description='Variable</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">linking</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">child</span> <span class="pre">table.</span> <span class="pre">The</span> <span class="pre">link_key</span> <span class="pre">specified</span> <span class="pre">here</span> <span class="pre">must</span> <span class="pre">contain</span> <span class="pre">unique</span> <span class="pre">values</span> <span class="pre">only.</span> <span class="pre">It</span> <span class="pre">is</span> <span class="pre">most</span> <span class="pre">often</span> <span class="pre">the\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">primary</span> <span class="pre">key.</span> <span class="pre">It</span> <span class="pre">needs</span> <span class="pre">to</span> <span class="pre">have</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">ColumnType.IDENTIFIER</span> <span class="pre">when</span> <span class="pre">creating</span> <span class="pre">the</span> <span class="pre">dataset.',</span> <span class="pre">title='Parent</span> <span class="pre">Link</span> <span class="pre">Key')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.parent_link_key" title="Permalink to this definition">#</a></dt>
+<dd><p>Variable to be used for linking with the child table. The link_key specified here must contain unique values only. It is most often the
+primary key. It needs to have the type ColumnType.IDENTIFIER when creating the dataset.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.TableLink.parent_table">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_table</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[TableReference,</span> <span class="pre">Field(description='Reference</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">parent</span> <span class="pre">table.')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.parent_table" title="Permalink to this definition">#</a></dt>
+<dd><p>Reference to the parent table.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2521,7 +2776,7 @@ that you want the computation to use with an instance of <code class="docutils l
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationParameters.dataset_id">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[UUID],</span> <span class="pre">Field(title='Dataset</span> <span class="pre">Id')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.AvatarizationParameters.dataset_id" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataset_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Dataset</span> <span class="pre">Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationParameters.dataset_id" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -2726,7 +2981,7 @@ that you want the computation to use with an instance of <code class="docutils l
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">MetaPrivacyMetrics</span></span><a class="headerlink" href="#avatars.models.MetaPrivacyMetrics" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.MetaPrivacyMetrics.details">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">details</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[PrivacyMetricsPerDataset],</span> <span class="pre">Field(title='Details')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.MetaPrivacyMetrics.details" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">details</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[PrivacyMetricsPerMultiTableDataset,</span> <span class="pre">PrivacyMetricsPerTimeSeriesDataset]],</span> <span class="pre">Field(title='Details')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.MetaPrivacyMetrics.details" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2793,6 +3048,71 @@ that you want the computation to use with an instance of <code class="docutils l
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsParameters" title="avatars.models.PrivacyMetricsParameters"><span class="pre">PrivacyMetricsParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsJobCreate.parameters" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsMultiTableParameters</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Parameters to create a multi table privacy metrics job.</p>
+<p>There are a few rules to follow to make sure that the parameters are consistent.
+The following ones are the same as the ones for the avatarization job.
+Other rules specific to privacy metrics are down below.</p>
+<ul>
+<li><p>Every dataset_id in table_parameters must be referenced in table_links.</p></li>
+<li><p>Every dataset_id in table_links must also be referenced in table_parameters.</p></li>
+<li><p>Every TableReference with the same dataset_id must be identical in other fields.</p></li>
+<li><p>There can’t be a cycle in the table_links e.g. A -&gt; B -&gt; C -&gt; A is not allowed.</p></li>
+<li><p>Each table needs to have N+1 identifier columns (id, patient_id, visit_id, etc.), where N is
+the  number of direct predecessors of each table. A direct predecessor is a table that has a
+direct link (depth=1) between itself and another table.</p>
+<p>For example, if a table has 2 direct predecessors, it needs to have 3 identifier columns.</p>
+<dl>
+<dt>Examples:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>A -&gt; B &lt;- C , A and C need to have 1 identifier column, and B needs to have 3 identifier</dt><dd><p>columns.</p>
+</dd>
+</dl>
+</li>
+<li><p>A -&gt; B -&gt; C &lt;- D , A and D need to have 1 identifier column, B needs to have 2, and</p></li>
+</ul>
+<blockquote>
+<div><p>C needs to only have 3 and not 4, because C only has 2 direct predecessors (B and D).
+There is not a direct link from C to A, so it is not a direct predecessor.</p>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><p>Each table can only be linked to the same variable once. This means that if A -&gt; B &lt;- C ,
+A and C need to link to two different columns in B.</p></li>
+<li><p>Every table can only reference another table once. This means that A -&gt; B &lt;- A is
+not possible.</p></li>
+<li><p>Top level tables need to be individual_level tables. For example, A -&gt; B &lt;- C , A and C need
+to be individual_level tables.</p>
+<ul class="simple">
+<li><p>The avatar datasets referenced by the avatars_id in table_parameters need to be
+identical in columns, shape, and dtype to their corresponding original dataset.</p></li>
+</ul>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Config<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extra</strong>: <em>str = allow</em></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableParameters.table_links">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_links</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[TableLink],</span> <span class="pre">Field(description='Description</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">relational</span> <span class="pre">link</span> <span class="pre">between</span> <span class="pre">tables.',</span> <span class="pre">title='Table</span> <span class="pre">Links')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_links" title="Permalink to this definition">#</a></dt>
+<dd><p>Description of each relational link between tables.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableParameters.table_parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[PrivacyMetricsParameters,</span> <span class="pre">PrivacyMetricsWithTimeSeriesParameters]],</span> <span class="pre">Field(description='Privacy</span> <span class="pre">metrics</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">table.</span> <span class="pre">',</span> <span class="pre">title='Table</span> <span class="pre">Parameters')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_parameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Privacy metrics parameters for each table.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2977,6 +3297,56 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsBatchJob.traceback">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Traceback')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsBatchJob.traceback" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsMultiTableJob</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.created_at">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[datetime,</span> <span class="pre">Field(title='Created</span> <span class="pre">At')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.current_progress">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobProgress" title="avatars.models.JobProgress"><span class="pre">JobProgress</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.current_progress" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.error_message">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Error</span> <span class="pre">Message')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.error_message" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.kind">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobKind" title="avatars.models.JobKind"><span class="pre">JobKind</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.kind" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableParameters" title="avatars.models.PrivacyMetricsMultiTableParameters"><span class="pre">PrivacyMetricsMultiTableParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.result">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.MetaPrivacyMetrics" title="avatars.models.MetaPrivacyMetrics"><span class="pre">MetaPrivacyMetrics</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.result" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.status">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJob.traceback">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Traceback')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJob.traceback" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3187,6 +3557,74 @@ that you want the computation to use with an instance of <code class="docutils l
 </dd></dl>
 
 <dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableParameters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationMultiTableParameters</span></span><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Parameters to create a multi table anonymization job.</p>
+<p>There are a few rules to follow to make sure that the parameters are consistent:</p>
+<ul>
+<li><p>Every dataset_id in table_parameters must be referenced in table_links.</p></li>
+<li><p>Every dataset_id in table_links must also be referenced in table_parameters.</p></li>
+<li><p>Every TableReference with the same dataset_id must be identical in other fields.</p></li>
+<li><p>There can’t be a cycle in the table_links e.g. A -&gt; B -&gt; C -&gt; A is not allowed.</p></li>
+<li><p>Each table needs to have N+1 identifier columns (id, patient_id, visit_id, etc.), where N is
+the  number of direct predecessors of each table. A direct predecessor is a table that has a
+direct link (depth=1) between itself and another table.</p>
+<p>For example, if a table has 2 direct predecessors, it needs to have 3 identifier columns.</p>
+<dl>
+<dt>Examples:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>A -&gt; B &lt;- C , A and C need to have 1 identifier column, and B needs to have 3 identifier</dt><dd><p>columns.</p>
+</dd>
+</dl>
+</li>
+<li><p>A -&gt; B -&gt; C &lt;- D , A and D need to have 1 identifier column, B needs to have 2, and</p></li>
+</ul>
+<blockquote>
+<div><p>C needs to only have 3 and not 4, because C only has 2 direct predecessors (B and D).
+There is not a direct link from C to A, so it is not a direct predecessor.</p>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><p>Each table can only be linked to the same variable once. This means that if A -&gt; B &lt;- C ,
+A and C need to link to two different columns in B.</p></li>
+<li><p>Every table can only reference another table once. This means that A -&gt; B &lt;- A is
+not possible.</p></li>
+<li><p>Top level tables need to be individual_level tables. For example, A -&gt; B &lt;- C , A and C need
+to be individual_level tables.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Config<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extra</strong>: <em>str = allow</em></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableParameters.table_links">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_links</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[TableLink],</span> <span class="pre">Field(description='Description</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">relational</span> <span class="pre">link</span> <span class="pre">between</span> <span class="pre">tables.',</span> <span class="pre">title='Table</span> <span class="pre">Links')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters.table_links" title="Permalink to this definition">#</a></dt>
+<dd><p>Description of each relational link between tables.</p>
+</dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableParameters.table_parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[AvatarizationParameters,</span> <span class="pre">AvatarizationWithTimeSeriesParameters]],</span> <span class="pre">Field(description='Avatarization</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">table.</span> <span class="pre">',</span> <span class="pre">title='Table</span> <span class="pre">Parameters')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters.table_parameters" title="Permalink to this definition">#</a></dt>
+<dd><p>Avatarization parameters for each table.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationMultiTableResult</span></span><a class="headerlink" href="#avatars.models.AvatarizationMultiTableResult" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableResult.datasets">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">datasets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[AvatarizationResultPerDataset],</span> <span class="pre">Field(title='Datasets')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableResult.datasets" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationWithTimeSeriesJobCreate">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationWithTimeSeriesJobCreate</span></span><a class="headerlink" href="#avatars.models.AvatarizationWithTimeSeriesJobCreate" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
@@ -3197,6 +3635,21 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationWithTimeSeriesJobCreate.parameters">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.AvatarizationWithTimeSeriesParameters" title="avatars.models.AvatarizationWithTimeSeriesParameters"><span class="pre">AvatarizationWithTimeSeriesParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationWithTimeSeriesJobCreate.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJobCreate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PrivacyMetricsMultiTableJobCreate</span></span><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJobCreate" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJobCreate.kind">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobKind" title="avatars.models.JobKind"><span class="pre">JobKind</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">JobKind.privacy_metrics_multi_table</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJobCreate.kind" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableJobCreate.parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableParameters" title="avatars.models.PrivacyMetricsMultiTableParameters"><span class="pre">PrivacyMetricsMultiTableParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableJobCreate.parameters" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3247,6 +3700,71 @@ that you want the computation to use with an instance of <code class="docutils l
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationBatchJob.traceback">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Traceback')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.AvatarizationBatchJob.traceback" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationMultiTableJob</span></span><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.created_at">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">created_at</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[datetime,</span> <span class="pre">Field(title='Created</span> <span class="pre">At')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.created_at" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.current_progress">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_progress</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobProgress" title="avatars.models.JobProgress"><span class="pre">JobProgress</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.current_progress" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.error_message">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">error_message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Error</span> <span class="pre">Message')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.error_message" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.id">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.id" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.kind">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobKind" title="avatars.models.JobKind"><span class="pre">JobKind</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.kind" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.AvatarizationMultiTableParameters" title="avatars.models.AvatarizationMultiTableParameters"><span class="pre">AvatarizationMultiTableParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.parameters" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.result">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">result</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.AvatarizationMultiTableResult" title="avatars.models.AvatarizationMultiTableResult"><span class="pre">AvatarizationMultiTableResult</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.result" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.status">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.JobStatus" title="avatars.models.JobStatus"><span class="pre">JobStatus</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.status" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJob.traceback">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">traceback</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Traceback')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJob.traceback" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJobCreate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">AvatarizationMultiTableJobCreate</span></span><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJobCreate" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJobCreate.kind">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#avatars.models.JobKind" title="avatars.models.JobKind"><span class="pre">JobKind</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">JobKind.avatarization_multi_table</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJobCreate.kind" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableJobCreate.parameters">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.AvatarizationMultiTableParameters" title="avatars.models.AvatarizationMultiTableParameters"><span class="pre">AvatarizationMultiTableParameters</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableJobCreate.parameters" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3470,6 +3988,10 @@ that you want the computation to use with an instance of <code class="docutils l
 </li>
 <li><a class="reference internal" href="#avatars.models.GenericParameters"><code class="docutils literal notranslate"><span class="pre">GenericParameters</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.GenericResult"><code class="docutils literal notranslate"><span class="pre">GenericResult</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.TrainingFractionItem"><code class="docutils literal notranslate"><span class="pre">TrainingFractionItem</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.TrainingFractionItem.root"><code class="docutils literal notranslate"><span class="pre">TrainingFractionItem.root</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.ImputeMethod"><code class="docutils literal notranslate"><span class="pre">ImputeMethod</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.ImputeMethod.knn"><code class="docutils literal notranslate"><span class="pre">ImputeMethod.knn</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.ImputeMethod.mode"><code class="docutils literal notranslate"><span class="pre">ImputeMethod.mode</span></code></a></li>
@@ -3486,7 +4008,9 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.JobKind.privacy_metrics_batch"><code class="docutils literal notranslate"><span class="pre">JobKind.privacy_metrics_batch</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.JobKind.signal_metrics_batch"><code class="docutils literal notranslate"><span class="pre">JobKind.signal_metrics_batch</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.JobKind.avatarization_with_time_series"><code class="docutils literal notranslate"><span class="pre">JobKind.avatarization_with_time_series</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobKind.avatarization_multi_table"><code class="docutils literal notranslate"><span class="pre">JobKind.avatarization_multi_table</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.JobKind.privacy_metrics_with_time_series"><code class="docutils literal notranslate"><span class="pre">JobKind.privacy_metrics_with_time_series</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.JobKind.privacy_metrics_multi_table"><code class="docutils literal notranslate"><span class="pre">JobKind.privacy_metrics_multi_table</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.JobKind.signal_metrics_with_time_series"><code class="docutils literal notranslate"><span class="pre">JobKind.signal_metrics_with_time_series</span></code></a></li>
 </ul>
 </li>
@@ -3505,6 +4029,11 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.JobStatus.unknown"><code class="docutils literal notranslate"><span class="pre">JobStatus.unknown</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.models.LinkMethod"><code class="docutils literal notranslate"><span class="pre">LinkMethod</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.LinkMethod.bottom_projection"><code class="docutils literal notranslate"><span class="pre">LinkMethod.bottom_projection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.LinkMethod.linear_sum_assignement"><code class="docutils literal notranslate"><span class="pre">LinkMethod.linear_sum_assignement</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.LoginResponse"><code class="docutils literal notranslate"><span class="pre">LoginResponse</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.LoginResponse.access_token"><code class="docutils literal notranslate"><span class="pre">LoginResponse.access_token</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.LoginResponse.token_type"><code class="docutils literal notranslate"><span class="pre">LoginResponse.token_type</span></code></a></li>
@@ -3521,6 +4050,13 @@ that you want the computation to use with an instance of <code class="docutils l
 </li>
 <li><a class="reference internal" href="#avatars.models.ClosestRateRatioThresholdItem"><code class="docutils literal notranslate"><span class="pre">ClosestRateRatioThresholdItem</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.ClosestRateRatioThresholdItem.root"><code class="docutils literal notranslate"><span class="pre">ClosestRateRatioThresholdItem.root</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsComputationType"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsComputationType</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsComputationType.standalone"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsComputationType.standalone</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsComputationType.to_bottom_id_propagated"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsComputationType.to_bottom_id_propagated</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsComputationType.to_top_enriched"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsComputationType.to_top_enriched</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsComputationType.full_enriched"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsComputationType.full_enriched</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsTargets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsTargets</span></code></a><ul>
@@ -3629,6 +4165,11 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.SignalMetricsWithTimeSeriesParameters.vanilla_original_id"><code class="docutils literal notranslate"><span class="pre">SignalMetricsWithTimeSeriesParameters.vanilla_original_id</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.models.TableReference"><code class="docutils literal notranslate"><span class="pre">TableReference</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.TableReference.dataset_id"><code class="docutils literal notranslate"><span class="pre">TableReference.dataset_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.TableReference.is_individual_level"><code class="docutils literal notranslate"><span class="pre">TableReference.is_individual_level</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.TimeSeriesSignalMetricsPerDataset"><code class="docutils literal notranslate"><span class="pre">TimeSeriesSignalMetricsPerDataset</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.TimeSeriesSignalMetricsPerDataset.avatars_id"><code class="docutils literal notranslate"><span class="pre">TimeSeriesSignalMetricsPerDataset.avatars_id</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.TimeSeriesSignalMetricsPerDataset.density_hellinger_mean"><code class="docutils literal notranslate"><span class="pre">TimeSeriesSignalMetricsPerDataset.density_hellinger_mean</span></code></a></li>
@@ -3664,6 +4205,7 @@ that you want the computation to use with an instance of <code class="docutils l
 </li>
 <li><a class="reference internal" href="#avatars.models.CreateDataset"><code class="docutils literal notranslate"><span class="pre">CreateDataset</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.CreateDataset.file"><code class="docutils literal notranslate"><span class="pre">CreateDataset.file</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.CreateDataset.name"><code class="docutils literal notranslate"><span class="pre">CreateDataset.name</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.GenericJob"><code class="docutils literal notranslate"><span class="pre">GenericJob</span></code></a><ul>
@@ -3792,21 +4334,42 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerBatchResult.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerBatchResult.unshuffled_avatars_id</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.categorical_hidden_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.closest_distances_ratio</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.closest_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.column_direct_match_protection</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.correlation_protection_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.distance_to_closest</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.hidden_rate</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.inference_categorical</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.inference_continuous</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.local_cloaking</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.original_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.original_id</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.row_direct_match_protection</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.targets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.targets</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerDataset.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerDataset.unshuffled_avatars_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.categorical_hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.closest_distances_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.closest_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.column_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.computation_type"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.computation_type</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.correlation_protection_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.distance_to_closest</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.individual_identifier_variable"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.individual_identifier_variable</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.inference_categorical</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.inference_continuous</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.local_cloaking</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.metrics_type"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.metrics_type</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.original_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.original_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.row_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.targets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.targets</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerMultiTableDataset.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerMultiTableDataset.unshuffled_avatars_id</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.categorical_hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.categorical_hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.closest_distances_ratio"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.closest_distances_ratio</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.closest_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.closest_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.column_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.column_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.correlation_protection_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.correlation_protection_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.distance_to_closest"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.distance_to_closest</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.hidden_rate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.hidden_rate</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.inference_categorical"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.inference_categorical</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.inference_continuous"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.inference_continuous</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.local_cloaking"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.local_cloaking</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.metrics_type"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.metrics_type</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.original_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.original_id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.row_direct_match_protection"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.row_direct_match_protection</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.targets"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.targets</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsPerTimeSeriesDataset.unshuffled_avatars_id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsPerTimeSeriesDataset.unshuffled_avatars_id</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsWithTimeSeriesParameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsWithTimeSeriesParameters</span></code></a><ul>
@@ -3861,6 +4424,14 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.SignalMetricsWithTimeSeriesJobCreate"><code class="docutils literal notranslate"><span class="pre">SignalMetricsWithTimeSeriesJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsWithTimeSeriesJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">SignalMetricsWithTimeSeriesJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.SignalMetricsWithTimeSeriesJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">SignalMetricsWithTimeSeriesJobCreate.parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.TableLink"><code class="docutils literal notranslate"><span class="pre">TableLink</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.TableLink.child_link_key"><code class="docutils literal notranslate"><span class="pre">TableLink.child_link_key</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.TableLink.child_table"><code class="docutils literal notranslate"><span class="pre">TableLink.child_table</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.TableLink.link_method"><code class="docutils literal notranslate"><span class="pre">TableLink.link_method</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.TableLink.parent_link_key"><code class="docutils literal notranslate"><span class="pre">TableLink.parent_link_key</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.TableLink.parent_table"><code class="docutils literal notranslate"><span class="pre">TableLink.parent_table</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.User"><code class="docutils literal notranslate"><span class="pre">User</span></code></a><ul>
@@ -3991,6 +4562,11 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsJobCreate.parameters</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableParameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableParameters</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_links"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableParameters.table_links</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableParameters.table_parameters</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsWithTimeSeriesJobCreate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsWithTimeSeriesJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsWithTimeSeriesJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsWithTimeSeriesJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsWithTimeSeriesJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsWithTimeSeriesJobCreate.parameters</span></code></a></li>
@@ -4036,6 +4612,18 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.result"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.result</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.status"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.status</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsBatchJob.traceback"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsBatchJob.traceback</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.created_at"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.created_at</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.current_progress"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.current_progress</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.error_message"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.error_message</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.id"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.kind"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.kind</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.parameters</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.result"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.result</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.status"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.status</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJob.traceback"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJob.traceback</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.PrivacyMetricsWithTimeSeriesJob"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsWithTimeSeriesJob</span></code></a><ul>
@@ -4091,9 +4679,23 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.AvatarizationJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationJobCreate.parameters</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableParameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableParameters</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableParameters.table_links"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableParameters.table_links</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableParameters.table_parameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableParameters.table_parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableResult"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableResult</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableResult.datasets"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableResult.datasets</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationWithTimeSeriesJobCreate"><code class="docutils literal notranslate"><span class="pre">AvatarizationWithTimeSeriesJobCreate</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.AvatarizationWithTimeSeriesJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">AvatarizationWithTimeSeriesJobCreate.kind</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationWithTimeSeriesJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationWithTimeSeriesJobCreate.parameters</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJobCreate"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJobCreate</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJobCreate.kind</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.PrivacyMetricsMultiTableJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">PrivacyMetricsMultiTableJobCreate.parameters</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationBatchJob"><code class="docutils literal notranslate"><span class="pre">AvatarizationBatchJob</span></code></a><ul>
@@ -4106,6 +4708,23 @@ that you want the computation to use with an instance of <code class="docutils l
 <li><a class="reference internal" href="#avatars.models.AvatarizationBatchJob.result"><code class="docutils literal notranslate"><span class="pre">AvatarizationBatchJob.result</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationBatchJob.status"><code class="docutils literal notranslate"><span class="pre">AvatarizationBatchJob.status</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.AvatarizationBatchJob.traceback"><code class="docutils literal notranslate"><span class="pre">AvatarizationBatchJob.traceback</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.created_at"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.created_at</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.current_progress"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.current_progress</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.error_message"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.error_message</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.id"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.id</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.kind"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.kind</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.parameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.parameters</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.result"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.result</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.status"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.status</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJob.traceback"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJob.traceback</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJobCreate"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJobCreate</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJobCreate.kind"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJobCreate.kind</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.AvatarizationMultiTableJobCreate.parameters"><code class="docutils literal notranslate"><span class="pre">AvatarizationMultiTableJobCreate.parameters</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.Processor"><code class="docutils literal notranslate"><span class="pre">Processor</span></code></a><ul>
