@@ -37,10 +37,14 @@ class ClusterStats(BaseModel):
 class ColumnStats(BaseModel):
     label: Annotated[str, Field(title="Label")]
     dtype: Annotated[str, Field(title="Dtype")]
-    missing_number: Annotated[int, Field(title="Missing Number")]
-    missing_proportion: Annotated[float, Field(title="Missing Proportion")]
-    unique_number: Annotated[int, Field(title="Unique Number")]
-    unique_proportion: Annotated[float, Field(title="Unique Proportion")]
+    missing_number: Annotated[int, Field(ge=0, title="Missing Number")]
+    missing_proportion: Annotated[
+        float, Field(ge=0.0, le=1.0, title="Missing Proportion")
+    ]
+    unique_number: Annotated[int, Field(ge=0, title="Unique Number")]
+    unique_proportion: Annotated[
+        float, Field(ge=0.0, le=1.0, title="Unique Proportion")
+    ]
     mean: Annotated[Optional[float], Field(title="Mean")] = None
     median: Annotated[Optional[float], Field(title="Median")] = None
     standard_deviation: Annotated[
@@ -135,6 +139,10 @@ class GenericParameters(BaseModel):
 
 class GenericResult(BaseModel):
     pass
+
+
+class TrainingFractionItem(RootModel[float]):
+    root: Annotated[float, Field(ge=0.0, le=1.0)]
 
 
 class ImputeMethod(Enum):
@@ -639,7 +647,7 @@ class ImputationParameters(BaseModel):
     method: Optional[ImputeMethod] = None
     k: Annotated[Optional[int], Field(title="K")] = None
     training_fraction: Annotated[
-        Optional[float], Field(title="Training Fraction")
+        Optional[TrainingFractionItem], Field(title="Training Fraction")
     ] = None
 
 
