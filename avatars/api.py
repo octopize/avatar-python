@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.13-6f8cd4b8ee591a1f8e0103bc2890c5f595675b31
+# API Version : 0.5.20-f09cb93c133027c26ed11e848283b18914102f1e
 
 
 import itertools
@@ -31,6 +31,8 @@ from avatars.models import (
     AvatarizationBatchResult,
     AvatarizationJob,
     AvatarizationJobCreate,
+    AvatarizationMultiTableJob,
+    AvatarizationMultiTableJobCreate,
     AvatarizationPipelineCreate,
     AvatarizationPipelineResult,
     AvatarizationWithTimeSeriesJob,
@@ -55,6 +57,8 @@ from avatars.models import (
     PrivacyMetricsBatchJobCreate,
     PrivacyMetricsJob,
     PrivacyMetricsJobCreate,
+    PrivacyMetricsMultiTableJob,
+    PrivacyMetricsMultiTableJobCreate,
     PrivacyMetricsParameters,
     PrivacyMetricsWithTimeSeriesJob,
     PrivacyMetricsWithTimeSeriesJobCreate,
@@ -559,6 +563,23 @@ class Jobs:
 
         return AvatarizationWithTimeSeriesJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
+    def create_avatarization_multi_table_job(
+        self,
+        request: AvatarizationMultiTableJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationMultiTableJob:
+        """Create an avatarization for relational data."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/avatarization_multi_table",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return AvatarizationMultiTableJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
     def create_signal_metrics_job(
         self,
         request: SignalMetricsJobCreate,
@@ -661,6 +682,23 @@ class Jobs:
 
         return SignalMetricsBatchJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
 
+    def create_privacy_metrics_multi_table_job(
+        self,
+        request: PrivacyMetricsMultiTableJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsMultiTableJob:
+        """Create a privacy metrics job."""
+
+        kwargs = {
+            "method": "post",
+            "url": f"/jobs/metrics/privacy_multi_table",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return PrivacyMetricsMultiTableJob(**self.client.request(**kwargs))  # type: ignore[arg-type]
+
     def get_avatarization_job(
         self,
         id: str,
@@ -723,6 +761,28 @@ class Jobs:
         return get_job(
             client=self.client,
             response_cls=AvatarizationWithTimeSeriesJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_avatarization_multi_table_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AvatarizationMultiTableJob:
+        """Get a multi table avatarization job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/avatarization_multi_table/{id}",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=AvatarizationMultiTableJob,
             per_request_timeout=per_request_timeout,
             **kwargs,  # type: ignore
         )
@@ -855,6 +915,28 @@ class Jobs:
         return get_job(
             client=self.client,
             response_cls=PrivacyMetricsWithTimeSeriesJob,
+            per_request_timeout=per_request_timeout,
+            **kwargs,  # type: ignore
+        )
+
+    def get_privacy_metrics_multi_table_job(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsMultiTableJob:
+        """Get a privacy metrics multi table job."""
+
+        kwargs = {
+            "method": "get",
+            "url": f"/jobs/{id}/metrics/privacy_multi_table",
+            "timeout": timeout,
+        }
+
+        return get_job(
+            client=self.client,
+            response_cls=PrivacyMetricsMultiTableJob,
             per_request_timeout=per_request_timeout,
             **kwargs,  # type: ignore
         )
