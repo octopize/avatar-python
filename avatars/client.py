@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.21-2951c0b68a984332c602f85ddd62dc086790cab4
+# API Version : 0.5.22-3a664d6659bef7b6fc3dcbdbaeed552ad4a1b188
 
 
 import sys
@@ -22,7 +22,6 @@ from avatars.api import (
     Auth,
     Compatibility,
     Datasets,
-    FileTooLarge,
     Health,
     Jobs,
     Metrics,
@@ -36,6 +35,10 @@ from avatars.api import (
 from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024
+
+
+class FileTooLarge(Exception):
+    pass
 
 
 def _get_nested_value(
