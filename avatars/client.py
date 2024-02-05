@@ -22,7 +22,6 @@ from avatars.api import (
     Auth,
     Compatibility,
     Datasets,
-    FileTooLarge,
     Health,
     Jobs,
     Metrics,
@@ -36,6 +35,10 @@ from avatars.api import (
 from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024
+
+
+class FileTooLarge(Exception):
+    pass
 
 
 def _get_nested_value(
