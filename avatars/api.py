@@ -64,6 +64,8 @@ from avatars.models import (
     PrivacyMetrics,
     PrivacyMetricsBatchJob,
     PrivacyMetricsBatchJobCreate,
+    PrivacyMetricsGeolocationJob,
+    PrivacyMetricsGeolocationJobCreate,
     PrivacyMetricsJob,
     PrivacyMetricsJobCreate,
     PrivacyMetricsMultiTableJob,
@@ -668,6 +670,42 @@ class Jobs:
         return _Jobs(self.client).create_privacy_metrics_multi_table_job(
             *args, **kwargs
         )
+
+    def create_privacy_metrics_geolocation_job(
+        self,
+        request: PrivacyMetricsGeolocationJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsGeolocationJob:
+        """Create a geolocation privacy metrics job."""
+
+        kwargs: Dict[str, Any] = {
+            "timeout": timeout,
+        }
+
+        args: List[Any] = [
+            request,
+        ]
+
+        return _Jobs(self.client).create_privacy_metrics_geolocation_job(
+            *args, **kwargs
+        )
+
+    def get_privacy_metrics_geolocation_job(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> PrivacyMetricsGeolocationJob:
+        """Get a geolocation privacy metrics job."""
+
+        kwargs: Dict[str, Any] = {
+            "timeout": timeout,
+        }
+
+        args: List[Any] = [id]
+
+        return _Jobs(self.client).get_privacy_metrics_geolocation_job(*args, **kwargs)
 
     def get_avatarization_job(
         self,
