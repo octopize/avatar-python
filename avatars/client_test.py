@@ -48,6 +48,6 @@ def test_should_verify_ssl(mock_client: Any) -> None:
 def test_url_is_rejected_if_it_contains_quotes(base_url: str) -> None:
     # Note there is "quote" within the URL, usually an error related to system
     # env variable configuration.
-    with pytest.raises(ValueError) as exc_info:
+    with pytest.raises(ValueError, match="must not contain quotes") as exc_info:
         api_client = ApiClient(base_url=base_url)
-    assert "must not contain quotes" in str(exc_info.value)
+
