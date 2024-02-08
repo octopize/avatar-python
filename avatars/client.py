@@ -75,6 +75,11 @@ class ApiClient:
     ) -> None:
         self.base_url = base_url
 
+        if '"' in self.base_url:
+            raise ValueError(
+                "Expected base_url not to contain quotes. Got {self.base_url} instead"
+            )
+
         self.auth = Auth(self)
         self.compatibility = Compatibility(self)
         self.datasets = Datasets(self)
