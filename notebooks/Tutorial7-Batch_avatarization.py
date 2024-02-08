@@ -42,10 +42,10 @@ from avatars.client import ApiClient
 from avatars.models import (
     AvatarizationBatchParameters,
     AvatarizationBatchJobCreate,
-    PrivacyMetricsBaseParameters,
+    CommonPrivacyMetricsParameters,
     PrivacyMetricsBatchJobCreate,
     PrivacyMetricsBatchParameters,
-    SignalMetricsBaseParameters,
+    CommonSignalMetricsParameters,
     SignalMetricsBatchJobCreate,
     SignalMetricsBatchParameters,
     ImputationParameters,
@@ -111,7 +111,7 @@ privacy_job_ref = client.jobs.create_privacy_metrics_batch_job(
     PrivacyMetricsBatchJobCreate(
         parameters=PrivacyMetricsBatchParameters(
             avatarization_batch_job_id=batch_job.id,
-            common_parameters=PrivacyMetricsBaseParameters(
+            common_parameters=CommonPrivacyMetricsParameters(
                 imputation=ImputationParameters(method=ImputeMethod.mean)
             ),
         ),
@@ -136,7 +136,7 @@ signal_job_training = client.jobs.create_signal_metrics_batch_job(
     SignalMetricsBatchJobCreate(
         parameters=SignalMetricsBatchParameters(
             avatarization_batch_job_id=batch_job.id,
-            common_parameters=SignalMetricsBaseParameters(),
+            common_parameters=CommonSignalMetricsParameters(),
         ),
     ),
     timeout=100,
