@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 
 from avatars.api import download_sensitive_unshuffled_avatar_dataframe_from_batch
-from avatars.client import ApiClient
 from avatars.models import (
     AvatarizationBatchResult,
     AvatarizationPerBatchResult,
@@ -18,20 +17,32 @@ def batch_result() -> AvatarizationBatchResult:
     batch = AvatarizationBatchResult(
         training_result=AvatarizationPerBatchResult(
             avatars_dataset=Dataset(
-                id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
+                id=uuid4(),
+                hash="plouf",
+                download_url="truc",
+                nb_dimensions=1,
             ),
             sensitive_unshuffled_avatars_datasets=Dataset(
-                id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
+                id=uuid4(),
+                hash="plouf",
+                download_url="truc",
+                nb_dimensions=1,
             ),
             original_id=uuid4(),
         ),
         batch_results=[
             AvatarizationPerBatchResult(
                 avatars_dataset=Dataset(
-                    id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
+                    id=uuid4(),
+                    hash="plouf",
+                    download_url="truc",
+                    nb_dimensions=1,
                 ),
                 sensitive_unshuffled_avatars_datasets=Dataset(
-                    id=uuid4(), hash="plouf", download_url="truc", nb_dimensions=1
+                    id=uuid4(),
+                    hash="plouf",
+                    download_url="truc",
+                    nb_dimensions=1,
                 ),
                 original_id=uuid4(),
             )
