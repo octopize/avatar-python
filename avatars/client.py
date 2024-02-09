@@ -1,20 +1,39 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-c112bb0d3046c2d5d6e40ef59db87a5273264ea9
+# API Version : 0.5.24-3d8918dad6f111274fe16498e055c21ee854ce9d
 
 
 import sys
 from collections.abc import Mapping, Sequence
+from contextlib import contextmanager
 from enum import Enum
 from io import BytesIO, StringIO
 from json import loads as json_loads
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    AnyStr,
+    BinaryIO,
+    Dict,
+    Generator,
+    Literal,
+    Optional,
+    Protocol,
+    Sequence,
+    TextIO,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 from uuid import UUID
 
 import httpx
 from httpx import ReadTimeout, Response, WriteTimeout
 from pydantic import BaseModel
-from toolz.dicttoolz import valfilter
+from toolz.dicttoolz import valfilter, valmap
+from typing_extensions import TypeAlias, TypeGuard
 
 from avatars import __version__
 from avatars.api import (
@@ -34,7 +53,13 @@ from avatars.api import (
 )
 from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
 
-MAX_FILE_LENGTH = 1024 * 1024 * 1024
+MAX_FILE_LENGTH = 1024 * 1024 * 1024  # 1 GB
+
+
+if TYPE_CHECKING:
+    from avatars._typing import FileLikeInterface, HttpxFile
+
+from avatars._typing import is_file_like
 
 
 class FileTooLarge(Exception):
@@ -72,7 +97,25 @@ class ApiClient:
         base_url: str,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
         should_verify_ssl: bool = True,
+        *,
+        verify_auth: bool = True,
+        http_client: Optional[httpx.Client] = None,
     ) -> None:
+        """Client to communicate with the Avatar API.
+
+        Parameters
+        ----------
+        base_url
+            url of the API
+        timeout:
+            timeout in seconds, by default DEFAULT_TIMEOUT
+        should_verify_ssl :, optional
+            whether to verify SSL certificates on the server. By default True
+        http_client :, optional
+            allow passing in custom httpx.Client instance, by default None
+        verify_auth :, optional
+            Bypass client-side authentication verification, by default True
+        """
         self.base_url = base_url
 
         if '"' in self.base_url:
@@ -89,13 +132,27 @@ class ApiClient:
         self.reports = Reports(self)
         self.stats = Stats(self)
         self.users = Users(self)
+
         self.pandas_integration = PandasIntegration(self)
         self.pipelines = Pipelines(self)
 
         self.timeout = timeout
         self.should_verify_ssl = should_verify_ssl
-
+        self._http_client = http_client
+        self.verify_auth = verify_auth
         self._headers = {"User-Agent": f"avatar-python/{__version__}"}
+
+    @contextmanager
+    def _get_http_client(self) -> Generator[httpx.Client, None, None]:
+        if self._http_client:
+            yield self._http_client
+        else:
+            with httpx.Client(
+                base_url=self.base_url,
+                timeout=self.timeout,
+                verify=self.should_verify_ssl,
+            ) as client:
+                yield client
 
     def authenticate(
         self, username: str, password: str, timeout: Optional[int] = None
@@ -137,22 +194,22 @@ class ApiClient:
         params: Optional[Dict[str, Any]] = None,
         json: Optional[BaseModel] = None,
         form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None,
-        file: Optional[Union[StringIO, BytesIO]] = None,
+        file: Optional[Sequence["HttpxFile"]] = None,
         timeout: Optional[int] = None,
-        should_verify_ssl: Optional[bool] = None,
+        should_verify_auth: bool = True,
         **kwargs: Dict[str, Any],
     ) -> Any:
         """Request the API."""
 
-        should_verify = (
-            kwargs.get("verify_auth") is None or kwargs.get("verify_auth") == True
-        )
+        should_verify = self.verify_auth and should_verify_auth
+
         if should_verify and "Authorization" not in self._headers:
             raise Exception("You are not authenticated.")
 
         # Remove params if they are set to None (allow handling of optionals)
         if isinstance(params, dict):
             params = valfilter(lambda x: x is not None, params)
+            params = valmap(lambda x: x.value if isinstance(x, Enum) else x, params)
 
         json_arg = json_loads(json.model_dump_json()) if json else None
         form_data_arg = (
@@ -161,30 +218,20 @@ class ApiClient:
 
         if form_data_arg:
             form_data_arg = valfilter(lambda x: x is not None, form_data_arg)
-        files_arg = self._get_file_argument(file)
+            form_data_arg = valmap(
+                lambda x: x.value if isinstance(x, Enum) else x, form_data_arg
+            )
 
-        # Allows for using self-signed certificates.
-        # Use default from self.shoud_verify_ssl if not specified.
-        _should_verify_ssl = (
-            should_verify_ssl
-            if should_verify_ssl is not None
-            else self.should_verify_ssl
-        )
+        should_stream = bool(kwargs.get("should_stream", False))  # for download
 
-        should_stream = bool(kwargs.get("should_stream", False))
-
-        with httpx.Client(
-            timeout=timeout or self.timeout,
-            base_url=self.base_url,
-            verify=_should_verify_ssl,
-        ) as client:
+        with self._get_http_client() as client:
             request = client.build_request(
                 method=method,
                 url=url,
                 params=params,
                 json=json_arg,
                 data=form_data_arg,
-                files=files_arg,
+                files=file,  # type: ignore[arg-type]
                 headers=self._headers,
             )
             try:
@@ -201,29 +248,6 @@ class ApiClient:
                 raise Timeout(
                     "The call timed out. Consider increasing the timeout with the `timeout` parameter."
                 ) from None
-
-    def _get_file_argument(
-        self, file: Optional[Union[StringIO, BytesIO]]
-    ) -> Optional[Dict[str, Tuple[str, bytes, str]]]:
-        if not file:
-            return None
-
-        filename = str(Path(file.name).name) if hasattr(file, "name") else "file.csv"
-
-        content = file.read(MAX_FILE_LENGTH)
-
-        if sys.getsizeof(content) >= MAX_FILE_LENGTH:
-            raise FileTooLarge(
-                f"The file size must not exceed{MAX_FILE_LENGTH / (1024*1024) : .0f} MB."
-            )
-
-        encoded_content = (
-            content if isinstance(content, bytes) else content.encode("utf-8")
-        )
-
-        # The dictionary key must be 'file' and you MUST pass in a filename
-        # else there is a request ValidationError on the server side
-        return {"file": (filename, encoded_content, "text/csv")}
 
     def _handle_standard_response(
         self, result: Response
@@ -282,3 +306,6 @@ class ApiClient:
         raise Exception(
             f"Got error in HTTP request: {result.request.method} {result.request.url}. Error status {result.status_code} - {error_msg}"
         )
+
+    def __str__(self) -> str:
+        return f"ApiClient(base_url={self.base_url}, timeout={self.timeout}, should_verify_ssl={self.should_verify_ssl}, verify_auth={self.verify_auth})"

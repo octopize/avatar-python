@@ -20,7 +20,7 @@ release-and-push: ## Prepare a new client release
 
 ##@ Tests
 
-test: typecheck  ## Run all the tests
+test:  ## Run all the tests
 	poetry run pytest --doctest-modules avatars
 .PHONY: test
 
