@@ -1,22 +1,37 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-c112bb0d3046c2d5d6e40ef59db87a5273264ea9
+# API Version : 0.5.24-3d8918dad6f111274fe16498e055c21ee854ce9d
 
 
+import io
 import itertools
 import logging
+import os
+import tempfile
 import time
+import warnings
+from contextlib import ExitStack
 from copy import copy
 from io import BytesIO, StringIO
 from typing import (
+    IO,
     TYPE_CHECKING,
     Any,
+    AnyStr,
+    BinaryIO,
     Callable,
     Dict,
     List,
+    Literal,
+    NoReturn,
     Optional,
+    Protocol,
+    Sequence,
+    TextIO,
     Tuple,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 from uuid import UUID
 
@@ -55,6 +70,7 @@ from avatars.models import (
     CreateUser,
     Dataset,
     ExplainedVariance,
+    FileType,
     ForgottenPasswordRequest,
     GenericJob,
     JobStatus,
@@ -93,7 +109,9 @@ from avatars.models import (
 
 if TYPE_CHECKING:
     from avatars.client import ApiClient
+    from avatars._typing import FileLikeInterface, HttpxFile
 
+from avatars._typing import is_file_like
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -203,20 +221,250 @@ class Datasets:
 
     def create_dataset_from_stream(
         self,
-        request: Union[StringIO, BytesIO],
+        request: Optional[
+            Union["FileLikeInterface[bytes]", "FileLikeInterface[str]"]
+        ] = None,
         name: Optional[str] = None,
+        source: Optional[
+            Union[str, "FileLikeInterface[bytes]"]
+        ] = None,  # optional because we still have to support the old way # TODO: Remove once deprecated
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
-        """Create a dataset by streaming chunks of the dataset."""
+        """Create a dataset by streaming chunks of the dataset.
 
-        kwargs: Dict[str, Any] = {
+        DEPRECATED: Please use create_dataset instead.
+        """
+
+        warnings.warn(
+            DeprecationWarning(
+                "create_dataset_from_stream is deprecated. Use create_dataset instead."
+            )
+        )
+
+        _source: Optional[
+            Union[str, "FileLikeInterface[bytes]", "FileLikeInterface[str]"]
+        ] = (request or source)
+        return self.create_dataset(source=_source, name=name, timeout=timeout)  # type: ignore[arg-type]
+
+    def create_dataset(
+        self,
+        request: Optional[
+            Union["FileLikeInterface[str]", "FileLikeInterface[bytes]"]
+        ] = None,  # TODO: Remove once deprecated
+        name: Optional[str] = None,
+        source: Optional[
+            Union[
+                str,
+                list[str],
+                "FileLikeInterface[bytes]",
+            ]
+        ] = None,  # optional because we still have to support the old way
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Dataset:
+        """Create a dataset from file upload."""
+
+        if request:
+            warnings.warn(
+                DeprecationWarning("request is deprecated. Use file instead.")
+            )
+
+        if request is not None and source is not None:
+            raise ValueError("You cannot pass both request and source.")
+
+        if request is None and source is None:
+            raise ValueError("You need to pass in a source.")
+
+        _source = request or source
+
+        if _source is None:
+            raise ValueError("You need to pass in a source.")
+
+        with ExitStack() as stack:
+            file_arguments = self._create_httpx_file_argument(_source, stack)
+
+            kwargs = {
+                "method": "post",
+                "url": f"/datasets/stream",
+                "timeout": timeout,
+                "file": file_arguments,
+                "params": dict(
+                    name=name,
+                ),
+            }
+
+            result = self.client.request(**kwargs)  # type: ignore[arg-type]
+        return Dataset(**result)
+
+    def download_dataset_as_stream(
+        self,
+        id: str,
+        destination: Optional[
+            Union[str, "FileLikeInterface[bytes]", "FileLikeInterface[str]"]
+        ] = None,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> BytesIO:
+        """Download a dataset by streaming chunks of it.
+
+        DEPRECATED: Please use download_dataset instead.
+        """
+        warnings.warn(
+            DeprecationWarning(
+                "download_dataset_as_stream is deprecated. Use download_dataset instead."
+            )
+        )
+
+        # Ignoring return type because download_dataset's logic makes sure
+        # that the return type will be BytesIO
+        # No point in going through the hassle of using typing.overload for something
+        # that will be removed soon
+        return self.download_dataset(  # type: ignore[return-value]
+            id,
+            destination=destination,
+            timeout=timeout,
+            from_download_as_stream=True,
+        )
+
+    def download_dataset(
+        self,
+        id: str,
+        destination: Optional[
+            Union[str, "FileLikeInterface[bytes]", "FileLikeInterface[str]"]
+        ] = None,
+        filetype: Optional[FileType] = None,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        from_download_as_stream: bool = False,  # TODO: Remove once deprecated
+    ) -> Optional[Union[BytesIO, str]]:
+        """Download a dataset."""
+
+        if destination is None and not from_download_as_stream:
+            # Old return value when using download_dataset
+            filetype = filetype or FileType.csv
+
+        kwargs = {
+            "method": "get",
+            "url": f"/datasets/{id}/download/stream",
             "timeout": timeout,
+            "should_stream": True,
+            "params": {
+                "filetype": filetype,
+            },
         }
 
-        args: List[Any] = [request, name]
+        received_buffer = cast(BytesIO, self.client.request(**kwargs))  # type: ignore[arg-type]
 
-        return _Datasets(self.client).create_dataset_from_stream(*args, **kwargs)
+        received_buffer.seek(0)
+
+        if destination is None:
+            warnings.warn(
+                DeprecationWarning(
+                    "Please specify the destination argument. The return type will change in the future."
+                )
+            )
+            # TODO: Remove once deprecated
+            if from_download_as_stream:
+                # Old return value when using download_dataset_as_stream
+                return received_buffer
+            else:
+                # Old return value when using download_dataset (with Filetype.csv as default)
+                received = received_buffer.read()
+                if filetype is FileType.csv:
+                    # Old return value when using download_dataset (with Filetype.csv as default)
+                    return received.decode()
+                elif filetype is FileType.parquet:
+                    raise ValueError(
+                        "Can't download parquet files as string. Please use a different destination."
+                    )
+
+        if isinstance(destination, str):
+            # User wants to save the file to disk
+            with open(destination, "wb") as f:
+                f.write(received_buffer.read())
+            return None
+
+        if is_file_like(destination):
+            # User wants to save the file to a buffer he provided
+            as_bytes = received_buffer.read()
+            del received_buffer
+
+            # We don't know the type of the buffer, so we try to write the bytes to it
+            # and if it fails, we assume it's a text buffer and try to decode the bytes
+            try:
+                destination.write(as_bytes)  # type: ignore[arg-type]
+            except TypeError as e:
+                if "string argument expected" in str(e.args[0]):
+                    destination.write(as_bytes.decode())
+                else:
+                    raise e
+            destination.seek(0)
+
+            return None
+
+        raise TypeError(
+            f"Expected destination to be a string or a buffer, got {type(destination)} instead"
+        )
+
+    def _create_httpx_file_argument(
+        self,
+        source: Union[
+            str,
+            list[str],
+            "FileLikeInterface[bytes]",
+            "FileLikeInterface[str]",  # TODO: remove that possibility once deprecated
+        ],
+        stack: ExitStack,
+    ) -> List["HttpxFile"]:
+        if source and is_file_like(source):
+            # User provided file like object.
+            # It is his responsibility to close it.
+
+            # We try reading the file to check if it's binary or not
+            # HTTPX handles binary files only
+
+            single_char = source.read(1)
+
+            if isinstance(single_char, bytes):
+                # undo previous read operation
+                # can only be done on binary file handles
+                source.seek(-1, os.SEEK_CUR)
+
+                # File is binary, we can upload it as is
+                return [("file", source)]
+
+            # TODO: When deprecating, raise an error instead of a warning
+            warnings.warn(
+                DeprecationWarning(
+                    "You are trying to upload a text file. This is deprecated. "
+                    "Please open the file in binary mode."
+                )
+            )
+
+            # We create a new temporary file, write the content of the source file to it
+            # and then upload the temporary file, but this time opened in binary mode (default)
+            temporary_file = stack.enter_context(tempfile.NamedTemporaryFile())
+            temporary_file.write(single_char.encode())
+            temporary_file.write(source.read().encode())
+            temporary_file.seek(0)
+
+            return [("file", temporary_file)]
+
+        if isinstance(source, str):
+            source = [source]
+
+        if isinstance(source, list):
+            # List of files to upload as one dataset.
+            # This is especially useful for large parquet files.
+            return [
+                ("file", stack.enter_context(open(file_path, "rb")))
+                for file_path in source
+            ]
+
+        raise TypeError(
+            f"Expected source to be a string or a buffer, got {type(source)} instead."
+        )
 
     def find_all_datasets_by_user(
         self,
@@ -233,29 +481,6 @@ class Datasets:
 
         return _Datasets(self.client).find_all_datasets_by_user(*args, **kwargs)
 
-    def create_dataset(
-        self,
-        request: Union[StringIO, BytesIO],
-        name: Optional[str] = None,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Dataset:
-        """Create a dataset from file upload.
-
-        The file should be in CSV format.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            request,
-            name,
-        ]
-
-        return _Datasets(self.client).create_dataset(*args, **kwargs)
-
     def get_dataset(
         self,
         id: str,
@@ -268,7 +493,9 @@ class Datasets:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Datasets(self.client).get_dataset(*args, **kwargs)
 
@@ -285,7 +512,10 @@ class Datasets:
             "timeout": timeout,
         }
 
-        args: List[Any] = [request, id]
+        args: List[Any] = [
+            request,
+            id,
+        ]
 
         return _Datasets(self.client).patch_dataset(*args, **kwargs)
 
@@ -301,7 +531,9 @@ class Datasets:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Datasets(self.client).analyze_dataset(*args, **kwargs)
 
@@ -317,41 +549,11 @@ class Datasets:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Datasets(self.client).get_dataset_correlations(*args, **kwargs)
-
-    def download_dataset_as_stream(
-        self,
-        id: str,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        """Download a dataset by streaming chunks of it."""
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [id]
-
-        return _Datasets(self.client).download_dataset_as_stream(*args, **kwargs)
-
-    def download_dataset(
-        self,
-        id: str,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        """Download a dataset."""
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [id]
-
-        return _Datasets(self.client).download_dataset(*args, **kwargs)
 
 
 class Health:
@@ -424,7 +626,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [nb_days]
+        args: List[Any] = [
+            nb_days,
+        ]
 
         return _Jobs(self.client).find_all_jobs_by_user(*args, **kwargs)
 
@@ -463,7 +667,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).cancel_job(*args, **kwargs)
 
@@ -703,7 +909,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_privacy_metrics_geolocation_job(*args, **kwargs)
 
@@ -721,7 +929,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_avatarization_job(*args, **kwargs)
 
@@ -739,7 +949,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_avatarization_batch_job(*args, **kwargs)
 
@@ -757,7 +969,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_avatarization_time_series_job(*args, **kwargs)
 
@@ -775,7 +989,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_avatarization_multi_table_job(*args, **kwargs)
 
@@ -793,7 +1009,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_signal_metrics(*args, **kwargs)
 
@@ -811,7 +1029,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_signal_metrics_batch_job(*args, **kwargs)
 
@@ -829,7 +1049,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_signal_metrics_time_series_job(*args, **kwargs)
 
@@ -847,7 +1069,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_privacy_metrics(*args, **kwargs)
 
@@ -865,7 +1089,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_privacy_metrics_batch_job(*args, **kwargs)
 
@@ -883,7 +1109,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_privacy_metrics_time_series_job(*args, **kwargs)
 
@@ -901,7 +1129,9 @@ class Jobs:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Jobs(self.client).get_privacy_metrics_multi_table_job(*args, **kwargs)
 
@@ -930,7 +1160,9 @@ class Metrics:
             "timeout": timeout,
         }
 
-        args: List[Any] = [job_id]
+        args: List[Any] = [
+            job_id,
+        ]
 
         return _Metrics(self.client).get_job_projections(*args, **kwargs)
 
@@ -955,7 +1187,10 @@ class Metrics:
             "timeout": timeout,
         }
 
-        args: List[Any] = [job_id, dataset_id]
+        args: List[Any] = [
+            job_id,
+            dataset_id,
+        ]
 
         return _Metrics(self.client).get_variable_contributions(*args, **kwargs)
 
@@ -979,7 +1214,9 @@ class Metrics:
             "timeout": timeout,
         }
 
-        args: List[Any] = [job_id]
+        args: List[Any] = [
+            job_id,
+        ]
 
         return _Metrics(self.client).get_explained_variance(*args, **kwargs)
 
@@ -1018,7 +1255,9 @@ class Reports:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Reports(self.client).download_report(*args, **kwargs)
 
@@ -1102,7 +1341,10 @@ class Users:
             "timeout": timeout,
         }
 
-        args: List[Any] = [email, username]
+        args: List[Any] = [
+            email,
+            username,
+        ]
 
         return _Users(self.client).find_users(*args, **kwargs)
 
@@ -1157,7 +1399,9 @@ class Users:
             "timeout": timeout,
         }
 
-        args: List[Any] = [id]
+        args: List[Any] = [
+            id,
+        ]
 
         return _Users(self.client).get_user(*args, **kwargs)
 
@@ -1197,7 +1441,7 @@ class PandasIntegration:
             )
         else:
             dataset = self.client.datasets.create_dataset(
-                buffer, timeout=timeout, name=name
+                source=buffer, timeout=timeout, name=name
             )
             columns = []
             for index, dtype in zip(df_types.index, df_types):
@@ -1231,9 +1475,9 @@ class PandasIntegration:
                 id, timeout=timeout
             )
         else:
-            dataset = self.client.datasets.download_dataset(id, timeout=timeout)
-            dataset_io = BytesIO(
-                dataset.encode("utf-8") if isinstance(dataset, str) else dataset
+            dataset_io = io.BytesIO()
+            self.client.datasets.download_dataset(
+                id, destination=dataset_io, timeout=timeout
             )
 
         dataset_io.seek(0)
