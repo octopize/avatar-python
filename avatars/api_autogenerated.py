@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-3d8918dad6f111274fe16498e055c21ee854ce9d
+# API Version : 0.5.24-0e261dc021c2d7f16d2f8332463a86fa90360196
 
 
 import logging
@@ -40,6 +40,7 @@ from avatars.models import Report
 from avatars.models import ReportCreate
 from avatars.models import ReportFromBatchCreate
 from avatars.models import ReportFromDataCreate
+from avatars.models import ReportGeolocationPrivacyCreate
 from avatars.models import ResetPasswordRequest
 from avatars.models import SignalMetricsBatchJob
 from avatars.models import SignalMetricsBatchJobCreate
@@ -262,10 +263,7 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
-        """Create a dataset from file upload.
-
-        The file should be in CSV format.
-        """
+        """Create a dataset from file upload."""
 
         kwargs: Dict[str, Any] = {
             "method": "post",
@@ -352,7 +350,19 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-        """Download a dataset by streaming chunks of it."""
+        """Download a dataset by streaming chunks of it.
+
+        Parameters
+        ----------
+        id
+            The identifier of the dataset to download.
+        filetype
+            The filetype of the data you which to receive.
+
+        Returns
+        -------
+            The dataset contents
+        """
 
         kwargs: Dict[str, Any] = {
             "method": "get",
@@ -373,7 +383,11 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-        """Download a dataset."""
+        """Download a dataset.
+
+        This is only advised for small datasets.
+        Use /datasets/{id}/download/stream for larger datasets.
+        """
 
         kwargs: Dict[str, Any] = {
             "method": "get",
@@ -1121,6 +1135,23 @@ class Reports:
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/reports/from_batch",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return Report(**self.client.request(**kwargs))
+
+    def create_geolocation_privacy_report(
+        self,
+        request: ReportGeolocationPrivacyCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report without avatarization job."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/reports/geolocation_privacy",
             "timeout": timeout,
             "json": request,
         }
