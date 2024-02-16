@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 1.1.0-8d3fdf018d62c07cb630d4d02e690cf75f8411ea
+# API Version : 1.1.2-0cb8cab6417ce47021ead827cc4b2da4bbda6b04
 
 
 import sys
@@ -34,25 +34,11 @@ import httpx
 from httpx import ReadTimeout, Response, WriteTimeout
 from pydantic import BaseModel
 from toolz.dicttoolz import valfilter, valmap
-from typing_extensions import TypeAlias, TypeGuard
 
 from avatars import __version__
-from avatars.api import (
-    DEFAULT_TIMEOUT,
-    Auth,
-    Compatibility,
-    Datasets,
-    Health,
-    Jobs,
-    Metrics,
-    PandasIntegration,
-    Pipelines,
-    Reports,
-    Stats,
-    Timeout,
-    Users,
-)
 from avatars.base_client import BaseClient
+from avatars.constants import DEFAULT_TIMEOUT
+from avatars.exceptions import Timeout
 from avatars.models import (
     CompatibilityStatus,
     ForgottenPasswordRequest,
@@ -65,12 +51,6 @@ MAX_FILE_LENGTH = 1024 * 1024 * 1024  # 1 GB
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
-
-from avatars._typing import is_file_like
-
-
-class FileTooLarge(Exception):
-    pass
 
 
 class ApiClient(BaseClient):
@@ -106,6 +86,21 @@ class ApiClient(BaseClient):
             verify_auth=verify_auth,
             http_client=http_client,
             headers={"User-Agent": f"avatar-python/{__version__}"},
+        )
+
+        # Importing here to prevent circular import
+        from avatars.api import (
+            Auth,
+            Compatibility,
+            Datasets,
+            Health,
+            Jobs,
+            Metrics,
+            PandasIntegration,
+            Pipelines,
+            Reports,
+            Stats,
+            Users,
         )
 
         self.auth = Auth(self)

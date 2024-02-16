@@ -36,6 +36,8 @@ jupytext = "^1.14.2"
 nbconvert = "^7.2.6"
 flake8 = "^6.0.0"
 pytest-cov = "^4.1.0"
+rich = "^13.7.0"
+ipdb = "^0.13.13"
 
 [tool.poetry.group.tutorial.dependencies]
 seaborn = "^0.12.1"

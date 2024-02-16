@@ -298,6 +298,51 @@ class PrivacyMetricsComputationType(Enum):
     full_enriched = "full_enriched"
 
 
+<<<<<<< HEAD
+||||||| parent of f3ca9778 (chore: generate code)
+class PrivacyMetricsGeolocationScenario(BaseModel):
+    projection_parameters: Annotated[
+        GeolocationFeaturesParameters,
+        Field(description="Parameters of the geolocation projection."),
+    ]
+    known_features: Annotated[
+        Optional[List[GeolocationFeatures]],
+        Field(description="Known geolocation features", title="Known Features"),
+    ] = None
+    target_feature: Annotated[
+        Optional[GeolocationFeatures], Field(description="Target geolocation features")
+    ] = None
+
+
+class PrivacyMetricsGeolocationScenarioResult(BaseModel):
+    privacy_metrics: GeolocationPrivacyMetrics
+    parameters: PrivacyMetricsGeolocationScenario
+
+
+=======
+class PrivacyMetricsGeolocationScenario(BaseModel):
+    projection_parameters: Annotated[
+        Union[GeolocationDensityParameters, GeolocationFeaturesParameters],
+        Field(
+            description="Parameters of the geolocation projection.",
+            title="Projection Parameters",
+        ),
+    ]
+    known_features: Annotated[
+        Optional[List[GeolocationFeatures]],
+        Field(description="Known geolocation features", title="Known Features"),
+    ] = None
+    target_feature: Annotated[
+        Optional[GeolocationFeatures], Field(description="Target geolocation features")
+    ] = None
+
+
+class PrivacyMetricsGeolocationScenarioResult(BaseModel):
+    privacy_metrics: GeolocationPrivacyMetrics
+    parameters: PrivacyMetricsGeolocationScenario
+
+
+>>>>>>> f3ca9778 (chore: generate code)
 class PrivacyMetricsTargets(BaseModel):
     hidden_rate: Annotated[str, Field(title="Hidden Rate")]
     local_cloaking: Annotated[str, Field(title="Local Cloaking")]
@@ -718,6 +763,7 @@ class Dataset(BaseModel):
     nb_lines: Annotated[Optional[int], Field(title="Nb Lines")] = None
     nb_dimensions: Annotated[int, Field(title="Nb Dimensions")]
     summary: Optional[DatasetSummary] = None
+    filetype: FileType
 
 
 class ExcludeCategoricalParameters(BaseModel):

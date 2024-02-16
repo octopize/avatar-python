@@ -221,10 +221,7 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
-        """Create a dataset from file upload.
-
-        The file should be in CSV format.
-        """
+        """Create a dataset from file upload."""
 
         kwargs: Dict[str, Any] = {
             "method": "post",
@@ -311,7 +308,19 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-        """Download a dataset by streaming chunks of it."""
+        """Download a dataset by streaming chunks of it.
+
+        Parameters
+        ----------
+        id
+            The identifier of the dataset to download.
+        filetype
+            The filetype of the data you which to receive.
+
+        Returns
+        -------
+            The dataset contents
+        """
 
         kwargs: Dict[str, Any] = {
             "method": "get",
@@ -332,7 +341,11 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-        """Download a dataset."""
+        """Download a dataset.
+
+        This is only advised for small datasets.
+        Use /datasets/{id}/download/stream for larger datasets.
+        """
 
         kwargs: Dict[str, Any] = {
             "method": "get",
@@ -1101,6 +1114,23 @@ class Reports:
             "url": f"/reports/geolocation_privacy",
             "timeout": timeout,
             "json_data": request,
+        }
+
+        return Report(**self.client.request(**kwargs))
+
+    def create_geolocation_privacy_report(
+        self,
+        request: ReportGeolocationPrivacyCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report without avatarization job."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/reports/geolocation_privacy",
+            "timeout": timeout,
+            "json": request,
         }
 
         return Report(**self.client.request(**kwargs))
