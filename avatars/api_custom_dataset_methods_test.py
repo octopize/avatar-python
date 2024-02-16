@@ -4,12 +4,29 @@ from pathlib import Path
 from typing import Any, Union
 from unittest.mock import patch
 from uuid import uuid4
+from typing import (
+    Any,
+    Dict,
+    Union,
+    Optional,
+    Tuple,
+    Literal,
+    IO,
+    Sequence,
+    cast,
+    Iterator,
+)
+from pydantic import BaseModel
 
 import httpx
 import pandas as pd
 import pytest
 
 from avatars.api import Datasets, PandasIntegration
+from avatars.exceptions import InvalidFileType
+
+from avatars.models import Dataset, FileType
+
 from avatars.conftest import RequestHandle, api_client_factory
 from avatars.models import Dataset
 
@@ -27,6 +44,17 @@ def dataset_json() -> dict[str, Any]:
     }
 
 
+@pytest.fixture(scope="session")
+def csv_content() -> bytes:
+    return b"a,b\n1,2"
+
+
+@pytest.fixture(scope="session")
+def parquet_content(csv_content: bytes) -> bytes:
+    result: bytes = pd.read_csv(io.BytesIO(csv_content)).to_parquet()
+    return result
+
+
 class TestCustomCreateDatasetMethod:
     @pytest.fixture(scope="session")
     def create_dataset_response(self, dataset_json: dict[str, Any]) -> RequestHandle:
@@ -35,26 +63,37 @@ class TestCustomCreateDatasetMethod:
 
         return handler
 
-    def test_create_dataset_from_stream_deprecation(
-        self, create_dataset_response: RequestHandle
+    @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
+    def test_create_dataset_from_stream(
+        self,
+        create_dataset_response: RequestHandle,
+        content_fixture_name: str,
+        request: Any,
     ) -> None:
         """Verify the call is deprecated, but it succeeds."""
         # TODO: remove this test when create_dataset_from_stream is removed
+        content = request.getfixturevalue(content_fixture_name)
         client = api_client_factory(create_dataset_response)
         with pytest.deprecated_call(match="create_dataset_from_stream is deprecated"):
             dataset = Datasets(client).create_dataset_from_stream(
-                request=io.BytesIO(b"Hello, world!")
+                request=io.BytesIO(content)
             )
 
         assert dataset.id
 
+    @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
     def test_create_dataset_request_argument_is_deprecated(
-        self, create_dataset_response: RequestHandle
+        self,
+        create_dataset_response: RequestHandle,
+        content_fixture_name: str,
+        request: Any,
     ) -> None:
-        """Verify the call is deprecated, but it succeeds."""
+        """Verify the parameter is deprecated, but it succeeds."""
+        content = request.getfixturevalue(content_fixture_name)
+
         client = api_client_factory(create_dataset_response)
         with pytest.deprecated_call(match="request is deprecated"):
-            dataset = Datasets(client).create_dataset(request=io.BytesIO(b"123"))
+            dataset = Datasets(client).create_dataset(request=io.BytesIO(content))
 
         assert dataset.id
 
@@ -78,78 +117,68 @@ class TestCustomCreateDatasetMethod:
         ):
             Datasets(client).create_dataset(source=1)  # type:ignore[arg-type]
 
+    @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
     def test_create_dataset_using_source_argument_with_filename(
-        self, dataset_json: dict[str, Any]
+        self,
+        create_dataset_response: RequestHandle,
+        content_fixture_name: str,
+        request: Any,
     ) -> None:
         # Arrange
-        client = api_client_factory()
-        with tempfile.NamedTemporaryFile() as tmp_file, patch.object(
-            client, "request", return_value=dataset_json
-        ) as mock_request:
-            Path(tmp_file.name).write_text("Hello, world!")
-            # Act
-            Datasets(client).create_dataset(source=tmp_file.name)
+        content = request.getfixturevalue(content_fixture_name)
+        client = api_client_factory(create_dataset_response)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_file.write(content)
+            result = Datasets(client).create_dataset(source=tmp_file.name)
 
-            # Assert
-            mock_request.assert_called_once()
-            file_ = mock_request.call_args.kwargs["file"][0][1]
-            assert isinstance(file_, io.BufferedReader)
+        assert result.id
 
     @pytest.mark.filterwarnings(
         "ignore:You are trying to upload a text file:DeprecationWarning"
     )
-    @pytest.mark.parametrize(
-        "source",
-        [io.BytesIO(b"Hello, world!"), io.StringIO("Hello, world!")],
-    )
+    @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
+    @pytest.mark.parametrize("source", [io.BytesIO, io.StringIO])
     def test_create_dataset_using_source_argument_with_buffer(
-        self, source: io.IOBase, dataset_json: dict[str, Any]
+        self,
+        source: type[io.IOBase],
+        content_fixture_name: str,
+        create_dataset_response: RequestHandle,
+        request: Any,
     ) -> None:
-        # Arrange
-        client = api_client_factory()
+        if source == io.StringIO and content_fixture_name == "parquet_content":
+            # We're skipping it here, because it makes it easier to handle a single test
+            # with parametrized fixtures, rather than having to create a separate test
+            # for each combination of source and content type.
+            pytest.skip(
+                "Parquet files are not UTF-8 encoded and cannot be read as a string."
+            )
 
-        # Act
-        with patch.object(client, "request", return_value=dataset_json) as mock_request:
-            Datasets(client).create_dataset(source=source)
+        client = api_client_factory(create_dataset_response)
+        content = request.getfixturevalue(content_fixture_name)
+        if source == io.StringIO:
+            buffer = source(content.decode())  # type: ignore[call-arg]
+        else:
+            buffer = source(content)  # type: ignore[call-arg]
 
-            # Assert
-            mock_request.assert_called_once()
-            file_ = mock_request.call_args.kwargs["file"][0][1]
-
-            try:
-                assert isinstance(file_, io.IOBase)  # BytesIO
-            except AssertionError:
-                assert isinstance(file_, tempfile._TemporaryFileWrapper)  # StringIO
+        res = Datasets(client).create_dataset(source=buffer)
+        assert res.id
 
     def test_create_dataset_using_source_argument_with_multiple_files(
-        self, dataset_json: dict[str, Any]
+        self, create_dataset_response: RequestHandle, parquet_content: bytes
     ) -> None:
         # Arrange
-        client = api_client_factory()
+        client = api_client_factory(create_dataset_response)
 
         # Act
         with tempfile.TemporaryDirectory() as tmpdir:
             filename_1 = Path(tmpdir).joinpath("file1.txt")
             filename_2 = Path(tmpdir).joinpath("file2.txt")
-            filename_1.write_text("Hello, world!")
-            filename_2.write_text("Hello, world!")
-            with patch.object(
-                client, "request", return_value=dataset_json
-            ) as mock_request:
-                Datasets(client).create_dataset(
-                    source=[str(filename_1), str(filename_2)]
-                )
-
-                # Assert
-                mock_request.assert_called_once()
-                files_ = mock_request.call_args.kwargs["file"]
-                assert len(files_) == 2
-
-                first_file_content = files_[0][1]
-                second_file_content = files_[1][1]
-
-                assert isinstance(first_file_content, io.BufferedReader)
-                assert isinstance(second_file_content, io.BufferedReader)
+            filename_1.write_bytes(parquet_content)
+            filename_2.write_bytes(parquet_content)
+            res = Datasets(client).create_dataset(
+                source=[str(filename_1), str(filename_2)]
+            )
+        assert res.id
 
     @pytest.mark.filterwarnings(
         "ignore:request is deprecated:DeprecationWarning"
@@ -179,92 +208,240 @@ class TestCustomCreateDatasetMethod:
             assert isinstance(file_, io.BytesIO)
 
 
+@pytest.fixture(scope="session")
+def download_dataset_parquet_response(parquet_content: bytes) -> httpx.Response:
+    return httpx.Response(
+        200,
+        content=parquet_content,
+        headers={"content-type": "application/octet-stream"},
+    )
+
+
+@pytest.fixture(scope="session")
+def download_dataset_csv_response(csv_content: bytes) -> httpx.Response:
+    return httpx.Response(
+        200,
+        content=csv_content,
+        headers={"content-type": "text/csv"},
+    )
+
+
+@pytest.fixture(scope="session")
+def get_dataset_response(dataset_json: Dict[str, Any]) -> httpx.Response:
+    return httpx.Response(200, json=dataset_json)
+
+
+@pytest.fixture(scope="session")
+def download_dataset_response(
+    get_dataset_response: httpx.Response,
+    download_dataset_parquet_response: httpx.Response,
+    download_dataset_csv_response: httpx.Response,
+) -> RequestHandle:
+    def handler(request: httpx.Request) -> httpx.Response:
+        is_download_dataset = "download" in request.url.path
+        is_get_dataset = not is_download_dataset and request.url.path.startswith(
+            "/datasets"
+        )
+        if is_download_dataset:
+            is_parquet_filetype = b"parquet" in request.url.query
+            if is_parquet_filetype:
+                return download_dataset_parquet_response
+            else:
+                return download_dataset_csv_response
+        elif is_get_dataset:
+            return get_dataset_response
+        else:
+            raise ValueError("Unexpected request")
+
+    return handler
+
+
 class TestCustomDownloadDatasetMethod:
-    @pytest.fixture(scope="session")
-    def download_dataset_response(self) -> RequestHandle:
-        def handler(request: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, json={"content": "Hello, world!"})
-
-        return handler
-
-    @pytest.fixture(scope="session")
-    def download_dataset_streaming_response(self) -> RequestHandle:
-        def handler(request: httpx.Request) -> httpx.Response:
-            return httpx.Response(200, content=b"Hello, world!")
-
-        return handler
-
+    @pytest.mark.parametrize(
+        "filetype,expected_output_fixture_name",
+        [
+            (FileType.csv, "csv_content"),
+            (FileType.parquet, "parquet_content"),
+        ],
+    )
     def test_download_dataset_as_stream(
-        self, download_dataset_streaming_response: RequestHandle
+        self,
+        download_dataset_response: RequestHandle,
+        filetype: FileType,
+        expected_output_fixture_name: str,
+        request: Any,
     ) -> None:
         """Verify the call is deprecated, but it succeeds."""
         # TODO: remove this test when download_dataset_as_stream is removed
-        client = api_client_factory(download_dataset_streaming_response)
+        client = api_client_factory(download_dataset_response)
         with pytest.deprecated_call(match="download_dataset_as_stream is deprecated"):
-            response = Datasets(client).download_dataset_as_stream(str(uuid4()))
+            response = Datasets(client).download_dataset_as_stream(
+                str(uuid4()), filetype=filetype
+            )
 
+        expected = request.getfixturevalue(expected_output_fixture_name)
         assert isinstance(response, io.BytesIO)
-        assert response.read() == b"Hello, world!"
+        assert response.read() == expected
 
+    @pytest.mark.parametrize(
+        "filetype,expected_output_fixture_name",
+        [
+            (FileType.csv, "csv_content"),
+            (None, "csv_content"),  # old behavior
+        ],
+    )
     def test_download_dataset_when_destination_is_none(
         self,
-        download_dataset_streaming_response: RequestHandle,
+        download_dataset_response: RequestHandle,
+        filetype: FileType,
+        expected_output_fixture_name: str,
+        request: Any,
     ) -> None:
         """Verify that we raise a DeprecationWarning, but keep the old behavior."""
-        client = api_client_factory(download_dataset_streaming_response)
+        client = api_client_factory(download_dataset_response)
         with pytest.warns(
             DeprecationWarning, match="Please specify the destination argument"
         ):
             response = Datasets(client).download_dataset(
-                str(uuid4()), destination=None, from_download_as_stream=False
+                str(uuid4()),
+                destination=None,
+                from_download_as_stream=False,
+                filetype=filetype,
             )
-            assert isinstance(response, str)
-            assert response == "Hello, world!"
 
+            expected: bytes = request.getfixturevalue(expected_output_fixture_name)
+            assert isinstance(response, str)
+            assert response == expected.decode()
+
+    @pytest.mark.parametrize(
+        "filetype,expected_output_fixture_name",
+        [
+            (FileType.csv, "csv_content"),
+            (FileType.parquet, "parquet_content"),
+        ],
+    )
     def test_download_dataset_with_valid_destination_as_filename(
         self,
-        download_dataset_streaming_response: RequestHandle,
+        download_dataset_response: RequestHandle,
+        filetype: FileType,
+        expected_output_fixture_name: str,
+        request: Any,
     ) -> None:
         """Verify that the method works correctly with a valid destination."""
-        client = api_client_factory(download_dataset_streaming_response)
+        client = api_client_factory(download_dataset_response)
         with tempfile.NamedTemporaryFile() as tmp:
-            Datasets(client).download_dataset(str(uuid4()), destination=tmp.name)
-            assert Path(tmp.name).read_bytes() == b"Hello, world!"
+            Datasets(client).download_dataset(
+                str(uuid4()), destination=tmp.name, filetype=filetype
+            )
 
-    def test_download_dataset_with_invalid_destination(
+            expected: bytes = request.getfixturevalue(expected_output_fixture_name)
+            assert Path(tmp.name).read_bytes() == expected
+
+    @pytest.fixture(scope="function")
+    def binary_file_handle(self) -> Iterator[IO[bytes]]:
+        new_file = tempfile.NamedTemporaryFile("rb+")
+        yield new_file
+        new_file.close()
+
+    @pytest.fixture(scope="function")
+    def file_handle(self) -> Iterator[IO[str]]:
+        new_file = tempfile.NamedTemporaryFile("r+")
+        yield new_file
+        new_file.close()
+
+    @pytest.mark.parametrize(
+        "filetype,expected_output_fixture_name,destination",
+        [
+            pytest.param(
+                FileType.csv, "csv_content", io.BytesIO(), id="io.BytesIO-csv"
+            ),
+            pytest.param(
+                FileType.csv, "csv_content", io.StringIO(), id="io.StringIO-csv"
+            ),
+            pytest.param(FileType.csv, "csv_content", "binary_file_handle"),
+            pytest.param(FileType.csv, "csv_content", "file_handle"),
+            pytest.param(
+                FileType.parquet,
+                "parquet_content",
+                io.BytesIO(),
+                id="io.BytesIO-parquet",
+            ),
+            pytest.param(FileType.parquet, "parquet_content", "binary_file_handle"),
+        ],
+    )
+    def test_download_dataset_with_valid_destination_as_buffer(
         self,
-        download_dataset_streaming_response: RequestHandle,
+        download_dataset_response: RequestHandle,
+        destination: Union[str, IO[bytes], IO[str]],
+        filetype: FileType,
+        expected_output_fixture_name: str,
+        request: Any,
+    ) -> None:
+        """Verify that the method works correctly with a valid destination."""
+        client = api_client_factory(download_dataset_response)
+        dataset_id = str(uuid4())
+
+        # grab the open file handle fixture
+        destination = (
+            request.getfixturevalue(destination)
+            if isinstance(destination, str)
+            else destination
+        )
+
+        response = Datasets(client).download_dataset(
+            dataset_id,
+            destination=destination,
+            filetype=filetype,
+        )
+
+        assert response is None
+
+        expected: bytes = request.getfixturevalue(expected_output_fixture_name)
+
+        actual = destination.read()
+        actual = actual if isinstance(actual, bytes) else actual.encode()
+
+        assert actual == expected
+
+    def test_download_dataset_with_invalid_destination_fails(
+        self,
+        download_dataset_response: RequestHandle,
     ) -> None:
         """Verify that the method raises an error with an invalid destination."""
-        client = api_client_factory(download_dataset_streaming_response)
+        client = api_client_factory(download_dataset_response)
         with pytest.raises(
             TypeError, match="Expected destination to be a string or a buffer"
         ):
             Datasets(client).download_dataset(str(uuid4()), destination=123)  # type: ignore[arg-type]
 
     @pytest.mark.parametrize(
-        "destination,expected",
+        "destination",
         [
-            (io.BytesIO(), b"Hello, world!"),
-            (io.StringIO(), "Hello, world!"),
+            pytest.param(io.StringIO(), id="io.StringIO"),
+            pytest.param("file_handle"),
         ],
     )
-    def test_download_dataset_with_valid_destination_as_buffer(
+    def test_download_dataset_with_invalid_filetype_fails(
         self,
-        download_dataset_streaming_response: RequestHandle,
-        destination: Union[io.BytesIO, io.StringIO],
-        expected: Union[bytes, str],
+        download_dataset_response: RequestHandle,
+        destination: Union[str, IO[Union[str]]],
+        request: Any,
     ) -> None:
-        """Verify that the method works correctly with a valid destination."""
-        client = api_client_factory(download_dataset_streaming_response)
-        dataset_id = str(uuid4())
-        response = Datasets(client).download_dataset(
-            dataset_id,
-            destination=destination,
-        )
+        """Verify that the method raises an error with an invalid filetype."""
 
-        assert response is None
-        assert destination.read() == expected
+        # grab the open file handle fixture
+        destination = (
+            request.getfixturevalue(destination)
+            if isinstance(destination, str)
+            else destination
+        )
+        client = api_client_factory(download_dataset_response)
+        with pytest.raises(
+            InvalidFileType, match="Can't download parquet files as string."
+        ):
+            Datasets(client).download_dataset(
+                str(uuid4()), filetype=FileType.parquet, destination=destination
+            )
 
 
 class TestPandasIntegrationUploadDataframe:
@@ -291,3 +468,33 @@ class TestPandasIntegrationUploadDataframe:
         result = PandasIntegration(client).upload_dataframe(dataframe)
         # Assert
         assert isinstance(result, Dataset)
+
+
+class TestPandasIntegrationDownloadDataframe:
+    @pytest.fixture
+    def dataset(self, dataset_json: dict[str, Any]) -> Dataset:
+        return Dataset(**dataset_json)
+
+    @pytest.fixture(scope="session")
+    def dataframe(self, csv_content: bytes) -> pd.DataFrame:
+        return pd.read_csv(io.BytesIO(csv_content))
+
+    @pytest.mark.filterwarnings(
+        "ignore:download_dataset_as_stream is deprecated:DeprecationWarning"
+    )
+    def test_download_dataframe(
+        self,
+        download_dataset_response: RequestHandle,
+        dataset: Dataset,
+        dataframe: pd.DataFrame,
+    ) -> None:
+        """Verify the call is deprecated, but it succeeds."""
+        client = api_client_factory(download_dataset_response)
+        with pytest.deprecated_call(
+            match="The `should_stream` parameter is deprecated"
+        ):
+            result = PandasIntegration(client).download_dataframe(
+                str(dataset.id), should_stream=True
+            )
+
+        pd.testing.assert_frame_equal(result, dataframe)
