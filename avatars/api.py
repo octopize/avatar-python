@@ -1,5 +1,11 @@
 # This file has been generated - DO NOT MODIFY
+<<<<<<< HEAD
 # API Version : 1.1.0-8d3fdf018d62c07cb630d4d02e690cf75f8411ea
+||||||| parent of 37080c14 (chore: generate code to handle large files using filehandle)
+# API Version : 0.5.24-0e261dc021c2d7f16d2f8332463a86fa90360196
+=======
+# API Version : 0.5.24-9abafdba2efbeee858fcabff049b56b18a218e9e
+>>>>>>> 37080c14 (chore: generate code to handle large files using filehandle)
 
 
 import io
@@ -133,7 +139,7 @@ logger.addHandler(logging.NullHandler())
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 5
 MAX_ROWS_PER_FILE = 1_000_000
-
+MAX_BYTES_PER_FILE = 100 * 1024 * 1024  # 100 MB
 
 PARQUET_MAGIC_BYTES = b"PAR1"
 
@@ -601,35 +607,72 @@ class Datasets:
             # User provided file like object.
             # It is his responsibility to close it.
 
-            # We try reading the file to check if it's binary or not
-            # HTTPX handles binary files only
+            # Get size of source, so we can check if it's too large
+            # and split it into multiple files
 
-            single_char = source.read(1)
+            source_needs_to_be_split = False
+            if source.read(MAX_BYTES_PER_FILE) and source.read(1):
+                # There are more bytes to read, so the file is too large
+                # and we have to split it into multiple files
+                source_needs_to_be_split = True
+            source.seek(0)
 
-            if isinstance(single_char, bytes):
-                # undo previous read operation
-                # can only be done on binary file handles
-                source.seek(-1, os.SEEK_CUR)
+            if not source_needs_to_be_split:
+                # We try reading the file to check if it's binary or not
+                # HTTPX handles binary files only
+                single_char = source.read(1)
 
-                # File is binary, we can upload it as is
-                return [("file", source)]
+                if isinstance(single_char, bytes):
+                    # undo previous read operation
+                    # can only be done on binary file handles
+                    source.seek(-1, os.SEEK_CUR)
 
-            # TODO: When deprecating, raise an error instead of a warning
-            warnings.warn(
-                DeprecationWarning(
-                    "You are trying to upload a text file. This is deprecated. "
-                    "Please open the file in binary mode."
+                    # File is binary, we can upload it as is
+                    return [("file", source)]
+
+                # TODO: When deprecating, raise an error instead of a warning
+                warnings.warn(
+                    DeprecationWarning(
+                        "You are trying to upload a text file. This is deprecated. "
+                        "Please open the file in binary mode."
+                    )
                 )
+
+                # We create a new temporary file, write the content of the source file to it
+                # and then upload the temporary file, but this time opened in binary mode (default)
+                temporary_file = stack.enter_context(tempfile.NamedTemporaryFile())
+                temporary_file.write(single_char.encode())
+                temporary_file.write(source.read().encode())
+                temporary_file.seek(0)
+
+                return [("file", temporary_file)]
+
+            # TODO: Split the file without loading it all into memory.
+            try:
+                df = pd.read_parquet(source, engine="pyarrow")
+            except (TypeError, pyarrow.lib.ArrowInvalid) as e:
+                expected_messages = [
+                    "binary file expected",
+                    "this is not a parquet file",
+                ]
+                if any(m in str(e.args[0]) for m in expected_messages):
+                    source.seek(0)
+                    df = pd.read_csv(source)
+
+                else:
+                    raise e
+
+            temp_dir = stack.enter_context(tempfile.TemporaryDirectory())
+            # Write the table into multiple parquet files
+            pq.write_to_dataset(
+                pyarrow.Table.from_pandas(df),
+                root_path=temp_dir,
+                max_rows_per_file=MAX_ROWS_PER_FILE,
+                row_group_size=MAX_ROWS_PER_FILE,
+                max_rows_per_group=MAX_ROWS_PER_FILE,
             )
-
-            # We create a new temporary file, write the content of the source file to it
-            # and then upload the temporary file, but this time opened in binary mode (default)
-            temporary_file = stack.enter_context(tempfile.NamedTemporaryFile())
-            temporary_file.write(single_char.encode())
-            temporary_file.write(source.read().encode())
-            temporary_file.seek(0)
-
-            return [("file", temporary_file)]
+            # Create a list, so that the if statement further down can upload the files
+            source = list(map(str, self._collect_filenames(Path(temp_dir))))
 
         if isinstance(source, str):
             source = [source]
