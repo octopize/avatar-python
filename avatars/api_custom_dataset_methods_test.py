@@ -1,3 +1,5 @@
+from unittest.mock import patch
+import pandas as pd
 import io
 import tempfile
 from pathlib import Path
@@ -29,6 +31,8 @@ from avatars.models import Dataset, FileType
 
 from avatars.conftest import RequestHandle, api_client_factory
 from avatars.models import Dataset
+
+TEST_MAX_BYTES_PER_FILE = 1 * 1024  # 1 KB
 
 
 @pytest.fixture(scope="session")
@@ -62,6 +66,10 @@ class TestCustomCreateDatasetMethod:
             return httpx.Response(200, json=dataset_json)
 
         return handler
+
+    @pytest.fixture(scope="session")
+    def large_csv(self) -> bytes:
+        return b"a,b\n" + b"1,2\n" * TEST_MAX_BYTES_PER_FILE
 
     @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
     def test_create_dataset_from_stream(
@@ -132,6 +140,73 @@ class TestCustomCreateDatasetMethod:
             result = Datasets(client).create_dataset(source=tmp_file.name)
 
         assert result.id
+
+    @patch("avatars.api.MAX_BYTES_PER_FILE", TEST_MAX_BYTES_PER_FILE)
+    @pytest.mark.parametrize(
+        "filetype, buffer",
+        [
+            (FileType.csv, io.BytesIO),
+            (FileType.csv, io.StringIO),  # TODO: Remove when request is deprecated
+            (FileType.parquet, io.BytesIO),
+        ],
+    )
+    def test_create_dataset_with_too_large_buffer_ok(
+        self,
+        create_dataset_response: RequestHandle,
+        filetype: FileType,
+        buffer: Any,
+        large_csv: bytes,
+    ) -> None:
+        client = api_client_factory(create_dataset_response)
+
+        filled_buffer: Union[io.BytesIO, io.StringIO]
+        if filetype == FileType.csv:
+            content = large_csv if buffer == io.BytesIO else large_csv.decode()
+            filled_buffer = buffer(content)
+        else:
+            filled_buffer = buffer(pd.read_csv(io.BytesIO(large_csv)).to_parquet())
+
+        filled_buffer.seek(0)
+        # TODO: Remove the type ignore when request is deprecated
+        # error: Argument "source" to "create_dataset" of "Datasets" has incompatible type "Union[BytesIO, StringIO]"; expected
+        # "Union[str, list[str], FileLikeInterface[bytes], None]"  [arg-type]
+        res = Datasets(client).create_dataset(source=filled_buffer)  # type: ignore[arg-type]
+        assert res.id
+
+    @patch("avatars.api.MAX_BYTES_PER_FILE", TEST_MAX_BYTES_PER_FILE)
+    @pytest.mark.parametrize(
+        "filetype, mode",
+        [
+            (
+                FileType.csv,
+                "rb",
+            ),
+            (FileType.csv, "r"),
+            (FileType.parquet, "rb"),
+        ],
+        ids=str,
+    )
+    def test_create_dataset_with_too_large_file_ok(
+        self,
+        create_dataset_response: RequestHandle,
+        filetype: FileType,
+        mode: str,
+        large_csv: bytes,
+    ) -> None:
+        client = api_client_factory(create_dataset_response)
+
+        buffer = io.BytesIO(large_csv)
+        buffer.seek(0)
+        df = pd.read_csv(buffer)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            if filetype == FileType.parquet:
+                df.to_parquet(tmp_file.name)
+            else:
+                df.to_csv(tmp_file.name)
+
+            file_ = open(tmp_file.name, mode)
+            res = Datasets(client).create_dataset(source=file_)
+            assert res.id
 
     @pytest.mark.filterwarnings(
         "ignore:You are trying to upload a text file:DeprecationWarning"

@@ -13,7 +13,9 @@ def processor() -> Any:
     return DatetimeProcessor()
 
 
-def test_preprocess_datetime(dates_df: pd.DataFrame, processor: Any) -> None:
+def test_preprocess_datetime(
+    dates_df: pd.DataFrame, processor: DatetimeProcessor
+) -> None:
     test_df = processor.preprocess(dates_df)
     expected = pd.DataFrame(
         {"date_1": [1.420096e09, 1.420106e09], "date_2": [1.514804e09, 1.577876e09]}
@@ -23,7 +25,7 @@ def test_preprocess_datetime(dates_df: pd.DataFrame, processor: Any) -> None:
 
 
 def test_preprocess_postprocess_datetime(
-    many_dtypes_df: pd.DataFrame, processor: Any
+    many_dtypes_df: pd.DataFrame, processor: DatetimeProcessor
 ) -> None:
     """Verify that preprocessing and postprocessing datetime yields original dataframe."""
     df = many_dtypes_df
@@ -35,7 +37,7 @@ def test_preprocess_postprocess_datetime(
 
 
 def test_preprocess_and_postprocess_handle_nan(
-    dates_df: pd.DataFrame, processor: Any
+    dates_df: pd.DataFrame, processor: DatetimeProcessor
 ) -> None:
     dates_df.loc[0, "date_1"] = np.nan
     expected = dates_df.copy()
