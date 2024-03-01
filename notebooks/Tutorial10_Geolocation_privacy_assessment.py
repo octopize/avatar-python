@@ -6,6 +6,10 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
 # ---
 
 # # Tutorial 10: Geolocation privacy assessment
@@ -125,7 +129,7 @@ print(f"Dataset {noised_dataset.id} loaded")
 # - `target_feature` defines a calculated feature that could be considered as sensitive and should be protected against **feature-based inference attacks**. Such attack would use the `known_features` to infer the `target_feature`.
 # - `known_signal_position` defines a part of the trip that could be known to an attacker (i.e. the start, middle or end of a trip). Attempt to re-associate anonymized trips to their original counterparts only using this information is considered as a **trace-based linkability attack**.
 # - `target_signal_poi` defines the point of interest (POI) that could be considered as a target for an attacker in the context of a **trace-based inference attack**. It can be the start or the end of a trip.
-# - `inference_metric_threshold` defines the distance under which a prediction on a target point of interest will be considered as a successful prediction by the attacker. Setting a large threshold will increase the expected level of protection.
+# - `inference_metric_threshold` defines the distance (in meters) under which a prediction on a target point of interest will be considered as a successful prediction by the attacker. The lower the threshold, the more accurate the inference needs to be for an attack to be considered as successful.
 #
 # The ability to define many scenarios ensure that the data can be looked from different angles and that the privacy assessment cover many types of attacks. There is no limit on the number of scenarios that can be defined.
 #
@@ -144,7 +148,7 @@ scenarios = [
         target_feature=GeolocationFeatures.speed,
         known_signal_position=SignalPosition.start,
         target_signal_poi=PointOfInterest.end,
-        inference_metric_threshold=20000,
+        inference_metric_threshold=1000,  # distance in meters
     ),
     # Scenario 1
     PrivacyMetricsGeolocationScenario(
