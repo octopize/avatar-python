@@ -1,12 +1,6 @@
-from typing import (
-    Any,
-    Tuple,
-    Literal,
-    AnyStr,
-    Protocol,
-    TYPE_CHECKING,
-)
-from typing_extensions import TypeGuard, TypeAlias
+from typing import TYPE_CHECKING, Any, AnyStr, Literal, Protocol, Tuple
+
+from typing_extensions import TypeAlias, TypeGuard
 
 if TYPE_CHECKING:
     from _typeshed import SupportsRead, SupportsWrite

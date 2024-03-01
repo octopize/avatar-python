@@ -1,11 +1,11 @@
 from typing import Any, Callable, Dict, Optional
 from unittest.mock import patch
 
+import httpx
 import pytest
 
-import httpx
-from avatars.conftest import api_client_factory, RequestHandle
 from avatars.client import ApiClient
+from avatars.conftest import RequestHandle, api_client_factory
 
 
 @patch("httpx.Client")
