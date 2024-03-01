@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-3d8918dad6f111274fe16498e055c21ee854ce9d
+# API Version : 0.5.24-4466bfb89f205cdba801d50aa8d95901746011d1
 
 
 import logging
@@ -40,6 +40,7 @@ from avatars.models import Report
 from avatars.models import ReportCreate
 from avatars.models import ReportFromBatchCreate
 from avatars.models import ReportFromDataCreate
+from avatars.models import ReportGeolocationPrivacyCreate
 from avatars.models import ResetPasswordRequest
 from avatars.models import SignalMetricsBatchJob
 from avatars.models import SignalMetricsBatchJobCreate
@@ -1121,6 +1122,23 @@ class Reports:
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/reports/from_batch",
+            "timeout": timeout,
+            "json": request,
+        }
+
+        return Report(**self.client.request(**kwargs))
+
+    def create_geolocation_privacy_report(
+        self,
+        request: ReportGeolocationPrivacyCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        """Create an anonymization report without avatarization job."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/reports/geolocation_privacy",
             "timeout": timeout,
             "json": request,
         }
