@@ -2,7 +2,7 @@
 
 ## Documentation
 
-Documentation is available here: https://python.docs.octopize.io/
+Documentation is available here: <https://python.docs.octopize.io/>
 
 ## Requirements
 
@@ -24,35 +24,19 @@ Simply run the following command:
 make notebook
 ```
 
-If you don't have access to `make` or you want to setup the tutorial requirements manually, you can follow the following commands:
+If you don't have access to `make` or you want to setup the tutorial requirements manually, you can follow the installation section.
 
-These have to be run from the root of the `avatar-python` repo.
+## Installation
 
-```shell
-# Create and activate a new virtual environment.
-python -m venv notebooks/env
-source notebooks/env/bin/activate
-
-# Install the necessary dependencies
-pip install -r requirements-tutorial.txt
-pip install . # installing avatars
-
-#Exporting the necessary environment variables
-export AVATAR_BASE_URL="https://yourcompany.octopize.app"
-export AVATAR_USERNAME="your_username"
-export AVATAR_PASSWORD="your_password"
-
-# Launch the notebooks
-jupyter notebook notebooks
-```
+See our [documentation](https://python.docs.octopize.io/latest/installation.html) for installation instructions.
 
 ## License
 
-This software is made available through the Apache License 2.0
+This software is made available through the Apache License 2.0.
 
 ## Contact
 
-help@octopize.io
+<help@octopize.io>
 
 ## Releasing
 
