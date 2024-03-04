@@ -1,6 +1,6 @@
 from typing import Callable, Optional
+
 import httpx
-from typing import Optional
 
 from avatars.client import ApiClient
 

@@ -1,18 +1,17 @@
-import pandas as pd
 import io
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from typing import Any, Union
-import httpx
 from unittest.mock import patch
 from uuid import uuid4
 
+import httpx
+import pandas as pd
 import pytest
+
 from avatars.api import Datasets, PandasIntegration
-
-from avatars.models import Dataset
-
 from avatars.conftest import RequestHandle, api_client_factory
+from avatars.models import Dataset
 
 
 @pytest.fixture(scope="session")

@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-3d8918dad6f111274fe16498e055c21ee854ce9d
+# API Version : 0.5.24-4466bfb89f205cdba801d50aa8d95901746011d1
 
 
 import sys
@@ -233,6 +233,7 @@ class ApiClient:
                 data=form_data_arg,
                 files=file,  # type: ignore[arg-type]
                 headers=self._headers,
+                timeout=timeout or self.timeout,
             )
             try:
                 result = client.send(
