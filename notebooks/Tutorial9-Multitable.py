@@ -450,16 +450,16 @@ sns.countplot(data=visit_combined, x="exam", hue="type", palette=map_color, ax=a
 # +
 doctor_avatar_renamed = doctor_avatar.rename(columns={"age": "age_doctor"})
 visit_avatar_flat = visit_avatar.join(
-    doctor_avatar_renamed.set_index("doctor_id"), on="doctor_id"
+    doctor_avatar_renamed.set_index("d_id"), on="doctor_id"
 )
 visit_avatar_flat = visit_avatar_flat.join(
-    patient_avatar.set_index("patient_id"), on="patient_id"
+    patient_avatar.set_index("p_id"), on="patient_id"
 )
 
 
 doctor_renamed = doctor.rename(columns={"age": "age_doctor"})
-visit_flat = visit.join(doctor_renamed.set_index("doctor_id"), on="doctor_id")
-visit_flat = visit_flat.join(patient.set_index("patient_id"), on="patient_id")
+visit_flat = visit.join(doctor_renamed.set_index("d_id"), on="doctor_id")
+visit_flat = visit_flat.join(patient.set_index("p_id"), on="patient_id")
 
 
 # -
