@@ -184,7 +184,7 @@ avat_job = client.jobs.create_avatarization_multi_table_job(
     )
 )
 
-avat_job = client.jobs.get_avatarization_multi_table_job(avat_job.id, timeout=100)
+avat_job = client.jobs.get_avatarization_multi_table_job(avat_job.id)
 results = avat_job.result.datasets
 
 # Get back avatar tables from the results
@@ -217,7 +217,7 @@ visit_avatar.head()
 # +
 privacy_parameters = parameters = [
     BasePrivacyMetricsParameters(
-        original_id=results[0].original_dataset_id,
+        original_id=results[0].original_id,
         unshuffled_avatars_id=results[0].sensitive_unshuffled_avatars_datasets.id,
         closest_rate_percentage_threshold=0.3,
         closest_rate_ratio_threshold=0.3,
@@ -228,7 +228,7 @@ privacy_parameters = parameters = [
         target="weight",
     ),
     BasePrivacyMetricsParameters(
-        original_id=results[1].original_dataset_id,
+        original_id=results[1].original_id,
         unshuffled_avatars_id=results[1].sensitive_unshuffled_avatars_datasets.id,
         closest_rate_percentage_threshold=0.3,
         closest_rate_ratio_threshold=0.3,
@@ -238,7 +238,7 @@ privacy_parameters = parameters = [
         target="job",
     ),
     BasePrivacyMetricsParameters(
-        original_id=results[2].original_dataset_id,
+        original_id=results[2].original_id,
         unshuffled_avatars_id=results[2].sensitive_unshuffled_avatars_datasets.id,
     ),
 ]
@@ -252,11 +252,12 @@ privacy_job = client.jobs.create_privacy_metrics_multi_table_job(
     )
 )
 
-privacy_job = client.jobs.get_privacy_metrics_multi_table_job(
-    privacy_job.id, timeout=1000
-)
+privacy_job = client.jobs.get_privacy_metrics_multi_table_job(privacy_job.id)
 
 # -
+
+# You can run this line again if the job is still pending (default timeout = 60 seconds)
+privacy_job = client.jobs.get_privacy_metrics_multi_table_job(privacy_job.id)
 
 # ## Privacy metric results
 # The privacy metrics results are computed on multiple tables to verify as many attack scenario as possible.
@@ -272,6 +273,9 @@ print("*** Privacy metrics ***")
 for metric in privacy_metrics:
     print("--------")
     print(metric)
+
+data = privacy_job.result.details
+[round(d.hidden_rate, 2) for d in data]
 
 # ## Summary table
 
@@ -315,7 +319,6 @@ data_dict = {
 
 summary_table = pd.DataFrame(data_dict)
 summary_table.set_index("Table", inplace=True)
-summary_table = summary_table.reindex(index)
 summary_table.loc["TARGET", :] = [
     metric.targets.hidden_rate,
     metric.targets.local_cloaking,
