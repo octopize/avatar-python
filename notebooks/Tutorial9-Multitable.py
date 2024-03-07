@@ -98,7 +98,7 @@ dataset_patient = client.pandas_integration.upload_dataframe(
     patient,
     name="patient",
     identifier_variables=[
-        "patient_id",
+        "p_id",
     ],
 )
 
@@ -106,7 +106,7 @@ dataset_doctor = client.pandas_integration.upload_dataframe(
     doctor,
     name="doctor",
     identifier_variables=[
-        "doctor_id",
+        "d_id",
     ],
 )
 
@@ -200,7 +200,6 @@ doctor_avatar = client.pandas_integration.download_dataframe(doctor_avatar_id)
 visit_avatar_id = results[2].avatars_dataset.id
 visit_avatar = client.pandas_integration.download_dataframe(visit_avatar_id)
 
-
 # -
 
 patient_avatar.head()
@@ -262,21 +261,7 @@ privacy_job = client.jobs.get_privacy_metrics_multi_table_job(
 # ## Privacy metric results
 # The privacy metrics results are computed on multiple tables to verify as many attack scenario as possible.
 #
-# We define 4 types of multi table privacy scenario. For each scenario, we compute the same privacy metrics used with tabular data and further described [here](https://docs.octopize.io/docs/understanding/Privacy) by comparing orginal to avatars.
-#
-# 1. **STANDALONE**:
-#     Privacy metrics are applied on original unmodified tables. (patient and doctor in our example)
-#
-# 2. **TO_TOP_ENRICHED**:
-#     Privacy metrics are applied on individual level tables (patient and doctor) enriched with aggregated information from all successor tables (visit).
-#
-# 3. **TO_BOTTOM_ID_PROPAGATED**:
-#     Privacy metrics are applied on all successor of each individual table. The evaluation is done by propagating the individual id of each individual table (patient.p_id or doctor.d_id) to all successor tables (only visit in our example).
-#
-# 4. **FULL_ENRICHED**:
-#     Privacy metrics are applied on direct successors of an individual table (only visit in our example). The evaluation is done by enriching the successor table (visit) with all the variables of an individual-level parent table (patient or doctor) and with aggregated information from successor tables (None here as visit has no successor).
-#
-#
+# All types of multi table privacy scenario are further described [here](https://docs.octopize.io/docs/understanding/multi_table/).
 
 # <img src="img/multitable_privacy.png" style="height:500px" />
 
