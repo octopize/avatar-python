@@ -121,8 +121,8 @@ dataset_visit = client.pandas_integration.upload_dataframe(
 # Once the tables have been uploaded, you need to specify which ones are at individual level.
 #
 # Note:
-# - Each row in an individual level table must refer to a single physical individual
-# - A table with no ancestor must be at individual level
+# - An individual level table is a dataframe where each row refers to a UNIQUE physical individual. Privacy metrics assess the re-identification risk of these individuals.
+# - A table with no ancestor must be at individual level.
 
 # +
 patient_ref = TableReference(
@@ -152,22 +152,23 @@ table_links = [
         parent_table=patient_ref,
         child_table=visit_ref,
         link_method="bottom_projection",
-        parent_link_key="patient_id",
+        parent_link_key="p_id",
         child_link_key="patient_id",
     ),
     TableLink(
         parent_table=doctor_ref,
         child_table=visit_ref,
         link_method="bottom_projection",
-        parent_link_key="doctor_id",
+        parent_link_key="d_id",
         child_link_key="doctor_id",
     ),
 ]
 
+# The k parameter for each table needs to be adjusted regarding the number of records.
 avat_parameters = [
-    BaseAvatarizationParameters(dataset_id=dataset_patient.id, k=5),
+    BaseAvatarizationParameters(dataset_id=dataset_patient.id, k=15),
     BaseAvatarizationParameters(dataset_id=dataset_doctor.id, k=5),
-    BaseAvatarizationParameters(dataset_id=dataset_visit.id, k=5),
+    BaseAvatarizationParameters(dataset_id=dataset_visit.id, k=30),
 ]
 # -
 
@@ -183,25 +184,33 @@ avat_job = client.jobs.create_avatarization_multi_table_job(
     )
 )
 
-avat_job = client.jobs.get_avatarization_multi_table_job(avat_job.id, timeout=1000)
+avat_job = client.jobs.get_avatarization_multi_table_job(avat_job.id, timeout=100)
 results = avat_job.result.datasets
-avatars_df = {}
-for i, result in enumerate(results):
-    avatars = client.pandas_integration.download_dataframe(
-        result.avatars_dataset.id, should_stream=False
-    )
-    avatars_df[i] = avatars
+
+# Get back avatar tables from the results
+
+# Patient
+patient_avatar_id = results[0].avatars_dataset.id
+patient_avatar = client.pandas_integration.download_dataframe(patient_avatar_id)
+# Doctor
+doctor_avatar_id = results[1].avatars_dataset.id
+doctor_avatar = client.pandas_integration.download_dataframe(doctor_avatar_id)
+
+# Visit
+visit_avatar_id = results[2].avatars_dataset.id
+visit_avatar = client.pandas_integration.download_dataframe(visit_avatar_id)
+
 
 # -
 
-patient_avatar = avatars_df[0]
 patient_avatar.head()
 
-doctor_avatar = avatars_df[1]
 doctor_avatar.head()
 
-visit_avatar = avatars_df[2]
+# +
+
 visit_avatar.head()
+# -
 
 # ## Privacy metric computation
 # Similarly to multitable avatarization, privacy metrics calculation requires the specification of one set of parameter per table.
@@ -209,15 +218,28 @@ visit_avatar.head()
 # +
 privacy_parameters = parameters = [
     BasePrivacyMetricsParameters(
-        original_id=dataset_patient.id,
+        original_id=results[0].original_dataset_id,
         unshuffled_avatars_id=results[0].sensitive_unshuffled_avatars_datasets.id,
+        closest_rate_percentage_threshold=0.3,
+        closest_rate_ratio_threshold=0.3,
+        known_variables=[
+            "gender",
+            "age",
+        ],
+        target="weight",
     ),
     BasePrivacyMetricsParameters(
-        original_id=dataset_doctor.id,
+        original_id=results[1].original_dataset_id,
         unshuffled_avatars_id=results[1].sensitive_unshuffled_avatars_datasets.id,
+        closest_rate_percentage_threshold=0.3,
+        closest_rate_ratio_threshold=0.3,
+        known_variables=[
+            "age",
+        ],
+        target="job",
     ),
     BasePrivacyMetricsParameters(
-        original_id=dataset_visit.id,
+        original_id=results[2].original_dataset_id,
         unshuffled_avatars_id=results[2].sensitive_unshuffled_avatars_datasets.id,
     ),
 ]
@@ -243,16 +265,16 @@ privacy_job = client.jobs.get_privacy_metrics_multi_table_job(
 # We define 4 types of multi table privacy scenario. For each scenario, we compute the same privacy metrics used with tabular data and further described [here](https://docs.octopize.io/docs/understanding/Privacy) by comparing orginal to avatars.
 #
 # 1. **STANDALONE**:
-#     Privacy metrics are applied on original unmodified tables at individual level. (patient and doctor in our example)
+#     Privacy metrics are applied on original unmodified tables. (patient and doctor in our example)
 #
 # 2. **TO_TOP_ENRICHED**:
-#     Privacy metrics are applied on individual level tables (patient and doctor) enriched with aggregated information from successor tables (visit).
+#     Privacy metrics are applied on individual level tables (patient and doctor) enriched with aggregated information from all successor tables (visit).
 #
-# 3. **TO_BOTTOM**:
-#     Privacy metrics are applied on tables with ancestor at individual level (visit). The evaluation is done by propagating the id of an individual level parent table (patient or doctor) to a successor table (visit).
+# 3. **TO_BOTTOM_ID_PROPAGATED**:
+#     Privacy metrics are applied on all successor of each individual table. The evaluation is done by propagating the individual id of each individual table (patient.p_id or doctor.d_id) to all successor tables (only visit in our example).
 #
 # 4. **FULL_ENRICHED**:
-#     Privacy metrics are applied on tables with ancestors at individual level (visit). The evaluation is done by enriching a successor table (visit) with all the variables of an individual level parent table (patient or doctor) and with aggregated information from successor tables (None here as visit has no successor).
+#     Privacy metrics are applied on direct successors of an individual table (only visit in our example). The evaluation is done by enriching the successor table (visit) with all the variables of an individual-level parent table (patient or doctor) and with aggregated information from successor tables (None here as visit has no successor).
 #
 #
 
@@ -308,11 +330,19 @@ data_dict = {
 
 summary_table = pd.DataFrame(data_dict)
 summary_table.set_index("Table", inplace=True)
-summary_table = df.reindex(index)
-summary_table.loc["TARGET", :] = [90, 5, 0.2, 0.3, 50, 90, 90]
+summary_table = summary_table.reindex(index)
+summary_table.loc["TARGET", :] = [
+    metric.targets.hidden_rate,
+    metric.targets.local_cloaking,
+    metric.targets.distance_to_closest,
+    metric.targets.closest_distances_ratio,
+    metric.targets.column_direct_match_protection,
+    metric.targets.categorical_hidden_rate,
+    metric.targets.row_direct_match_protection,
+]
 # -
 
-df
+summary_table
 
 # # Utility evaluation
 
@@ -324,10 +354,14 @@ df
 # ### Patient
 
 # +
+AVATAR_COLOR = "#3BD6B0"
+ORIGINAL_COLOR = "dimgrey"
+map_color = {"original": ORIGINAL_COLOR, "avatar": AVATAR_COLOR}
+
 patient_combined = pd.concat([patient, patient_avatar]).reset_index(drop=True)
-patient_combined["type"] = np.repeat(["original", "avatar"], 150)
-map_color = {"original": "dimgrey", "avatar": "#3BD6B0"}
-# Distribution continuous sur la même sortie
+patient_combined["type"] = np.repeat(["original", "avatar"], len(patient))
+
+# Continuous distributions
 fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 sns.histplot(
     data=patient_combined,
@@ -356,6 +390,8 @@ sns.histplot(
     ax=axes[1, 0],
     stat="density",
 )
+
+# Categorical distribution
 sns.countplot(
     data=patient_combined, x="gender", hue="type", palette=map_color, ax=axes[1, 1]
 )
@@ -372,10 +408,11 @@ plt.show()
 
 # +
 doctor_combined = pd.concat([doctor, doctor_avatar]).reset_index(drop=True)
-doctor_combined["type"] = np.repeat(["original", "avatar"], 50)
-map_color = {"original": "dimgrey", "avatar": "#3BD6B0"}
-# Distribution continuous sur la même sortie
+doctor_combined["type"] = np.repeat(["original", "avatar"], len(doctor))
+
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+# Continuous distribution
 sns.histplot(
     data=doctor_combined,
     x="age",
@@ -385,6 +422,8 @@ sns.histplot(
     ax=axes[0],
     stat="density",
 )
+
+# Categorical distribution
 sns.countplot(data=doctor_combined, x="job", hue="type", palette=map_color, ax=axes[1])
 
 axes[0].set_title("Age Distribution")
@@ -395,14 +434,15 @@ plt.show()
 
 # ### Visit
 
+# +
 visit_combined = pd.concat([visit, visit_avatar]).reset_index(drop=True)
-visit_combined["type"] = np.repeat(["original", "avatar"], 300)
-map_color = {"original": "dimgrey", "avatar": "#3BD6B0"}
+visit_combined["type"] = np.repeat(["original", "avatar"], len(visit))
+
 fig, axes = plt.subplots(1, 3, figsize=(16, 4))
 sns.kdeplot(
     data=visit_combined, x="patient_id", hue="type", ax=axes[0], palette=map_color
 )
-day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+day_order = list(visit["day_visit"].unique())
 visit_combined["day_visit"] = pd.Categorical(
     visit_combined["day_visit"], categories=day_order, ordered=True
 )
@@ -412,6 +452,7 @@ sns.countplot(
 )
 sns.countplot(data=visit_combined, x="exam", hue="type", palette=map_color, ax=axes[2])
 
+# -
 
 # ## Multivariate comparison
 #
@@ -449,14 +490,14 @@ sns.countplot(
     x="day_visit",
     hue="gender",
     ax=axes[0],
-    palette=["dimgrey", "lightgrey"],
+    palette=[ORIGINAL_COLOR, "lightgrey"],
 )
 sns.countplot(
     data=visit_avatar_flat,
     x="day_visit",
     hue="gender",
     ax=axes[1],
-    palette=["#3BD6B0", "#9fe9d7"],
+    palette=[AVATAR_COLOR, "#9fe9d7"],
 )
 axes[0].set_title("Original")
 axes[1].set_title("Avatar")
@@ -473,19 +514,17 @@ visit_avatar_flat["day_visit"] = pd.Categorical(
 visit_avatar_flat = visit_avatar_flat.sort_values(["day_visit", "exam"])
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 sns.boxplot(
-    data=visit_flat,
-    x="age_doctor",
-    y="day_visit",
-    ax=axes[0],
-    palette=["dimgrey", "lightgrey"],
+    data=visit_flat, x="age_doctor", y="day_visit", ax=axes[0], palette=[ORIGINAL_COLOR]
 )
 sns.boxplot(
     data=visit_avatar_flat,
     x="age_doctor",
     y="day_visit",
     ax=axes[1],
-    palette=["#3BD6B0", "#9fe9d7"],
+    palette=[AVATAR_COLOR],
 )
+axes[0].set_xlim(30, 70)
+axes[1].set_xlim(30, 70)
 axes[0].set_title("Original")
 axes[1].set_title("Avatar")
 
@@ -493,14 +532,18 @@ visit_avatar_flat = visit_avatar_flat.sort_values("exam")
 visit_flat = visit_flat.sort_values("exam")
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 sns.countplot(
-    data=visit_flat, x="exam", hue="job", ax=axes[0], palette=["dimgrey", "lightgrey"]
+    data=visit_flat,
+    x="exam",
+    hue="job",
+    ax=axes[0],
+    palette=[ORIGINAL_COLOR, "lightgrey"],
 )
 sns.countplot(
     data=visit_avatar_flat,
     x="exam",
     hue="job",
     ax=axes[1],
-    palette=["#3BD6B0", "#9fe9d7"],
+    palette=[AVATAR_COLOR, "#9fe9d7"],
 )
 axes[0].set_title("Original")
 axes[1].set_title("Avatar")
@@ -508,14 +551,14 @@ axes[1].set_title("Avatar")
 # ### Patient x Doctor
 
 sns.kdeplot(
-    data=visit_flat, x="age", y="age_doctor", fill=True, color="dimgrey", alpha=0.8
+    data=visit_flat, x="age", y="age_doctor", fill=True, color=ORIGINAL_COLOR, alpha=0.8
 )
 sns.kdeplot(
     data=visit_avatar_flat,
     x="age",
     y="age_doctor",
     fill=True,
-    color="#3BD6B0",
+    color=AVATAR_COLOR,
     alpha=0.8,
 )
 plt.show()
