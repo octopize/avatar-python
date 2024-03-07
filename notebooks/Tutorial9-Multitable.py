@@ -274,6 +274,9 @@ for metric in privacy_metrics:
     print("--------")
     print(metric)
 
+data = privacy_job.result.details
+[round(d.hidden_rate, 2) for d in data]
+
 # ## Summary table
 
 # +
