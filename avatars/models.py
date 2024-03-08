@@ -76,11 +76,10 @@ class CommonSignalMetricsParameters(BaseModel):
     pass
 
 
-class CompatibilityResponse(BaseModel):
-    message: Annotated[str, Field(title="Message")]
-    most_recent_compatible_client: Annotated[
-        Optional[str], Field(title="Most Recent Compatible Client")
-    ] = None
+class CompatibilityStatus(Enum):
+    compatible = "compatible"
+    incompatible = "incompatible"
+    unknown = "unknown"
 
 
 class Contributions(BaseModel):
@@ -690,6 +689,14 @@ class AvatarizationTimeSeriesParameters(BaseModel):
 class ColumnDetail(BaseModel):
     type: ColumnType
     label: Annotated[str, Field(title="Label")]
+
+
+class CompatibilityResponse(BaseModel):
+    message: Annotated[str, Field(title="Message")]
+    most_recent_compatible_client: Annotated[
+        Optional[str], Field(title="Most Recent Compatible Client")
+    ] = None
+    status: CompatibilityStatus
 
 
 class CreateUser(BaseModel):

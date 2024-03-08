@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from avatars.client import ApiClient
-from avatars.conftest import RequestHandle, api_client_factory
+from avatars.conftest import RequestHandle, api_client_factory, mock_httpx_client
 
 
 @patch("httpx.Client")
@@ -16,14 +16,19 @@ def test_should_verify_ssl(mock_client: Any) -> None:
         api_client.request("GET", base_url, **kwargs)
 
     # Verify default is set to True
-    api_client = ApiClient(base_url=base_url, verify_auth=False)
+    api_client = ApiClient(
+        base_url=base_url, verify_auth=False, should_verify_compatibility=False
+    )
     do_request(api_client)
     assert mock_client.call_args.kwargs["verify"] == True
     mock_client.reset_mock()
 
     # Verify that the should_verify_ssl parameter is passed to the httpx.Client
     api_client = ApiClient(
-        base_url=base_url, should_verify_ssl=False, verify_auth=False
+        base_url=base_url,
+        should_verify_ssl=False,
+        verify_auth=False,
+        should_verify_compatibility=False,
     )
     do_request(api_client)
     assert mock_client.call_args.kwargs["verify"] == False
@@ -41,6 +46,33 @@ def test_url_is_rejected_if_it_contains_quotes(base_url: str) -> None:
     # env variable configuration.
     with pytest.raises(ValueError, match="not to contain quotes") as exc_info:
         api_client = ApiClient(base_url=base_url)
+
+
+@pytest.mark.parametrize(
+    "incompatiblity_status",
+    [
+        "incompatible",
+        "unknown",
+    ],
+)
+def test_should_verify_compatibility(incompatiblity_status: str) -> None:
+    json = {
+        "message": "Message from the server",
+        "status": incompatiblity_status,
+        "most_recent_compatible_client": "1.0.0",
+    }
+
+    http_client = mock_httpx_client(
+        handler=lambda request: httpx.Response(200, json=json)
+    )
+
+    with pytest.warns(match="Client is not compatible") as checker:
+        ApiClient(
+            base_url="http://localhost:8000",
+            http_client=http_client,
+            verify_auth=False,
+            should_verify_compatibility=True,
+        )
 
 
 class TestClientRequest:

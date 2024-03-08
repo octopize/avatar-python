@@ -53,7 +53,7 @@ build-backend = "poetry.core.masonry.api"
 profile = "black"
 
 [tool.mypy]
-python_version = 3.9
+python_version = "3.9"
 plugins = [
   "pydantic.mypy"
 ]
