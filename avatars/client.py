@@ -3,6 +3,7 @@
 
 
 import sys
+import warnings
 from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
 from enum import Enum
@@ -51,7 +52,12 @@ from avatars.api import (
     Timeout,
     Users,
 )
-from avatars.models import ForgottenPasswordRequest, Login, ResetPasswordRequest
+from avatars.models import (
+    CompatibilityStatus,
+    ForgottenPasswordRequest,
+    Login,
+    ResetPasswordRequest,
+)
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024  # 1 GB
 
@@ -100,6 +106,7 @@ class ApiClient:
         *,
         verify_auth: bool = True,
         http_client: Optional[httpx.Client] = None,
+        should_verify_compatibility: bool = True,
     ) -> None:
         """Client to communicate with the Avatar API.
 
@@ -141,6 +148,22 @@ class ApiClient:
         self._http_client = http_client
         self.verify_auth = verify_auth
         self._headers = {"User-Agent": f"avatar-python/{__version__}"}
+
+        # Verify client is compatible with the server
+        if should_verify_compatibility:
+            response = self.compatibility.is_client_compatible()
+
+            uncompatible_statuses = [
+                CompatibilityStatus.incompatible,
+                CompatibilityStatus.unknown,
+            ]
+            if response.status in uncompatible_statuses:
+                warnings.warn(
+                    f"Client is not compatible with the server. \n"
+                    f"Server message: {response.message}.\n"
+                    f"Current client version: {__version__}.\n"
+                    f"Most recent compatible client version: {response.most_recent_compatible_client}.\n"
+                )
 
     @contextmanager
     def _get_http_client(self) -> Generator[httpx.Client, None, None]:
