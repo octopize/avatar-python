@@ -27,7 +27,7 @@ autodoc-pydantic = "^2"
 [tool.poetry.group.dev.dependencies]
 blacken-docs = "^1.12.1"
 typer = "^0.4.1"
-black = {extras = ["jupyter"], version = "^22.3.0" }
+black = {extras = ["jupyter"], version = "^24.3.0" }
 isort = "^5.10.1"
 bandit = "^1.7.4"
 mypy = "^1.4"
