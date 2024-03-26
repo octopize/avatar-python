@@ -95,6 +95,7 @@ sns.scatterplot(
     x="lon",
     y="lat",
     label="Original",
+    s=100,
 )
 sns.scatterplot(
     data=trimmed_df[trimmed_df["id"] == selected_id], x="lon", y="lat", label="Trimmed"
