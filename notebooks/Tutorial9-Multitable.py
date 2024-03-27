@@ -6,10 +6,6 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
 
 # # Tutorial 9: Multitable
@@ -175,7 +171,6 @@ avat_parameters = [
 # ## Anonymization
 
 # +
-
 avat_job = client.jobs.create_avatarization_multi_table_job(
     AvatarizationMultiTableJobCreate(
         parameters=AvatarizationMultiTableParameters(
@@ -199,17 +194,13 @@ doctor_avatar = client.pandas_integration.download_dataframe(doctor_avatar_id)
 # Visit
 visit_avatar_id = results[2].avatars_dataset.id
 visit_avatar = client.pandas_integration.download_dataframe(visit_avatar_id)
-
 # -
 
 patient_avatar.head()
 
 doctor_avatar.head()
 
-# +
-
 visit_avatar.head()
-# -
 
 # ## Privacy metric computation
 # Similarly to multitable avatarization, privacy metrics calculation requires the specification of one set of parameter per table.
@@ -253,7 +244,6 @@ privacy_job = client.jobs.create_privacy_metrics_multi_table_job(
 )
 
 privacy_job = client.jobs.get_privacy_metrics_multi_table_job(privacy_job.id)
-
 # -
 
 # You can run this line again if the job is still pending (default timeout = 60 seconds)
@@ -436,7 +426,6 @@ sns.countplot(
     data=visit_combined, x="day_visit", hue="type", palette=map_color, ax=axes[1]
 )
 sns.countplot(data=visit_combined, x="exam", hue="type", palette=map_color, ax=axes[2])
-
 # -
 
 # ## Multivariate comparison
@@ -457,8 +446,6 @@ visit_avatar_flat = visit_avatar_flat.join(
 doctor_renamed = doctor.rename(columns={"age": "age_doctor"})
 visit_flat = visit.join(doctor_renamed.set_index("d_id"), on="doctor_id")
 visit_flat = visit_flat.join(patient.set_index("p_id"), on="patient_id")
-
-
 # -
 
 visit_flat["day_visit"] = pd.Categorical(
