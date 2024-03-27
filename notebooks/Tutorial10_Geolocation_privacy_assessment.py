@@ -6,10 +6,6 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
 # ---
 
 # # Tutorial 10: Geolocation privacy assessment
@@ -31,12 +27,9 @@ password = os.environ.get("AVATAR_PASSWORD")
 # This is the client that you'll be using for all of your requests
 from avatars.client import ApiClient
 from avatars.models import (
-    AvatarizationJobCreate,
-    AvatarizationParameters,
     GeolocationDensityParameters,
     GeolocationFeatures,
     GeolocationFeaturesParameters,
-    JobStatus,
     PointOfInterest,
     PrivacyMetricsGeolocationJobCreate,
     PrivacyMetricsGeolocationParameters,
@@ -44,9 +37,9 @@ from avatars.models import (
     ReportGeolocationPrivacyCreate,
     SignalPosition,
 )
-
 import pandas as pd
-import io
+from IPython.display import Image
+
 
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 client = ApiClient(base_url=url)
@@ -87,7 +80,7 @@ plt.title("Original traces")
 plt.show
 
 # +
-selected_id = 1
+selected_id = "id1"
 
 plt.figure(figsize=(10, 10))
 sns.scatterplot(
@@ -109,9 +102,27 @@ plt.legend()
 plt.show
 # -
 
-# ## Run a geolocation privacy assessment
+# ## Density representation
 
-# ### Upload datasets
+# The density representation is a way to visualize data using a heatmap. It provides a visual representation of the distribution of data points in a given area. In the case of the Porto taxi traces, the density representation shows the concentration of taxi traces in different regions of Porto.
+#
+# There are two common methods used to create a density representation: histogram and kernel density estimation.
+# - Histogram: In this method, the area is divided into a grid of cells, and the number of data points falling into each cell is counted. The count is then used to assign a color to each cell, creating a heatmap. Cells with a higher count will have a darker color, indicating a higher density of data points in that region.
+# - Kernel Density Estimation: This method uses a statistical technique to estimate the underlying probability density function of the data. It involves placing a kernel (a smooth, continuous function) on each data point and summing up the contributions of all kernels to create a smooth density estimate. The density estimate is then used to generate a heatmap, where regions with higher density have a darker color.
+#
+# Both methods provide a visual representation of the density of data points, but they differ in terms of how they estimate the density. Histograms are simpler and provide a more discrete representation, while kernel density estimation produces a smoother and continuous density estimate.
+#
+# Here is the density representation of all Porto taxi' traces:
+
+# ![Density representation of Porto' traces£](img/porto_density.png)
+
+# Using the `GeolocationDensityProjector`, each traces is represented as a density image. Here are some traces under their density representation:
+
+# ![Trace sensity representation samples](img/porto_traces.png)
+
+# ## Run a geolocation privacy assessment
+
+# ### Upload datasets
 
 original_dataset = client.pandas_integration.upload_dataframe(original_df)
 print(f"Dataset {original_dataset.id} loaded")
@@ -204,7 +215,7 @@ result = client.reports.download_report(id=report.id)
 with open("./my_geolocation_privacy_assessment_report_trimmed.pdf", "wb") as f:
     f.write(result)
 
-# ## Comparing the two treated dataset versions
+# ## Comparing the two treated dataset versions
 #
 # To further demonstrate how the geolocation privacy assessment can be used, we run a second job using the second dataset treated with the noise addition approach. This will enable a comparison of both treated datasets.
 
