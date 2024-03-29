@@ -220,4 +220,28 @@ with open("./my_avatarization_report.pdf", "wb") as f:
 
 # The report is now generated and available on your machine
 
+# # How to manage error message
+# There is multiple type of error and we encourage you to have a look to our [documentation](https://python.docs.octopize.io/latest/user_guide.html#understanding-errors) to understand them.
+#
+# the most common error is when a job is failing and you want to understand why.
+#
+# Here is a small tutorial to print the error message.
+
+# +
+wrong_parameters = AvatarizationParameters(
+    k=500, dataset_id=dataset.id
+)  # k is too high
+
+avatarization_job = client.jobs.create_avatarization_job(
+    AvatarizationJobCreate(
+        parameters=wrong_parameters,
+    )
+)
+
+avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=100)
+print(avatarization_job.status)
+print("----")
+print(avatarization_job.error_message)
+# -
+
 # *In the next tutorial, we will show how to parameterize an avatarization.*

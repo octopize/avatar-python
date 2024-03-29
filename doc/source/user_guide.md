@@ -377,7 +377,7 @@ See [this notebook](https://github.com/octopize/avatar-python/blob/main/notebook
 ## How to download an avatar dataset
 
 This section is responsible for showing you how to download a dataset from our server.
-Note that for security reason, you can't download an original dataset once  it's uploaded.
+Note that for security reason, you can't download an original dataset once it's uploaded.
 
 ### As a pandas dataframe
 
@@ -463,6 +463,7 @@ Most of your actions will have a successfull outcome. However, sometimes there w
    ```python
    job = client.jobs.get_avatarization_job(job_id)
    print(job.status)  # JobStatus.FAILURE
+   print(job.error_message)
    ```
 
    If the status is `JobStatus.FAILURE`, the `error_message` property will contain an explanation of the error.

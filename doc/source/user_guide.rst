@@ -570,6 +570,7 @@ errors that can happen, and how to correct them.
 
       job = client.jobs.get_avatarization_job(job_id)
       print(job.status)  # JobStatus.FAILURE
+      print(job.error_message)
 
    If the status is ``JobStatus.FAILURE``, the ``error_message``
    property will contain an explanation of the error. You’ll have to
