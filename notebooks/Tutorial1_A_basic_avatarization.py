@@ -225,16 +225,16 @@ with open("./my_avatarization_report.pdf", "wb") as f:
 # The report is now generated and available on your machine
 
 # # How to print an error message
-# There is multiple types of error and we encourage you to have a look to our [documentation](https://python.docs.octopize.io/latest/user_guide.html#understanding-errors) to understand them.
+# There are multiple types of error and we encourage you to have a look at our [documentation](https://python.docs.octopize.io/latest/user_guide.html#understanding-errors) to understand them.
 #
-# The most common error is when a job is failing, and you want to understand why.
+# The most common error is when server validation prevents a job from running.
 #
 # The following section show how to print an error message.
 
 # +
 wrong_parameters = AvatarizationParameters(
     k=500, dataset_id=dataset.id
-)  # k is too high
+)  # k is too big (bigger than the dataset !)
 
 avatarization_job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
