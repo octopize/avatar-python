@@ -6,6 +6,10 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: .venv
+#     language: python
+#     name: python3
 # ---
 
 # # Tutorial 1: A basic avatarization
@@ -220,12 +224,12 @@ with open("./my_avatarization_report.pdf", "wb") as f:
 
 # The report is now generated and available on your machine
 
-# # How to manage error message
-# There is multiple type of error and we encourage you to have a look to our [documentation](https://python.docs.octopize.io/latest/user_guide.html#understanding-errors) to understand them.
+# # How to print an error message
+# There is multiple types of error and we encourage you to have a look to our [documentation](https://python.docs.octopize.io/latest/user_guide.html#understanding-errors) to understand them.
 #
-# the most common error is when a job is failing and you want to understand why.
+# The most common error is when a job is failing, and you want to understand why.
 #
-# Here is a small tutorial to print the error message.
+# The following section show how to print an error message.
 
 # +
 wrong_parameters = AvatarizationParameters(
