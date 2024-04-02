@@ -6,6 +6,10 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
+#   kernelspec:
+#     display_name: .venv
+#     language: python
+#     name: python3
 # ---
 
 # # Tutorial 1: A basic avatarization
@@ -219,5 +223,29 @@ with open("./my_avatarization_report.pdf", "wb") as f:
 # -
 
 # The report is now generated and available on your machine
+
+# # How to print an error message
+# There are multiple types of error and we encourage you to have a look at our [documentation](https://python.docs.octopize.io/latest/user_guide.html#understanding-errors) to understand them.
+#
+# The most common error is when server validation prevents a job from running.
+#
+# The following section show how to print an error message.
+
+# +
+wrong_parameters = AvatarizationParameters(
+    k=500, dataset_id=dataset.id
+)  # k is too big (bigger than the dataset !)
+
+avatarization_job = client.jobs.create_avatarization_job(
+    AvatarizationJobCreate(
+        parameters=wrong_parameters,
+    )
+)
+
+avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=100)
+print(avatarization_job.status)
+print("----")
+print(avatarization_job.error_message)
+# -
 
 # *In the next tutorial, we will show how to parameterize an avatarization.*
