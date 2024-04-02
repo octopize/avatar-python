@@ -739,6 +739,7 @@ new privacy job once it is successful.</p>
 the <code class="docutils literal notranslate"><span class="pre">JobStatus</span></code> that is in the <code class="docutils literal notranslate"><span class="pre">status</span></code> property.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">job</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">jobs</span><span class="o">.</span><span class="n">get_avatarization_job</span><span class="p">(</span><span class="n">job_id</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>  <span class="c1"># JobStatus.FAILURE</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">error_message</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>If the status is <code class="docutils literal notranslate"><span class="pre">JobStatus.FAILURE</span></code>, the <code class="docutils literal notranslate"><span class="pre">error_message</span></code>
@@ -928,7 +929,7 @@ you can set <code class="docutils literal notranslate"><span class="pre">vanilla
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, Octopize
+                Copyright &#169; 2024, Octopize
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
