@@ -6,10 +6,6 @@
 #       format_name: light
 #       format_version: '1.5'
 #       jupytext_version: 1.15.2
-#   kernelspec:
-#     display_name: .venv
-#     language: python
-#     name: python3
 # ---
 
 # # Tutorial 1: A basic avatarization
