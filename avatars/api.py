@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-4466bfb89f205cdba801d50aa8d95901746011d1
+# API Version : 0.5.24-31ecf491edf177802dac8778b7df365abb92d4d3
 
 
 import io
@@ -117,7 +117,7 @@ from avatars._typing import is_file_like
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 DEFAULT_RETRY_TIMEOUT = 60
-DEFAULT_TIMEOUT = 5
+DEFAULT_TIMEOUT = 60
 
 
 class Timeout(Exception):
@@ -1464,14 +1464,11 @@ class PandasIntegration:
             )
             columns = []
             for index, dtype in zip(df_types.index, df_types):
-                if index in identifier_variables:
-                    column_detail = ColumnDetail(
-                        type=ColumnType.identifier, label=index
-                    )
-                else:
-                    column_detail = ColumnDetail(
-                        type=to_common_type(str(dtype)), label=index
-                    )
+                column_detail = ColumnDetail(
+                    type=to_common_type(str(dtype)),
+                    label=index,
+                    is_identifier=index in identifier_variables,
+                )
                 columns.append(column_detail)
 
             dataset = self.client.datasets.patch_dataset(
@@ -1502,11 +1499,7 @@ class PandasIntegration:
         dataset_io.seek(0)
 
         # We apply datetime columns separately as 'datetime' is not a valid pandas dtype
-        dtypes = {
-            c.label: c.type.value
-            for c in dataset_info.columns or {}
-            if c.type is not ColumnType.identifier
-        }
+        dtypes = {c.label: c.type.value for c in dataset_info.columns or {}}
         datetime_columns = [
             label for label, type in dtypes.items() if type == ColumnType.datetime.value
         ]
