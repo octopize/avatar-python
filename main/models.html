@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Processors" href="processors.html" /><link rel="prev" title="Client" href="client_and_api.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>Models - avatars 0.6.2 documentation</title>
+        <title>Models - avatars 0.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.6.2 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.7.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.6.2 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.7.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -189,6 +189,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.7.0/models.html">0.7.0</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.6.2/models.html">0.6.2</a>
     </li>
@@ -434,11 +437,6 @@
 <span class="sig-name descname"><span class="pre">datetime</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'datetime'</span></em><a class="headerlink" href="#avatars.models.ColumnType.datetime" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="avatars.models.ColumnType.identifier">
-<span class="sig-name descname"><span class="pre">identifier</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'identifier'</span></em><a class="headerlink" href="#avatars.models.ColumnType.identifier" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class pydantic_model">
@@ -474,24 +472,6 @@
 <dt class="sig sig-object py" id="avatars.models.Contributions.data">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Dict[str,</span> <span class="pre">Dict[str,</span> <span class="pre">float]],</span> <span class="pre">Field(title='Data')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Contributions.data" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class pydantic_model">
-<dt class="sig sig-object py" id="avatars.models.PasswordItem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">PasswordItem</span></span><a class="headerlink" href="#avatars.models.PasswordItem" title="Permalink to this definition">#</a></dt>
-<dd><dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.PasswordItem.root">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">root</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(max_length=128,</span> <span class="pre">min_length=12)]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PasswordItem.root" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Constraints<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>min_length</strong> = 12</p></li>
-<li><p><strong>max_length</strong> = 128</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
 
 </dd></dl>
 
@@ -1256,29 +1236,13 @@ non-deterministic way.</p>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ResetPasswordRequest.new_password">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(max_length=128,</span> <span class="pre">min_length=12,</span> <span class="pre">title='New</span> <span class="pre">Password')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ResetPasswordRequest.new_password" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Constraints<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>min_length</strong> = 12</p></li>
-<li><p><strong>max_length</strong> = 128</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(title='New</span> <span class="pre">Password')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ResetPasswordRequest.new_password" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ResetPasswordRequest.new_password_repeated">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_password_repeated</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(max_length=128,</span> <span class="pre">min_length=12,</span> <span class="pre">title='New</span> <span class="pre">Password</span> <span class="pre">Repeated')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ResetPasswordRequest.new_password_repeated" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Constraints<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>min_length</strong> = 12</p></li>
-<li><p><strong>max_length</strong> = 128</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">new_password_repeated</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(title='New</span> <span class="pre">Password</span> <span class="pre">Repeated')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ResetPasswordRequest.new_password_repeated" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ResetPasswordRequest.token">
@@ -1766,6 +1730,11 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dt class="sig sig-object py" id="avatars.models.ColumnDetail">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">ColumnDetail</span></span><a class="headerlink" href="#avatars.models.ColumnDetail" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.ColumnDetail.is_identifier">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_identifier</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[bool,</span> <span class="pre">Field(title='Is</span> <span class="pre">Identifier')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnDetail.is_identifier" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.ColumnDetail.label">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(title='Label')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.ColumnDetail.label" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -1809,7 +1778,7 @@ computation to use with an instance of <code class="docutils literal notranslate
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.CreateUser.password">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[PasswordItem],</span> <span class="pre">Field(title='Password')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.CreateUser.password" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">password</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[str],</span> <span class="pre">Field(title='Password')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.CreateUser.password" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -2636,9 +2605,9 @@ with a large number of modalities.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">avatars.models.</span></span><span class="sig-name descname"><span class="pre">TableLink</span></span><a class="headerlink" href="#avatars.models.TableLink" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.TableLink.child_link_key">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">child_link_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(description='Variable</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">linking</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">parent</span> <span class="pre">table.</span> <span class="pre">It</span> <span class="pre">is</span> <span class="pre">most</span> <span class="pre">often</span> <span class="pre">a</span> <span class="pre">foreign</span> <span class="pre">key.</span> <span class="pre">It</span> <span class="pre">needs</span> <span class="pre">to</span> <span class="pre">have</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">ColumnType.IDENTIFIER</span> <span class="pre">when\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">creating</span> <span class="pre">the</span> <span class="pre">dataset.',</span> <span class="pre">title='Child</span> <span class="pre">Link</span> <span class="pre">Key')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.child_link_key" title="Permalink to this definition">#</a></dt>
-<dd><p>Variable to be used for linking with the parent table. It is most often a foreign key. It needs to have the type ColumnType.IDENTIFIER when
-creating the dataset.</p>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">child_link_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(description='Variable</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">linking</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">parent</span> <span class="pre">table.</span> <span class="pre">It</span> <span class="pre">is</span> <span class="pre">most</span> <span class="pre">often</span> <span class="pre">a</span> <span class="pre">foreign</span> <span class="pre">key.</span> <span class="pre">It</span> <span class="pre">needs</span> <span class="pre">to</span> <span class="pre">have</span> <span class="pre">the</span> <span class="pre">property</span> <span class="pre">is_identifier</span> <span class="pre">set</span> <span class="pre">to</span> <span class="pre">True\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">when</span> <span class="pre">creating</span> <span class="pre">the</span> <span class="pre">dataset.',</span> <span class="pre">title='Child</span> <span class="pre">Link</span> <span class="pre">Key')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.child_link_key" title="Permalink to this definition">#</a></dt>
+<dd><p>Variable to be used for linking with the parent table. It is most often a foreign key. It needs to have the property is_identifier set to True
+when creating the dataset.</p>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -2654,9 +2623,10 @@ creating the dataset.</p>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.TableLink.parent_link_key">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_link_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(description='Variable</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">linking</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">child</span> <span class="pre">table.</span> <span class="pre">The</span> <span class="pre">link_key</span> <span class="pre">specified</span> <span class="pre">here</span> <span class="pre">must</span> <span class="pre">contain</span> <span class="pre">unique</span> <span class="pre">values</span> <span class="pre">only.</span> <span class="pre">It</span> <span class="pre">is</span> <span class="pre">most</span> <span class="pre">often</span> <span class="pre">the\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">primary</span> <span class="pre">key.</span> <span class="pre">It</span> <span class="pre">needs</span> <span class="pre">to</span> <span class="pre">have</span> <span class="pre">the</span> <span class="pre">type</span> <span class="pre">ColumnType.IDENTIFIER</span> <span class="pre">when</span> <span class="pre">creating</span> <span class="pre">the</span> <span class="pre">dataset.',</span> <span class="pre">title='Parent</span> <span class="pre">Link</span> <span class="pre">Key')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.parent_link_key" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent_link_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(description='Variable</span> <span class="pre">to</span> <span class="pre">be</span> <span class="pre">used</span> <span class="pre">for</span> <span class="pre">linking</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">child</span> <span class="pre">table.</span> <span class="pre">The</span> <span class="pre">link_key</span> <span class="pre">specified</span> <span class="pre">here</span> <span class="pre">must</span> <span class="pre">contain</span> <span class="pre">unique</span> <span class="pre">values</span> <span class="pre">only.</span> <span class="pre">It</span> <span class="pre">is</span> <span class="pre">most</span> <span class="pre">often</span> <span class="pre">the\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">primary</span> <span class="pre">key.</span> <span class="pre">It</span> <span class="pre">needs</span> <span class="pre">to</span> <span class="pre">have</span> <span class="pre">the</span> <span class="pre">is_identifier</span> <span class="pre">property</span> <span class="pre">set</span> <span class="pre">to</span> <span class="pre">True</span> <span class="pre">when</span> <span class="pre">creating\n</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">the</span> <span class="pre">dataset.',</span> <span class="pre">title='Parent</span> <span class="pre">Link</span> <span class="pre">Key')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.TableLink.parent_link_key" title="Permalink to this definition">#</a></dt>
 <dd><p>Variable to be used for linking with the child table. The link_key specified here must contain unique values only. It is most often the
-primary key. It needs to have the type ColumnType.IDENTIFIER when creating the dataset.</p>
+primary key. It needs to have the is_identifier property set to True when creating
+the dataset.</p>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -2678,16 +2648,6 @@ primary key. It needs to have the type ColumnType.IDENTIFIER when creating the d
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.User.id">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[UUID,</span> <span class="pre">Field(title='Id')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.User.id" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.User.max_allowed_dimensions_per_dataset">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_allowed_dimensions_per_dataset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[int],</span> <span class="pre">Field(title='Max</span> <span class="pre">Allowed</span> <span class="pre">Dimensions</span> <span class="pre">Per</span> <span class="pre">Dataset')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.User.max_allowed_dimensions_per_dataset" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute pydantic_field">
-<dt class="sig sig-object py" id="avatars.models.User.max_allowed_lines_per_dataset">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_allowed_lines_per_dataset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[Optional[int],</span> <span class="pre">Field(title='Max</span> <span class="pre">Allowed</span> <span class="pre">Lines</span> <span class="pre">Per</span> <span class="pre">Dataset')]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#avatars.models.User.max_allowed_lines_per_dataset" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -4627,7 +4587,6 @@ to be individual_level tables.</p></li>
 <li><a class="reference internal" href="#avatars.models.ColumnType.category"><code class="docutils literal notranslate"><span class="pre">ColumnType.category</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.ColumnType.float"><code class="docutils literal notranslate"><span class="pre">ColumnType.float</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.ColumnType.datetime"><code class="docutils literal notranslate"><span class="pre">ColumnType.datetime</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.ColumnType.identifier"><code class="docutils literal notranslate"><span class="pre">ColumnType.identifier</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.CommonSignalMetricsParameters"><code class="docutils literal notranslate"><span class="pre">CommonSignalMetricsParameters</span></code></a></li>
@@ -4639,10 +4598,6 @@ to be individual_level tables.</p></li>
 </li>
 <li><a class="reference internal" href="#avatars.models.Contributions"><code class="docutils literal notranslate"><span class="pre">Contributions</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.Contributions.data"><code class="docutils literal notranslate"><span class="pre">Contributions.data</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#avatars.models.PasswordItem"><code class="docutils literal notranslate"><span class="pre">PasswordItem</span></code></a><ul>
-<li><a class="reference internal" href="#avatars.models.PasswordItem.root"><code class="docutils literal notranslate"><span class="pre">PasswordItem.root</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.DatasetSummary"><code class="docutils literal notranslate"><span class="pre">DatasetSummary</span></code></a><ul>
@@ -4955,6 +4910,7 @@ to be individual_level tables.</p></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#avatars.models.ColumnDetail"><code class="docutils literal notranslate"><span class="pre">ColumnDetail</span></code></a><ul>
+<li><a class="reference internal" href="#avatars.models.ColumnDetail.is_identifier"><code class="docutils literal notranslate"><span class="pre">ColumnDetail.is_identifier</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.ColumnDetail.label"><code class="docutils literal notranslate"><span class="pre">ColumnDetail.label</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.ColumnDetail.type"><code class="docutils literal notranslate"><span class="pre">ColumnDetail.type</span></code></a></li>
 </ul>
@@ -5168,8 +5124,6 @@ to be individual_level tables.</p></li>
 <li><a class="reference internal" href="#avatars.models.User"><code class="docutils literal notranslate"><span class="pre">User</span></code></a><ul>
 <li><a class="reference internal" href="#avatars.models.User.email"><code class="docutils literal notranslate"><span class="pre">User.email</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.User.id"><code class="docutils literal notranslate"><span class="pre">User.id</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.User.max_allowed_dimensions_per_dataset"><code class="docutils literal notranslate"><span class="pre">User.max_allowed_dimensions_per_dataset</span></code></a></li>
-<li><a class="reference internal" href="#avatars.models.User.max_allowed_lines_per_dataset"><code class="docutils literal notranslate"><span class="pre">User.max_allowed_lines_per_dataset</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.User.organization_id"><code class="docutils literal notranslate"><span class="pre">User.organization_id</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.User.role"><code class="docutils literal notranslate"><span class="pre">User.role</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.User.username"><code class="docutils literal notranslate"><span class="pre">User.username</span></code></a></li>
