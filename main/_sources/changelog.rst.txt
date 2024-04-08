@@ -22,9 +22,9 @@ Changelog
 
 -  feat: add should_verify_ssl to ApiClient to bypass
 -  refactor: revert to AvatarizationParameters.dataset_id being required
-   feat: add pydantic constraints to privacy metrics fields feat: add
-   multi table avatarization and privacy metrics jobs feat: add ‘name’
-   keyword argument to create_dataset
+-  feat: add pydantic constraints to privacy metrics fields
+-  feat: add multi table avatarization and privacy metrics jobs
+-  feat: add ‘name’ keyword argument to create_dataset
 
 .. _section-2:
 
