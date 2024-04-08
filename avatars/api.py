@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-31ecf491edf177802dac8778b7df365abb92d4d3
+# API Version : 1.0.0-edc198235b81a4d2532d8444100e0402819c5610
 
 
 import io
@@ -1243,6 +1243,22 @@ class Reports:
         ]
 
         return _Reports(self.client).create_report(*args, **kwargs)
+
+    def get_report(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        kwargs: Dict[str, Any] = {
+            "timeout": timeout,
+        }
+
+        args: List[Any] = [
+            id,
+        ]
+
+        return _Reports(self.client).get_report(*args, **kwargs)
 
     def download_report(
         self,

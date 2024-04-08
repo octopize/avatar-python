@@ -5,9 +5,9 @@ SHELL := bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-AVATAR_BASE_URL ?= "http://localhost:8000"
-AVATAR_USERNAME ?= "user_integration"
-AVATAR_PASSWORD ?= "password_integration"
+export AVATAR_BASE_URL ?= http://localhost:8000
+export AVATAR_USERNAME ?= user_integration
+export AVATAR_PASSWORD ?= password_integration
 
 install:  ## Install the stack
 	poetry install --sync --no-ansi
@@ -109,7 +109,8 @@ doc-build-pydantic-v2:
 ##@ Tutorial
 
 TUTORIAL_REQUIREMENTS := requirements-tutorial.txt
-VENV_NAME := notebooks/env
+export VENV_NAME := notebooks/env
+export VENV_PATH := $(abspath $(VENV_NAME))
 
 
 pip-requirements: ## Export the packages for the tutorials as a pip requirements.txt file
@@ -119,8 +120,8 @@ pip-requirements: ## Export the packages for the tutorials as a pip requirements
 
 pip-install-tutorial: pip-requirements ## Install the dependecies of the tutorial via pip
 	python3.10 -m venv $(VENV_NAME)
-	"$(abspath $(VENV_NAME))/bin/python3.10" -m pip install -r $(TUTORIAL_REQUIREMENTS)
-	"$(abspath $(VENV_NAME))/bin/python3.10" -m pip install . ## Installing the avatars package
+	"$(VENV_PATH)/bin/python3.10" -m pip install -r $(TUTORIAL_REQUIREMENTS)
+	"$(VENV_PATH)/bin/python3.10" -m pip install . ## Installing the avatars package
 .PHONY: pip-install-tutorial
 
 
@@ -137,9 +138,10 @@ generate-py:  ## Generate .py files from notebooks
 
 test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run without errors
 	echo "You must install the pip venv first. Run make pip-install-tutorial."
-	SYSTEM=$$(uname -s)
-	if [ $$SYSTEM = "Darwin" ]; then XARGS=gxargs; else XARGS=xargs; fi
-	ls notebooks/Tutorial*.py | xargs -n1 basename | $$XARGS -I {{}} bash -eu -o pipefail -c "cd notebooks/ && AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) $(abspath $(VENV_NAME))/bin/python3.10 {{}} > /dev/null && echo \'Succesfully ran {{}}\'"
+	cd notebooks && ls Tutorial*.py | xargs -n1 basename | while read TUT; do \
+	    $(VENV_PATH)/bin/python3.10 $$TUT >/dev/null ; \
+	    echo Succesfully ran $$TUT ; \
+	done
 .PHONY: test-tutorial
 
 
