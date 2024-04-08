@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-31ecf491edf177802dac8778b7df365abb92d4d3
+# API Version : 1.0.0-1f5f0188953fa9ef8330037be766e5433099f851
 
 
 import itertools
@@ -97,48 +97,6 @@ DEFAULT_TIMEOUT = 60
 T = TypeVar("T")
 
 
-def get_job(
-    client: "ApiClient",
-    response_cls: Callable[..., T],
-    *,
-    per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-    timeout: Optional[int] = DEFAULT_TIMEOUT,
-    **kwargs: Dict[str, Any],
-) -> T:
-    def print_response(job_response: Any) -> None:
-        if not job_response.current_progress:
-            return
-        message = f"[{job_response.current_progress.created_at.time()}] Status: {job_response.status}, current_step: {job_response.current_progress.name}"
-        logger.info(message)
-
-    retry_timeout = timeout or DEFAULT_RETRY_TIMEOUT
-
-    start = time.time()
-    current: float = 0
-
-    max_interval = 10
-    # Exponential interval, capped at max_interval
-    sleep_interval = iter(min(2**i, max_interval) for i in itertools.count())
-
-    # Iterate while we are < retry_timeout
-    while current == 0 or (current < retry_timeout):
-        timeout = per_request_timeout  # to pass to client.request
-        response = response_cls(**client.request(**kwargs, timeout=timeout))  # type: ignore[arg-type]
-        if response.status not in (JobStatus.pending, JobStatus.started):  # type: ignore[attr-defined]
-            print_response(response)
-            return response
-
-        print_response(response)
-
-        # Sleep, but not longer than timeout
-        time_to_sleep = min(next(sleep_interval), retry_timeout - current)
-        time.sleep(time_to_sleep)
-
-        current = time.time() - start
-
-    return response
-
-
 class Auth:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
@@ -171,7 +129,7 @@ class Auth:
             "method": "post",
             "url": f"/login/forgotten_password",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
             "should_verify_auth": False,
         }
 
@@ -187,7 +145,7 @@ class Auth:
             "method": "post",
             "url": f"/login/reset_password",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
             "should_verify_auth": False,
         }
 
@@ -308,7 +266,7 @@ class Datasets:
             "method": "patch",
             "url": f"/datasets/{id}",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return Dataset(**self.client.request(**kwargs))
@@ -476,7 +434,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return AvatarizationJob(**self.client.request(**kwargs))
@@ -514,7 +472,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/avatarization",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return AvatarizationJob(**self.client.request(**kwargs))
@@ -531,7 +489,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/avatarization_batch",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return AvatarizationBatchJob(**self.client.request(**kwargs))
@@ -548,7 +506,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/avatarization_with_time_series",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return AvatarizationWithTimeSeriesJob(**self.client.request(**kwargs))
@@ -565,7 +523,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/avatarization_multi_table",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return AvatarizationMultiTableJob(**self.client.request(**kwargs))
@@ -582,7 +540,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/signal",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return SignalMetricsJob(**self.client.request(**kwargs))
@@ -599,7 +557,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/privacy",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return PrivacyMetricsJob(**self.client.request(**kwargs))
@@ -616,7 +574,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/privacy_batch",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return PrivacyMetricsBatchJob(**self.client.request(**kwargs))
@@ -633,7 +591,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/privacy_time_series",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return PrivacyMetricsWithTimeSeriesJob(**self.client.request(**kwargs))
@@ -650,7 +608,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/signal_time_series",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return SignalMetricsWithTimeSeriesJob(**self.client.request(**kwargs))
@@ -667,7 +625,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/signal_batch",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return SignalMetricsBatchJob(**self.client.request(**kwargs))
@@ -684,7 +642,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/privacy_multi_table",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return PrivacyMetricsMultiTableJob(**self.client.request(**kwargs))
@@ -701,7 +659,7 @@ class Jobs:
             "method": "post",
             "url": f"/jobs/metrics/privacy_geolocation",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return PrivacyMetricsGeolocationJob(**self.client.request(**kwargs))
@@ -721,8 +679,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=PrivacyMetricsGeolocationJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -743,8 +700,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=AvatarizationJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -765,8 +721,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=AvatarizationBatchJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -787,8 +742,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=AvatarizationWithTimeSeriesJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -809,8 +763,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=AvatarizationMultiTableJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -831,8 +784,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=SignalMetricsJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -853,8 +805,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=SignalMetricsBatchJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -875,8 +826,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=SignalMetricsWithTimeSeriesJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -897,8 +847,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=PrivacyMetricsJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -919,8 +868,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=PrivacyMetricsBatchJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -941,8 +889,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=PrivacyMetricsWithTimeSeriesJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -963,8 +910,7 @@ class Jobs:
             "timeout": timeout,
         }
 
-        return get_job(
-            client=self.client,
+        return self.client.get_job(
             response_cls=PrivacyMetricsMultiTableJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
@@ -1069,7 +1015,21 @@ class Reports:
             "method": "post",
             "url": f"/reports",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
+        }
+
+        return Report(**self.client.request(**kwargs))
+
+    def get_report(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Report:
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/reports/jobs/{id}",
+            "timeout": timeout,
         }
 
         return Report(**self.client.request(**kwargs))
@@ -1102,7 +1062,7 @@ class Reports:
             "method": "post",
             "url": f"/reports/from_data",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return Report(**self.client.request(**kwargs))
@@ -1122,7 +1082,7 @@ class Reports:
             "method": "post",
             "url": f"/reports/from_batch",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return Report(**self.client.request(**kwargs))
@@ -1139,7 +1099,7 @@ class Reports:
             "method": "post",
             "url": f"/reports/geolocation_privacy",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return Report(**self.client.request(**kwargs))
@@ -1208,7 +1168,7 @@ class Users:
             "method": "post",
             "url": f"/users",
             "timeout": timeout,
-            "json": request,
+            "json_data": request,
         }
 
         return User(**self.client.request(**kwargs))

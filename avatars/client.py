@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.24-31ecf491edf177802dac8778b7df365abb92d4d3
+# API Version : 1.0.0-1f5f0188953fa9ef8330037be766e5433099f851
 
 
 import sys
@@ -52,6 +52,7 @@ from avatars.api import (
     Timeout,
     Users,
 )
+from avatars.base_client import BaseClient
 from avatars.models import (
     CompatibilityStatus,
     ForgottenPasswordRequest,
@@ -72,32 +73,7 @@ class FileTooLarge(Exception):
     pass
 
 
-def _get_nested_value(
-    obj: Union[Mapping[Any, Any], Sequence[Any]], key: str, default: Any = None
-) -> Any:
-    """
-    Return value from (possibly) nested key in JSON dictionary.
-    """
-
-    if isinstance(obj, Sequence) and not isinstance(obj, str):
-        for item in obj:
-            return _get_nested_value(item, key, default=default)
-
-    if isinstance(obj, Mapping):
-        if key in obj:
-            return obj[key]
-        return _get_nested_value(list(obj.values()), key, default=default)
-
-    return default
-
-
-def _default_encoder(obj: Any) -> Any:
-    if isinstance(obj, Enum):
-        return obj.value
-    return str(obj)  # default
-
-
-class ApiClient:
+class ApiClient(BaseClient):
     def __init__(
         self,
         base_url: str,
@@ -123,12 +99,14 @@ class ApiClient:
         verify_auth :, optional
             Bypass client-side authentication verification, by default True
         """
-        self.base_url = base_url
-
-        if '"' in self.base_url:
-            raise ValueError(
-                "Expected base_url not to contain quotes. Got {self.base_url} instead"
-            )
+        super().__init__(
+            base_url,
+            timeout,
+            should_verify_ssl,
+            verify_auth=verify_auth,
+            http_client=http_client,
+            headers={"User-Agent": f"avatar-python/{__version__}"},
+        )
 
         self.auth = Auth(self)
         self.compatibility = Compatibility(self)
@@ -142,12 +120,6 @@ class ApiClient:
 
         self.pandas_integration = PandasIntegration(self)
         self.pipelines = Pipelines(self)
-
-        self.timeout = timeout
-        self.should_verify_ssl = should_verify_ssl
-        self._http_client = http_client
-        self.verify_auth = verify_auth
-        self._headers = {"User-Agent": f"avatar-python/{__version__}"}
 
         # Verify client is compatible with the server
         if should_verify_compatibility:
@@ -164,18 +136,6 @@ class ApiClient:
                     f"Current client version: {__version__}.\n"
                     f"Most recent compatible client version: {response.most_recent_compatible_client}.\n"
                 )
-
-    @contextmanager
-    def _get_http_client(self) -> Generator[httpx.Client, None, None]:
-        if self._http_client:
-            yield self._http_client
-        else:
-            with httpx.Client(
-                base_url=self.base_url,
-                timeout=self.timeout,
-                verify=self.should_verify_ssl,
-            ) as client:
-                yield client
 
     def authenticate(
         self, username: str, password: str, timeout: Optional[int] = None
@@ -207,128 +167,6 @@ class ApiClient:
                 token=token,
             ),
             timeout=timeout or self.timeout,
-        )
-
-    def request(
-        self,
-        method: str,
-        url: str,
-        *,
-        params: Optional[Dict[str, Any]] = None,
-        json: Optional[BaseModel] = None,
-        form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None,
-        file: Optional[Sequence["HttpxFile"]] = None,
-        timeout: Optional[int] = None,
-        should_verify_auth: bool = True,
-        **kwargs: Dict[str, Any],
-    ) -> Any:
-        """Request the API."""
-
-        should_verify = self.verify_auth and should_verify_auth
-
-        if should_verify and "Authorization" not in self._headers:
-            raise Exception("You are not authenticated.")
-
-        # Remove params if they are set to None (allow handling of optionals)
-        if isinstance(params, dict):
-            params = valfilter(lambda x: x is not None, params)
-            params = valmap(lambda x: x.value if isinstance(x, Enum) else x, params)
-
-        json_arg = json_loads(json.model_dump_json()) if json else None
-        form_data_arg = (
-            form_data.model_dump() if isinstance(form_data, BaseModel) else form_data
-        )
-
-        if form_data_arg:
-            form_data_arg = valfilter(lambda x: x is not None, form_data_arg)
-            form_data_arg = valmap(
-                lambda x: x.value if isinstance(x, Enum) else x, form_data_arg
-            )
-
-        should_stream = bool(kwargs.get("should_stream", False))  # for download
-
-        with self._get_http_client() as client:
-            request = client.build_request(
-                method=method,
-                url=url,
-                params=params,
-                json=json_arg,
-                data=form_data_arg,
-                files=file,  # type: ignore[arg-type]
-                headers=self._headers,
-                timeout=timeout or self.timeout,
-            )
-            try:
-                result = client.send(
-                    request=request,
-                    stream=should_stream,
-                )
-
-                if should_stream:
-                    return self._handle_streaming_response(result)
-                else:
-                    return self._handle_standard_response(result)
-            except (WriteTimeout, ReadTimeout):
-                raise Timeout(
-                    "The call timed out. Consider increasing the timeout with the `timeout` parameter."
-                ) from None
-
-    def _handle_standard_response(
-        self, result: Response
-    ) -> Union[Dict[str, Any], bytes, str]:
-        if not result.is_success:
-            self._raise_on_status(result, result.json())
-
-        if result.headers["content-type"] == "application/json":
-            as_json: Dict[str, Any] = result.json()
-            return as_json
-        elif result.headers["content-type"] in (
-            "application/pdf",
-            "application/octet-stream",
-        ):
-            return result.content
-        else:
-            return result.text
-
-    def _handle_streaming_response(self, result: Response) -> BytesIO:
-        if not result.is_success:
-            content = result.read()
-            encoding = result.encoding or "utf-8"
-            as_json: Dict[str, Any] = json_loads(content.decode(encoding))
-            self._raise_on_status(result, as_json)
-
-        buffer = BytesIO()
-        try:
-            for chunk in result.iter_bytes():
-                buffer.write(chunk)
-        finally:
-            result.close()
-
-        return buffer
-
-    def _raise_on_status(self, result: Response, content: Dict[str, Any]) -> None:
-        value = content.get("detail")
-        if (
-            result.status_code == 401
-            and isinstance(value, str)
-            and "authenticated" in value
-        ):
-            raise Exception("You are not authenticated.")
-        standard_error = _get_nested_value(content, "message")
-
-        if standard_error:
-            error_msg = standard_error
-        elif validation_error := _get_nested_value(content, "msg"):
-            if detailed_message := _get_nested_value(content, "loc"):
-                field = detailed_message[-1]
-                error_msg = f"{validation_error}: {field}"
-            else:
-                error_msg = f"Bad Request: {validation_error}"
-        else:
-            error_msg = "Internal error"
-
-        raise Exception(
-            f"Got error in HTTP request: {result.request.method} {result.request.url}. Error status {result.status_code} - {error_msg}"
         )
 
     def __str__(self) -> str:
