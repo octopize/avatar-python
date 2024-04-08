@@ -34,9 +34,10 @@ from avatars.utils import (
     callable_type_match,
     ensure_valid,
     pop_or,
-    remove_optionals,
     validated,
+    remove_optionals,
 )
+
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
@@ -497,9 +498,7 @@ class BaseClient:
         response_cls: Type[ResponseClass],
         timeout: Optional[int] = None,
     ) -> ResponseClass:
-        headers: dict[str, Any] = {"new-client-create-api": "yeah"}
-
-        with self.context(method="post", url=url, headers=headers) as ctx:
+        with self.context(method="post", url=url) as ctx:
             ctx.data.json_data = request
             ctx.build_and_send_request()
             ctx.data.ensure_created()
