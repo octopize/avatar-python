@@ -1,12 +1,24 @@
 # Changelog
 
+## 0.7.0- 2024/04/05
+
+- fix: change shuffle multi-table process to return the right dataframe
+- fix: return metric parameter error to user
+- feat: return error to user if data contains ninf
+- feat: improve multi-table anonymization quality (utility)
+- feat: verify compatibility with server on client init
+- feat: add dataset name in the multitable privacy metrics
+- feat: create privacy geolocation assessment feature
+- refactor: add custom methods for Datasets
+- refactor: change seed place for avatarization and metrics job parameters to guarantee reproducibility
+
 ## 0.6.2
 
 - feat: add should_verify_ssl to ApiClient to bypass
 - refactor: revert to AvatarizationParameters.dataset_id being required
-  feat: add pydantic constraints to privacy metrics fields
-  feat: add multi table avatarization and privacy metrics jobs
-  feat: add 'name' keyword argument to create_dataset
+- feat: add pydantic constraints to privacy metrics fields
+- feat: add multi table avatarization and privacy metrics jobs
+- feat: add 'name' keyword argument to create_dataset
 
 ## 0.6.1
 

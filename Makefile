@@ -119,9 +119,9 @@ pip-requirements: ## Export the packages for the tutorials as a pip requirements
 
 
 pip-install-tutorial: pip-requirements ## Install the dependecies of the tutorial via pip
-	python3.10 -m venv $(VENV_NAME)
-	"$(VENV_PATH)/bin/python3.10" -m pip install -r $(TUTORIAL_REQUIREMENTS)
-	"$(VENV_PATH)/bin/python3.10" -m pip install . ## Installing the avatars package
+	python3 -m venv $(VENV_NAME)
+	"$(VENV_PATH)/bin/python3" -m pip install -r $(TUTORIAL_REQUIREMENTS)
+	"$(VENV_PATH)/bin/python3" -m pip install .
 .PHONY: pip-install-tutorial
 
 
@@ -137,11 +137,10 @@ generate-py:  ## Generate .py files from notebooks
 
 
 test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run without errors
-	echo "You must install the pip venv first. Run make pip-install-tutorial."
-	cd notebooks && ls Tutorial*.py | xargs -n1 basename | while read TUT; do \
-	    $(VENV_PATH)/bin/python3.10 $$TUT >/dev/null ; \
-	    echo Succesfully ran $$TUT ; \
-	done
+	cd notebooks && \
+	    find -s . \
+	        -name Tutorial\*.py \
+	        -exec $(VENV_PATH)/bin/python3 "{}" \;
 .PHONY: test-tutorial
 
 

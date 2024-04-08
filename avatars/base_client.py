@@ -34,10 +34,9 @@ from avatars.utils import (
     callable_type_match,
     ensure_valid,
     pop_or,
-    validated,
     remove_optionals,
+    validated,
 )
-
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
