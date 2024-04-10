@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_RETRY_INTERVAL = 5
-DEFAULT_RETRY_COUNT = 4
+DEFAULT_RETRY_COUNT = 20
 DEFAULT_TIMEOUT = 60 * 4
 DEFAULT_PER_CALL_TIMEOUT = 15
 
@@ -294,8 +294,8 @@ class ClientContext:
                 msg += f" (attempt {retry} of {DEFAULT_RETRY_COUNT})"
 
                 if retry < DEFAULT_RETRY_COUNT:
-                    print(
-                        f"@@@@@@@@@ {msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s..."
+                    logger.info(
+                        f"{msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s..."
                     )  # noqa
                     time.sleep(DEFAULT_RETRY_INTERVAL)
                 else:
