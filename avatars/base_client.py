@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import BytesIO
 from json import loads as json_loads
 from typing import (
@@ -43,7 +43,6 @@ if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
 
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_RETRY_INTERVAL = 5
@@ -250,7 +249,7 @@ class ContextData:
 class OperationInfo:
     data: ContextData
     in_progress: bool = False
-    last_updated_at: datetime = datetime.now()
+    last_updated_at: datetime = field(default_factory=datetime.now)
     response: Optional[Any] = None
 
 
@@ -295,7 +294,9 @@ class ClientContext:
                 msg += f" (attempt {retry} of {DEFAULT_RETRY_COUNT})"
 
                 if retry < DEFAULT_RETRY_COUNT:
-                    logger.warning(f"{msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s...")
+                    print(
+                        f"@@@@@@@@@ {msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s..."
+                    )  # noqa
                     time.sleep(DEFAULT_RETRY_INTERVAL)
                 else:
                     raise Timeout(msg) from None
