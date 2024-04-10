@@ -3,9 +3,10 @@ from __future__ import annotations
 import itertools
 import logging
 import time
+from datetime import datetime
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import BytesIO
 from json import loads as json_loads
 from typing import (
@@ -18,7 +19,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Tuple,
     Type,
     TypeVar,
     Union,
@@ -34,20 +34,21 @@ from avatars.utils import (
     callable_type_match,
     ensure_valid,
     pop_or,
-    remove_optionals,
     validated,
+    remove_optionals,
 )
+
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
 
 DEFAULT_RETRY_TIMEOUT = 60
-DEFAULT_TIMEOUT = 60
+DEFAULT_RETRY_INTERVAL = 5
+DEFAULT_RETRY_COUNT = 20
+DEFAULT_TIMEOUT = 60 * 4
 DEFAULT_PER_CALL_TIMEOUT = 15
-DEFAULT_CALL_RETRIES = 4
 
 IN_PROGRESS_STATUSES = (JobStatus.pending, JobStatus.started)
 
@@ -244,8 +245,16 @@ class ContextData:
         return deepcopy(self)
 
 
-IsInProgressCallable = Callable[[ContextData], bool]
-IsResponseInProgressCallable = Callable[[ResponseClass, ContextData], bool]
+@dataclass
+class OperationInfo:
+    data: ContextData
+    in_progress: bool = False
+    last_updated_at: datetime = field(default_factory=datetime.now)
+    response: Optional[Any] = None
+
+
+UpdateFunc = Callable[[OperationInfo], bool]
+UpdateResponseFunc = Callable[[OperationInfo, ResponseClass], bool]
 
 
 class ClientContext:
@@ -254,8 +263,7 @@ class ClientContext:
         self.data: ContextData = data
         self.timeout: Optional[ClientTimeout] = None
 
-    @contextmanager
-    def build_request(self) -> Generator[Request, None, None]:
+    def build_request(self) -> Request:
         self.data.http_request = self.http_client.build_request(
             method=self.data.method,
             url=self.data.url,
@@ -267,17 +275,15 @@ class ClientContext:
             timeout=DEFAULT_PER_CALL_TIMEOUT,
         )
 
-        yield self.data.http_request
+        return ensure_valid(self.data.http_request)
 
-        self.data.http_request = None
+    def send_request(self) -> Response:
+        request = ensure_valid(self.data.http_request)
 
-    def send_request(self, request: Optional[Request] = None) -> Response:
-        req = ensure_valid(request or self.data.http_request)
-
-        for retry in range(1, DEFAULT_CALL_RETRIES + 1):
+        for retry in range(1, DEFAULT_RETRY_COUNT + 1):
             try:
                 self.data.http_response = self.http_client.send(
-                    request=req,
+                    request=request,
                     stream=self.data.should_stream,
                 )
                 break
@@ -285,17 +291,19 @@ class ClientContext:
                 msg = (
                     f"Timeout waiting for {self.data.method.upper()} on {self.data.url}"
                 )
-                msg += f" (attempt {retry} of {DEFAULT_CALL_RETRIES})"
+                msg += f" (attempt {retry} of {DEFAULT_RETRY_COUNT})"
 
-                if retry < DEFAULT_CALL_RETRIES:
-                    logger.warning(f"{msg}. Retrying...")
+                if retry < DEFAULT_RETRY_COUNT:
+                    logger.info(
+                        f"{msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s..."
+                    )  # noqa
+                    time.sleep(DEFAULT_RETRY_INTERVAL)
                 else:
                     raise Timeout(msg) from None
 
         self.check_success()
 
-        with validated(self.data.http_response) as response:
-            return response
+        return ensure_valid(self.data.http_response)
 
     def send_request_and_build_response(
         self, response_cls: type[ResponseClass]
@@ -305,8 +313,9 @@ class ClientContext:
         return self.build_response(response_cls)
 
     def build_and_send_request(self) -> Any:
-        with self.build_request():
-            return self.send_request()
+        self.build_request()
+
+        return self.send_request()
 
     def build_response(self, response_cls: type[ResponseClass]) -> ResponseClass:
         return response_cls(**self.data.response_to_json())
@@ -324,45 +333,78 @@ class ClientContext:
 
         self.timeout = None
 
+    def build_update_func(
+        self,
+        update_func: Callable[..., bool],
+        response_cls: Optional[Type[ResponseClass]] = None,
+    ) -> UpdateFunc:
+        if callable_type_match(UpdateFunc, update_func):  # type: ignore[arg-type]
+
+            def call_update_func(info: OperationInfo) -> bool:
+                return update_func(info)
+
+        elif callable_type_match(UpdateResponseFunc, update_func):  # type: ignore[arg-type]
+            response_cls = ensure_valid(response_cls, "response class")
+
+            def call_update_func(info: OperationInfo) -> bool:
+                info.response = self.build_response(response_cls)
+                return update_func(info, info.response)
+
+        else:
+            raise RuntimeError(
+                "Expected a valid 'update_func' function"
+                f", got {update_func} instead (response_cls={response_cls})"
+            )
+
+        return call_update_func
+
     def loop_until(
         self,
         *,
         label: str,
-        in_progress_func: Callable[..., bool],
+        update_func: Callable[..., bool],
         response_cls: Optional[Type[ResponseClass]] = None,
-    ) -> Tuple[bool, Any]:
-        if callable_type_match(IsInProgressCallable, in_progress_func):  # type: ignore[arg-type]
+    ) -> OperationInfo:
+        call_update_func = self.build_update_func(update_func, response_cls)
+        info = OperationInfo(data=self.data)
+        last_updated_at = info.last_updated_at
+        what = str(response_cls) if response_cls else "request"
+        what_label = f"for {what} at {self.data.url} to complete"
+        loops = 1
 
-            def is_in_progress_func(data: ContextData) -> Tuple[bool, Any]:
-                return in_progress_func(data), None
+        self.build_request()
+        info.in_progress = True
 
-        elif callable_type_match(IsResponseInProgressCallable, in_progress_func):  # type: ignore[arg-type]
-            response_cls = ensure_valid(response_cls, "response class")
+        while info.in_progress:
+            self.send_request()
 
-            def is_in_progress_func(data: ContextData) -> Tuple[bool, Any]:
-                response = self.build_response(response_cls)
-                return in_progress_func(response, data), response
+            stop = call_update_func(info)
 
-        else:
-            raise RuntimeError("Expected a valid 'in progress' function")
+            if stop or not info.in_progress:
+                break
 
-        with self.build_request():
-            in_progress, response = False, None
+            last_updated_duration = (
+                info.last_updated_at - last_updated_at
+            ).total_seconds()
 
-            for interval in self.wait_intervals(label):
-                self.send_request()
+            if last_updated_duration > DEFAULT_TIMEOUT:
+                raise TimeoutError(f"It took more than {DEFAULT_TIMEOUT}s {what_label}")
+            else:
+                last_updated_at = info.last_updated_at
+                logger.info(
+                    f"waiting {what_label}"
+                    f" (last updated: {info.last_updated_at}"
+                    f", duration {last_updated_duration}"
+                    f", loop {loops}, sleeping {DEFAULT_RETRY_INTERVAL}s)"
+                )
+                time.sleep(DEFAULT_RETRY_INTERVAL)
 
-                in_progress, response = is_in_progress_func(self.data)
+            loops += 1
 
-                if not in_progress:
-                    break
+        if not response_cls:
+            info.response = self.data.get_user_content()
 
-                time.sleep(interval)
-
-            if not response:
-                response = self.data.get_user_content()
-
-            return in_progress, response
+        return info
 
     def check_success(self) -> None:
         resp = ensure_valid(self.data.http_response, "response")
@@ -413,15 +455,23 @@ class ClientContext:
         )
 
 
-def request_is_in_progress(data: ContextData) -> bool:
-    return data.status_is(httpx.codes.ACCEPTED)
+def update_request_op(info: OperationInfo) -> bool:
+    info.in_progress = info.data.status_is(httpx.codes.ACCEPTED)
+    return False
 
 
-def response_is_in_progress(response: ResponseClass, data: ContextData) -> bool:
+def update_response_op(info: OperationInfo, response: ResponseClass) -> bool:
+    ret: bool = False
+
     if hasattr(response, "status"):
-        return response.status in IN_PROGRESS_STATUSES
+        info.in_progress = response.status in IN_PROGRESS_STATUSES
     else:
-        return request_is_in_progress(data)
+        ret = update_request_op(info)
+
+    if hasattr(response, "last_updated_at"):
+        info.last_updated_at = response.last_updated_at
+
+    return ret
 
 
 class BaseClient:
@@ -502,28 +552,27 @@ class BaseClient:
             ctx.build_and_send_request()
             ctx.data.ensure_created()
 
-            in_progress, response = self.wait_created(
+            info = self.wait_created(
                 url=ctx.data.get_header("location"),
-                in_progress_func=response_is_in_progress,
+                update_func=update_response_op,
                 response_cls=response_cls,
                 ctx=ctx,
             )
 
-            return cast(ResponseClass, response)
+            return cast(ResponseClass, info.response)
 
     def request(self, method: str, url: str, **kwargs: Any) -> Any:
-        in_progress: bool = False
-        response: dict[str, Any] = {}
+        response: Any = None
 
         with self.context(method=method, url=url, **kwargs) as ctx:
             response = ctx.build_and_send_request()
 
             if ctx.data.is_created():
-                in_progress, response = self.wait_created(
+                response = self.wait_created(
                     url=ctx.data.get_header("location"),
-                    in_progress_func=request_is_in_progress,
+                    update_func=update_request_op,
                     ctx=ctx,
-                )
+                ).response
             else:
                 response = ctx.data.get_user_content()
 
@@ -531,7 +580,7 @@ class BaseClient:
 
     def wait_created(
         self, *, ctx: ClientContext, url: str, **kwargs: Any
-    ) -> Tuple[bool, Any]:
+    ) -> OperationInfo:
         with self.context(method="get", url=url, ctx=ctx) as ctx:
             return ctx.loop_until(
                 label=f"created resource is ready at {url}",
@@ -548,22 +597,9 @@ class BaseClient:
         """Request the API."""
         with self.context(method=method, url=url, **kwargs) as ctx:
             self.check_auth(ctx.data)
+            ctx.build_and_send_request()
 
-            ret: Any = None
-
-            ctx.build_request()
-
-            try:
-                ctx.send_request()
-
-                ret = ctx.data.get_user_content()
-            except (WriteTimeout, ReadTimeout):
-                raise Timeout(
-                    "The call timed out."
-                    " Consider increasing the timeout with the `timeout` parameter."
-                ) from None
-
-        return ret
+            return ctx.data.get_user_content()
 
     def get_job(
         self,
@@ -575,13 +611,13 @@ class BaseClient:
         with self.context(method="get", url=url) as ctx:
             ctx.build_and_send_request()
 
-            in_progress, response = ctx.loop_until(
+            info = ctx.loop_until(
                 label=f"get job at {url}",
-                in_progress_func=response_is_in_progress,
+                update_func=update_response_op,
                 response_cls=response_cls,
             )
 
-            return cast(ResponseClass, response)
+            return cast(ResponseClass, info.response)
 
     def __str__(self) -> str:
         return ", ".join(

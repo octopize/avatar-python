@@ -138,9 +138,10 @@ generate-py:  ## Generate .py files from notebooks
 
 test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run without errors
 	cd notebooks && \
-	    find -s . \
-	        -name Tutorial\*.py \
-	        -exec $(VENV_PATH)/bin/python3 "{}" \;
+	    ls Tutorial*.py | sort | \
+	        while read TUT; do \
+	            $(VENV_PATH)/bin/python3 $$TUT ; \
+	        done
 .PHONY: test-tutorial
 
 

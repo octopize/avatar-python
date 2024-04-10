@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from enum import Enum
 from inspect import signature
 from typing import Any, Callable, Generator, Optional, TypeVar, get_args
-
 from toolz.dicttoolz import valfilter, valmap
 
 T = TypeVar("T")
