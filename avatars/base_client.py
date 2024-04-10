@@ -3,10 +3,10 @@ from __future__ import annotations
 import itertools
 import logging
 import time
+from datetime import datetime
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import dataclass
 from io import BytesIO
 from json import loads as json_loads
 from typing import (
@@ -19,7 +19,6 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Tuple,
     Type,
     TypeVar,
     Union,
@@ -35,9 +34,10 @@ from avatars.utils import (
     callable_type_match,
     ensure_valid,
     pop_or,
-    remove_optionals,
     validated,
+    remove_optionals,
 )
+
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
@@ -46,9 +46,10 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 DEFAULT_RETRY_TIMEOUT = 60
+DEFAULT_RETRY_INTERVAL = 5
+DEFAULT_RETRY_COUNT = 4
 DEFAULT_TIMEOUT = 60 * 4
 DEFAULT_PER_CALL_TIMEOUT = 15
-DEFAULT_CALL_RETRIES = 4
 
 IN_PROGRESS_STATUSES = (JobStatus.pending, JobStatus.started)
 
@@ -280,7 +281,7 @@ class ClientContext:
     def send_request(self) -> Response:
         request = ensure_valid(self.data.http_request)
 
-        for retry in range(1, DEFAULT_CALL_RETRIES + 1):
+        for retry in range(1, DEFAULT_RETRY_COUNT + 1):
             try:
                 self.data.http_response = self.http_client.send(
                     request=request,
@@ -291,10 +292,11 @@ class ClientContext:
                 msg = (
                     f"Timeout waiting for {self.data.method.upper()} on {self.data.url}"
                 )
-                msg += f" (attempt {retry} of {DEFAULT_CALL_RETRIES})"
+                msg += f" (attempt {retry} of {DEFAULT_RETRY_COUNT})"
 
-                if retry < DEFAULT_CALL_RETRIES:
-                    logger.warning(f"{msg}. Retrying...")
+                if retry < DEFAULT_RETRY_COUNT:
+                    logger.warning(f"{msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s...")
+                    time.sleep(DEFAULT_RETRY_INTERVAL)
                 else:
                     raise Timeout(msg) from None
 
@@ -373,34 +375,30 @@ class ClientContext:
         info.in_progress = True
 
         while info.in_progress:
-            for interval in self.wait_intervals(label):
-                self.send_request()
+            self.send_request()
 
-                stop = call_update_func(info)
+            stop = call_update_func(info)
 
-                if stop or not info.in_progress:
-                    break
+            if stop or not info.in_progress:
+                break
 
-                last_updated_duration = (
-                    info.last_updated_at - last_updated_at
-                ).total_seconds()
+            last_updated_duration = (
+                info.last_updated_at - last_updated_at
+            ).total_seconds()
 
-                if last_updated_duration > DEFAULT_TIMEOUT:
-                    raise TimeoutError(
-                        f"It took more than {DEFAULT_TIMEOUT}s {what_label}"
-                    )
-                else:
-                    last_updated_at = info.last_updated_at
-                    logger.info(
-                        f"waiting {what_label}"
-                        f" (last updated: {info.last_updated_at}"
-                        f", duration {last_updated_duration}"
-                        f", loop {loops}, sleeping {interval}s)"
-                    )
+            if last_updated_duration > DEFAULT_TIMEOUT:
+                raise TimeoutError(f"It took more than {DEFAULT_TIMEOUT}s {what_label}")
+            else:
+                last_updated_at = info.last_updated_at
+                logger.info(
+                    f"waiting {what_label}"
+                    f" (last updated: {info.last_updated_at}"
+                    f", duration {last_updated_duration}"
+                    f", loop {loops}, sleeping {DEFAULT_RETRY_INTERVAL}s)"
+                )
+                time.sleep(DEFAULT_RETRY_INTERVAL)
 
-                loops += 1
-
-                time.sleep(interval)
+            loops += 1
 
         if not response_cls:
             info.response = self.data.get_user_content()
