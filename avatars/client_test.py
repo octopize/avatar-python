@@ -1,8 +1,7 @@
 import logging
 import unittest
-from unittest.mock import Mock
 from typing import Any, Callable, Dict, Optional
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import httpx
 import pytest
@@ -105,7 +104,7 @@ class TestClientRequest:
 
         # First request raises an EOF error, second request is successful
         side_effects = [error_to_raise, httpx.Response(200, json={})]
-        client.send = Mock(side_effect=side_effects)
+        client.send = Mock(side_effect=side_effects) # type: ignore[method-assign]
 
         api_client = ApiClient(
             base_url="http://localhost:8000",
