@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1 - 2024/04/11
+
+- feat: overhaul client architecture
+
 ## 0.7.0- 2024/04/05
 
 - fix: change shuffle multi-table process to return the right dataframe
