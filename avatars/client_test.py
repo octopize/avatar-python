@@ -116,7 +116,7 @@ class TestClientRequest:
 
         expected_warning = "Got EOF error on /health"
         with unittest.mock.patch(
-            "avatars.base_client.DEFAULT_RETRY_COUNT", 2
+            "avatars.base_client.DEFAULT_RETRY_COUNT", 1
         ), unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0):
             api_client.send_request(method="GET", url="/health")
 

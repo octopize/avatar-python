@@ -280,26 +280,39 @@ class ClientContext:
     def send_request(self) -> Response:
         request = ensure_valid(self.data.http_request)
 
-        for retry in range(1, DEFAULT_RETRY_COUNT + 1):
+        error_to_raise_after_retry: Optional[Exception] = None
+        nb_retries_left = DEFAULT_RETRY_COUNT
+        while True:
             try:
                 self.data.http_response = self.http_client.send(
                     request=request,
                     stream=self.data.should_stream,
                 )
-                break
+
+                # Reset retry parameters
+                error_to_raise_after_retry = None
+                break # Success, does not run finally
+            except httpx.ConnectError as e:
+                if "EOF occurred in violation of protocol" in str(e):
+                    msg = f"Got EOF error on {self.data.url}."
+                    logger.warning(msg)
+                    error_to_raise_after_retry = e
+                else:
+                    raise e
             except (ReadTimeout, WriteTimeout):
                 msg = (
                     f"Timeout waiting for {self.data.method.upper()} on {self.data.url}"
                 )
-                msg += f" (attempt {retry} of {DEFAULT_RETRY_COUNT})"
+                logger.info(msg)
+                error_to_raise_after_retry = Timeout(msg)
 
-                if retry < DEFAULT_RETRY_COUNT:
-                    logger.info(
-                        f"{msg}. Retrying in {DEFAULT_RETRY_INTERVAL}s..."
-                    )  # noqa
+            if error_to_raise_after_retry:
+                if nb_retries_left > 0:
+                    nb_retries_left -= 1
+                    logger.info(f"Retrying in {DEFAULT_RETRY_INTERVAL}s...")
                     time.sleep(DEFAULT_RETRY_INTERVAL)
                 else:
-                    raise Timeout(msg) from None
+                    raise error_to_raise_after_retry
 
         self.check_success()
 
