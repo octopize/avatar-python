@@ -1,3 +1,6 @@
+import logging
+import unittest
+from unittest.mock import Mock
 from typing import Any, Callable, Dict, Optional
 from unittest.mock import patch
 
@@ -44,8 +47,8 @@ def test_should_verify_ssl(mock_client: Any) -> None:
 def test_url_is_rejected_if_it_contains_quotes(base_url: str) -> None:
     # Note there is "quote" within the URL, usually an error related to system
     # env variable configuration.
-    with pytest.raises(ValueError, match="not to contain quotes") as exc_info:
-        api_client = ApiClient(base_url=base_url)
+    with pytest.raises(ValueError, match="not to contain quotes"):
+        ApiClient(base_url=base_url)
 
 
 @pytest.mark.parametrize(
@@ -91,3 +94,32 @@ class TestClientRequest:
         result = api_client.request("GET", "/health")
 
         assert result == {"message": "ok"}
+
+    def test_retries_on_ssl_eof_error(self, caplog: Any) -> None:
+        """Verify that the client retries on EOF error.
+
+        We do this by checking if we correctly log.
+        """
+        error_to_raise = httpx.ConnectError("EOF occurred in violation of protocol")
+        client = mock_httpx_client()
+
+        # First request raises an EOF error, second request is successful
+        side_effects = [error_to_raise, httpx.Response(200, json={})]
+        client.send = Mock(side_effect=side_effects)
+
+        api_client = ApiClient(
+            base_url="http://localhost:8000",
+            http_client=client,
+            should_verify_ssl=False,
+            verify_auth=False,
+            should_verify_compatibility=False,
+        )
+
+        expected_warning = "Got EOF error on /health"
+        with unittest.mock.patch(
+            "avatars.base_client.DEFAULT_RETRY_COUNT", 2
+        ), unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0):
+            api_client.send_request(method="GET", url="/health")
+
+        _, __, log = caplog.record_tuples[0]
+        assert expected_warning in log
