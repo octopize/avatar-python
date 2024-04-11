@@ -140,7 +140,8 @@ test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run
 	cd notebooks && \
 	    ls Tutorial*.py | sort | \
 	        while read TUT; do \
-	            $(VENV_PATH)/bin/python3 $$TUT ; \
+				echo "Running $$TUT";
+	            $(VENV_PATH)/bin/python3 $$TUT > /dev/null; \
 	        done
 .PHONY: test-tutorial
 
