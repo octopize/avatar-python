@@ -291,7 +291,7 @@ class ClientContext:
 
                 # Reset retry parameters
                 error_to_raise_after_retry = None
-                break # Success, does not run finally
+                break  # Success, does not run finally
             except httpx.ConnectError as e:
                 if "EOF occurred in violation of protocol" in str(e):
                     msg = f"Got EOF error on {self.data.url}."

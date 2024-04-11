@@ -104,7 +104,7 @@ class TestClientRequest:
 
         # First request raises an EOF error, second request is successful
         side_effects = [error_to_raise, httpx.Response(200, json={})]
-        client.send = Mock(side_effect=side_effects) # type: ignore[method-assign]
+        client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
 
         api_client = ApiClient(
             base_url="http://localhost:8000",
