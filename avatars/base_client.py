@@ -3,10 +3,10 @@ from __future__ import annotations
 import itertools
 import logging
 import time
-from datetime import datetime
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import datetime
 from io import BytesIO
 from json import loads as json_loads
 from typing import (
@@ -30,14 +30,7 @@ from httpx import ReadTimeout, Request, Response, WriteTimeout
 from pydantic import BaseModel
 
 from avatars.models import JobStatus
-from avatars.utils import (
-    callable_type_match,
-    ensure_valid,
-    pop_or,
-    validated,
-    remove_optionals,
-)
-
+from avatars.utils import ensure_valid, pop_or, remove_optionals, validated
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
@@ -253,10 +246,6 @@ class OperationInfo:
     response: Optional[Any] = None
 
 
-UpdateFunc = Callable[[OperationInfo], bool]
-UpdateResponseFunc = Callable[[OperationInfo, ResponseClass], bool]
-
-
 class ClientContext:
     def __init__(self, http_client: httpx.Client, data: ContextData) -> None:
         self.http_client: httpx.Client = http_client
@@ -346,31 +335,6 @@ class ClientContext:
 
         self.timeout = None
 
-    def build_update_func(
-        self,
-        update_func: Callable[..., bool],
-        response_cls: Optional[Type[ResponseClass]] = None,
-    ) -> UpdateFunc:
-        if callable_type_match(UpdateFunc, update_func):  # type: ignore[arg-type]
-
-            def call_update_func(info: OperationInfo) -> bool:
-                return update_func(info)
-
-        elif callable_type_match(UpdateResponseFunc, update_func):  # type: ignore[arg-type]
-            response_cls = ensure_valid(response_cls, "response class")
-
-            def call_update_func(info: OperationInfo) -> bool:
-                info.response = self.build_response(response_cls)
-                return update_func(info, info.response)
-
-        else:
-            raise RuntimeError(
-                "Expected a valid 'update_func' function"
-                f", got {update_func} instead (response_cls={response_cls})"
-            )
-
-        return call_update_func
-
     def loop_until(
         self,
         *,
@@ -378,7 +342,13 @@ class ClientContext:
         update_func: Callable[..., bool],
         response_cls: Optional[Type[ResponseClass]] = None,
     ) -> OperationInfo:
-        call_update_func = self.build_update_func(update_func, response_cls)
+        def call_update_func(info: OperationInfo) -> bool:
+            if response_cls:
+                info.response = self.build_response(response_cls)
+                return update_func(info, info.response)
+            else:
+                return update_func(info)
+
         info = OperationInfo(data=self.data)
         last_updated_at = info.last_updated_at
         what = str(response_cls) if response_cls else "request"
