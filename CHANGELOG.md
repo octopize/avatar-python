@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2 - 2024/04/12
+
+- fix: remove retry logic around Job.last_updated_at
+
 ## 0.7.1 - 2024/04/11
 
 - feat: overhaul client architecture

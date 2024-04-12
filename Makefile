@@ -68,12 +68,19 @@ doc: doc-build  ## Build and open the docs
 	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
 .PHONY: doc
 
-doc-fast: ## Build and open the current version of the docs only
+doc-fast: format-doc ## Build and open the current version of the docs only
 	current_branch=$$(git branch --show-current)
 	poetry run sphinx-build -b html $(DOC_SOURCE_DIR) $(DOC_OUTPUT_DIR)/$$current_branch
 	echo $(DOC_OUTPUT_DIR)/$$current_branch/index.html
 	python3 -m webbrowser -t $(DOC_OUTPUT_DIR)/$$current_branch/index.html
 .PHONY: doc-fast
+
+
+format-doc:
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst doc/source/tutorial.md
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/user_guide.rst doc/source/user_guide.md
+	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
+.PHONY: format-doc
 
 doc-build:  ## Build the docs
 ##! This script is also used to deploy to production.
@@ -81,9 +88,7 @@ doc-build:  ## Build the docs
 ##! the repercussions on the Github Actions script
 	rm -rf $(DOC_OUTPUT_DIR)
 	mkdir -p $(DOC_OUTPUT_DIR)
-	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/tutorial.rst doc/source/tutorial.md
-	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/user_guide.rst doc/source/user_guide.md
-	poetry run pandoc --from=markdown --to=rst --output=$(DOC_SOURCE_DIR)/changelog.rst CHANGELOG.md
+	$(MAKE) format-doc
 	$(MAKE) doc-build-pydantic-v1
 	$(MAKE) doc-build-pydantic-v2
 	poetry run python doc/bin/modify_class_name.py $(DOC_OUTPUT_DIR)
