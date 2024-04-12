@@ -3,10 +3,10 @@ from __future__ import annotations
 import itertools
 import logging
 import time
+from datetime import datetime
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
-from datetime import datetime
 from io import BytesIO
 from json import loads as json_loads
 from typing import (
@@ -30,7 +30,13 @@ from httpx import ReadTimeout, Request, Response, WriteTimeout
 from pydantic import BaseModel
 
 from avatars.models import JobStatus
-from avatars.utils import ensure_valid, pop_or, remove_optionals, validated
+from avatars.utils import (
+    ensure_valid,
+    pop_or,
+    validated,
+    remove_optionals,
+)
+
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
@@ -350,7 +356,6 @@ class ClientContext:
                 return update_func(info)
 
         info = OperationInfo(data=self.data)
-        last_updated_at = info.last_updated_at
         what = str(response_cls) if response_cls else "request"
         what_label = f"for {what} at {self.data.url} to complete"
         loops = 1
@@ -366,21 +371,11 @@ class ClientContext:
             if stop or not info.in_progress:
                 break
 
-            last_updated_duration = (
-                info.last_updated_at - last_updated_at
-            ).total_seconds()
-
-            if last_updated_duration > DEFAULT_TIMEOUT:
-                raise TimeoutError(f"It took more than {DEFAULT_TIMEOUT}s {what_label}")
-            else:
-                last_updated_at = info.last_updated_at
-                logger.info(
-                    f"waiting {what_label}"
-                    f" (last updated: {info.last_updated_at}"
-                    f", duration {last_updated_duration}"
-                    f", loop {loops}, sleeping {DEFAULT_RETRY_INTERVAL}s)"
-                )
-                time.sleep(DEFAULT_RETRY_INTERVAL)
+            logger.info(
+                f"waiting {what_label}"
+                f"(loop {loops}, sleeping {DEFAULT_RETRY_INTERVAL}s)"
+            )
+            time.sleep(DEFAULT_RETRY_INTERVAL)
 
             loops += 1
 

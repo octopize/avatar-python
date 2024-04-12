@@ -1,88 +1,89 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 1.1.0-8143129ddb2381b96eb92a581856bda578d89291
+# API Version : 1.1.0-8d3fdf018d62c07cb630d4d02e690cf75f8411ea
 
 
-import itertools
 import logging
-import time
-from copy import copy
-from io import BytesIO, StringIO
+
+
+from avatars.models import AvatarizationBatchJob
+from avatars.models import AvatarizationBatchJobCreate
+from avatars.models import AvatarizationJob
+from avatars.models import AvatarizationJobCreate
+from avatars.models import AvatarizationMultiTableJob
+from avatars.models import AvatarizationMultiTableJobCreate
+from avatars.models import AvatarizationWithTimeSeriesJob
+from avatars.models import AvatarizationWithTimeSeriesJobCreate
+from avatars.models import ClusterStats
+from avatars.models import CompatibilityResponse
+from avatars.models import Contributions
+from avatars.models import CreateDataset
+from avatars.models import CreateUser
+from avatars.models import Dataset
+from avatars.models import ExplainedVariance
+from avatars.models import ForgottenPasswordRequest
+from avatars.models import GenericJob
+from avatars.models import Login
+from avatars.models import LoginResponse
+from avatars.models import PatchDataset
+from avatars.models import PrivacyMetricsBatchJob
+from avatars.models import PrivacyMetricsBatchJobCreate
+from avatars.models import PrivacyMetricsGeolocationJob
+from avatars.models import PrivacyMetricsGeolocationJobCreate
+from avatars.models import PrivacyMetricsJob
+from avatars.models import PrivacyMetricsJobCreate
+from avatars.models import PrivacyMetricsMultiTableJob
+from avatars.models import PrivacyMetricsMultiTableJobCreate
+from avatars.models import PrivacyMetricsWithTimeSeriesJob
+from avatars.models import PrivacyMetricsWithTimeSeriesJobCreate
+from avatars.models import Projections
+from avatars.models import Report
+from avatars.models import ReportCreate
+from avatars.models import ReportFromBatchCreate
+from avatars.models import ReportFromDataCreate
+from avatars.models import ReportGeolocationPrivacyCreate
+from avatars.models import ResetPasswordRequest
+from avatars.models import SignalMetricsBatchJob
+from avatars.models import SignalMetricsBatchJobCreate
+from avatars.models import SignalMetricsJob
+from avatars.models import SignalMetricsJobCreate
+from avatars.models import SignalMetricsWithTimeSeriesJob
+from avatars.models import SignalMetricsWithTimeSeriesJobCreate
+from avatars.models import User
+from avatars.models import JobStatus, AvatarizationBatchResult
+from avatars.models import ColumnDetail, ColumnType
+from avatars.models import (
+    PrivacyMetrics,
+    SignalMetrics,
+    PrivacyMetricsParameters,
+    SignalMetricsParameters,
+)
+from avatars.models import (
+    Processor,
+    AvatarizationPipelineCreate,
+    AvatarizationPipelineResult,
+)
+from avatars.models import FileType
+
+from io import StringIO, BytesIO
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Dict,
-    List,
     Optional,
-    Tuple,
     TypeVar,
     Union,
+    List,
+    Tuple,
 )
 from uuid import UUID
-
-import numpy as np
+import itertools
+import time
 import pandas as pd
-import pyarrow
+import numpy as np
 from pydantic import BaseModel
-
-from avatars.models import (
-    AvatarizationBatchJob,
-    AvatarizationBatchJobCreate,
-    AvatarizationBatchResult,
-    AvatarizationJob,
-    AvatarizationJobCreate,
-    AvatarizationMultiTableJob,
-    AvatarizationMultiTableJobCreate,
-    AvatarizationPipelineCreate,
-    AvatarizationPipelineResult,
-    AvatarizationWithTimeSeriesJob,
-    AvatarizationWithTimeSeriesJobCreate,
-    ClusterStats,
-    ColumnDetail,
-    ColumnType,
-    CompatibilityResponse,
-    Contributions,
-    CreateDataset,
-    CreateUser,
-    Dataset,
-    ExplainedVariance,
-    FileType,
-    ForgottenPasswordRequest,
-    GenericJob,
-    JobStatus,
-    Login,
-    LoginResponse,
-    PatchDataset,
-    PrivacyMetrics,
-    PrivacyMetricsBatchJob,
-    PrivacyMetricsBatchJobCreate,
-    PrivacyMetricsGeolocationJob,
-    PrivacyMetricsGeolocationJobCreate,
-    PrivacyMetricsJob,
-    PrivacyMetricsJobCreate,
-    PrivacyMetricsMultiTableJob,
-    PrivacyMetricsMultiTableJobCreate,
-    PrivacyMetricsParameters,
-    PrivacyMetricsWithTimeSeriesJob,
-    PrivacyMetricsWithTimeSeriesJobCreate,
-    Processor,
-    Projections,
-    Report,
-    ReportCreate,
-    ReportFromBatchCreate,
-    ReportFromDataCreate,
-    ReportGeolocationPrivacyCreate,
-    ResetPasswordRequest,
-    SignalMetrics,
-    SignalMetricsBatchJob,
-    SignalMetricsBatchJobCreate,
-    SignalMetricsJob,
-    SignalMetricsJobCreate,
-    SignalMetricsParameters,
-    SignalMetricsWithTimeSeriesJob,
-    SignalMetricsWithTimeSeriesJobCreate,
-    User,
-)
+import pyarrow
+from copy import copy
 
 if TYPE_CHECKING:
     from avatars.client import ApiClient
