@@ -23,6 +23,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 import httpx
@@ -210,7 +211,7 @@ class ContextData:
     def get_user_content(self) -> Any:
         with validated(self.http_response, "response") as resp:
             if self.should_stream:
-                return self.stream_response(resp)
+                return self.stream_response(resp, destination=None)
             else:
                 if self.is_content_json():
                     return self.response_to_json()
@@ -229,16 +230,52 @@ class ContextData:
 
         return as_json
 
-    def stream_response(self, resp: Response) -> Any:
-        buffer = BytesIO()
+    @overload
+    def stream_response(self, resp: Response, destination: None) -> bytes:
+        ...
+
+    @overload
+    def stream_response(
+        self, resp: Response, destination: "FileLikeInterface[bytes]"
+    ) -> None:
+        ...
+
+    def stream_response(
+        self, resp: Response, destination: Optional["FileLikeInterface[bytes]"] = None
+    ) -> Any:
+        """
+        Handle the streaming of a response to a destination.
+
+        If the destination is not provided, it returns the content as bytes.
+
+        This needs the httpx.Client instance to remain open, even though no client
+        is used in this function.
+
+        Parameters
+        ----------
+        response
+            The response object to be streamed.
+        destination
+            The destination where the response will be streamed.
+            If not provided, the content is returned as.
+
+        Returns
+        -------
+            If no destination was provided, it returns the raw bytes.
+        """
+
+        _destination: "FileLikeInterface[bytes]" = destination or BytesIO()
 
         try:
             for chunk in resp.iter_bytes():
-                buffer.write(chunk)
+                _destination.write(chunk)
         finally:
             resp.close()
 
-        return buffer
+        if not destination:
+            return _destination.read()
+
+        return None
 
     def clone(self) -> ContextData:
         return deepcopy(self)

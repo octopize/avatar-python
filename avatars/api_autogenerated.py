@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 1.1.0-8d3fdf018d62c07cb630d4d02e690cf75f8411ea
+# API Version : 1.1.2-09625ad679476a17d7ed5335bc4acff637572cde
 
 
 import logging
@@ -1114,23 +1114,6 @@ class Reports:
             "url": f"/reports/geolocation_privacy",
             "timeout": timeout,
             "json_data": request,
-        }
-
-        return Report(**self.client.request(**kwargs))
-
-    def create_geolocation_privacy_report(
-        self,
-        request: ReportGeolocationPrivacyCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Report:
-        """Create an anonymization report without avatarization job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/reports/geolocation_privacy",
-            "timeout": timeout,
-            "json": request,
         }
 
         return Report(**self.client.request(**kwargs))
