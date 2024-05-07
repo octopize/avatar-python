@@ -15,7 +15,7 @@ install:  ## Install the stack
 .PHONY: install
 
 release-and-push: ## Prepare a new client release
-	poetry run python release.py --bump-type patch
+	poetry run python release.py
 .PHONY: release-and-push
 
 ##@ Tests
