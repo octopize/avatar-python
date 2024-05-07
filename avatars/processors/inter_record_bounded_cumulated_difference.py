@@ -173,32 +173,38 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
         if self.new_first_variable_name not in dest.columns.values:
             raise ValueError(
-                f"Expected a valid `new_first_variable_name`, got {self.new_first_variable_name} instead"
+                "Expected a valid `new_first_variable_name`, "
+                f"got {self.new_first_variable_name} instead"
             )
 
         if self.new_difference_variable_name not in dest.columns.values:
             raise ValueError(
-                f"Expected a valid `new_difference_variable_name`, got {self.new_difference_variable_name} instead"
+                "Expected a valid `new_difference_variable_name`, "
+                f"got {self.new_difference_variable_name} instead"
             )
 
         if source[self.id_variable].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for id variable in source, got column with nulls instead"
+                "Expected no missing values for id variable in source, "
+                "got column with nulls instead"
             )
 
         if source[self.target_variable].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for target variable in source, got column with nulls instead"
+                "Expected no missing values for target variable in source, "
+                "got column with nulls instead"
             )
 
         if dest[self.new_difference_variable_name].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for `new_difference_variable_name`, got column with nulls instead"
+                "Expected no missing values for `new_difference_variable_name`, "
+                "got column with nulls instead"
             )
 
         if dest[self.new_first_variable_name].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for `new_first_variable_name`, got column with nulls instead"
+                "Expected no missing values for `new_first_variable_name`, "
+                "got column with nulls instead"
             )
 
         working = dest.copy()

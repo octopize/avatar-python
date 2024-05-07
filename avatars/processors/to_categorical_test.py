@@ -62,7 +62,7 @@ def test_processor_to_categorical_keep_continuous(original: pd.DataFrame) -> Non
 
 
 def test_postprocessed_with_category(original: pd.DataFrame) -> None:
-    """Check post processor with a transformed variable changed the categorical variable as expected.
+    """Check post processor with a transformed variable changed the categorical variable.
 
     Transformed data frame could be obtained with another processor such as GroupModalities().
     """

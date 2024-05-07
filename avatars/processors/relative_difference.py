@@ -4,9 +4,10 @@ import pandas as pd
 
 
 class RelativeDifferenceProcessor:
-    """Processor to express numeric variables as a difference relative to the sum of other variables.
+    """Express numeric variables as a difference relative to the sum of other variables.
 
-    Even if the avatarization is keeping relation and correlation, it will not guarantee mathematical relation retention.
+    Even if the avatarization is keeping relation and correlation,
+    it will not guarantee mathematical relation retention.
     You can apply the RelativeDifferenceProcessor to retain this relation between variables.
 
     Arguments
@@ -169,7 +170,8 @@ class RelativeDifferenceProcessor:
             )
         if df[self.references].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for `references`, got column with missing values instead"
+                "Expected no missing values for `references`, "
+                "got column with missing values instead"
             )
         df[self.target_rename] = (
             df[self.target].sub(df[self.references].sum(axis=1))
@@ -179,7 +181,7 @@ class RelativeDifferenceProcessor:
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-        """Transform a difference relative to the sum of other variables into an absolute numeric value.
+        """Transform a difference relative to the sum of variables into an absolute numeric value.
 
         Arguments
         ---------

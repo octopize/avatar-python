@@ -140,12 +140,14 @@ class GroupRelationshipProcessor:
 
         # Sample an old modality for each value
         working[self.variable_to_transform] = [
-            np.random.choice(
-                a=list(self.family_frequencies.keys()),
-                p=list(self.family_frequencies.values()),
+            (
+                np.random.choice(
+                    a=list(self.family_frequencies.keys()),
+                    p=list(self.family_frequencies.values()),
+                )
+                if x == "family"
+                else np.random.choice(list(self.nofamily_frequencies.keys()))
             )
-            if x == "family"
-            else np.random.choice(list(self.nofamily_frequencies.keys()))
             for x in working[self.variable_to_transform]
         ]
         return working

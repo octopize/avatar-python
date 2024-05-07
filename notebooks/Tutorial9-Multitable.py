@@ -58,6 +58,8 @@ client.authenticate(username=username, password=password)
 client.health.get_health()
 # -
 
+# %matplotlib inline
+
 # ## Loading data
 
 # In this tutorial, we will avatarise data that contains a patient table, a doctor table and a visit table
@@ -375,8 +377,6 @@ axes[0, 0].set_title("Height Distribution")
 axes[0, 1].set_title("Weight Distribution")
 axes[1, 0].set_title("Age Distribution")
 axes[1, 1].set_title("Gender Distribution")
-plt.tight_layout()
-plt.show()
 # -
 
 # ### Doctor
@@ -403,8 +403,6 @@ sns.countplot(data=doctor_combined, x="job", hue="type", palette=map_color, ax=a
 
 axes[0].set_title("Age Distribution")
 axes[1].set_title("Job Distribution")
-plt.tight_layout()
-plt.show()
 # -
 
 # ### Visit
@@ -533,4 +531,3 @@ sns.kdeplot(
     color=AVATAR_COLOR,
     alpha=0.8,
 )
-plt.show()

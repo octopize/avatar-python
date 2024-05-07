@@ -40,7 +40,8 @@ def test_get_split_for_batch_with_optimization() -> None:
     )
     training, splits = get_split_for_batch(df, row_limit=6, seed=42)
 
-    # the two first record should be the same of the original data and the other ones should be randomly selected
+    # the two first record should be the same of the original data and the other ones
+    # should be randomly selected
     expected_training = pd.DataFrame(
         data={
             "a": ["a", "b", "b", "a", "a", "b"],

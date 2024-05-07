@@ -145,7 +145,7 @@ def commit_and_tag() -> None:
         do_command, undo_command = do_undo_command
 
         typer.echo(" ".join(do_command))
-        do_result = subprocess.call(do_command)
+        do_result = subprocess.call(do_command, shell=True)
         if do_result != 0:
             typer.echo(
                 "Command produced non-zero exit status. Undoing previous commands..."

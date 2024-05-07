@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from _typeshed import SupportsRead, SupportsWrite
 
     class FileLikeInterface(
-        #! Make sure you modify is_file_like too.
+        # ! Make sure you modify is_file_like too.
         SupportsRead[AnyStr],
         SupportsWrite[AnyStr],
         Protocol,

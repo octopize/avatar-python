@@ -1,6 +1,5 @@
-import logging
 import unittest
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 from unittest.mock import Mock, patch
 
 import httpx
@@ -22,7 +21,7 @@ def test_should_verify_ssl(mock_client: Any) -> None:
         base_url=base_url, verify_auth=False, should_verify_compatibility=False
     )
     do_request(api_client)
-    assert mock_client.call_args.kwargs["verify"] == True
+    assert mock_client.call_args.kwargs["verify"] is True
     mock_client.reset_mock()
 
     # Verify that the should_verify_ssl parameter is passed to the httpx.Client
@@ -33,7 +32,7 @@ def test_should_verify_ssl(mock_client: Any) -> None:
         should_verify_compatibility=False,
     )
     do_request(api_client)
-    assert mock_client.call_args.kwargs["verify"] == False
+    assert mock_client.call_args.kwargs["verify"] is False
     mock_client.reset_mock()
 
 
@@ -68,7 +67,7 @@ def test_should_verify_compatibility(incompatiblity_status: str) -> None:
         handler=lambda request: httpx.Response(200, json=json)
     )
 
-    with pytest.warns(match="Client is not compatible") as checker:
+    with pytest.warns(match="Client is not compatible"):
         ApiClient(
             base_url="http://localhost:8000",
             http_client=http_client,

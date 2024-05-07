@@ -1,7 +1,7 @@
 """Original source: https://github.com/cgdeboer/iteround."""
 
 from collections import OrderedDict
-from typing import Any, NamedTuple
+from typing import NamedTuple
 from typing import OrderedDict as OrderedDictType
 from typing import Tuple
 

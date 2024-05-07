@@ -18,7 +18,8 @@ def get_split_for_batch(
         df:
             dataframe to split into batch
         row_limit:
-            maximum number of rows per batch, this parameter determines the number of batches that will be created
+            maximum number of rows per batch, this parameter determines the
+            number of batches that will be created
 
     Keyword Arguments
     -----------------

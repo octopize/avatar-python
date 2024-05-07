@@ -11,7 +11,7 @@ def mock_httpx_client(handler: Optional[RequestHandle] = None) -> httpx.Client:
     """Generate a HTTPX client with a MockTransport."""
 
     if handler is None:
-        handler = lambda request: httpx.Response(200, json={})
+        handler = lambda request: httpx.Response(200, json={})  # noqa: E731
 
     transport = httpx.MockTransport(handler)
     return httpx.Client(base_url="http://localhost:8000", transport=transport)

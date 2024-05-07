@@ -9,7 +9,8 @@ from avatars.lib.saferound import saferound
 class ProportionProcessor:
     """Processor to express numeric variables as a proportion of another variable.
 
-    By this transformation, we keep the addition and substraction relations such as variable_1 = variable_2 + variable_3.
+    By this transformation, we keep the addition and subtraction relations
+    such as variable_1 = variable_2 + variable_3.
 
     Arguments
     ---------

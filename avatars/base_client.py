@@ -3,10 +3,10 @@ from __future__ import annotations
 import itertools
 import logging
 import time
-from datetime import datetime
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import datetime
 from io import BytesIO
 from json import loads as json_loads
 from typing import (
@@ -23,6 +23,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 import httpx
@@ -30,13 +31,7 @@ from httpx import ReadTimeout, Request, Response, WriteTimeout
 from pydantic import BaseModel
 
 from avatars.models import JobStatus
-from avatars.utils import (
-    ensure_valid,
-    pop_or,
-    validated,
-    remove_optionals,
-)
-
+from avatars.utils import ensure_valid, pop_or, remove_optionals, validated
 
 if TYPE_CHECKING:
     from avatars._typing import FileLikeInterface, HttpxFile
@@ -146,6 +141,7 @@ class ContextData:
     file: Optional[Sequence["HttpxFile"]] = None
     should_verify_auth: bool = True
     should_stream: bool = False
+    destination: Optional["FileLikeInterface[bytes]"] = None
 
     def update(self, **kwargs: Any) -> None:
         for k, v in kwargs.items():
@@ -210,7 +206,7 @@ class ContextData:
     def get_user_content(self) -> Any:
         with validated(self.http_response, "response") as resp:
             if self.should_stream:
-                return self.stream_response(resp)
+                return self.stream_response(resp, destination=None)
             else:
                 if self.is_content_json():
                     return self.response_to_json()
@@ -229,16 +225,50 @@ class ContextData:
 
         return as_json
 
-    def stream_response(self, resp: Response) -> Any:
-        buffer = BytesIO()
+    @overload
+    def stream_response(self, resp: Response, destination: None) -> bytes: ...
+
+    @overload
+    def stream_response(
+        self, resp: Response, destination: "FileLikeInterface[bytes]"
+    ) -> None: ...
+
+    def stream_response(
+        self, resp: Response, destination: Optional["FileLikeInterface[bytes]"] = None
+    ) -> Any:
+        """
+        Handle the streaming of a response to a destination.
+
+        If the destination is not provided, it returns the content as bytes.
+
+        This needs the httpx.Client instance to remain open, even though no client
+        is used in this function.
+
+        Parameters
+        ----------
+        response
+            The response object to be streamed.
+        destination
+            The destination where the response will be streamed.
+            If not provided, the content is returned as.
+
+        Returns
+        -------
+            If no destination was provided, it returns the raw bytes.
+        """
+
+        _destination: "FileLikeInterface[bytes]" = destination or BytesIO()
 
         try:
             for chunk in resp.iter_bytes():
-                buffer.write(chunk)
+                _destination.write(chunk)
         finally:
             resp.close()
 
-        return buffer
+        if not destination:
+            return _destination.read()
+
+        return None
 
     def clone(self) -> ContextData:
         return deepcopy(self)
@@ -545,7 +575,12 @@ class BaseClient:
         with self.context(method=method, url=url, **kwargs) as ctx:
             response = ctx.build_and_send_request()
 
-            if ctx.data.is_created():
+            if "destination" in kwargs:
+                ctx.data.stream_response(
+                    ensure_valid(ctx.data.http_response),
+                    destination=kwargs["destination"],
+                )
+            elif ctx.data.is_created():
                 response = self.wait_created(
                     url=ctx.data.get_header("location"),
                     update_func=update_request_op,
@@ -602,5 +637,5 @@ class BaseClient:
             f"ApiClient(base_url={self.base_url}"
             f"timeout={self.timeout}"
             f"should_verify_ssl={self.should_verify_ssl}"
-            "verify_auth={self.verify_auth})"
+            f"verify_auth={self.verify_auth})"
         )

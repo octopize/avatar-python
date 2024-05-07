@@ -9,6 +9,7 @@ from avatars.models import (
     AvatarizationBatchResult,
     AvatarizationPerBatchResult,
     Dataset,
+    FileType,
 )
 
 
@@ -21,12 +22,14 @@ def batch_result() -> AvatarizationBatchResult:
                 hash="plouf",
                 download_url="truc",
                 nb_dimensions=1,
+                filetype=FileType.csv,
             ),
             sensitive_unshuffled_avatars_datasets=Dataset(
                 id=uuid4(),
                 hash="plouf",
                 download_url="truc",
                 nb_dimensions=1,
+                filetype=FileType.csv,
             ),
             original_id=uuid4(),
         ),
@@ -37,12 +40,14 @@ def batch_result() -> AvatarizationBatchResult:
                     hash="plouf",
                     download_url="truc",
                     nb_dimensions=1,
+                    filetype=FileType.csv,
                 ),
                 sensitive_unshuffled_avatars_datasets=Dataset(
                     id=uuid4(),
                     hash="plouf",
                     download_url="truc",
                     nb_dimensions=1,
+                    filetype=FileType.csv,
                 ),
                 original_id=uuid4(),
             )

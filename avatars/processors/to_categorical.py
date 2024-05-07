@@ -1,5 +1,3 @@
-from typing import List
-
 import numpy as np
 import pandas as pd
 
@@ -12,7 +10,8 @@ class ToCategoricalProcessor:
     Arguments
     ---------
         to_categorical_threshold:
-            threshold of the number of distinct value to consider a continuous variable as categorical.
+            threshold of the number of distinct value to consider
+            a continuous variable as categorical.
 
     Keyword Arguments
     -----------------

@@ -153,12 +153,16 @@ class InterRecordRangeDifferenceProcessor:
         ]
         if len(set(variables_to_check).difference(df.columns.values)) > 0:
             raise ValueError(
-                f"Expected valid variable names for `id_variable`, `target_start_variable`, `target_end_variable` and `sort_by_variable`, got '{self.id_variable}', '{self.target_start_variable}', '{self.target_end_variable}' and '{self.sort_by_variable}' instead"
+                "Expected valid variable names for `id_variable`, `target_start_variable`, "
+                "`target_end_variable` and `sort_by_variable`, got "
+                f"'{self.id_variable}', '{self.target_start_variable}', "
+                f"'{self.target_end_variable}' and '{self.sort_by_variable}' instead"
             )
 
         if df[variables_to_check].isnull().values.any():
             raise ValueError(
-                f"Expected no missing values for `id_variable`, `target_start_variable`, `target_end_variable` and `sort_by_variable`, got columns with nulls instead"
+                "Expected no missing values for `id_variable`, `target_start_variable`, "
+                "`target_end_variable` and `sort_by_variable`, got columns with nulls instead"
             )
 
         df = df.copy()
@@ -210,7 +214,10 @@ class InterRecordRangeDifferenceProcessor:
         ]
         if len(set(variables_to_check).difference(dest.columns.values)) > 0:
             raise ValueError(
-                f"Expected valid variable names for `id_variable`, `new_first_variable`, `new_range_variable` and `new_difference_variable`, got '{self.id_variable}', '{self.new_first_variable}', '{self.new_range_variable}' and '{self.new_difference_variable}' instead"
+                "Expected valid variable names for `id_variable`, `new_first_variable`, "
+                "`new_range_variable` and `new_difference_variable`, "
+                f"got '{self.id_variable}', '{self.new_first_variable}', "
+                f"'{self.new_range_variable}' and '{self.new_difference_variable}' instead"
             )
 
         if self.sort_by_variable not in source.columns.values:
@@ -220,12 +227,15 @@ class InterRecordRangeDifferenceProcessor:
 
         if dest[variables_to_check].isnull().values.any():
             raise ValueError(
-                f"Expected no missing values for `id_variable`, `new_first_variable`, `new_range_variable` and `new_difference_variable`, got columns with nulls instead"
+                "Expected no missing values for `id_variable`, "
+                "`new_first_variable`, `new_range_variable` and `new_difference_variable`, "
+                "got columns with nulls instead"
             )
 
         if source[self.sort_by_variable].isnull().values.any():
             raise ValueError(
-                "Expected no missing values for `sort_by_variable` in source, got column with nulls instead"
+                "Expected no missing values for `sort_by_variable` in source, "
+                "got column with nulls instead"
             )
 
         if (
@@ -233,7 +243,8 @@ class InterRecordRangeDifferenceProcessor:
             and len(set(source.index).symmetric_difference(dest.index)) > 0
         ):
             raise ValueError(
-                "Expected `keep_record_order` to be `True` only if source and dest have same indices, got source and dest with different indices"
+                "Expected `keep_record_order` to be `True` only if source and dest "
+                "have same indices, got source and dest with different indices"
             )
 
         df = dest.copy()

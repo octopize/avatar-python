@@ -1,58 +1,16 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 1.1.0-8d3fdf018d62c07cb630d4d02e690cf75f8411ea
+# API Version : 2.0.0-f729943514b3f36aca26f40f15f20380f9d53cbf
 
 
-import sys
 import warnings
-from collections.abc import Mapping, Sequence
-from contextlib import contextmanager
-from enum import Enum
-from io import BytesIO, StringIO
-from json import loads as json_loads
-from pathlib import Path
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    BinaryIO,
-    Dict,
-    Generator,
-    Literal,
-    Optional,
-    Protocol,
-    Sequence,
-    TextIO,
-    Tuple,
-    Union,
-    cast,
-    overload,
-)
+from typing import Optional
 from uuid import UUID
 
 import httpx
-from httpx import ReadTimeout, Response, WriteTimeout
-from pydantic import BaseModel
-from toolz.dicttoolz import valfilter, valmap
-from typing_extensions import TypeAlias, TypeGuard
 
 from avatars import __version__
-from avatars.api import (
-    DEFAULT_TIMEOUT,
-    Auth,
-    Compatibility,
-    Datasets,
-    Health,
-    Jobs,
-    Metrics,
-    PandasIntegration,
-    Pipelines,
-    Reports,
-    Stats,
-    Timeout,
-    Users,
-)
 from avatars.base_client import BaseClient
+from avatars.constants import DEFAULT_TIMEOUT
 from avatars.models import (
     CompatibilityStatus,
     ForgottenPasswordRequest,
@@ -61,16 +19,6 @@ from avatars.models import (
 )
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024  # 1 GB
-
-
-if TYPE_CHECKING:
-    from avatars._typing import FileLikeInterface, HttpxFile
-
-from avatars._typing import is_file_like
-
-
-class FileTooLarge(Exception):
-    pass
 
 
 class ApiClient(BaseClient):
@@ -108,6 +56,21 @@ class ApiClient(BaseClient):
             headers={"User-Agent": f"avatar-python/{__version__}"},
         )
 
+        # Importing here to prevent circular import
+        from avatars.api import (
+            Auth,
+            Compatibility,
+            Datasets,
+            Health,
+            Jobs,
+            Metrics,
+            PandasIntegration,
+            Pipelines,
+            Reports,
+            Stats,
+            Users,
+        )
+
         self.auth = Auth(self)
         self.compatibility = Compatibility(self)
         self.datasets = Datasets(self)
@@ -134,7 +97,7 @@ class ApiClient(BaseClient):
                     f"Client is not compatible with the server. \n"
                     f"Server message: {response.message}.\n"
                     f"Current client version: {__version__}.\n"
-                    f"Most recent compatible client version: {response.most_recent_compatible_client}.\n"
+                    f"Most recent compatible client version: {response.most_recent_compatible_client}.\n"  # noqa: E501
                 )
 
     def authenticate(
@@ -170,4 +133,9 @@ class ApiClient(BaseClient):
         )
 
     def __str__(self) -> str:
-        return f"ApiClient(base_url={self.base_url}, timeout={self.timeout}, should_verify_ssl={self.should_verify_ssl}, verify_auth={self.verify_auth})"
+        return ", ".join(
+            f"ApiClient(base_url={self.base_url}"
+            f"timeout={self.timeout}"
+            f"should_verify_ssl={self.should_verify_ssl}"
+            f"verify_auth={self.verify_auth})"
+        )

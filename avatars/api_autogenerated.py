@@ -1,89 +1,56 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 1.1.0-8d3fdf018d62c07cb630d4d02e690cf75f8411ea
+# API Version : 2.0.0-f729943514b3f36aca26f40f15f20380f9d53cbf
 
 
 import logging
+from io import BytesIO, StringIO
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 
-
-from avatars.models import AvatarizationBatchJob
-from avatars.models import AvatarizationBatchJobCreate
-from avatars.models import AvatarizationJob
-from avatars.models import AvatarizationJobCreate
-from avatars.models import AvatarizationMultiTableJob
-from avatars.models import AvatarizationMultiTableJobCreate
-from avatars.models import AvatarizationWithTimeSeriesJob
-from avatars.models import AvatarizationWithTimeSeriesJobCreate
-from avatars.models import ClusterStats
-from avatars.models import CompatibilityResponse
-from avatars.models import Contributions
-from avatars.models import CreateDataset
-from avatars.models import CreateUser
-from avatars.models import Dataset
-from avatars.models import ExplainedVariance
-from avatars.models import ForgottenPasswordRequest
-from avatars.models import GenericJob
-from avatars.models import Login
-from avatars.models import LoginResponse
-from avatars.models import PatchDataset
-from avatars.models import PrivacyMetricsBatchJob
-from avatars.models import PrivacyMetricsBatchJobCreate
-from avatars.models import PrivacyMetricsGeolocationJob
-from avatars.models import PrivacyMetricsGeolocationJobCreate
-from avatars.models import PrivacyMetricsJob
-from avatars.models import PrivacyMetricsJobCreate
-from avatars.models import PrivacyMetricsMultiTableJob
-from avatars.models import PrivacyMetricsMultiTableJobCreate
-from avatars.models import PrivacyMetricsWithTimeSeriesJob
-from avatars.models import PrivacyMetricsWithTimeSeriesJobCreate
-from avatars.models import Projections
-from avatars.models import Report
-from avatars.models import ReportCreate
-from avatars.models import ReportFromBatchCreate
-from avatars.models import ReportFromDataCreate
-from avatars.models import ReportGeolocationPrivacyCreate
-from avatars.models import ResetPasswordRequest
-from avatars.models import SignalMetricsBatchJob
-from avatars.models import SignalMetricsBatchJobCreate
-from avatars.models import SignalMetricsJob
-from avatars.models import SignalMetricsJobCreate
-from avatars.models import SignalMetricsWithTimeSeriesJob
-from avatars.models import SignalMetricsWithTimeSeriesJobCreate
-from avatars.models import User
-from avatars.models import JobStatus, AvatarizationBatchResult
-from avatars.models import ColumnDetail, ColumnType
-from avatars.models import (
-    PrivacyMetrics,
-    SignalMetrics,
-    PrivacyMetricsParameters,
-    SignalMetricsParameters,
-)
-from avatars.models import (
-    Processor,
-    AvatarizationPipelineCreate,
-    AvatarizationPipelineResult,
-)
+from avatars.models import AvatarizationBatchJob  # noqa: F401
+from avatars.models import AvatarizationBatchJobCreate  # noqa: F401
+from avatars.models import AvatarizationJob  # noqa: F401
+from avatars.models import AvatarizationJobCreate  # noqa: F401
+from avatars.models import AvatarizationMultiTableJob  # noqa: F401
+from avatars.models import AvatarizationMultiTableJobCreate  # noqa: F401
+from avatars.models import AvatarizationWithTimeSeriesJob  # noqa: F401
+from avatars.models import AvatarizationWithTimeSeriesJobCreate  # noqa: F401
+from avatars.models import ClusterStats  # noqa: F401
+from avatars.models import CompatibilityResponse  # noqa: F401
+from avatars.models import Contributions  # noqa: F401
+from avatars.models import CreateDataset  # noqa: F401
+from avatars.models import CreateUser  # noqa: F401
+from avatars.models import Dataset  # noqa: F401
+from avatars.models import ExplainedVariance  # noqa: F401
+from avatars.models import ForgottenPasswordRequest  # noqa: F401
+from avatars.models import GenericJob  # noqa: F401
+from avatars.models import Login  # noqa: F401
+from avatars.models import LoginResponse  # noqa: F401
+from avatars.models import PatchDataset  # noqa: F401
+from avatars.models import PrivacyMetricsBatchJob  # noqa: F401
+from avatars.models import PrivacyMetricsBatchJobCreate  # noqa: F401
+from avatars.models import PrivacyMetricsGeolocationJob  # noqa: F401
+from avatars.models import PrivacyMetricsGeolocationJobCreate  # noqa: F401
+from avatars.models import PrivacyMetricsJob  # noqa: F401
+from avatars.models import PrivacyMetricsJobCreate  # noqa: F401
+from avatars.models import PrivacyMetricsMultiTableJob  # noqa: F401
+from avatars.models import PrivacyMetricsMultiTableJobCreate  # noqa: F401
+from avatars.models import PrivacyMetricsWithTimeSeriesJob  # noqa: F401
+from avatars.models import PrivacyMetricsWithTimeSeriesJobCreate  # noqa: F401
+from avatars.models import Projections  # noqa: F401
+from avatars.models import Report  # noqa: F401
+from avatars.models import ReportCreate  # noqa: F401
+from avatars.models import ReportFromBatchCreate  # noqa: F401
+from avatars.models import ReportFromDataCreate  # noqa: F401
+from avatars.models import ReportGeolocationPrivacyCreate  # noqa: F401
+from avatars.models import ResetPasswordRequest  # noqa: F401
+from avatars.models import SignalMetricsBatchJob  # noqa: F401
+from avatars.models import SignalMetricsBatchJobCreate  # noqa: F401
+from avatars.models import SignalMetricsJob  # noqa: F401
+from avatars.models import SignalMetricsJobCreate  # noqa: F401
+from avatars.models import SignalMetricsWithTimeSeriesJob  # noqa: F401
+from avatars.models import SignalMetricsWithTimeSeriesJobCreate  # noqa: F401
+from avatars.models import User  # noqa: F401
 from avatars.models import FileType
-
-from io import StringIO, BytesIO
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Optional,
-    TypeVar,
-    Union,
-    List,
-    Tuple,
-)
-from uuid import UUID
-import itertools
-import time
-import pandas as pd
-import numpy as np
-from pydantic import BaseModel
-import pyarrow
-from copy import copy
 
 if TYPE_CHECKING:
     from avatars.client import ApiClient
@@ -112,7 +79,7 @@ class Auth:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/login",
+            "url": f"/login",  # noqa: F541
             "timeout": timeout,
             "form_data": request,
             "should_verify_auth": False,
@@ -126,9 +93,10 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/login/forgotten_password",
+            "url": f"/login/forgotten_password",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
             "should_verify_auth": False,
@@ -142,9 +110,10 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/login/reset_password",
+            "url": f"/login/reset_password",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
             "should_verify_auth": False,
@@ -166,7 +135,7 @@ class Compatibility:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/check_client",
+            "url": f"/check_client",  # noqa: F541
             "timeout": timeout,
             "should_verify_auth": False,
         }
@@ -189,7 +158,7 @@ class Datasets:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/datasets/stream",
+            "url": f"/datasets/stream",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 name=name,
@@ -208,7 +177,7 @@ class Datasets:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/datasets",
+            "url": f"/datasets",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -221,14 +190,11 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
-        """Create a dataset from file upload.
-
-        The file should be in CSV format.
-        """
+        """Create a dataset from file upload."""
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/datasets",
+            "url": f"/datasets",  # noqa: F541
             "timeout": timeout,
             "file": request,
             "form_data": dict(
@@ -248,7 +214,7 @@ class Datasets:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/datasets/{id}",
+            "url": f"/datasets/{id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -265,7 +231,7 @@ class Datasets:
 
         kwargs: Dict[str, Any] = {
             "method": "patch",
-            "url": f"/datasets/{id}",
+            "url": f"/datasets/{id}",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -282,7 +248,7 @@ class Datasets:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/datasets/{id}/analyze",
+            "url": f"/datasets/{id}/analyze",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -298,7 +264,7 @@ class Datasets:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/datasets/{id}/correlations",
+            "url": f"/datasets/{id}/correlations",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -311,11 +277,23 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-        """Download a dataset by streaming chunks of it."""
+        """Download a dataset by streaming chunks of it.
+
+        Parameters
+        ----------
+        id
+            The identifier of the dataset to download.
+        filetype
+            The filetype of the data you which to receive.
+
+        Returns
+        -------
+            The dataset contents
+        """
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/datasets/{id}/download/stream",
+            "url": f"/datasets/{id}/download/stream",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 filetype=filetype,
@@ -332,11 +310,15 @@ class Datasets:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
-        """Download a dataset."""
+        """Download a dataset.
+
+        This is only advised for small datasets.
+        Use /datasets/{id}/download/stream for larger datasets.
+        """
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/datasets/{id}/download",
+            "url": f"/datasets/{id}/download",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 filetype=filetype,
@@ -359,7 +341,7 @@ class Health:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/",
+            "url": f"/",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -374,7 +356,7 @@ class Health:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/health",
+            "url": f"/health",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -389,7 +371,7 @@ class Health:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/health/db",
+            "url": f"/health/db",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -414,7 +396,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs",
+            "url": f"/jobs",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 nb_days=nb_days,
@@ -433,7 +415,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs",
+            "url": f"/jobs",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -455,7 +437,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/{id}/cancel",
+            "url": f"/jobs/{id}/cancel",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -471,7 +453,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/avatarization",
+            "url": f"/jobs/avatarization",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -488,7 +470,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/avatarization_batch",
+            "url": f"/jobs/avatarization_batch",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -505,7 +487,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/avatarization_with_time_series",
+            "url": f"/jobs/avatarization_with_time_series",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -522,7 +504,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/avatarization_multi_table",
+            "url": f"/jobs/avatarization_multi_table",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -539,7 +521,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/signal",
+            "url": f"/jobs/metrics/signal",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -556,7 +538,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/privacy",
+            "url": f"/jobs/metrics/privacy",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -573,7 +555,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/privacy_batch",
+            "url": f"/jobs/metrics/privacy_batch",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -590,7 +572,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/privacy_time_series",
+            "url": f"/jobs/metrics/privacy_time_series",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -607,7 +589,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/signal_time_series",
+            "url": f"/jobs/metrics/signal_time_series",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -624,7 +606,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/signal_batch",
+            "url": f"/jobs/metrics/signal_batch",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -641,7 +623,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/privacy_multi_table",
+            "url": f"/jobs/metrics/privacy_multi_table",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -658,7 +640,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/jobs/metrics/privacy_geolocation",
+            "url": f"/jobs/metrics/privacy_geolocation",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -676,7 +658,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/privacy_geolocation",
+            "url": f"/jobs/{id}/metrics/privacy_geolocation",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -697,7 +679,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/avatarization/{id}",
+            "url": f"/jobs/avatarization/{id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -718,7 +700,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/avatarization_batch/{id}",
+            "url": f"/jobs/avatarization_batch/{id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -739,7 +721,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/avatarization_with_time_series/{id}",
+            "url": f"/jobs/avatarization_with_time_series/{id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -760,7 +742,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/avatarization_multi_table/{id}",
+            "url": f"/jobs/avatarization_multi_table/{id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -781,7 +763,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/signal",
+            "url": f"/jobs/{id}/metrics/signal",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -802,7 +784,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/signal_batch",
+            "url": f"/jobs/{id}/metrics/signal_batch",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -823,7 +805,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/signal_time_series",
+            "url": f"/jobs/{id}/metrics/signal_time_series",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -844,7 +826,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/privacy",
+            "url": f"/jobs/{id}/metrics/privacy",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -865,7 +847,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/privacy_batch",
+            "url": f"/jobs/{id}/metrics/privacy_batch",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -886,7 +868,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/privacy_time_series",
+            "url": f"/jobs/{id}/metrics/privacy_time_series",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -907,7 +889,7 @@ class Jobs:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{id}/metrics/privacy_multi_table",
+            "url": f"/jobs/{id}/metrics/privacy_multi_table",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -940,7 +922,7 @@ class Metrics:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/projections/{job_id}",
+            "url": f"/projections/{job_id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -965,7 +947,7 @@ class Metrics:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/contributions",
+            "url": f"/contributions",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 job_id=job_id,
@@ -993,7 +975,7 @@ class Metrics:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/variance/{job_id}",
+            "url": f"/variance/{job_id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -1014,7 +996,7 @@ class Reports:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/reports",
+            "url": f"/reports",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -1027,9 +1009,10 @@ class Reports:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Report:
+
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/reports/jobs/{id}",
+            "url": f"/reports/jobs/{id}",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -1045,7 +1028,7 @@ class Reports:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/reports/{id}/download",
+            "url": f"/reports/{id}/download",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -1061,7 +1044,7 @@ class Reports:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/reports/from_data",
+            "url": f"/reports/from_data",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -1081,7 +1064,7 @@ class Reports:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/reports/from_batch",
+            "url": f"/reports/from_batch",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -1098,7 +1081,7 @@ class Reports:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/reports/geolocation_privacy",
+            "url": f"/reports/geolocation_privacy",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -1119,7 +1102,7 @@ class Stats:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/stats/cluster",
+            "url": f"/stats/cluster",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -1144,7 +1127,7 @@ class Users:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/users",
+            "url": f"/users",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 email=email,
@@ -1167,7 +1150,7 @@ class Users:
 
         kwargs: Dict[str, Any] = {
             "method": "post",
-            "url": f"/users",
+            "url": f"/users",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }
@@ -1183,7 +1166,7 @@ class Users:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/users/me",
+            "url": f"/users/me",  # noqa: F541
             "timeout": timeout,
         }
 
@@ -1202,7 +1185,7 @@ class Users:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
-            "url": f"/users/{id}",
+            "url": f"/users/{id}",  # noqa: F541
             "timeout": timeout,
         }
 

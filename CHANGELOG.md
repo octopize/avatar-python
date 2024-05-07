@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.3 - 2024/04/29
+
+- Allow passing filetype in datasets.download_dataset and pandas_integration.download_dataframe to change the format of the retrieved data
+- Deprecate datasets.download_dataset_as_stream and datasets.create_dataset_from_stream
+- Deprecate the 'should_stream' argument from pandas_integration.upload_dataframe and pandas_integration.download_dataframe
+- Deprecate 'request' argument from datasets.create_dataset in favor of 'source' argument
+- Add 'destination' argument to datasets.download_dataset
+
 ## 0.7.2 - 2024/04/12
 
 - fix: remove retry logic around Job.last_updated_at

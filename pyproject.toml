@@ -1,10 +1,17 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
-name = "avatars"
+name = "octopize.avatar"
 # Also modify avatars/__init__.py
-version = "0.7.2"
-description = "Python client for Avatar's API"
-authors = ["Octopize <help@octopize.io>"]
+version = "0.7.3"
+description = "Python client for Octopize's avatar API"
+authors = ["Octopize <pypi-octopize@octopize.io>"]
 license = "Apache-2.0"
+packages = [{ include = "avatars" }]
+readme = "README.md"
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -27,7 +34,7 @@ autodoc-pydantic = "^2"
 [tool.poetry.group.dev.dependencies]
 blacken-docs = "^1.12.1"
 typer = "^0.4.1"
-black = {extras = ["jupyter"], version = "^22.3.0" }
+black = { extras = ["jupyter"], version = "^24.3.0" }
 isort = "^5.10.1"
 bandit = "^1.7.4"
 mypy = "^1.4"
@@ -44,9 +51,6 @@ ipykernel = "^6.19.2"
 missingno = "^0.5.1"
 notebook = "^6.5.6"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/black_compatibility.html
@@ -54,24 +58,20 @@ profile = "black"
 
 [tool.mypy]
 python_version = "3.9"
-plugins = [
-  "pydantic.mypy"
-]
+plugins = ["pydantic.mypy"]
 strict = true
 exclude = "(tmp|.venv)"
 
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if __name__ == .__main__.:",
-    "nocov",
-    "if TYPE_CHECKING:",
+  "pragma: no cover",
+  "def __repr__",
+  "if __name__ == .__main__.:",
+  "nocov",
+  "if TYPE_CHECKING:",
 ]
-omit = [
-    "**/*_test.py",
-    ]
+omit = ["**/*_test.py"]
 
 [tool.coverage.run]
 branch = true
@@ -94,3 +94,10 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "pyarrow.*"
 ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+"error",
+"ignore::pytest.PytestUnraisableExceptionWarning",
+"ignore:np.find_common_type is deprecated:DeprecationWarning", # TODO: Remove this once we migrate to pandas v2
+]
