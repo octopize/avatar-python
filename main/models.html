@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Processors" href="processors.html" /><link rel="prev" title="Client" href="client_and_api.html" />
 
     <!-- Generated with Sphinx 5.3.0 and Furo 2023.03.27 -->
-        <title>Models - avatars 0.7.2 documentation</title>
+        <title>Models - avatars 0.7.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
@@ -124,7 +124,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">avatars 0.7.2 documentation</div></a>
+      <a href="index.html"><div class="brand">avatars 0.7.3 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -147,7 +147,7 @@
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
   
-  <span class="sidebar-brand-text">avatars 0.7.2 documentation</span>
+  <span class="sidebar-brand-text">avatars 0.7.3 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -189,6 +189,9 @@
     <span class="caption-text">Versions</span>
   </p>
   <ul>
+    <li class="toctree-l1">
+      <a class="reference internal" href="../0.7.3/models.html">0.7.3</a>
+    </li>
     <li class="toctree-l1">
       <a class="reference internal" href="../0.7.2/models.html">0.7.2</a>
     </li>
@@ -1825,6 +1828,11 @@ computation to use with an instance of <code class="docutils literal notranslate
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.Dataset.download_url">
 <em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">download_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[str,</span> <span class="pre">Field(title='Download</span> <span class="pre">Url')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Dataset.download_url" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute pydantic_field">
+<dt class="sig sig-object py" id="avatars.models.Dataset.filetype">
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">filetype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#avatars.models.FileType" title="avatars.models.FileType"><span class="pre">FileType</span></a></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.Dataset.filetype" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute pydantic_field">
@@ -3662,14 +3670,28 @@ identical in columns, shape, and dtype to their corresponding original dataset.<
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableParameters.table_links">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_links</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[TableLink],</span> <span class="pre">Field(description='Description</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">relational</span> <span class="pre">link</span> <span class="pre">between</span> <span class="pre">tables.',</span> <span class="pre">title='Table</span> <span class="pre">Links')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_links" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_links</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[TableLink],</span> <span class="pre">Field(description='Description</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">relational</span> <span class="pre">link</span> <span class="pre">between</span> <span class="pre">tables.',</span> <span class="pre">min_length=1,</span> <span class="pre">title='Table</span> <span class="pre">Links')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_links" title="Permalink to this definition">#</a></dt>
 <dd><p>Description of each relational link between tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_length</strong> = 1</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.PrivacyMetricsMultiTableParameters.table_parameters">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[BasePrivacyMetricsParameters,</span> <span class="pre">BasePrivacyMetricsWithTimeSeriesParameters]],</span> <span class="pre">Field(description='Privacy</span> <span class="pre">metrics</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">table.</span> <span class="pre">',</span> <span class="pre">title='Table</span> <span class="pre">Parameters')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_parameters" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[BasePrivacyMetricsParameters,</span> <span class="pre">BasePrivacyMetricsWithTimeSeriesParameters]],</span> <span class="pre">Field(description='Privacy</span> <span class="pre">metrics</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">table.</span> <span class="pre">',</span> <span class="pre">min_length=1,</span> <span class="pre">title='Table</span> <span class="pre">Parameters')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.PrivacyMetricsMultiTableParameters.table_parameters" title="Permalink to this definition">#</a></dt>
 <dd><p>Privacy metrics parameters for each table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_length</strong> = 1</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -4216,14 +4238,28 @@ to be individual_level tables.</p></li>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableParameters.table_links">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_links</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[TableLink],</span> <span class="pre">Field(description='Description</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">relational</span> <span class="pre">link</span> <span class="pre">between</span> <span class="pre">tables.',</span> <span class="pre">title='Table</span> <span class="pre">Links')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters.table_links" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_links</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[TableLink],</span> <span class="pre">Field(description='Description</span> <span class="pre">of</span> <span class="pre">each</span> <span class="pre">relational</span> <span class="pre">link</span> <span class="pre">between</span> <span class="pre">tables.',</span> <span class="pre">min_length=1,</span> <span class="pre">title='Table</span> <span class="pre">Links')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters.table_links" title="Permalink to this definition">#</a></dt>
 <dd><p>Description of each relational link between tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_length</strong> = 1</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute pydantic_field">
 <dt class="sig sig-object py" id="avatars.models.AvatarizationMultiTableParameters.table_parameters">
-<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[BaseAvatarizationParameters,</span> <span class="pre">BaseAvatarizationWithTimeSeriesParameters]],</span> <span class="pre">Field(description='Avatarization</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">table.</span> <span class="pre">',</span> <span class="pre">title='Table</span> <span class="pre">Parameters')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters.table_parameters" title="Permalink to this definition">#</a></dt>
+<em class="property"> <span class="w"> </span></em><span class="sig-name descname"><span class="pre">table_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated[List[Union[BaseAvatarizationParameters,</span> <span class="pre">BaseAvatarizationWithTimeSeriesParameters]],</span> <span class="pre">Field(description='Avatarization</span> <span class="pre">parameters</span> <span class="pre">for</span> <span class="pre">each</span> <span class="pre">table.</span> <span class="pre">',</span> <span class="pre">min_length=1,</span> <span class="pre">title='Table</span> <span class="pre">Parameters')]</span></em><em class="property"> <span class="pre">[Required]</span></em><a class="headerlink" href="#avatars.models.AvatarizationMultiTableParameters.table_parameters" title="Permalink to this definition">#</a></dt>
 <dd><p>Avatarization parameters for each table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Constraints<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min_length</strong> = 1</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -4945,6 +4981,7 @@ to be individual_level tables.</p></li>
 <li><a class="reference internal" href="#avatars.models.Dataset.analysis_status"><code class="docutils literal notranslate"><span class="pre">Dataset.analysis_status</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.Dataset.columns"><code class="docutils literal notranslate"><span class="pre">Dataset.columns</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.Dataset.download_url"><code class="docutils literal notranslate"><span class="pre">Dataset.download_url</span></code></a></li>
+<li><a class="reference internal" href="#avatars.models.Dataset.filetype"><code class="docutils literal notranslate"><span class="pre">Dataset.filetype</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.Dataset.hash"><code class="docutils literal notranslate"><span class="pre">Dataset.hash</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.Dataset.id"><code class="docutils literal notranslate"><span class="pre">Dataset.id</span></code></a></li>
 <li><a class="reference internal" href="#avatars.models.Dataset.name"><code class="docutils literal notranslate"><span class="pre">Dataset.name</span></code></a></li>
