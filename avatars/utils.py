@@ -11,6 +11,20 @@ U = TypeVar("U")
 R = TypeVar("R")
 
 
+class ContentType(Enum):
+    MULTIPART_FROM_DATA = "multipart/form-data"
+    CSV = "text/csv"
+    PDF = "application/pdf"
+    JSON = "application/json"
+    OCTET_STREAM = "application/octet-stream"
+    ARROW_STREAM = "application/vnd.apache.arrow.stream"
+    UNSUPPORTED = "unsupported"
+
+    @classmethod
+    def _missing_(cls, value: object) -> ContentType:
+        return ContentType.UNSUPPORTED
+
+
 def ensure_valid(what: Optional[T], label: str = "") -> T:
     if what is None:
         msg = f"{label} " if label else ""

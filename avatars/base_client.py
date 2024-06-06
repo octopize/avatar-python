@@ -2,19 +2,21 @@ from __future__ import annotations
 
 import itertools
 import logging
+import os
 import time
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from io import BytesIO
 from json import loads as json_loads
+from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     Generator,
+    Iterable,
     Iterator,
     Mapping,
     Optional,
@@ -23,18 +25,21 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    overload,
 )
 
 import httpx
 from httpx import ReadTimeout, Request, Response, WriteTimeout
 from pydantic import BaseModel
 
+from avatars.arrow_utils import (
+    ArrowStreamReader,
+    ArrowStreamWriter,
+    FileLike,
+    FileLikes,
+    is_text_file_or_buffer,
+)
 from avatars.models import JobStatus
-from avatars.utils import ensure_valid, pop_or, remove_optionals, validated
-
-if TYPE_CHECKING:
-    from avatars._typing import FileLikeInterface, HttpxFile
+from avatars.utils import ContentType, ensure_valid, pop_or, remove_optionals, validated
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +51,25 @@ DEFAULT_PER_CALL_TIMEOUT = 15
 
 IN_PROGRESS_STATUSES = (JobStatus.pending, JobStatus.started)
 
-DEFAULT_BINARY_CONTENT_TYPES = ("application/pdf", "application/octet-stream")
+DEFAULT_BINARY_CONTENT_TYPES = (
+    ContentType.PDF,
+    ContentType.OCTET_STREAM,
+    ContentType.ARROW_STREAM,
+)
+DEFAULT_TEXT_CONTENT_TYPES = (ContentType.CSV, ContentType.JSON)
 
 T = TypeVar("T")
 R = TypeVar("R")
 RequestClass = TypeVar("RequestClass", bound=BaseModel)
 ResponseClass = TypeVar("ResponseClass", bound=BaseModel)
+
+JsonLike = dict[str, Any]
+
+Content = Union[Iterable[bytes], bytes]
+UserContent = Union[JsonLike, str, bytes, Optional[BytesIO]]
+StreamedContent = Optional[Union[BytesIO, bytes, str]]
+
+AuthRefreshFunc = Optional[Callable[..., dict[str, str]]]
 
 
 def _get_nested_value(
@@ -138,10 +156,12 @@ class ContextData:
     params: Optional[Dict[str, Any]] = None
     json_data: Optional[BaseModel] = None
     form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None
-    file: Optional[Sequence["HttpxFile"]] = None
+    files: Optional[FileLikes] = None
+    content: Optional[Content] = None
     should_verify_auth: bool = True
     should_stream: bool = False
-    destination: Optional["FileLikeInterface[bytes]"] = None
+    destination: Optional[FileLike] = None
+    want_content: bool = False
 
     def update(self, **kwargs: Any) -> None:
         for k, v in kwargs.items():
@@ -191,22 +211,39 @@ class ContextData:
     def get_header(self, header: str) -> Any:
         return ensure_valid(self.http_response).headers[header]
 
+    def update_headers(self, headers: dict[str, str]) -> None:
+        self.headers |= headers
+
+        if self.http_request:
+            self.http_request.headers.update(headers)
+
+    def content_type(self) -> ContentType:
+        return ContentType(self.get_header("content-type").split(";")[0].strip())
+
     def is_created(self) -> bool:
         return self.status_is(httpx.codes.CREATED) and self.has_header("location")
 
-    def ensure_created(self) -> None:
-        self.ensure_status_is(httpx.codes.CREATED) and self.has_header("location")
+    def ensure_created(self) -> bool:
+        return self.ensure_status_is(httpx.codes.CREATED) and self.has_header(
+            "location"
+        )
 
     def is_content_json(self) -> bool:
-        return bool(self.get_header("content-type") == "application/json")
+        return bool(self.content_type() == ContentType.JSON)
+
+    def is_content_arrow(self) -> bool:
+        return bool(self.content_type() == ContentType.ARROW_STREAM)
+
+    def is_content_text(self) -> bool:
+        return self.content_type() in DEFAULT_TEXT_CONTENT_TYPES
 
     def is_content_binary(self) -> bool:
-        return self.get_header("content-type") in DEFAULT_BINARY_CONTENT_TYPES
+        return self.content_type() in DEFAULT_BINARY_CONTENT_TYPES
 
-    def get_user_content(self) -> Any:
+    def get_user_content(self) -> UserContent:
         with validated(self.http_response, "response") as resp:
             if self.should_stream:
-                return self.stream_response(resp, destination=None)
+                return self.stream_response()
             else:
                 if self.is_content_json():
                     return self.response_to_json()
@@ -214,6 +251,21 @@ class ContextData:
                     return resp.content
                 else:
                     return resp.text
+
+    def get_content_message(self) -> str:
+        content = self.get_user_content()
+        msg = ""
+
+        if isinstance(content, dict):
+            if "detail" in content:
+                if "message" in content["detail"]:
+                    msg = content["detail"]["message"]
+        elif isinstance(content, str):
+            msg = content
+        else:
+            logger.warning(f"Expected readable content, got {type(content)} instead")
+
+        return msg
 
     def response_to_json(self) -> dict[str, Any]:
         resp = ensure_valid(self.http_response, "response")
@@ -225,17 +277,26 @@ class ContextData:
 
         return as_json
 
-    @overload
-    def stream_response(self, resp: Response, destination: None) -> bytes: ...
+    def stream_response_content(self, destination: FileLike) -> None:
+        with validated(self.http_response, "response") as resp:
+            if self.is_content_arrow():
+                with ArrowStreamReader() as reader:
+                    reader.write_parquet(destination, resp.iter_bytes())
+            else:
+                try:
+                    if is_text_file_or_buffer(destination):
+                        for chunk in resp.iter_text():
+                            destination.write(chunk)  # type: ignore[call-overload]
+                    else:
+                        # Assume bytes...
+                        for chunk in resp.iter_bytes():  # type: ignore[assignment]
+                            destination.write(chunk)  # type: ignore[call-overload]
+                finally:
+                    resp.close()
 
-    @overload
     def stream_response(
-        self, resp: Response, destination: "FileLikeInterface[bytes]"
-    ) -> None: ...
-
-    def stream_response(
-        self, resp: Response, destination: Optional["FileLikeInterface[bytes]"] = None
-    ) -> Any:
+        self, destination: Optional[FileLike] = None
+    ) -> StreamedContent:
         """
         Handle the streaming of a response to a destination.
 
@@ -256,19 +317,27 @@ class ContextData:
         -------
             If no destination was provided, it returns the raw bytes.
         """
+        content: StreamedContent = None
+        buffer = BytesIO()
 
-        _destination: "FileLikeInterface[bytes]" = destination or BytesIO()
+        if isinstance(destination, str):
+            destination_data = open(destination, "wb")
+        else:
+            destination_data = destination or buffer
 
-        try:
-            for chunk in resp.iter_bytes():
-                _destination.write(chunk)
-        finally:
-            resp.close()
+        self.stream_response_content(destination_data)
 
-        if not destination:
-            return _destination.read()
+        buffer.seek(0, os.SEEK_SET)
 
-        return None
+        content = buffer if not destination else None
+
+        if self.want_content and content:
+            content = content.read()
+
+            if self.is_content_text():
+                content = content.decode()
+
+        return content
 
     def clone(self) -> ContextData:
         return deepcopy(self)
@@ -283,10 +352,16 @@ class OperationInfo:
 
 
 class ClientContext:
-    def __init__(self, http_client: httpx.Client, data: ContextData) -> None:
+    def __init__(
+        self,
+        http_client: httpx.Client,
+        data: ContextData,
+        on_auth_refresh: AuthRefreshFunc = None,
+    ) -> None:
         self.http_client: httpx.Client = http_client
         self.data: ContextData = data
         self.timeout: Optional[ClientTimeout] = None
+        self.on_auth_refresh = on_auth_refresh
 
     def build_request(self) -> Request:
         self.data.http_request = self.http_client.build_request(
@@ -295,7 +370,8 @@ class ClientContext:
             params=self.data.build_params_arg(),
             json=self.data.build_json_data_arg(),
             data=self.data.build_form_data_arg(),
-            files=self.data.file,  # type: ignore[arg-type]
+            files=self.data.files,  # type: ignore[arg-type]
+            content=self.data.content,
             headers=self.data.headers,
             timeout=DEFAULT_PER_CALL_TIMEOUT,
         )
@@ -303,10 +379,12 @@ class ClientContext:
         return ensure_valid(self.data.http_request)
 
     def send_request(self) -> Response:
+        refreshed = False
         request = ensure_valid(self.data.http_request)
 
         error_to_raise_after_retry: Optional[Exception] = None
         nb_retries_left = DEFAULT_RETRY_COUNT
+
         while True:
             try:
                 self.data.http_response = self.http_client.send(
@@ -316,7 +394,17 @@ class ClientContext:
 
                 # Reset retry parameters
                 error_to_raise_after_retry = None
-                break  # Success, does not run finally
+
+                if self.check_auth_refreshed():
+                    if refreshed:
+                        # Don't loop forever trying to refresh auth
+                        logger.warning("Authentication was already refreshed once")
+                        break
+                    else:
+                        refreshed = True
+                        continue  # Retry current request with new auth
+                else:
+                    break  # Success, does not run finally
             except httpx.ConnectError as e:
                 if "EOF occurred in violation of protocol" in str(e):
                     msg = f"Got EOF error on {self.data.url}."
@@ -428,6 +516,26 @@ class ClientContext:
         else:
             self.raise_on_status(resp, resp.json())
 
+    def check_auth_refreshed(
+        self,
+    ) -> bool:
+        refreshed = False
+
+        if self.data.status_is(httpx.codes.UNAUTHORIZED):
+            msg = self.data.get_content_message()
+
+            if "credentials expired" in msg:
+                if self.on_auth_refresh:
+                    logger.info("trying to refresh authentication token")
+                    new_headers = self.on_auth_refresh()
+                    self.data.update_headers(new_headers)
+                    logger.info("authentication refreshed, retrying previous request")
+                    refreshed = True
+                else:
+                    logger.warning("Authentication refresh needed but not configured")
+
+        return refreshed
+
     def check_authenticated(self, resp: Response, content: dict[str, Any]) -> None:
         value = content.get("detail")
 
@@ -490,6 +598,7 @@ class BaseClient:
         should_verify_ssl: bool = True,
         *,
         verify_auth: bool = True,
+        on_auth_refresh: Optional[AuthRefreshFunc] = None,
         http_client: Optional[httpx.Client] = None,
         headers: Dict[str, str] = {},
     ) -> None:
@@ -517,35 +626,90 @@ class BaseClient:
         self.timeout = timeout
         self.should_verify_ssl = should_verify_ssl
         self.verify_auth = verify_auth
+        self._on_auth_refresh = on_auth_refresh or (lambda: {})
         self._http_client = http_client
         self._headers = {"Avatars-Accept-Created": "yes"} | headers
 
     def set_header(self, key: str, value: str) -> None:
         self._headers[key] = value
 
+    def on_auth_refresh(
+        self, on_auth_refresh: Optional[AuthRefreshFunc] = None
+    ) -> None:
+        self._on_auth_refresh = on_auth_refresh or (lambda: {})
+
+    def prepare_files(
+        self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
+    ) -> Optional[FileLikes]:
+        files: Any = pop_or(keyword_args, "files", [])
+        files = files if isinstance(files, list) else [files]
+
+        if f := pop_or(keyword_args, "file", None):
+            files.append(f)
+
+        prepared_files: Optional[FileLikes] = None
+
+        if files:
+            prepared_files = []
+
+            for f in files:
+                if isinstance(f, str) and Path(f).is_file():
+                    prepared_files.append(stack.enter_context(open(f, "rb")))
+                else:
+                    raise ValueError(
+                        f"Expected streamable file-like object, got {f} instead"
+                    )
+
+        return prepared_files
+
+    def prepare_content(
+        self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
+    ) -> Optional[Content]:
+        content: Optional[Content] = None
+
+        if "dataset" in keyword_args:
+            content = ArrowStreamWriter(keyword_args.pop("dataset"))
+            headers["Content-Type"] = ContentType.ARROW_STREAM.value
+
+        return content
+
     @contextmanager
     def context(
         self, *, ctx: Optional[ClientContext] = None, **kwargs: Any
     ) -> Generator[ClientContext, None, None]:
-        http_client = self._http_client or httpx.Client(
-            base_url=self.base_url, timeout=self.timeout, verify=self.should_verify_ssl
-        )
-
-        # Grab special keys
-        headers: dict[str, Any] = pop_or(kwargs, "headers", {})
-
-        if not ctx:
-            ctx = ClientContext(
-                http_client=http_client,
-                data=ContextData(
-                    base_url=self.base_url, headers=self._headers.copy(), **kwargs
-                ),
+        with ExitStack() as stack:
+            http_client = self._http_client or httpx.Client(
+                base_url=self.base_url,
+                timeout=self.timeout,
+                verify=self.should_verify_ssl,
             )
 
-        ctx.data.update(**kwargs)
-        ctx.data.headers.update(headers)
+            # Grab special keys
+            headers: dict[str, Any] = pop_or(kwargs, "headers", {})
+            files = self.prepare_files(stack, headers, kwargs)
+            content = self.prepare_content(stack, headers, kwargs)
+            want_content: bool = pop_or(kwargs, "want_content", False)
 
-        yield ctx
+            if not ctx:
+                ctx = ClientContext(
+                    http_client=http_client,
+                    data=ContextData(
+                        base_url=self.base_url, headers=self._headers.copy(), **kwargs
+                    ),
+                    on_auth_refresh=self._on_auth_refresh,
+                )
+
+            ctx.data.update(**kwargs)
+            ctx.data.headers.update(headers)
+            ctx.data.files = files
+            ctx.data.content = content
+            ctx.data.want_content = want_content
+
+            yield ctx
+
+            ctx.data.files = None
+            ctx.data.content = None
+            ctx.data.want_content = False
 
     def create(
         self,
@@ -573,13 +737,11 @@ class BaseClient:
         response: Any = None
 
         with self.context(method=method, url=url, **kwargs) as ctx:
-            response = ctx.build_and_send_request()
+            ctx.build_and_send_request()
+            destination = kwargs.get("destination", None)
 
-            if "destination" in kwargs:
-                ctx.data.stream_response(
-                    ensure_valid(ctx.data.http_response),
-                    destination=kwargs["destination"],
-                )
+            if destination:
+                response = ctx.data.stream_response(destination=destination)
             elif ctx.data.is_created():
                 response = self.wait_created(
                     url=ctx.data.get_header("location"),

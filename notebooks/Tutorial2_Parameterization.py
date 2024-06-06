@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 # ---
 
 # # Tutorial 2: Parameterizing an avatarization
@@ -27,7 +27,13 @@ password = os.environ.get("AVATAR_PASSWORD")
 # +
 # This is the client that you'll be using for all of your requests
 from avatars.client import ApiClient
-from avatars.models import AvatarizationJobCreate, AvatarizationParameters
+from avatars.models import (
+    AvatarizationJobCreate,
+    AvatarizationParameters,
+    AdviceJobCreate,
+    AdviceParameters,
+    AvatarizationPipelineCreate,
+)
 from avatars.models import ReportCreate
 
 # The following are not necessary to run avatar but are used in this tutorial
@@ -248,6 +254,64 @@ sns.scatterplot(
 )
 
 ax.set_title("Projection of originals and avatars produced with custom settings")
+# -
+
+# ### Recommended parameters
+#
+# You can use our tool to find parameters for your avatarization,
+# we use information contained in your dataset to advice you some parameters.
+#
+# These are recommendations, the more you know about your data, the better the avatarization will be.
+
+advice_job = client.jobs.create_advice(
+    AdviceJobCreate(parameters=AdviceParameters(dataset_id=dataset.id))
+)
+advice_job = client.jobs.get_advice(advice_job.id)
+print("We recommend using these parameters: ")
+print(advice_job.result.parameters)
+print("Additional advice : ")
+print(advice_job.result.more_details)
+
+# replace the placeholder with the name of your dataframe
+pipeline_str = advice_job.result.python_client_pipeline.replace(
+    "<NAME_OF_YOUR_DF>", "df"
+)
+pipeline_job = client.pipelines.avatarization_pipeline_with_processors(
+    eval(pipeline_str)
+)
+avatars = pipeline_job.post_processed_avatars
+
+# +
+projections = client.metrics.get_job_projections(
+    job_id=pipeline_job.avatarization_job_id
+)
+projections_records = np.array(projections.records)[
+    :, 0:2
+]  # First 2 dimensions of projected records
+projections_avatars = np.array(projections.avatars)[
+    :, 0:2
+]  # First 2 dimensions of projected records
+
+fig, ax = plt.subplots(1, 1)
+sns.scatterplot(
+    ax=ax,
+    x=projections_records[:, 0],
+    y=projections_records[:, 1],
+    alpha=0.6,
+    color="dimgrey",
+    label="Original",
+)
+
+sns.scatterplot(
+    ax=ax,
+    x=projections_avatars[:, 0],
+    y=projections_avatars[:, 1],
+    alpha=0.6,
+    color="#3BD6B0",
+    label="Avatars",
+)
+
+ax.set_title("Projection of originals and avatars produced with adviced parameters")
 # -
 
 # *In the next tutorial, we will show how to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities.*

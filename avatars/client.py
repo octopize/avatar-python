@@ -1,8 +1,9 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.0.0-f729943514b3f36aca26f40f15f20380f9d53cbf
+# API Version : 3.0.1-739cf4fbfd2c425a13dd912b8f3d8e873174c36d
 
 
 import warnings
+from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
@@ -15,10 +16,23 @@ from avatars.models import (
     CompatibilityStatus,
     ForgottenPasswordRequest,
     Login,
+    LoginResponse,
     ResetPasswordRequest,
 )
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024  # 1 GB
+
+
+@dataclass
+class AuthTokens:
+    access: str
+    refresh: Optional[str] = None
+
+    def update(self, resp: LoginResponse) -> None:
+        self.access = resp.access_token
+
+        if resp.refresh_token:
+            self.refresh = resp.refresh_token
 
 
 class ApiClient(BaseClient):
@@ -52,6 +66,7 @@ class ApiClient(BaseClient):
             timeout,
             should_verify_ssl,
             verify_auth=verify_auth,
+            on_auth_refresh=self._refresh_auth,
             http_client=http_client,
             headers={"User-Agent": f"avatar-python/{__version__}"},
         )
@@ -83,6 +98,7 @@ class ApiClient(BaseClient):
 
         self.pandas_integration = PandasIntegration(self)
         self.pipelines = Pipelines(self)
+        self.auth_tokens: Optional[AuthTokens] = None
 
         # Verify client is compatible with the server
         if should_verify_compatibility:
@@ -103,11 +119,11 @@ class ApiClient(BaseClient):
     def authenticate(
         self, username: str, password: str, timeout: Optional[int] = None
     ) -> None:
-        result = self.auth.login(
+        resp = self.auth.login(
             Login(username=username, password=password),
             timeout=timeout or self.timeout,
         )
-        self._headers["Authorization"] = f"Bearer {result.access_token}"
+        self._update_auth_tokens(resp)
 
     def forgotten_password(self, email: str, timeout: Optional[int] = None) -> None:
         self.auth.forgotten_password(
@@ -139,3 +155,40 @@ class ApiClient(BaseClient):
             f"should_verify_ssl={self.should_verify_ssl}"
             f"verify_auth={self.verify_auth})"
         )
+
+    def _enable_refresh_auth(self, enable: bool = True) -> None:
+        self.on_auth_refresh(self._refresh_auth if enable else None)
+
+    def _refresh_auth(self) -> dict[str, str]:
+        new_headers: dict[str, str] = {}
+
+        if self.auth_tokens:
+            if self.auth_tokens.refresh:
+                resp = self.auth.refresh(self.auth_tokens.refresh)
+                self._update_auth_tokens(resp, headers=new_headers)
+            else:
+                warnings.warn("Cannot refresh auth with refresh token")
+        else:
+            warnings.warn("Client is not authenticated, cannot refresh auth")
+
+        return new_headers
+
+    def _set_auth_bearer(
+        self, token: str, *, headers: Optional[dict[str, str]] = None
+    ) -> None:
+        self.set_header("Authorization", f"Bearer {token}")
+
+        if headers is not None:
+            headers["Authorization"] = f"Bearer {token}"
+
+    def _update_auth_tokens(
+        self, resp: LoginResponse, *, headers: Optional[dict[str, str]] = None
+    ) -> None:
+        if not self.auth_tokens:
+            self.auth_tokens = AuthTokens(
+                access=resp.access_token, refresh=resp.refresh_token
+            )
+        else:
+            self.auth_tokens.update(resp)
+
+        self._set_auth_bearer(self.auth_tokens.access, headers=headers)

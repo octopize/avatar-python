@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 # ---
 
 # # Tutorial 9: Multitable
@@ -43,6 +43,7 @@ from avatars.models import ReportCreate, SignalMetricsJobCreate, SignalMetricsPa
 from avatars.models import (
     TableReference,
     TableLink,
+    LinkMethod,
     PrivacyMetricsParameters,
     PrivacyMetricsMultiTableParameters,
     AvatarizationMultiTableParameters,
@@ -149,16 +150,17 @@ table_links = [
     TableLink(
         parent_table=patient_ref,
         child_table=visit_ref,
-        link_method="bottom_projection",
         parent_link_key="p_id",
         child_link_key="patient_id",
+        link_method=LinkMethod.linear_sum_assignment,
+        # Linear sum assignment consumes lots of ressource. Change the method if you have a large dataset.
     ),
     TableLink(
         parent_table=doctor_ref,
         child_table=visit_ref,
-        link_method="bottom_projection",
         parent_link_key="d_id",
         child_link_key="doctor_id",
+        link_method=LinkMethod.linear_sum_assignment,
     ),
 ]
 

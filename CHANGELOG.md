@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.8.0 - 2024/06/05
+
+- BREAKING feat: add linkage methods to TableLink and make linear sum assignment the default method.
+- BREAKING refactor: remove `ExcludeCategoricalParameters` and replace it by `ExcludeVariablesParameters`
+
+## 0.7.4 - 2024/05/15
+
+- Add advice for choosing avatarization parameters
+- Speed up projector load and save
+- Remove dataset_id from get_variable_contributions
+- Add size agnostic bi-directional arrow/parquet streaming utilities
+
 ## 0.7.3 - 2024/04/29
 
 - Allow passing filetype in datasets.download_dataset and pandas_integration.download_dataframe to change the format of the retrieved data

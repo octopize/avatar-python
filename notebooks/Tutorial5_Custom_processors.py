@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 # ---
 
 # # Tutorial 5: Custom processors
@@ -31,9 +31,6 @@ from avatars.models import (
     AvatarizationParameters,
     ImputationParameters,
     ImputeMethod,
-    ExcludeCategoricalParameters,
-    ExcludeCategoricalMethod,
-    RareCategoricalMethod,
 )
 from avatars.models import ReportCreate
 

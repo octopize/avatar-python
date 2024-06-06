@@ -1,11 +1,13 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.0.0-f729943514b3f36aca26f40f15f20380f9d53cbf
+# API Version : 3.0.1-739cf4fbfd2c425a13dd912b8f3d8e873174c36d
 
 
 import logging
 from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 
+from avatars.models import AdviceJob  # noqa: F401
+from avatars.models import AdviceJobCreate  # noqa: F401
 from avatars.models import AvatarizationBatchJob  # noqa: F401
 from avatars.models import AvatarizationBatchJobCreate  # noqa: F401
 from avatars.models import AvatarizationJob  # noqa: F401
@@ -87,6 +89,24 @@ class Auth:
 
         return LoginResponse(**self.client.request(**kwargs))
 
+    def refresh(
+        self,
+        token: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> LoginResponse:
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/refresh",  # noqa: F541
+            "timeout": timeout,
+            "params": dict(
+                token=token,
+            ),
+        }
+
+        return LoginResponse(**self.client.request(**kwargs))
+
     def forgotten_password(
         self,
         request: ForgottenPasswordRequest,
@@ -151,6 +171,7 @@ class Datasets:
         self,
         request: Union[StringIO, BytesIO],
         name: Optional[str] = None,
+        filetype: Optional[FileType] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Dataset:
@@ -162,6 +183,7 @@ class Datasets:
             "timeout": timeout,
             "params": dict(
                 name=name,
+                filetype=filetype,
             ),
             "file": request,
         }
@@ -899,6 +921,42 @@ class Jobs:
             **kwargs,
         )
 
+    def create_advice(
+        self,
+        request: AdviceJobCreate,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AdviceJob:
+        """Create advice on anonymization parameters."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/jobs/advice",  # noqa: F541
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return AdviceJob(**self.client.request(**kwargs))
+
+    def get_advice(
+        self,
+        id: str,
+        *,
+        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> AdviceJob:
+        """Get advice result."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/jobs/advice/{id}",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return self.client.get_job(
+            response_cls=AdviceJob, per_request_timeout=per_request_timeout, **kwargs
+        )
+
 
 class Metrics:
     def __init__(self, client: "ApiClient") -> None:
@@ -931,7 +989,6 @@ class Metrics:
     def get_variable_contributions(
         self,
         job_id: str,
-        dataset_id: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Contributions:
@@ -951,7 +1008,6 @@ class Metrics:
             "timeout": timeout,
             "params": dict(
                 job_id=job_id,
-                dataset_id=dataset_id,
             ),
         }
 

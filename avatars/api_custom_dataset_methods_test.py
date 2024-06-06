@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 from pathlib import Path
 from typing import IO, Any, Dict, Iterator, Union
@@ -7,11 +8,11 @@ from uuid import uuid4
 
 import httpx
 import pandas as pd
+import pyarrow.dataset as ds
 import pytest
 
 from avatars.api import Datasets, PandasIntegration
 from avatars.conftest import RequestHandle, api_client_factory
-from avatars.exceptions import InvalidFileType
 from avatars.models import Dataset, FileType
 
 TEST_MAX_BYTES_PER_FILE = 1 * 1024  # 1 KB
@@ -102,10 +103,8 @@ class TestCustomCreateDatasetMethod:
 
     def test_create_dataset_with_unknown_source_type(self) -> None:
         client = api_client_factory()
-        with pytest.raises(
-            TypeError, match="Expected source to be a string or a buffer"
-        ):
-            Datasets(client).create_dataset(source=1)  # type:ignore[arg-type]
+        with pytest.raises(TypeError, match="Unsupported dataset source"):
+            Datasets(client).create_dataset(source=1)
 
     @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
     def test_create_dataset_using_source_argument_with_filename(
@@ -119,6 +118,7 @@ class TestCustomCreateDatasetMethod:
         client = api_client_factory(create_dataset_response)
         with tempfile.NamedTemporaryFile() as tmp_file:
             tmp_file.write(content)
+            tmp_file.flush()
             result = Datasets(client).create_dataset(source=tmp_file.name)
 
         assert result.id
@@ -153,7 +153,7 @@ class TestCustomCreateDatasetMethod:
         # error: Argument "source" to "create_dataset" of "Datasets"
         #        has incompatible type "Union[BytesIO, StringIO]"; expected
         #        "Union[str, list[str], FileLikeInterface[bytes], None]"  [arg-type]
-        res = Datasets(client).create_dataset(source=filled_buffer)  # type: ignore[arg-type]
+        res = Datasets(client).create_dataset(source=filled_buffer)
         assert res.id
 
     @patch("avatars.api.MAX_BYTES_PER_FILE", TEST_MAX_BYTES_PER_FILE)
@@ -164,7 +164,6 @@ class TestCustomCreateDatasetMethod:
                 FileType.csv,
                 "rb",
             ),
-            (FileType.csv, "r"),
             (FileType.parquet, "rb"),
         ],
         ids=str,
@@ -248,22 +247,22 @@ class TestCustomCreateDatasetMethod:
 
         with patch.object(client, "request", return_value=dataset_json) as mock_request:
             # as positional argument
-            Datasets(client).create_dataset(io.BytesIO(b"123"))
+            Datasets(client).create_dataset(io.BytesIO(b"123\n"))
             mock_request.assert_called_once()
 
-            file_ = mock_request.call_args.kwargs["file"][0][1]
+            ds_ = mock_request.call_args.kwargs["dataset"]
 
-            assert isinstance(file_, io.BytesIO)
+            assert isinstance(ds_, ds.Dataset)
 
             mock_request.reset_mock()
 
             # as keyword argument
-            Datasets(client).create_dataset(request=io.BytesIO(b"123"))
+            Datasets(client).create_dataset(request=io.BytesIO(b"123\n"))
             mock_request.assert_called_once()
 
-            file_ = mock_request.call_args.kwargs["file"][0][1]
+            ds_ = mock_request.call_args.kwargs["dataset"]
 
-            assert isinstance(file_, io.BytesIO)
+            assert isinstance(ds_, ds.Dataset)
 
 
 @pytest.fixture(scope="session")
@@ -456,6 +455,7 @@ class TestCustomDownloadDatasetMethod:
 
         expected: bytes = request.getfixturevalue(expected_output_fixture_name)
 
+        destination.seek(0, os.SEEK_SET)
         actual = destination.read()
         actual = actual if isinstance(actual, bytes) else actual.encode()
 
@@ -473,35 +473,6 @@ class TestCustomDownloadDatasetMethod:
             Datasets(client).download_dataset(
                 str(uuid4()),
                 destination=123,  # type: ignore[arg-type]
-            )
-
-    @pytest.mark.parametrize(
-        "destination",
-        [
-            pytest.param(io.StringIO(), id="io.StringIO"),
-            pytest.param("file_handle"),
-        ],
-    )
-    def test_download_dataset_with_invalid_filetype_fails(
-        self,
-        download_dataset_response: RequestHandle,
-        destination: Union[str, IO[Union[str]]],
-        request: Any,
-    ) -> None:
-        """Verify that the method raises an error with an invalid filetype."""
-
-        # grab the open file handle fixture
-        destination = (
-            request.getfixturevalue(destination)
-            if isinstance(destination, str)
-            else destination
-        )
-        client = api_client_factory(download_dataset_response)
-        with pytest.raises(
-            InvalidFileType, match="Can't download parquet files as string."
-        ):
-            Datasets(client).download_dataset(
-                str(uuid4()), filetype=FileType.parquet, destination=destination
             )
 
 

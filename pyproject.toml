@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "octopize.avatar"
 # Also modify avatars/__init__.py
-version = "0.7.3"
+version = "0.8.0"
 description = "Python client for Octopize's avatar API"
 authors = ["Octopize <pypi-octopize@octopize.io>"]
 license = "Apache-2.0"
@@ -43,6 +43,7 @@ jupytext = "^1.14.2"
 nbconvert = "^7.2.6"
 flake8 = "^6.0.0"
 pytest-cov = "^4.1.0"
+structlog = "^24.1.0"
 
 [tool.poetry.group.tutorial.dependencies]
 seaborn = "^0.12.1"
@@ -97,7 +98,8 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 filterwarnings = [
-"error",
-"ignore::pytest.PytestUnraisableExceptionWarning",
-"ignore:np.find_common_type is deprecated:DeprecationWarning", # TODO: Remove this once we migrate to pandas v2
+  "error",
+  "ignore::pytest.PytestUnraisableExceptionWarning",
+  "ignore:np.find_common_type is deprecated:DeprecationWarning", # TODO: Remove this once we migrate to pandas v2,
+  "ignore::pluggy.PluggyTeardownRaisedWarning",                  # This because doubles and schemathesis use an old style hookwrapper teardown is outdated
 ]

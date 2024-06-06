@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 # ---
 
 # # Tutorial 3: Using embedded processors
@@ -31,9 +31,11 @@ from avatars.models import (
     AvatarizationParameters,
     ImputationParameters,
     ImputeMethod,
-    ExcludeCategoricalParameters,
-    ExcludeCategoricalMethod,
-    RareCategoricalMethod,
+    ExcludeVariablesParameters,
+    ExcludeVariablesMethod,
+    AdviceParameters,
+    AdviceJobCreate,
+    AvatarizationPipelineCreate,
 )
 from avatars.models import ReportCreate
 
@@ -218,11 +220,41 @@ avatars_categorical["Clump_Thickness"].hist()
 
 # We observe that transforming some numeric variables to categorical can be beneficial. In our example, we preserve the distribution of the variable where it may not be the case if we keep the variable as numeric.
 
+# ### Recommended parameters
+#
+# You can use our tool to find parameters and processors for your avatarization,
+# we use information contained in your dataset to advice you some parameters.
+#
+# These are recommendations, the more you know about your data, the better the avatarization will be.
+
+dataset = client.pandas_integration.upload_dataframe(df)
+advice_job = client.jobs.create_advice(
+    AdviceJobCreate(parameters=AdviceParameters(dataset_id=dataset.id))
+)
+advice_job = client.jobs.get_advice(advice_job.id)
+print("We recommend using these pipeline: ")
+print(advice_job.result.python_client_pipeline)
+print("Additional advice : ")
+print(advice_job.result.more_details)
+
+# replace the placeholder with the name of your dataframe
+pipeline = advice_job.result.python_client_pipeline.replace("<NAME_OF_YOUR_DF>", "df")
+pipeline_job = client.pipelines.avatarization_pipeline_with_processors(eval(pipeline))
+avatars = pipeline_job.post_processed_avatars
+
+print(
+    "Number of distinct values in avatars:",
+    avatars["Clump_Thickness"].nunique(),
+)
+avatars["Clump_Thickness"].hist()
+
+# Our recommendation is to use the `ToCategoricalProcessor` to avatarize this dataframe.
+
 # ## Categorical variables with large cardinality
 
-# The anonymization of datasets containing categorical variables with large cardinality is not trivial. We recommend to exclude the variable from the avatarization before [re-assigning it by individual similarity](https://python.docs.octopize.io/latest/models.html#avatars.models.ExcludeCategoricalMethod) (`coordinate_similarity`) or by the original row order (`row_order`). Using row order is more likely to preserve identifying information than coordinate similarity. Privacy metrics must be calculated at the end of the process to confirm that the data generated is anonymous.
+# The anonymization of datasets containing categorical variables with large cardinality is not trivial. We recommend to exclude the variable from the avatarization before [re-assigning it by individual similarity](https://python.docs.octopize.io/latest/models.html#avatars.models.ExcludeVariablesMethod) (`coordinate_similarity`) or by the original row order (`row_order`). Using row order is more likely to preserve identifying information than coordinate similarity. Privacy metrics must be calculated at the end of the process to confirm that the data generated is anonymous.
 #
-# This necessary step is included in the avatarization job and can be managed via a set of parameters `ExcludeCategoricalMethod`.
+# This necessary step is included in the avatarization job and can be managed via a set of parameters `ExcludeVariablesMethod`.
 #
 # Metrics are computed after re-assignment of the excluded variables, so a variable that has been excluded is still anonymized as long as the privacy targets are reached.
 #
@@ -235,9 +267,6 @@ df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000)
 df.head()
 
 counts = df["city"].value_counts()
-rare_values = set(counts[counts == 1].index)
-print("Rare values for variable city are: ", rare_values)
-
 counts
 
 # ### Excluding variables and re-assigning them by individual similarity
@@ -246,11 +275,9 @@ counts
 # %%time
 dataset = client.pandas_integration.upload_dataframe(df)
 
-exclude_parameters = ExcludeCategoricalParameters(
-    exclude_cardinality_threshold=30,
-    exclude_replacement_strategy=ExcludeCategoricalMethod.coordinate_similarity,
-    rare_occurence_threshold=1,
-    rare_replacement_strategy=RareCategoricalMethod.most_similar,
+exclude_parameters = ExcludeVariablesParameters(
+    variable_names=["city"],
+    replacement_strategy=ExcludeVariablesMethod.coordinate_similarity,
 )
 
 job = client.jobs.create_avatarization_job(
@@ -259,7 +286,7 @@ job = client.jobs.create_avatarization_job(
             k=20,
             dataset_id=dataset.id,
             imputation=ImputationParameters(method=ImputeMethod.mode),
-            exclude_categorical=exclude_parameters,
+            exclude_variables=exclude_parameters,
         )
     )
 )
@@ -271,11 +298,5 @@ avatars = client.pandas_integration.download_dataframe(job.result.avatars_datase
 avatars.head()
 
 avatars["city"].value_counts()
-
-# The exclude variable processor also ensures that rare modalities are not kept as they could be re-identifying. We can confirm this by looking at rare values from the original data still present in the avatars.
-
-pd.DataFrame(avatars["city"].value_counts() - df["city"].value_counts())
-
-rare_values.intersection(set(avatars["city"].unique()))
 
 # *In the next tutorial, we will show how to prepare the data prior to running an avatarization by using other processors on your local machine in order to handle and preserve other data characteristics.*

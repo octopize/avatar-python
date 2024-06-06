@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 # ---
 
 # # Tutorial 7: Batch avatarization
@@ -147,6 +147,26 @@ signal_job = client.jobs.get_signal_metrics_batch_job(
 
 print("Mean metrics")
 print(signal_job.result.mean_metrics)
+# -
+
+# ## Create Report
+
+# +
+from avatars.models import ReportCreate, ReportFromBatchCreate
+
+
+report = client.reports.create_report_from_batch(
+    ReportFromBatchCreate(
+        avatarization_batch_job_id=batch_job.id,
+        privacy_batch_job_id=privacy_job.id,
+        signal_batch_job_id=signal_job.id,
+    ),
+    timeout=30,
+)
+result = client.reports.download_report(id=report.id)
+
+with open("./my_batch_avatarization_report.pdf", "wb") as f:
+    f.write(result)
 # -
 
 # ## Build the anonymized dataset

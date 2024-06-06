@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.16.1
 # ---
 
 # # Tutorial 6: Short Time Series
@@ -34,9 +34,6 @@ from avatars.models import (
     AvatarizationParameters,
     ImputationParameters,
     ImputeMethod,
-    ExcludeCategoricalParameters,
-    ExcludeCategoricalMethod,
-    RareCategoricalMethod,
 )
 from avatars.models import ReportCreate
 
