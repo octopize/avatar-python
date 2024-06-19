@@ -1,8 +1,9 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 3.0.1-739cf4fbfd2c425a13dd912b8f3d8e873174c36d
+# API Version : 5.1.0-5d5865f0a4b03a10f73a0894938c6843af952096
 
 
 import logging
+import shutil
 import tempfile
 import warnings
 from pathlib import Path
@@ -90,7 +91,7 @@ from avatars.models import (
 )
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+
 DEFAULT_RETRY_TIMEOUT = 60
 MAX_ROWS_PER_FILE = 1_000_000
 MAX_BYTES_PER_FILE = 100 * 1024 * 1024  # 100 MB
@@ -1448,15 +1449,24 @@ class PandasIntegration:
         _filetype = filetype or dataset_info.filetype
         with tempfile.TemporaryDirectory() as download_dir:
             path = Path(download_dir) / "file"
-            Datasets(client=self.client).download_dataset(
-                id, str(path), timeout=timeout, filetype=_filetype
-            )
-            if _filetype is FileType.parquet:
-                df = pd.read_parquet(path, engine="pyarrow")
-            elif _filetype is FileType.csv:
-                df = pd.read_csv(path)
-            else:
-                raise ValueError(f"Unsupported filetype: {_filetype}")
+
+            try:
+                Datasets(client=self.client).download_dataset(
+                    id, str(path), timeout=timeout, filetype=_filetype
+                )
+                if _filetype is FileType.parquet:
+                    df = pd.read_parquet(path, engine="pyarrow")
+                elif _filetype is FileType.csv:
+                    df = pd.read_csv(path)
+                else:
+                    raise ValueError(f"Unsupported filetype: {_filetype}")
+            except Exception as e:
+                # Save file somewhere to allow for investigation
+                tdir = tempfile.mkdtemp()
+                tfile = Path(tdir) / f"dataframe-{id}.fail"
+                shutil.copyfile(path, tfile)
+                warnings.warn(f"download failed: file is here: {str(tfile)}")
+                raise e
 
         # We apply datetime columns separately as 'datetime' is not a valid pandas dtype
         dtypes = {c.label: from_column_type(c.type) for c in dataset_info.columns or {}}
@@ -1511,7 +1521,7 @@ class Pipelines:
         avatarization_job = self.client.jobs.create_avatarization_job(
             request.avatarization_job_create
         )
-        print(f"launching avatarization job with id={avatarization_job.id}")
+        logger.info(f"launching avatarization job with id={avatarization_job.id}")
 
         avatarization_job = self.client.jobs.get_avatarization_job(
             str(avatarization_job.id),
@@ -1558,7 +1568,7 @@ class Pipelines:
             ),
             timeout=per_request_timeout,
         )
-        print(f"launching privacy metrics job with id={privacy_job.id}")
+        logger.info(f"launching privacy metrics job with id={privacy_job.id}")
 
         # Calculate signal metrics
         signal_job = self.client.jobs.create_signal_metrics_job(
@@ -1569,7 +1579,7 @@ class Pipelines:
             ),
             timeout=per_request_timeout,
         )
-        print(f"launching signal metrics job with id={signal_job.id}")
+        logger.info(f"launching signal metrics job with id={signal_job.id}")
 
         # Get the job results
         signal_job = self.client.jobs.get_signal_metrics(

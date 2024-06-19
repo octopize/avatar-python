@@ -1,10 +1,11 @@
 import unittest
-from typing import Any
+from typing import Any, Type
 from unittest.mock import Mock, patch
 
 import httpx
 import pytest
 
+from avatars.base_client import Timeout
 from avatars.client import ApiClient
 from avatars.conftest import RequestHandle, api_client_factory, mock_httpx_client
 
@@ -76,6 +77,19 @@ def test_should_verify_compatibility(incompatiblity_status: str) -> None:
         )
 
 
+def prepare_api_client_for(resp: httpx.Response) -> ApiClient:
+    client = mock_httpx_client()
+    client.send = Mock(return_value=resp)  # type: ignore[method-assign]
+
+    return ApiClient(
+        base_url="http://localhost:8000",
+        http_client=client,
+        should_verify_ssl=False,
+        verify_auth=False,
+        should_verify_compatibility=False,
+    )
+
+
 class TestClientRequest:
     @pytest.fixture(scope="session")
     def json_ok_response(self) -> RequestHandle:
@@ -94,15 +108,16 @@ class TestClientRequest:
         assert result == {"message": "ok"}
 
     def test_retries_on_ssl_eof_error(self, caplog: Any) -> None:
-        """Verify that the client retries on EOF error.
+        """Verify that the client retries on httpx.RequestError.
 
         We do this by checking if we correctly log.
         """
-        error_to_raise = httpx.ConnectError("EOF occurred in violation of protocol")
+        error_message = "error=EOF occurred in violation of protocol"
+        error_to_raise = httpx.RequestError(error_message)
         client = mock_httpx_client()
 
         # First request raises an EOF error, second request is successful
-        side_effects = [error_to_raise, httpx.Response(200, json={})]
+        side_effects = [error_to_raise, httpx.Response(200, json={"message": "ok"})]
         client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
 
         api_client = ApiClient(
@@ -113,11 +128,109 @@ class TestClientRequest:
             should_verify_compatibility=False,
         )
 
-        expected_warning = "Got EOF error on /health"
         with unittest.mock.patch(
             "avatars.base_client.DEFAULT_RETRY_COUNT", 1
-        ), unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0):
-            api_client.send_request(method="GET", url="/health")
+        ), unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0.1):
+            response = api_client.send_request(method="GET", url="/health")
 
         _, __, log = caplog.record_tuples[0]
-        assert expected_warning in log
+        assert error_message in log
+        assert "/health" in log
+
+        assert response == {"message": "ok"}
+
+    def test_json_unrecognized_error(self, caplog: Any) -> None:
+        """Verify that the client handles error in JSON format with unrecognized structure."""
+        api_client = prepare_api_client_for(
+            httpx.Response(403, json={"whatever": "a json error"})
+        )
+
+        with pytest.raises(Exception) as exc_info:
+            api_client.send_request(method="GET", url="/health")
+
+        assert exc_info.type is Exception
+        msg = exc_info.value.args[0]
+        assert "Got error in HTTP request" in msg
+        assert "Error status 403 - Internal error: {'whatever': 'a json error'}" in msg
+
+    def test_json_error(self, caplog: Any) -> None:
+        """Verify that the client handles error in JSON format."""
+        api_client = prepare_api_client_for(
+            httpx.Response(403, json={"message": "a json error in message"})
+        )
+
+        with pytest.raises(Exception) as exc_info:
+            api_client.send_request(method="GET", url="/health")
+
+        assert exc_info.type is Exception
+        msg = exc_info.value.args[0]
+        assert "Got error in HTTP request" in msg
+        assert "Error status 403 - a json error in message" in msg
+
+    def test_non_json_error(self, caplog: Any) -> None:
+        """Verify that the client handles error not in JSON format."""
+        api_client = prepare_api_client_for(
+            httpx.Response(403, text="a plain text error")
+        )
+
+        with pytest.raises(Exception) as exc_info:
+            api_client.send_request(method="GET", url="/health")
+
+        assert exc_info.type is Exception
+        msg = exc_info.value.args[0]
+        assert "Got error in HTTP request" in msg
+        assert "Error status 403" in msg
+        assert "a plain text error" in msg
+
+    @pytest.mark.parametrize("exc_cls", [httpx.ReadTimeout, httpx.WriteTimeout])
+    def test_reraise_timeout_as_custom_timeout(self, exc_cls: Type[Exception]) -> None:
+        """Verify that we reraise a custom error on timeout after the last retrying attempt."""
+        error_to_raise = exc_cls("whatever")
+        client = mock_httpx_client()
+
+        # First call raises a timeout, gets retried, then a second timeout is raised
+        side_effects = [error_to_raise, error_to_raise]
+
+        client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
+
+        api_client = ApiClient(
+            base_url="http://localhost:8000",
+            http_client=client,
+            should_verify_ssl=False,
+            verify_auth=False,
+            should_verify_compatibility=False,
+        )
+        with unittest.mock.patch(
+            "avatars.base_client.DEFAULT_RETRY_COUNT", 1
+        ), unittest.mock.patch(
+            "avatars.base_client.DEFAULT_RETRY_INTERVAL", 0.1
+        ), pytest.raises(
+            Timeout, match="Timeout waiting for GET on /health"
+        ):
+            api_client.send_request(method="GET", url="/health")
+
+    def test_reraise_same_error_at_end_of_retry(self) -> None:
+        """Verify that we reraise the same error at the end of the retrying attempts."""
+        error_to_raise = httpx.RequestError("whatever")
+        client = mock_httpx_client()
+
+        # First call raises an error, gets retried, then a second error is raised, but not retried.
+        side_effects = [error_to_raise, error_to_raise]
+
+        client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
+
+        api_client = ApiClient(
+            base_url="http://localhost:8000",
+            http_client=client,
+            should_verify_ssl=False,
+            verify_auth=False,
+            should_verify_compatibility=False,
+        )
+        with unittest.mock.patch(
+            "avatars.base_client.DEFAULT_RETRY_COUNT", 1
+        ), unittest.mock.patch(
+            "avatars.base_client.DEFAULT_RETRY_INTERVAL", 0.1
+        ), pytest.raises(
+            httpx.RequestError, match="whatever"
+        ):
+            api_client.send_request(method="GET", url="/health")

@@ -104,7 +104,7 @@ def plot_series(
     df_tmp = df.copy()
     df_tmp = df_tmp.sort_values(by=[id_variable, time_variable]).reset_index(drop=True)
 
-    cmap = matplotlib.cm.get_cmap("gist_rainbow")
+    cmap = plt.get_cmap("gist_rainbow")
 
     fig, ax = plt.subplots(figsize=figsize)
     for id_nb, id_name in enumerate(set(df_tmp[id_variable])):

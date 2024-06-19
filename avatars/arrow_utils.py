@@ -1,6 +1,9 @@
 import io
 import os
 import struct
+from contextlib import contextmanager
+from enum import Enum
+from io import BytesIO
 from pathlib import Path
 from typing import (
     IO,
@@ -8,6 +11,7 @@ from typing import (
     AsyncGenerator,
     BinaryIO,
     Callable,
+    Generator,
     Iterator,
     Optional,
     Union,
@@ -21,8 +25,9 @@ import pyarrow.ipc as pi
 import pyarrow.parquet as pq
 
 PARQUET_MARKER = b"PAR1"
-ARROW_BATCH_MARKER = b"ARROW"
-MAX_ROWS_PER_BATCH = 1_000_000
+ARROW_STREAM_MARKER = b"ARRS1"
+ARROW_BATCH_MARKER = b"ARRB1"
+DEFAULT_MAX_ROWS_PER_BATCH = 1_000_000
 APPLICATION_ARROW_STREAM = "application/vnd.apache.arrow.stream"
 
 
@@ -35,6 +40,12 @@ FileLikes = list[FileLike]
 TableSource = Union[str, FileLike]
 DataSourceItem = Union[TableSource, pa.Table]
 DataSourceItems = Union[DataSourceItem, list[DataSourceItem]]
+
+
+class StreamState(Enum):
+    WAIT_STREAM = "stream"
+    WAIT_BATCH = "batch"
+    DATA = "data"
 
 
 def has_method(obj: Any, name: str) -> bool:
@@ -75,6 +86,111 @@ def flatten(items: Any) -> Iterator[Any]:
             yield from flatten(item)
     else:
         yield items
+
+
+@contextmanager
+def save_pos(data: BytesIO) -> Generator[None, None, None]:
+    pos = data.tell()
+    yield
+    data.seek(pos, os.SEEK_SET)
+
+
+@contextmanager
+def to_start(data: BytesIO, ofs: int = 0) -> Generator[None, None, None]:
+    with save_pos(data):
+        data.seek(ofs, os.SEEK_SET)
+        yield
+
+
+@contextmanager
+def to_end(data: BytesIO) -> Generator[None, None, None]:
+    with save_pos(data):
+        data.seek(0, os.SEEK_END)
+        yield
+
+
+def available(data: BytesIO) -> int:
+    with to_end(data):
+        return data.tell()
+
+
+class HeaderBase:
+    def __init__(self, *, total_size: int) -> None:
+        self.total_size = total_size
+
+    def make(self) -> bytes:
+        return bytes()
+
+    def can_load(self, data: memoryview) -> bool:
+        return len(data) >= self.total_size
+
+    def check_can_load(self, data: memoryview) -> None:
+        if not self.can_load(data):
+            raise RuntimeError(
+                f"Expected at least {self.total_size} bytes, "
+                f" got {len(data)} insrtead"
+            )
+
+    def load(self, data: memoryview) -> memoryview:
+        self.check_can_load(data)
+
+        return data
+
+    def try_load(self, data: memoryview) -> bool:
+        if self.can_load(data):
+            self.load(data)
+            return True
+        else:
+            return False
+
+    def skip_data(self, data: memoryview, size: int) -> memoryview:
+        return data[size:]
+
+
+class Header(HeaderBase):
+    def __init__(self, marker: bytes, *, aux_size: int = 0) -> None:
+        self.marker = marker
+        self.marker_size = len(self.marker)
+        self.aux_size = aux_size
+        super().__init__(total_size=self.marker_size + self.aux_size)
+
+    def make(self) -> bytes:
+        return super().make() + self.marker
+
+    def load(self, data: memoryview) -> memoryview:
+        # Load "my" parts (marker) and return the rest
+        my_data = super().load(data)
+        self.check_marker(my_data)
+
+        return self.skip_data(my_data, self.marker_size)
+
+    def check_marker(self, data: memoryview) -> None:
+        marker = data[0 : self.marker_size]
+
+        if marker != self.marker:
+            raise ValueError(
+                f"Expected '{str(self.marker)}', got {str(marker)} instead"
+            )
+
+
+class HeaderWithSize(Header):
+    size_format = "!I"
+    size_packed_size = struct.calcsize(size_format)
+
+    def __init__(self, marker: bytes, size: int = 0) -> None:
+        self.size = size
+        super().__init__(marker, aux_size=HeaderWithSize.size_packed_size)
+
+    def make(self) -> bytes:
+        return super().make() + struct.pack(self.size_format, self.size)
+
+    def load(self, data: memoryview) -> memoryview:
+        my_data = super().load(data)
+        packed_size = my_data[0 : HeaderWithSize.size_packed_size]
+
+        self.size = struct.unpack(HeaderWithSize.size_format, packed_size)[0]
+
+        return self.skip_data(my_data, HeaderWithSize.size_packed_size)
 
 
 class ArrowDatasetBuilder:
@@ -126,11 +242,11 @@ class ArrowStreamReader:
         self.table_func = table_func
         self.func_stack: list[Any] = []
         self.batch = bytes()
-        self.data = io.BytesIO()
-        self.batch_size_format = "!I"
-        self.batch_size_packed_size = struct.calcsize(self.batch_size_format)
-        self.min_size = len(ARROW_BATCH_MARKER) + self.batch_size_packed_size
-        self.batch_size = 0
+        self.data = bytearray()
+        self.stream_header = Header(ARROW_STREAM_MARKER)
+        self.batch_header = HeaderWithSize(ARROW_BATCH_MARKER)
+        self.state = StreamState.WAIT_STREAM
+        self.offset = 0
 
     def __enter__(self) -> Any:
         return self
@@ -168,17 +284,12 @@ class ArrowStreamReader:
         batch_bytes_func: Optional[BatchBytesFunction] = None,
         table_func: Optional[TableFunction] = None,
     ) -> None:
-        self.push_funcs()
-
-        self.batch_bytes_func = batch_bytes_func
-        self.table_func = table_func
+        self.process_begin(batch_bytes_func=batch_bytes_func, table_func=table_func)
 
         async for chunk in stream:
             self.process_chunk(chunk)
 
-        self.flush()
-
-        self.pop_funcs()
+        self.process_end()
 
     def process_bytes(
         self,
@@ -187,64 +298,70 @@ class ArrowStreamReader:
         batch_bytes_func: Optional[BatchBytesFunction] = None,
         table_func: Optional[TableFunction] = None,
     ) -> None:
-        self.push_funcs()
-
-        self.batch_bytes_func = batch_bytes_func
-        self.table_func = table_func
+        self.process_begin(batch_bytes_func=batch_bytes_func, table_func=table_func)
 
         for chunk in iter_bytes:
             self.process_chunk(chunk)
 
-        self.flush()
+        self.process_end()
 
+    def process_begin(
+        self,
+        *,
+        batch_bytes_func: Optional[BatchBytesFunction] = None,
+        table_func: Optional[TableFunction] = None,
+    ) -> None:
+        self.push_funcs()
+        self.batch_bytes_func = batch_bytes_func
+        self.table_func = table_func
+
+    def process_end(self) -> None:
+        self.flush()
+        self.check_no_remaining_data()
         self.pop_funcs()
 
-    def process_chunk(self, chunk: bytes) -> bool:
-        batch_is_ready: bool = False
-        avail = self.append(chunk)
+    def process_chunk(self, chunk: bytes) -> None:
+        self.data.extend(chunk)
 
-        if self.batch_size == 0 and avail >= self.min_size:
-            # We are looking for a new batch
-            self.check_marker()
-            self.read_batch_size()
-        else:
-            # Try to flush
-            batch_is_ready = self.flush()
+        while True:
+            prev_state = self.state
 
-        return batch_is_ready
+            if self.state == StreamState.WAIT_STREAM:
+                self.load_header(self.stream_header, StreamState.WAIT_BATCH)
+            elif self.state == StreamState.WAIT_BATCH:
+                self.load_header(self.batch_header, StreamState.DATA)
+            elif self.state == StreamState.DATA:
+                self.flush()
 
-    def flush(self) -> bool:
-        avail = self.available()
+            if self.state == prev_state:
+                # No progress in this loop, need more data
+                break
 
-        if self.batch_size == 0 or avail < self.batch_size + self.min_size:
-            # Not enough data yet
-            return False
+    def load_header(self, header: HeaderBase, new_state: StreamState) -> None:
+        if header.try_load(memoryview(self.data)):
+            self.skip_data(header.total_size)
+            self.state = new_state
 
-        # Read batch bytes (skipping marker and size)
-        self.data.seek(self.min_size, os.SEEK_SET)
-        self.batch = self.data.read(self.batch_size)
+    def flush(self) -> None:
+        if not self.is_batch_complete() or self.no_data():
+            return
 
-        if len(self.batch) != self.batch_size:
-            raise ValueError(
-                f"Expected a batch of {self.batch_size}, got {len(self.batch)} instead"
-            )
+        # Read batch bytes
+        self.batch = self.extract_data(self.batch_header.size)
 
-        # Reset with remaining data
-        remaining_size = avail - self.min_size - self.batch_size
-        remaining = self.data.read(remaining_size)
-
-        if len(remaining) != remaining_size:
-            raise ValueError(
-                f"Expected remaining size {remaining_size}"
-                f", got {len(remaining)} instead"
-            )
-
-        self.data = io.BytesIO(remaining)
-        self.batch_size = 0
+        # Keep remaining data from next batch
+        self.skip_data(self.batch_header.size)
 
         self.call_funcs()
 
-        return True
+        self.set_wait_batch()
+
+    def is_batch_complete(self) -> Any:
+        return len(self.data) >= self.batch_header.size
+
+    def set_wait_batch(self) -> None:
+        self.state = StreamState.WAIT_BATCH
+        self.batch_header.size = 0
 
     def push_funcs(self) -> None:
         self.func_stack.append([self.batch_bytes_func, self.table_func])
@@ -260,35 +377,30 @@ class ArrowStreamReader:
             reader = pi.RecordBatchStreamReader(self.batch)
             self.table_func(reader.read_all())
 
-    def check_marker(self) -> None:
-        self.data.seek(0, os.SEEK_SET)
-        marker = self.data.read(len(ARROW_BATCH_MARKER))
+    def skip_data(self, size: int) -> None:
+        self.data = self.data[size:]
 
-        if len(marker) != len(ARROW_BATCH_MARKER) or marker != ARROW_BATCH_MARKER:
-            raise ValueError(
-                f"Expected '{str(ARROW_BATCH_MARKER)}', got {str(marker)} instead"
-            )
+    def extract_data(self, size: int) -> bytes:
+        return bytes(self.data[0:size])
 
-    def read_batch_size(self) -> None:
-        packed_size = self.data.read(self.batch_size_packed_size)
-        self.batch_size = struct.unpack(self.batch_size_format, packed_size)[0]
+    def no_data(self) -> bool:
+        return len(self.data) == 0
 
-    def append(self, chunk: bytes) -> int:
-        self.data.seek(0, os.SEEK_END)
-        self.data.write(chunk)
-        return self.data.tell()
+    def check_no_remaining_data(self) -> None:
+        remaining = len(self.data)
 
-    def available(self) -> int:
-        self.data.seek(0, os.SEEK_END)
-        return self.data.tell()
+        if remaining:
+            raise RuntimeError(f"Expected no remaining data, got {remaining} bytes")
 
 
 class ArrowStreamWriter:
-    def __init__(self, ds: ds.Dataset) -> None:
+    def __init__(
+        self, ds: ds.Dataset, nb_rows_per_batch: int = DEFAULT_MAX_ROWS_PER_BATCH
+    ) -> None:
         self.ds = ds
-        self.header = bytearray(ARROW_BATCH_MARKER)
-        self.header += struct.pack("!I", 0)
-        self.batch = bytes()
+        self.nb_rows_per_batch = nb_rows_per_batch
+        self.batch_header = HeaderWithSize(ARROW_BATCH_MARKER)
+        self.batch: Optional[bytes] = None
         self.reset_writer()
 
     def __enter__(self) -> Any:
@@ -298,43 +410,36 @@ class ArrowStreamWriter:
         pass
 
     def __iter__(self) -> Iterator[bytes]:
+        yield Header(ARROW_STREAM_MARKER).make()
+
         for batch in self.ds.to_batches():
-            if self.process_batch(batch):
-                yield bytes(self.header)
-                yield self.batch
+            yield from self.process_batch(batch)
 
-        if self.flush():
-            yield bytes(self.header)
-            yield self.batch
+        yield from self.flush()
 
-    def process_batch(self, batch: pa.RecordBatch) -> bool:
-        batch_is_ready = False
-
-        if self.row_count + batch.num_rows > MAX_ROWS_PER_BATCH:
-            batch_is_ready = self.flush()
+    def process_batch(self, batch: pa.RecordBatch) -> Iterator[bytes]:
+        if self.should_flush(batch):
+            yield from self.flush()
 
         self.writer.write_batch(batch)
         self.row_count += batch.num_rows
 
-        return batch_is_ready
+    def should_flush(self, batch: pa.RecordBatch) -> Any:
+        return self.row_count + batch.num_rows > self.nb_rows_per_batch
 
-    def flush(self) -> bool:
-        if self.row_count:
-            self.close_writer()
-            self.reset_writer()
-            self.make_header()
+    def flush(self) -> Iterator[bytes]:
+        self.close_writer()
+        self.reset_writer()
+        yield from self.get_buffers()
 
-            return True
+    def get_buffers(self) -> Iterator[bytes]:
+        if self.batch:
+            self.batch_header.size = len(self.batch)
 
-        return False
+            yield self.batch_header.make()
+            yield self.batch
 
-    def make_header(self) -> None:
-        struct.pack_into(
-            "!I",
-            self.header,
-            len(ARROW_BATCH_MARKER),
-            len(self.batch),
-        )
+            self.batch = None
 
     def close_writer(self) -> None:
         self.writer.close()

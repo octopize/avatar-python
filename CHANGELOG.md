@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.10.0 - 2024/06/18
+
+- BREAKING: fix dataset upload
+
+## 0.9.2 - 2024/06/11
+
+- feat: retry any kind of network error
+
+## 0.9.1 - 2024/06/10
+
+- feat: retry on DNS resolution errors
+
+## 0.9.0 - 2024/06/06
+
+- feat: add categorical hidden rate variable to privacy parameters
+- BREAKING refactor: categorical hidden rate is optional in PrivacyMetrics
+
 ## 0.8.0 - 2024/06/05
 
 - BREAKING feat: add linkage methods to TableLink and make linear sum assignment the default method.

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.16.2
 # ---
 
 # # Tutorial 9: Multitable
@@ -291,7 +291,14 @@ data_dict = {
     "Column Direct Match Protection": [
         round(d.column_direct_match_protection, 2) for d in data
     ],
-    "Categorical Hidden Rate": [round(d.categorical_hidden_rate, 2) for d in data],
+    "Categorical Hidden Rate": [
+        (
+            round(d.categorical_hidden_rate, 2)
+            if d.categorical_hidden_rate is not None
+            else None
+        )
+        for d in data
+    ],
     "Row Direct Match Protection": [
         round(d.row_direct_match_protection, 2) for d in data
     ],

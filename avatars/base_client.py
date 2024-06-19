@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import itertools
-import logging
 import os
 import time
 from contextlib import ExitStack, contextmanager
@@ -28,7 +27,9 @@ from typing import (
 )
 
 import httpx
-from httpx import ReadTimeout, Request, Response, WriteTimeout
+import structlog
+import tenacity
+from httpx import Request, Response
 from pydantic import BaseModel
 
 from avatars.arrow_utils import (
@@ -41,7 +42,8 @@ from avatars.arrow_utils import (
 from avatars.models import JobStatus
 from avatars.utils import ContentType, ensure_valid, pop_or, remove_optionals, validated
 
-logger = logging.getLogger(__name__)
+logger = structlog.getLogger(__name__)
+structlog.configure(logger_factory=structlog.stdlib.LoggerFactory())
 
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_RETRY_INTERVAL = 5
@@ -88,6 +90,41 @@ def _get_nested_value(
         return _get_nested_value(list(obj.values()), key, default=default)
 
     return default
+
+
+def _log_before_retry_attempt(retry_state: tenacity.RetryCallState) -> None:
+    if not retry_state.next_action:
+        logger.info(" log_before_retry_attempt no next action")
+        return
+    next_retry_seconds = retry_state.next_action.sleep
+    logger.info(f"Retrying in {next_retry_seconds}s...")
+
+
+def _log_after_failure(
+    retry_state: tenacity.RetryCallState, *, data: ContextData
+) -> None:
+    if not retry_state.outcome:
+        return
+
+    if retry_state.outcome.failed:
+        e = retry_state.outcome.exception()
+        error_message = str(e)
+        logger.warning(error_message, url=data.url, base_url=data.base_url)
+
+
+def _reraise_on_timeout(
+    retry_state: tenacity.RetryCallState, *, data: ContextData
+) -> None:
+    """After last retry attempt, if the outcome is a timeout, raise a custom exception."""
+    if not retry_state.outcome:
+        return
+
+    if retry_state.outcome.failed:
+        e = retry_state.outcome.exception()
+        if isinstance(e, (httpx.ReadTimeout, httpx.WriteTimeout)):
+            msg = f"Timeout waiting for {data.method.upper()} on {data.url}"
+            raise Timeout(msg)
+        raise e  # type: ignore[misc] # Exception must be derived from BaseException
 
 
 class Timeout(Exception):
@@ -378,54 +415,38 @@ class ClientContext:
 
         return ensure_valid(self.data.http_request)
 
+    def retry(
+        self,
+        retry_count: int = DEFAULT_RETRY_COUNT + 1,  # stop is inclusive
+        retry_inverval: int = DEFAULT_RETRY_INTERVAL,
+    ) -> Iterator[tenacity.AttemptManager]:
+        for attempt in tenacity.Retrying(
+            stop=tenacity.stop_after_attempt(retry_count),
+            wait=tenacity.wait_exponential(max=retry_inverval),
+            before_sleep=_log_before_retry_attempt,
+            retry_error_callback=lambda call_state: _reraise_on_timeout(
+                call_state, data=self.data
+            ),
+            after=lambda call_state: _log_after_failure(call_state, data=self.data),
+            reraise=True,
+        ):
+            yield attempt
+
     def send_request(self) -> Response:
-        refreshed = False
         request = ensure_valid(self.data.http_request)
 
-        error_to_raise_after_retry: Optional[Exception] = None
-        nb_retries_left = DEFAULT_RETRY_COUNT
-
-        while True:
-            try:
+        for attempt in self.retry(DEFAULT_RETRY_COUNT + 1, DEFAULT_RETRY_INTERVAL):
+            with attempt:
                 self.data.http_response = self.http_client.send(
                     request=request,
                     stream=self.data.should_stream,
                 )
 
-                # Reset retry parameters
-                error_to_raise_after_retry = None
-
                 if self.check_auth_refreshed():
-                    if refreshed:
-                        # Don't loop forever trying to refresh auth
-                        logger.warning("Authentication was already refreshed once")
-                        break
-                    else:
-                        refreshed = True
-                        continue  # Retry current request with new auth
-                else:
-                    break  # Success, does not run finally
-            except httpx.ConnectError as e:
-                if "EOF occurred in violation of protocol" in str(e):
-                    msg = f"Got EOF error on {self.data.url}."
-                    logger.warning(msg)
-                    error_to_raise_after_retry = e
-                else:
-                    raise e
-            except (ReadTimeout, WriteTimeout):
-                msg = (
-                    f"Timeout waiting for {self.data.method.upper()} on {self.data.url}"
-                )
-                logger.info(msg)
-                error_to_raise_after_retry = Timeout(msg)
-
-            if error_to_raise_after_retry:
-                if nb_retries_left > 0:
-                    nb_retries_left -= 1
-                    logger.info(f"Retrying in {DEFAULT_RETRY_INTERVAL}s...")
-                    time.sleep(DEFAULT_RETRY_INTERVAL)
-                else:
-                    raise error_to_raise_after_retry
+                    self.data.http_response = self.http_client.send(
+                        request=request,
+                        stream=self.data.should_stream,
+                    )
 
         self.check_success()
 
@@ -508,13 +529,7 @@ class ClientContext:
         if resp.is_success:
             return
 
-        if self.data.should_stream:
-            content = resp.read()
-            encoding = resp.encoding or "utf-8"
-            as_json: Dict[str, Any] = json_loads(content.decode(encoding))
-            self.raise_on_status(resp, as_json)
-        else:
-            self.raise_on_status(resp, resp.json())
+        self.raise_on_status(resp)
 
     def check_auth_refreshed(
         self,
@@ -546,24 +561,26 @@ class ClientContext:
         ):
             raise Exception("You are not authenticated.")
 
-    def raise_on_status(self, resp: Response, content: dict[str, Any]) -> None:
-        if not content:
-            content = resp.json()
+    def raise_on_status(self, resp: Response) -> None:
+        content = self.data.get_user_content() or "no message available"
 
-        self.check_authenticated(resp, content)
+        if isinstance(content, dict):
+            self.check_authenticated(resp, content)
 
-        standard_error = _get_nested_value(content, "message")
+            standard_error = _get_nested_value(content, "message")
 
-        if standard_error:
-            error_msg = standard_error
-        elif validation_error := _get_nested_value(content, "msg"):
-            if detailed_message := _get_nested_value(content, "loc"):
-                field = detailed_message[-1]
-                error_msg = f"{validation_error}: {field}"
+            if standard_error:
+                error_msg = standard_error
+            elif validation_error := _get_nested_value(content, "msg"):
+                if detailed_message := _get_nested_value(content, "loc"):
+                    field = detailed_message[-1]
+                    error_msg = f"{validation_error}: {field}"
+                else:
+                    error_msg = f"Bad Request: {validation_error}"
             else:
-                error_msg = f"Bad Request: {validation_error}"
+                error_msg = "Internal error: " + str(content)
         else:
-            error_msg = "Internal error"
+            error_msg = content
 
         raise Exception(
             f"Got error in HTTP request: {self.data.method} {self.data.url}."

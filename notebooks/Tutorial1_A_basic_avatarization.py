@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.1
+#       jupytext_version: 1.16.2
 # ---
 
 # # Tutorial 1: A basic avatarization
@@ -96,67 +96,39 @@ for var in dataset.summary.stats:
     for stat in var:
         print(stat)
 
-# ## Creating and launching an avatarization job with metrics
+# ## Creating and launching an avatarization job
 
-# +
-job = client.jobs.create_full_avatarization_job(
-    AvatarizationJobCreate(
-        parameters=AvatarizationParameters(k=20, dataset_id=dataset.id),
-    )
-)
-
-print(job.status)
-# -
-
-# ## Retrieving the completed avatarization job
-
-# +
-job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
-
-print(job.status)
-# -
-
-# ## Retrieving the avatars
-
-# +
-# Download the avatars as a string
-avatars_str = client.datasets.download_dataset(job.result.avatars_dataset.id)
-
-# Download the avatars as a pandas dataframe
-avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
-# -
-
-print(avatars_str)
-
-print(avatars_df)
-
-# ## Retrieving the utility and privacy metrics
-
-# Because this dataset did not require any pre-processing or post-processing outside the avatarization job, the metrics calculated at the end of the avatarization job can directly be used.
-
-privacy_metrics = job.result.privacy_metrics
-print("*** Privacy metrics ***")
-for metric in privacy_metrics:
-    print(metric)
-
-utility_metrics = job.result.signal_metrics
-print("*** Utility metrics ***")
-for metric in utility_metrics:
-    print(metric)
-
-# ## Creating and launching an avatarization job without metrics
-
-# +
 avatarization_job = client.jobs.create_avatarization_job(
     AvatarizationJobCreate(
         parameters=AvatarizationParameters(k=20, dataset_id=dataset.id),
     )
 )
 
+# ## Retrieving the completed avatarization job
 
 avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=100)
 print(avatarization_job.status)
 print(avatarization_job.result)  # there is no metrics
+
+# ## Retrieving the avatars
+
+# +
+# Download the avatars as a string
+avatars_str = client.datasets.download_dataset(
+    avatarization_job.result.avatars_dataset.id
+)
+
+# Download the avatars as a pandas dataframe
+avatars_df = client.pandas_integration.download_dataframe(
+    avatarization_job.result.avatars_dataset.id
+)
+# -
+
+print(avatars_str)
+
+print(avatars_df)
+
+# ## Creating and launching a privacy metrics job
 
 # +
 from avatars.models import PrivacyMetricsJobCreate, PrivacyMetricsParameters
@@ -165,7 +137,7 @@ privacy_job = client.jobs.create_privacy_metrics_job(
     PrivacyMetricsJobCreate(
         parameters=PrivacyMetricsParameters(
             original_id=dataset.id,
-            unshuffled_avatars_id=job.result.sensitive_unshuffled_avatars_datasets.id,
+            unshuffled_avatars_id=avatarization_job.result.sensitive_unshuffled_avatars_datasets.id,
             closest_rate_percentage_threshold=0.3,
             closest_rate_ratio_threshold=0.3,
             known_variables=[
@@ -182,6 +154,14 @@ privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=100)
 
 print(privacy_job.status)
 print(privacy_job.result)
+# -
+
+privacy_metrics = privacy_job.result
+print("*** Privacy metrics ***")
+for metric in privacy_metrics:
+    print(metric)
+
+# ## Creating and launching a signal metrics job
 
 # +
 from avatars.models import SignalMetricsJobCreate, SignalMetricsParameters
@@ -190,7 +170,7 @@ signal_job = client.jobs.create_signal_metrics_job(
     SignalMetricsJobCreate(
         parameters=SignalMetricsParameters(
             original_id=dataset.id,
-            avatars_id=job.result.avatars_dataset.id,
+            avatars_id=avatarization_job.result.avatars_dataset.id,
             seed=42,
         ),
     )
@@ -200,6 +180,11 @@ signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=100)
 print(signal_job.status)
 print(signal_job.result)
 # -
+
+utility_metrics = signal_job.result
+print("*** Utility metrics ***")
+for metric in utility_metrics:
+    print(metric)
 
 # ## Retrieving the avatarization report
 
