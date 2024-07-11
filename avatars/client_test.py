@@ -68,13 +68,17 @@ def test_should_verify_compatibility(incompatiblity_status: str) -> None:
         handler=lambda request: httpx.Response(200, json=json)
     )
 
-    with pytest.warns(match="Client is not compatible"):
-        ApiClient(
-            base_url="http://localhost:8000",
-            http_client=http_client,
-            verify_auth=False,
-            should_verify_compatibility=True,
-        )
+    # Verify that the client raises a DeprecationWarning when the server is incompatible
+    with pytest.raises(
+        DeprecationWarning, match="Client is not compatible with the server."
+    ):
+        with pytest.warns(DeprecationWarning):
+            ApiClient(
+                base_url="http://localhost:8000",
+                http_client=http_client,
+                verify_auth=False,
+                should_verify_compatibility=True,
+            )
 
 
 def prepare_api_client_for(resp: httpx.Response) -> ApiClient:

@@ -20,6 +20,7 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -220,6 +221,9 @@ class ContextData:
 
         return remove_optionals(arg)
 
+    def build_files_arg(self) -> Optional[list[Tuple[str, Any]]]:
+        return [("file", file) for file in self.files] if self.files else None
+
     def status_is(self, status_code: int) -> bool:
         if self.http_response:
             return self.http_response.status_code == status_code
@@ -407,7 +411,7 @@ class ClientContext:
             params=self.data.build_params_arg(),
             json=self.data.build_json_data_arg(),
             data=self.data.build_form_data_arg(),
-            files=self.data.files,  # type: ignore[arg-type]
+            files=self.data.build_files_arg(),
             content=self.data.content,
             headers=self.data.headers,
             timeout=DEFAULT_PER_CALL_TIMEOUT,
@@ -704,7 +708,11 @@ class BaseClient:
             # Grab special keys
             headers: dict[str, Any] = pop_or(kwargs, "headers", {})
             files = self.prepare_files(stack, headers, kwargs)
-            content = self.prepare_content(stack, headers, kwargs)
+            content = pop_or(
+                kwargs,
+                "content",
+                self.prepare_content(stack, headers, kwargs),
+            )
             want_content: bool = pop_or(kwargs, "want_content", False)
 
             if not ctx:

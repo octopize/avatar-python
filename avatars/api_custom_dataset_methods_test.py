@@ -28,6 +28,7 @@ def dataset_json() -> dict[str, Any]:
         "nb_lines": 1,
         "nb_dimensions": 2,
         "filetype": "csv",
+        "columns": [],
     }
 
 

@@ -493,20 +493,25 @@ visit_avatar_flat["day_visit"] = pd.Categorical(
 visit_avatar_flat = visit_avatar_flat.sort_values(["day_visit", "exam"])
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 sns.boxplot(
-    data=visit_flat, x="age_doctor", y="day_visit", ax=axes[0], palette=[ORIGINAL_COLOR]
+    data=visit_flat,
+    x="age_doctor",
+    y="day_visit",
+    ax=axes[0],
+    color=ORIGINAL_COLOR,
 )
 sns.boxplot(
     data=visit_avatar_flat,
     x="age_doctor",
     y="day_visit",
     ax=axes[1],
-    palette=[AVATAR_COLOR],
+    color=AVATAR_COLOR,
 )
 axes[0].set_xlim(30, 70)
 axes[1].set_xlim(30, 70)
 axes[0].set_title("Original")
 axes[1].set_title("Avatar")
 
+# +
 visit_avatar_flat = visit_avatar_flat.sort_values("exam")
 visit_flat = visit_flat.sort_values("exam")
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
@@ -526,6 +531,7 @@ sns.countplot(
 )
 axes[0].set_title("Original")
 axes[1].set_title("Avatar")
+# -
 
 # ### Patient x Doctor
 

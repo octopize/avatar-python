@@ -1,6 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 5.1.0-5d5865f0a4b03a10f73a0894938c6843af952096
-
+# API Version : 8.0.0
 
 import warnings
 from dataclasses import dataclass
@@ -109,12 +108,22 @@ class ApiClient(BaseClient):
                 CompatibilityStatus.unknown,
             ]
             if response.status in uncompatible_statuses:
-                warnings.warn(
-                    f"Client is not compatible with the server. \n"
-                    f"Server message: {response.message}.\n"
-                    f"Current client version: {__version__}.\n"
-                    f"Most recent compatible client version: {response.most_recent_compatible_client}.\n"  # noqa: E501
+                compat_error_message = "Client is not compatible with the server.\n"
+                compat_error_message += f"Server message: {response.message}.\n"
+                compat_error_message += f"Client version: {__version__}.\n"
+
+                compat_error_message += "Most recent compatible client version: "
+                compat_error_message += f"{response.most_recent_compatible_client}.\n"
+
+                compat_error_message += "To update your client, you can run "
+                compat_error_message += "`pip install --upgrade octopize.avatar`.\n"
+
+                compat_error_message += "To ignore, you can set "
+                compat_error_message += (
+                    "`ApiClient(should_verify_compatibility=False)`."
                 )
+                warnings.warn(compat_error_message)
+                raise DeprecationWarning(compat_error_message)
 
     def authenticate(
         self, username: str, password: str, timeout: Optional[int] = None

@@ -8,6 +8,8 @@ from avatars.api import download_sensitive_unshuffled_avatar_dataframe_from_batc
 from avatars.models import (
     AvatarizationBatchResult,
     AvatarizationPerBatchResult,
+    ColumnDetail,
+    ColumnType,
     Dataset,
     FileType,
 )
@@ -23,6 +25,10 @@ def batch_result() -> AvatarizationBatchResult:
                 download_url="truc",
                 nb_dimensions=1,
                 filetype=FileType.csv,
+                columns=[
+                    ColumnDetail(label="a", type=ColumnType.int),
+                    ColumnDetail(label="b", type=ColumnType.category),
+                ],
             ),
             sensitive_unshuffled_avatars_datasets=Dataset(
                 id=uuid4(),
@@ -30,6 +36,10 @@ def batch_result() -> AvatarizationBatchResult:
                 download_url="truc",
                 nb_dimensions=1,
                 filetype=FileType.csv,
+                columns=[
+                    ColumnDetail(label="a", type=ColumnType.int),
+                    ColumnDetail(label="b", type=ColumnType.category),
+                ],
             ),
             original_id=uuid4(),
         ),
@@ -41,6 +51,10 @@ def batch_result() -> AvatarizationBatchResult:
                     download_url="truc",
                     nb_dimensions=1,
                     filetype=FileType.csv,
+                    columns=[
+                        ColumnDetail(label="a", type=ColumnType.int),
+                        ColumnDetail(label="b", type=ColumnType.category),
+                    ],
                 ),
                 sensitive_unshuffled_avatars_datasets=Dataset(
                     id=uuid4(),
@@ -48,6 +62,10 @@ def batch_result() -> AvatarizationBatchResult:
                     download_url="truc",
                     nb_dimensions=1,
                     filetype=FileType.csv,
+                    columns=[
+                        ColumnDetail(label="a", type=ColumnType.int),
+                        ColumnDetail(label="b", type=ColumnType.category),
+                    ],
                 ),
                 original_id=uuid4(),
             )

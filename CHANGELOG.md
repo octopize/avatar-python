@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.12.0 - 2024/07/05
+
+- BREAKING: refactor: Dataset.columns is required
+
+## 0.11.0 - 2024/07/01
+
+- BREAKING: fix dataset upload
+
 ## 0.10.0 - 2024/06/18
 
 - BREAKING: fix dataset upload
