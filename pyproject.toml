@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "octopize.avatar"
 # Also modify avatars/__init__.py
-version = "0.12.0"
+version = "0.15.0"
 description = "Python client for Octopize's avatar API"
 authors = ["Octopize <pypi-octopize@octopize.io>"]
 license = "Apache-2.0"
@@ -17,13 +17,13 @@ readme = "README.md"
 python = "^3.9"
 httpx = ">=0.23,<0.28"
 pydantic = "^2"
-pandas = "^1.4.2"
+pandas = "*"
 toolz = "^0.12.0"
-pyarrow = "^16.1.0"
+pyarrow = "^17.0.0"
 structlog = "^24.2.0"
 tenacity = "^8.3.0"
 numpy = "<2"
-python-magic = "^0.4.27"
+clevercsv = "^0.8.2"
 
 
 [tool.poetry.group.doc.dependencies]
@@ -49,6 +49,7 @@ flake8 = "^6.0.0"
 pytest-cov = "^4.1.0"
 structlog = "^24.1.0"
 flake8-print = "^5.0.0"
+pyarrow-stubs = "^17.3"
 
 [tool.poetry.group.tutorial.dependencies]
 seaborn = ">=0.12.1,<0.14.0"
@@ -56,7 +57,6 @@ matplotlib = "^3.6.2"
 ipykernel = "^6.19.2"
 missingno = "^0.5.1"
 notebook = "^6.5.6"
-
 
 [tool.isort]
 # https://pycqa.github.io/isort/docs/configuration/black_compatibility.html

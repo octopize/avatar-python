@@ -7,7 +7,7 @@ from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, IOBase
 from json import loads as json_loads
 from pathlib import Path
 from typing import (
@@ -69,6 +69,7 @@ ResponseClass = TypeVar("ResponseClass", bound=BaseModel)
 JsonLike = dict[str, Any]
 
 Content = Union[Iterable[bytes], bytes]
+ContentBuilderFunc = Optional[Callable[..., Content]]
 UserContent = Union[JsonLike, str, bytes, Optional[BytesIO]]
 StreamedContent = Optional[Union[BytesIO, bytes, str]]
 
@@ -195,7 +196,7 @@ class ContextData:
     json_data: Optional[BaseModel] = None
     form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None
     files: Optional[FileLikes] = None
-    content: Optional[Content] = None
+    content_builder: ContentBuilderFunc = None
     should_verify_auth: bool = True
     should_stream: bool = False
     destination: Optional[FileLike] = None
@@ -223,6 +224,9 @@ class ContextData:
 
     def build_files_arg(self) -> Optional[list[Tuple[str, Any]]]:
         return [("file", file) for file in self.files] if self.files else None
+
+    def build_content_arg(self) -> Optional[Content]:
+        return self.content_builder() if self.content_builder else None
 
     def status_is(self, status_code: int) -> bool:
         if self.http_response:
@@ -360,13 +364,23 @@ class ContextData:
         """
         content: StreamedContent = None
         buffer = BytesIO()
+        opened = False
 
         if isinstance(destination, str):
+            opened = True
             destination_data = open(destination, "wb")
         else:
             destination_data = destination or buffer
 
         self.stream_response_content(destination_data)
+
+        if isinstance(destination_data, IOBase):
+            logger.info(f"base_client: flushing {destination=}")
+            destination_data.flush()
+
+        if opened:
+            logger.info(f"base_client: closing {destination=}")
+            destination_data.close()
 
         buffer.seek(0, os.SEEK_SET)
 
@@ -412,9 +426,9 @@ class ClientContext:
             json=self.data.build_json_data_arg(),
             data=self.data.build_form_data_arg(),
             files=self.data.build_files_arg(),
-            content=self.data.content,
+            content=self.data.build_content_arg(),
             headers=self.data.headers,
-            timeout=DEFAULT_PER_CALL_TIMEOUT,
+            timeout=None,
         )
 
         return ensure_valid(self.data.http_request)
@@ -437,20 +451,24 @@ class ClientContext:
             yield attempt
 
     def send_request(self) -> Response:
-        request = ensure_valid(self.data.http_request)
+        first_or_retry_all = True
 
-        for attempt in self.retry(DEFAULT_RETRY_COUNT + 1, DEFAULT_RETRY_INTERVAL):
-            with attempt:
-                self.data.http_response = self.http_client.send(
-                    request=request,
-                    stream=self.data.should_stream,
-                )
+        while first_or_retry_all:
+            first_or_retry_all = False
+            request = ensure_valid(self.data.http_request)
 
-                if self.check_auth_refreshed():
+            for attempt in self.retry(DEFAULT_RETRY_COUNT + 1, DEFAULT_RETRY_INTERVAL):
+                with attempt:
                     self.data.http_response = self.http_client.send(
                         request=request,
                         stream=self.data.should_stream,
                     )
+
+                    if self.check_auth_refreshed():
+                        # Reset/rebuild current request
+                        first_or_retry_all = True
+                        self.build_request()
+                        break
 
         self.check_success()
 
@@ -647,7 +665,7 @@ class BaseClient:
         self.timeout = timeout
         self.should_verify_ssl = should_verify_ssl
         self.verify_auth = verify_auth
-        self._on_auth_refresh = on_auth_refresh or (lambda: {})
+        self._on_auth_refresh = on_auth_refresh
         self._http_client = http_client
         self._headers = {"Avatars-Accept-Created": "yes"} | headers
 
@@ -657,7 +675,7 @@ class BaseClient:
     def on_auth_refresh(
         self, on_auth_refresh: Optional[AuthRefreshFunc] = None
     ) -> None:
-        self._on_auth_refresh = on_auth_refresh or (lambda: {})
+        self._on_auth_refresh = on_auth_refresh
 
     def prepare_files(
         self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
@@ -674,7 +692,7 @@ class BaseClient:
             prepared_files = []
 
             for f in files:
-                if isinstance(f, str) and Path(f).is_file():
+                if isinstance(f, (str, Path)) and Path(f).is_file():
                     prepared_files.append(stack.enter_context(open(f, "rb")))
                 else:
                     raise ValueError(
@@ -683,16 +701,20 @@ class BaseClient:
 
         return prepared_files
 
-    def prepare_content(
-        self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
-    ) -> Optional[Content]:
-        content: Optional[Content] = None
+    def make_content_builder(
+        self, headers: dict[str, Any], keyword_args: dict[str, Any]
+    ) -> ContentBuilderFunc:
+        content_builder: ContentBuilderFunc = None
 
-        if "dataset" in keyword_args:
-            content = ArrowStreamWriter(keyword_args.pop("dataset"))
+        if "content" in keyword_args:
+            content = keyword_args.pop("content")
+            content_builder = lambda: content  # noqa
+        elif "dataset" in keyword_args:
+            ds = keyword_args.pop("dataset")
             headers["Content-Type"] = ContentType.ARROW_STREAM.value
+            content_builder = lambda: ArrowStreamWriter(ds)  # noqa
 
-        return content
+        return content_builder
 
     @contextmanager
     def context(
@@ -708,11 +730,7 @@ class BaseClient:
             # Grab special keys
             headers: dict[str, Any] = pop_or(kwargs, "headers", {})
             files = self.prepare_files(stack, headers, kwargs)
-            content = pop_or(
-                kwargs,
-                "content",
-                self.prepare_content(stack, headers, kwargs),
-            )
+            content_builder = self.make_content_builder(headers, kwargs)
             want_content: bool = pop_or(kwargs, "want_content", False)
 
             if not ctx:
@@ -727,13 +745,13 @@ class BaseClient:
             ctx.data.update(**kwargs)
             ctx.data.headers.update(headers)
             ctx.data.files = files
-            ctx.data.content = content
+            ctx.data.content_builder = content_builder
             ctx.data.want_content = want_content
 
             yield ctx
 
             ctx.data.files = None
-            ctx.data.content = None
+            ctx.data.content_builder = None
             ctx.data.want_content = False
 
     def create(

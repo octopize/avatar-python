@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 3: Using embedded processors
@@ -92,6 +92,8 @@ job = client.jobs.create_full_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
+print(job.id)
+
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -
@@ -134,6 +136,7 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
+print(job.id)
 print(job.status)
 # -
 
@@ -171,6 +174,8 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
+print(job.id)
+
 # Download the avatars as a pandas dataframe
 avatars_numeric = client.pandas_integration.download_dataframe(
     job.result.avatars_dataset.id
@@ -205,6 +210,8 @@ job = client.jobs.create_avatarization_job(
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
+print(job.id)
+
 # Download the avatars as a pandas dataframe
 avatars_categorical = client.pandas_integration.download_dataframe(
     job.result.avatars_dataset.id
@@ -232,6 +239,7 @@ advice_job = client.jobs.create_advice(
     AdviceJobCreate(parameters=AdviceParameters(dataset_id=dataset.id))
 )
 advice_job = client.jobs.get_advice(advice_job.id)
+print(advice_job.id)
 print("We recommend using these pipeline: ")
 print(advice_job.result.python_client_pipeline)
 print("Additional advice : ")
@@ -291,6 +299,7 @@ job = client.jobs.create_avatarization_job(
     )
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
+print(job.id)
 # Download the avatars as a pandas dataframe
 avatars = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)
 # -

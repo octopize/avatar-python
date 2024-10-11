@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 8.0.0
+# API Version : 11.7.0
 
 
 import logging
@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 
 from avatars.models import AdviceJob  # noqa: F401
 from avatars.models import AdviceJobCreate  # noqa: F401
-from avatars.models import AvatarizationBatchJob  # noqa: F401
-from avatars.models import AvatarizationBatchJobCreate  # noqa: F401
 from avatars.models import AvatarizationJob  # noqa: F401
 from avatars.models import AvatarizationJobCreate  # noqa: F401
 from avatars.models import AvatarizationMultiTableJob  # noqa: F401
@@ -28,8 +26,6 @@ from avatars.models import GenericJob  # noqa: F401
 from avatars.models import Login  # noqa: F401
 from avatars.models import LoginResponse  # noqa: F401
 from avatars.models import PatchDataset  # noqa: F401
-from avatars.models import PrivacyMetricsBatchJob  # noqa: F401
-from avatars.models import PrivacyMetricsBatchJobCreate  # noqa: F401
 from avatars.models import PrivacyMetricsGeolocationJob  # noqa: F401
 from avatars.models import PrivacyMetricsGeolocationJobCreate  # noqa: F401
 from avatars.models import PrivacyMetricsJob  # noqa: F401
@@ -41,12 +37,9 @@ from avatars.models import PrivacyMetricsWithTimeSeriesJobCreate  # noqa: F401
 from avatars.models import Projections  # noqa: F401
 from avatars.models import Report  # noqa: F401
 from avatars.models import ReportCreate  # noqa: F401
-from avatars.models import ReportFromBatchCreate  # noqa: F401
 from avatars.models import ReportFromDataCreate  # noqa: F401
 from avatars.models import ReportGeolocationPrivacyCreate  # noqa: F401
 from avatars.models import ResetPasswordRequest  # noqa: F401
-from avatars.models import SignalMetricsBatchJob  # noqa: F401
-from avatars.models import SignalMetricsBatchJobCreate  # noqa: F401
 from avatars.models import SignalMetricsJob  # noqa: F401
 from avatars.models import SignalMetricsJobCreate  # noqa: F401
 from avatars.models import SignalMetricsWithTimeSeriesJob  # noqa: F401
@@ -482,23 +475,6 @@ class Jobs:
 
         return AvatarizationJob(**self.client.request(**kwargs))
 
-    def create_avatarization_batch_job(
-        self,
-        request: AvatarizationBatchJobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> AvatarizationBatchJob:
-        """Create an avatarization batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/jobs/avatarization_batch",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-        }
-
-        return AvatarizationBatchJob(**self.client.request(**kwargs))
-
     def create_avatarization_with_time_series_job(
         self,
         request: AvatarizationWithTimeSeriesJobCreate,
@@ -567,23 +543,6 @@ class Jobs:
 
         return PrivacyMetricsJob(**self.client.request(**kwargs))
 
-    def create_privacy_metrics_batch_job(
-        self,
-        request: PrivacyMetricsBatchJobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> PrivacyMetricsBatchJob:
-        """Create a privacy metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/jobs/metrics/privacy_batch",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-        }
-
-        return PrivacyMetricsBatchJob(**self.client.request(**kwargs))
-
     def create_privacy_metrics_time_series_job(
         self,
         request: PrivacyMetricsWithTimeSeriesJobCreate,
@@ -617,23 +576,6 @@ class Jobs:
         }
 
         return SignalMetricsWithTimeSeriesJob(**self.client.request(**kwargs))
-
-    def create_signal_metrics_batch_job(
-        self,
-        request: SignalMetricsBatchJobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> SignalMetricsBatchJob:
-        """Create a signal metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/jobs/metrics/signal_batch",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-        }
-
-        return SignalMetricsBatchJob(**self.client.request(**kwargs))
 
     def create_privacy_metrics_multi_table_job(
         self,
@@ -711,27 +653,6 @@ class Jobs:
             **kwargs,
         )
 
-    def get_avatarization_batch_job(
-        self,
-        id: str,
-        *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> AvatarizationBatchJob:
-        """Get an avatarization batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/jobs/avatarization_batch/{id}",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return self.client.get_job(
-            response_cls=AvatarizationBatchJob,
-            per_request_timeout=per_request_timeout,
-            **kwargs,
-        )
-
     def get_avatarization_time_series_job(
         self,
         id: str,
@@ -795,27 +716,6 @@ class Jobs:
             **kwargs,
         )
 
-    def get_signal_metrics_batch_job(
-        self,
-        id: str,
-        *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> SignalMetricsBatchJob:
-        """Get a signal metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/jobs/{id}/metrics/signal_batch",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return self.client.get_job(
-            response_cls=SignalMetricsBatchJob,
-            per_request_timeout=per_request_timeout,
-            **kwargs,
-        )
-
     def get_signal_metrics_time_series_job(
         self,
         id: str,
@@ -854,27 +754,6 @@ class Jobs:
 
         return self.client.get_job(
             response_cls=PrivacyMetricsJob,
-            per_request_timeout=per_request_timeout,
-            **kwargs,
-        )
-
-    def get_privacy_metrics_batch_job(
-        self,
-        id: str,
-        *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> PrivacyMetricsBatchJob:
-        """Get a privacy metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/jobs/{id}/metrics/privacy_batch",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return self.client.get_job(
-            response_cls=PrivacyMetricsBatchJob,
             per_request_timeout=per_request_timeout,
             **kwargs,
         )
@@ -1101,26 +980,6 @@ class Reports:
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/reports/from_data",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-        }
-
-        return Report(**self.client.request(**kwargs))
-
-    def create_report_from_batch(
-        self,
-        request: ReportFromBatchCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Report:
-        """Create an anonymization report from batch job identifiers.
-
-        The report will be generated with the worst privacy_metrics and the mean signal_metrics.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/reports/from_batch",  # noqa: F541
             "timeout": timeout,
             "json_data": request,
         }

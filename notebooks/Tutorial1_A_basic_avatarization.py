@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 1: A basic avatarization
@@ -107,6 +107,7 @@ avatarization_job = client.jobs.create_avatarization_job(
 # ## Retrieving the completed avatarization job
 
 avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=100)
+print(avatarization_job.id)
 print(avatarization_job.status)
 print(avatarization_job.result)  # there is no metrics
 
@@ -152,6 +153,7 @@ privacy_job = client.jobs.create_privacy_metrics_job(
 
 privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=100)
 
+print(privacy_job.id)
 print(privacy_job.status)
 print(privacy_job.result)
 # -
@@ -177,6 +179,7 @@ signal_job = client.jobs.create_signal_metrics_job(
 )
 
 signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=100)
+print(signal_job.id)
 print(signal_job.status)
 print(signal_job.result)
 # -
@@ -197,6 +200,8 @@ report = client.reports.create_report(
     ),
     timeout=30,
 )
+
+print(report.id)
 result = client.reports.download_report(id=report.id)
 
 with open("./my_avatarization_report.pdf", "wb") as f:
@@ -224,6 +229,7 @@ avatarization_job = client.jobs.create_avatarization_job(
 )
 
 avatarization_job = client.jobs.get_avatarization_job(avatarization_job.id, timeout=100)
+print(avatarization_job.id)
 print(avatarization_job.status)
 print("----")
 print(avatarization_job.error_message)

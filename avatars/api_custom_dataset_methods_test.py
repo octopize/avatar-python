@@ -105,7 +105,7 @@ class TestCustomCreateDatasetMethod:
     def test_create_dataset_with_unknown_source_type(self) -> None:
         client = api_client_factory()
         with pytest.raises(TypeError, match="Unsupported dataset source"):
-            Datasets(client).create_dataset(source=1)
+            Datasets(client).create_dataset(source=1)  # type: ignore[arg-type]
 
     @pytest.mark.parametrize("content_fixture_name", ["csv_content", "parquet_content"])
     def test_create_dataset_using_source_argument_with_filename(

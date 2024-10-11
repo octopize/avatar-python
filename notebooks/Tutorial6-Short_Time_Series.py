@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 6: Short Time Series
@@ -215,6 +215,7 @@ job = client.jobs.create_full_avatarization_job(
 
 job = client.jobs.get_avatarization_job(id=job.id, timeout=1000)
 
+print(job.id)
 print(job.status)
 
 avatars_df = client.pandas_integration.download_dataframe(job.result.avatars_dataset.id)

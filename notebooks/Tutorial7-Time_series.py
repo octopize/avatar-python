@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 8: Time Series
@@ -217,6 +217,7 @@ job = client.jobs.create_avatarization_with_time_series_job(
     timeout=50,
 )
 job = client.jobs.get_avatarization_time_series_job(job.id, timeout=60)
+print(job.id)
 
 # ### Retrieve avatars
 #
@@ -330,6 +331,7 @@ privacy_job = client.jobs.create_privacy_metrics_time_series_job(
 privacy_job = client.jobs.get_privacy_metrics_time_series_job(
     privacy_job.id, timeout=10
 )
+print(privacy_job.id)
 # -
 
 # Metric results are calculated for each dataset and are stored in `privacy_job.result`
@@ -359,6 +361,7 @@ signal_job = client.jobs.create_signal_metrics_time_series_job(
 )
 
 signal_job = client.jobs.get_signal_metrics_time_series_job(signal_job.id, timeout=10)
+print(signal_job.id)
 # -
 
 # Metric results are calculated for each dataset and are stored in `signal_job.result`

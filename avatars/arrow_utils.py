@@ -1,7 +1,9 @@
+import inspect
 import io
 import os
 import struct
 from contextlib import contextmanager
+from dataclasses import dataclass, field
 from enum import Enum
 from io import BytesIO
 from pathlib import Path
@@ -17,7 +19,7 @@ from typing import (
     Union,
 )
 
-import magic
+import clevercsv
 import pandas as pd
 import pyarrow as pa
 import pyarrow.csv as pcsv
@@ -35,6 +37,7 @@ DEFAULT_MAX_ROWS_PER_BATCH = 1_000_000
 APPLICATION_ARROW_STREAM = "application/vnd.apache.arrow.stream"
 
 DEFAULT_MAGIC_BYTES = 2048
+SNIFF_SIZE = 1024 * 10
 
 
 BatchBytesFunction = Callable[[bytes], None]
@@ -48,6 +51,12 @@ DataSourceItem = Union[TableSource, pa.Table]
 DataSourceItems = Union[DataSourceItem, list[DataSourceItem]]
 
 logger = structlog.get_logger(__name__)
+
+
+@dataclass
+class FileInfo:
+    fmt: Optional[str] = None
+    error: list[str] = field(default_factory=list)
 
 
 class StreamState(Enum):
@@ -89,37 +98,17 @@ def is_text_file_or_buffer(obj: Any) -> bool:
     return is_text_file(obj) or is_text_buffer(obj)
 
 
-def guess_file_format(obj: Any) -> str:
-    fmt: Optional[str] = None
+@contextmanager
+def save_pos(obj: Any) -> Generator[None, None, None]:
+    pos = 0
 
     if is_file_like(obj):
-        fmagic = magic.from_buffer(obj.read(DEFAULT_MAGIC_BYTES))
-        obj.seek(0, os.SEEK_SET)
-    else:
-        fmagic = magic.from_file(obj)
+        pos = obj.tell()
 
-    if fmagic:
-        if "Parquet" in fmagic:
-            fmt = "parquet"
-        elif "CSV" in fmagic or "ASCII text" in fmagic:
-            fmt = "csv"
-
-    return fmt or fmagic or "unknown"
-
-
-def flatten(items: Any) -> Iterator[Any]:
-    if isinstance(items, list):
-        for item in items:
-            yield from flatten(item)
-    else:
-        yield items
-
-
-@contextmanager
-def save_pos(data: BytesIO) -> Generator[None, None, None]:
-    pos = data.tell()
     yield
-    data.seek(pos, os.SEEK_SET)
+
+    if is_file_like(obj):
+        obj.seek(pos, os.SEEK_SET)
 
 
 @contextmanager
@@ -139,6 +128,39 @@ def to_end(data: BytesIO) -> Generator[None, None, None]:
 def available(data: BytesIO) -> int:
     with to_end(data):
         return data.tell()
+
+
+def try_format(finfo: FileInfo, fmt: str, obj: Any, func: Callable[[Any], Any]) -> None:
+    if finfo.fmt:
+        return
+
+    with save_pos(obj):
+        try:
+            func(obj)
+            finfo.fmt = fmt
+            finfo.error.clear()
+        except pa.ArrowInvalid as e:
+            finfo.error = [fmt, str(e)]
+
+
+def guess_file_format(obj: Any) -> FileInfo:
+    finfo = FileInfo()
+
+    try_format(finfo, "parquet", obj, lambda obj: pq.ParquetFile(obj))
+    try_format(finfo, "csv", obj, lambda obj: pcsv.read_csv(obj))
+
+    if not finfo.fmt:
+        finfo.fmt = "unknown"
+
+    return finfo
+
+
+def flatten(items: Any) -> Iterator[Any]:
+    if isinstance(items, list):
+        for item in items:
+            yield from flatten(item)
+    else:
+        yield items
 
 
 class MarkerBase:
@@ -236,28 +258,63 @@ class ArrowDatasetBuilder:
     def __init__(self) -> None:
         self.inferred_type: Optional[str] = None
 
-    def read_table(self, source: TableSource, fmt: str) -> pa.Table:
-        if fmt == "csv":
-            return pcsv.read_csv(source)
-        elif fmt == "parquet":
-            return pq.read_table(source)
+    def sniff_csv_data(self, source: TableSource) -> dict[Any, Any]:
+        if isinstance(source, (str, Path)):
+            with open(source, "rb") as f:
+                sample = f.read(SNIFF_SIZE)
+        else:
+            sample = source.read(SNIFF_SIZE)
+            source.seek(0)
 
-        raise ValueError(f"{ERROR_PRE}" f"Expected known format, got '{fmt}' instead")
+        if isinstance(sample, bytes):
+            sample = sample.decode(errors="ignore")  # type: ignore[assignment]
+        else:
+            sample = str(sample)
+
+        try:
+            # Python csv module is really struggling on simple cases
+            # CleverCSV seems to do a better job
+            dialect = clevercsv.Sniffer().sniff(sample)  # type: ignore[arg-type]
+        except clevercsv.Error as e:
+            raise ValueError(str(e))
+
+        if not dialect:
+            raise ValueError("Failed to find CSV format")
+
+        if not dialect.delimiter:
+            dialect.delimiter = ","
+
+        return dialect.to_dict()
+
+    def read_table(self, source: TableSource, finfo: FileInfo) -> pa.Table:
+        if finfo.fmt == "csv":
+            dialect = self.sniff_csv_data(source)
+            parse_options = pcsv.ParseOptions(delimiter=dialect["delimiter"])
+            return pcsv.read_csv(source, parse_options=parse_options)  # type: ignore[arg-type]
+        elif finfo.fmt == "parquet":
+            return pq.read_table(source)  # type: ignore[arg-type]
+
+        if finfo.error:
+            detail = finfo.error[1]
+        else:
+            detail = f"Expected known format, got '{finfo.fmt}' instead"
+
+        raise ValueError(f"{ERROR_PRE}{detail}")
 
     def to_table(self, source: TableSource) -> pa.Table:
-        fmt = guess_file_format(source)
-        self.inferred_type = fmt
+        finfo = guess_file_format(source)
+        self.inferred_type = finfo.fmt
 
-        logger.info(f"dataset item guessed format is {fmt}")
+        logger.info(f"dataset item guessed format is {finfo.fmt}")
 
-        return self.read_table(source, fmt)
+        return self.read_table(source, finfo)
 
     def to_source(self, item: Any) -> Union[str, pa.Table]:
         if p := is_existing_file_or_dir(item):
             if p.is_file():
                 return self.to_table(item)
             else:
-                return item
+                return item  # type: ignore[no-any-return]
         elif is_text_file(item):
             # Let pyarrow open the file itself (in binary mode)
             return self.to_table(item.name)
@@ -267,7 +324,7 @@ class ArrowDatasetBuilder:
 
             return self.to_table(item)
         elif isinstance(item, pd.DataFrame):
-            return pa.Table.from_pandas(item)
+            return pa.Table.from_pandas(item)  # type: ignore[no-any-return,unused-ignore]
         else:
             raise TypeError(f"Unsupported dataset source {type(item)}")
 
@@ -275,7 +332,7 @@ class ArrowDatasetBuilder:
         self.inferred_type = None
         sources = [self.to_source(s) for s in flatten(items)]
 
-        return ds.dataset(sources), self.inferred_type
+        return ds.dataset(sources), self.inferred_type  # type: ignore[arg-type]
 
 
 class ArrowStreamReader:
@@ -290,11 +347,12 @@ class ArrowStreamReader:
         self.func_stack: list[Any] = []
         self.batch = bytes()
         self.data = bytearray()
-        self.stream_header = Marker(ARROW_BEGIN_OF_STREAM_MARKER)
+        self.stream_header = MarkerWithSize(ARROW_BEGIN_OF_STREAM_MARKER)
         self.stream_footer = MarkerWithSize(ARROW_END_OF_STREAM_MARKER)
         self.batch_header = MarkerWithSize(ARROW_BATCH_MARKER)
         self.state = StreamState.WAIT_STREAM_BEGIN
         self.nb_batches = 0
+        self.total_rows = None
 
     def __enter__(self) -> Any:
         return self
@@ -309,6 +367,8 @@ class ArrowStreamReader:
     ) -> None:
         writer: Optional[pq.ParquetWriter] = None
 
+        logger.info(f"WP: file is {where}")
+
         def write_table(table: pa.Table) -> None:
             # In case you wonder: writer is created here on the first run because ParquetWriter
             # needs a table schema, hence a table, which we only have on the first call when
@@ -318,12 +378,15 @@ class ArrowStreamReader:
             if not writer:
                 writer = pq.ParquetWriter(where, table.schema)
 
+            logger.info(f"WP: {where=} {table.num_rows=}")
             writer.write_table(table)
 
         self.process_bytes(iter_bytes, table_func=write_table)
 
         if writer:
             writer.close()
+
+        logger.info(f"WP: {where=} closing")
 
     async def process_stream(
         self,
@@ -388,6 +451,7 @@ class ArrowStreamReader:
 
             if self.state == StreamState.WAIT_STREAM_BEGIN:
                 self.try_load_header(self.stream_header, StreamState.WAIT_BATCH)
+                self.total_rows = self.stream_header.size  # type: ignore[assignment]
             elif self.state == StreamState.WAIT_BATCH:
                 self.try_load_header(self.batch_header, StreamState.DATA)
             elif self.state == StreamState.DATA:
@@ -448,8 +512,19 @@ class ArrowStreamReader:
             self.batch_bytes_func(self.batch)
 
         if self.table_func:
-            reader = pi.RecordBatchStreamReader(self.batch)
-            self.table_func(reader.read_all())
+            reader = pi.RecordBatchStreamReader(self.batch)  # type: ignore[call-arg]
+            nb_args = len(inspect.signature(self.table_func).parameters)
+            if nb_args == 2:
+                self.table_func(  # type: ignore[call-arg]
+                    reader.read_all(),
+                    self.total_rows,
+                )
+            elif nb_args == 1:
+                self.table_func(reader.read_all())
+            else:
+                raise ValueError(
+                    f"Expected 1 or 2 arguments for table_func, got {nb_args}"
+                )
 
     def skip_data(self, size: int) -> None:
         self.data = self.data[size:]
@@ -489,6 +564,7 @@ class ArrowStreamWriter:
         self, ds: ds.Dataset, nb_rows_per_batch: int = DEFAULT_MAX_ROWS_PER_BATCH
     ) -> None:
         self.ds = ds
+        self.total_rows = ds.count_rows()
         self.nb_rows_per_batch = nb_rows_per_batch
         self.batch_header = MarkerWithSize(ARROW_BATCH_MARKER)
         self.batch: Optional[bytes] = None
@@ -502,7 +578,7 @@ class ArrowStreamWriter:
         pass
 
     def iter_core(self) -> Iterator[bytes]:
-        yield Marker(ARROW_BEGIN_OF_STREAM_MARKER).make()
+        yield MarkerWithSize(ARROW_BEGIN_OF_STREAM_MARKER, size=self.total_rows).make()
 
         for batch in self.ds.to_batches(batch_size=self.nb_rows_per_batch):
             yield from self.process_batch(batch)
@@ -511,7 +587,7 @@ class ArrowStreamWriter:
 
         yield MarkerWithSize(ARROW_END_OF_STREAM_MARKER, self.nb_batches).make()
 
-    async def __aiter__(self) -> Stream:
+    async def stream(self) -> Stream:
         for v in self.iter_core():
             yield v
 

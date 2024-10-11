@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 2: Parameterizing an avatarization
@@ -79,6 +79,7 @@ job_small_k = client.jobs.create_full_avatarization_job(
     )
 )
 job_small_k = client.jobs.get_avatarization_job(id=job_small_k.id, timeout=100)
+print(job_small_k.id)
 
 # Retrieve selected metric
 hidden_rate = job_small_k.result.privacy_metrics.hidden_rate
@@ -100,6 +101,7 @@ job_large_k = client.jobs.create_full_avatarization_job(
     )
 )
 job_large_k = client.jobs.get_avatarization_job(id=job_large_k.id, timeout=100)
+print(job_large_k.id)
 
 # Retrieve selected metric
 hidden_rate = job_large_k.result.privacy_metrics.hidden_rate
@@ -202,6 +204,18 @@ column_weights = {"variety": 3}
 
 ncp = 5
 
+# ### Reduction of highly dimensional data
+#
+# When dealing with variables with a high number of modalities, the number of dimensions created during the projection increase accordingly. This could lead to situations where the number of dimension is too high compared to the number of records.
+#
+# We developed a parameter to transform categorical data into a restricted number of continuous dimensions embedding categorical variables in vectors.
+#
+# By default, `use_categorical_reduction` is set to `False`, meaning that categorical variables are left unprocessed. Furthermore, since categorical variables are converted into 20 dimensions by default, it's recommended to enable this parameter if the total number of modalities in the dataset exceeds 20.
+
+# Turning on categoricalbreduction will 20 numeric columns that embed the categorical columns as vectors
+# In this particular example it is conterproductive as it dilutes the signal even more (only three modalities in the original dataset)
+use_categorical_reduction = True
+
 # ### Seed
 #
 # A seed is a helpful feature to enable reproducible experiments. However, a seed should not be set in production to ensure that avatars are unique and that the originals cannot be retro-engineered.
@@ -214,13 +228,19 @@ seed = 123
 
 # +
 parameters = AvatarizationParameters(
-    k=k, dataset_id=dataset.id, column_weights=column_weights, ncp=ncp, seed=seed
+    k=k,
+    dataset_id=dataset.id,
+    column_weights=column_weights,
+    ncp=ncp,
+    seed=seed,
+    use_categorical_reduction=use_categorical_reduction,
 )
 
 job = client.jobs.create_full_avatarization_job(
     AvatarizationJobCreate(parameters=parameters)
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
+print(job.id)
 # -
 
 # We will now observe the impact of the parameters on the projections. We recommend executing this last part of the tutorial several times with different settings.
@@ -267,6 +287,7 @@ advice_job = client.jobs.create_advice(
     AdviceJobCreate(parameters=AdviceParameters(dataset_id=dataset.id))
 )
 advice_job = client.jobs.get_advice(advice_job.id)
+print(advice_job.id)
 print("We recommend using these parameters: ")
 print(advice_job.result.parameters)
 print("Additional advice : ")

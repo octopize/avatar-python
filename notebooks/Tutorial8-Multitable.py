@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 9: Multitable
@@ -184,6 +184,7 @@ avat_job = client.jobs.create_avatarization_multi_table_job(
 )
 
 avat_job = client.jobs.get_avatarization_multi_table_job(avat_job.id)
+print(avat_job.id)
 results = avat_job.result.datasets
 
 # Get back avatar tables from the results
@@ -248,6 +249,7 @@ privacy_job = client.jobs.create_privacy_metrics_multi_table_job(
 )
 
 privacy_job = client.jobs.get_privacy_metrics_multi_table_job(privacy_job.id)
+print(privacy_job.id)
 # -
 
 # You can run this line again if the job is still pending (default timeout = 60 seconds)

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Quickstart - Avatarization with parameters
@@ -63,6 +63,8 @@ avatarization_job = client.jobs.create_avatarization_job(
 avatarization_job = client.jobs.get_avatarization_job(
     avatarization_job.id, timeout=1800
 )
+
+print(avatarization_job.id)
 print(avatarization_job.status)
 # -
 
@@ -82,6 +84,7 @@ privacy_job = client.jobs.create_privacy_metrics_job(
 )
 
 privacy_job = client.jobs.get_privacy_metrics(privacy_job.id, timeout=1800)
+print(privacy_job.id)
 print(privacy_job.status)
 print("*** Privacy metrics ***")
 for metric in privacy_job.result:
@@ -99,6 +102,7 @@ signal_job = client.jobs.create_signal_metrics_job(
 )
 
 signal_job = client.jobs.get_signal_metrics(signal_job.id, timeout=1800)
+print(signal_job.id)
 print(signal_job.status)
 print("*** Utility metrics ***")
 for metric in signal_job.result:
@@ -128,6 +132,7 @@ report = client.reports.create_report(
     timeout=240,
 )
 print(report)
+print(report.id)
 
 # +
 result = client.reports.download_report(id=report.id)

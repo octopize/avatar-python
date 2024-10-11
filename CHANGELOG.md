@@ -1,5 +1,27 @@
 # Changelog
 
+## NEXT_RELEASE
+
+- docs: update doc on compatibility check
+- feat: Avatar anonymization works on large datasets (more dimensions than the number of records)
+
+## 0.15.0 - 2024/08/26
+
+- feat: add tutorial on job management
+- feat: add GeolocationNormalizationProcessor
+- chore: remove timeout to avoid re-POST
+- BREAKING: chore: remove all batch from client side
+
+## 0.14.0 - 2024/08/07
+
+- BREAKING: remove deprecated persistance_job_id
+- BREAKING: remove deprecated to_categorical_threshold
+
+## 0.13.0 - 2024/07/24
+
+- BREAKING: send the total size of the stream at the start of the stream
+- Remove dependency on libmagic
+
 ## 0.12.0 - 2024/07/05
 
 - BREAKING: refactor: Dataset.columns is required

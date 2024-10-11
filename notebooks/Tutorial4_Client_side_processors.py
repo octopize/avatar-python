@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 4: Client-side processors
@@ -266,6 +266,7 @@ job = client.jobs.create_avatarization_job(
     )
 )
 job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
+print(job.id)
 # -
 
 avatars_noprocessing = client.pandas_integration.download_dataframe(
@@ -375,6 +376,9 @@ result = client.pipelines.avatarization_pipeline_with_processors(
     ),
     timeout=1000,
 )
+print(result.avatarization_job_id)
+print(result.privacy_job_id)
+print(result.signal_job_id)
 # -
 
 avatars = result.post_processed_avatars
@@ -426,6 +430,9 @@ result = client.pipelines.avatarization_pipeline_with_processors(
     ),
     timeout=1000,
 )
+print(result.avatarization_job_id)
+print(result.privacy_job_id)
+print(result.signal_job_id)
 avatars_perturbation_1 = result.post_processed_avatars
 
 perturbation_processor = PerturbationProcessor(perturbation_level={"age": 0})
@@ -444,6 +451,9 @@ result = client.pipelines.avatarization_pipeline_with_processors(
     ),
     timeout=1000,
 )
+print(result.avatarization_job_id)
+print(result.privacy_job_id)
+print(result.signal_job_id)
 avatars_perturbation_0 = result.post_processed_avatars
 
 perturbation_processor = PerturbationProcessor(perturbation_level={"age": 0.5})
@@ -463,6 +473,9 @@ result = client.pipelines.avatarization_pipeline_with_processors(
     timeout=1000,
 )
 avatars_perturbation_05 = result.post_processed_avatars
+print(result.avatarization_job_id)
+print(result.privacy_job_id)
+print(result.signal_job_id)
 # -
 
 # We observe that as expected, using a perturbation level of 0 on the variable `age`, this variable gets unchanged.
@@ -491,6 +504,8 @@ report = client.reports.create_report(
     timeout=30,
 )
 result = client.reports.download_report(id=report.id)
+
+print(report.id)
 
 with open("./my_avatarization_report.pdf", "wb") as f:
     f.write(result)

@@ -5,10 +5,10 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
-# # Tutorial 10: Geolocation privacy assessment
+# # Tutorial 9: Geolocation privacy assessment
 
 # In this tutorial, we demonstrate how to run a privacy assessment on geolocation trace data using an original dataset and a treated version of the same data.
 
@@ -182,6 +182,7 @@ privacy_job_trimmed = client.jobs.create_privacy_metrics_geolocation_job(
 privacy_job_trimmed = client.jobs.get_privacy_metrics_geolocation_job(
     privacy_job_trimmed.id, timeout=300
 )
+print(privacy_job_trimmed.id)
 privacy_job_trimmed.status
 
 # The privacy job object retrieved contains the privacy metric results. Those can be accessed using `privacy_job_trimmed.result`. Alternatively or complementarily, a report can be generated to improve their readability, for better sharing or for audit purposes.
@@ -197,6 +198,7 @@ report = client.reports.create_geolocation_privacy_report(
     timeout=30,
 )
 result = client.reports.download_report(id=report.id)
+
 
 with open("./my_geolocation_privacy_assessment_report_trimmed.pdf", "wb") as f:
     f.write(result)

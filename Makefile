@@ -134,22 +134,23 @@ notebook: pip-install-tutorial ## Start the tutorial notebooks
 	PATH="file:///$(abspath $(VENV_NAME))/bin":$$PATH VIRTUAL_ENV="file:///$(abspath $(VENV_NAME))/bin" AVATAR_BASE_URL=$(AVATAR_BASE_URL) AVATAR_USERNAME=$(AVATAR_USERNAME) AVATAR_PASSWORD=$(AVATAR_PASSWORD) jupyter notebook notebooks
 .PHONY: notebook
 
-
 generate-py:  ## Generate .py files from notebooks
 	poetry run jupytext notebooks/*.ipynb  --from ipynb --to py
 	poetry run black notebooks/*.py
-.PHONY: generate-py
 
 
-test-tutorial: generate-py pip-install-tutorial ## Verify that all tutorials run without errors
-	cd notebooks && \
-	    ls Tutorial*.py | sort | \
-	        while read TUT; do \
-	            echo "Running $$TUT"; \
-	            $(VENV_PATH)/bin/python3 $$TUT > /dev/null; \
-	        done
-.PHONY: test-tutorial
+test-tutorial: generate-py pip-install-tutorial run-test-tutorial ## Verify that all tutorials run without errors
 
+run-test-tutorial:
+	# Tutorials are IO-bound, they are mostly waiting for the server to do the processing
+	# We can run them in parallel, and force more processes than available CPU cores.
+	cd notebooks ; \
+		NB_TESTS=$(shell find . -name "Tutorial*.py" | wc -l | tr -d ' ') ; \
+		$(VENV_PATH)/bin/python3.10 -m \
+		pytest test_tutorials.py \
+		-n $$NB_TESTS \
+		-v \
+		-W "ignore::DeprecationWarning:avatars.api"
 
 .DEFAULT_GOAL := help
 help: Makefile

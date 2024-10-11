@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 8.0.0
+# API Version : 11.7.0
 
 from __future__ import annotations
 
@@ -78,10 +78,6 @@ class ColumnType(Enum):
     category = "category"
     float = "float"
     datetime = "datetime"
-
-
-class CommonSignalMetricsParameters(BaseModel):
-    pass
 
 
 class CompatibilityStatus(Enum):
@@ -288,9 +284,6 @@ class JobKind(Enum):
     avatarization = "avatarization"
     privacy_metrics = "privacy_metrics"
     signal_metrics = "signal_metrics"
-    avatarization_batch = "avatarization_batch"
-    privacy_metrics_batch = "privacy_metrics_batch"
-    signal_metrics_batch = "signal_metrics_batch"
     avatarization_with_time_series = "avatarization_with_time_series"
     avatarization_multi_table = "avatarization_multi_table"
     privacy_metrics_with_time_series = "privacy_metrics_with_time_series"
@@ -353,11 +346,6 @@ class PointOfInterest(Enum):
 
     start = "start"
     end = "end"
-
-
-class PrivacyBatchDatasetMapping(BaseModel):
-    original_id: Annotated[UUID, Field(title="Original Id")]
-    unshuffled_avatars_id: Annotated[UUID, Field(title="Unshuffled Avatars Id")]
 
 
 class PrivacyMetricsComputationType(Enum):
@@ -439,14 +427,6 @@ class ReportCreate(BaseModel):
     signal_job_id: Annotated[UUID, Field(title="Signal Job Id")]
 
 
-class ReportFromBatchCreate(BaseModel):
-    avatarization_batch_job_id: Annotated[
-        UUID, Field(title="Avatarization Batch Job Id")
-    ]
-    privacy_batch_job_id: Annotated[UUID, Field(title="Privacy Batch Job Id")]
-    signal_batch_job_id: Annotated[UUID, Field(title="Signal Batch Job Id")]
-
-
 class ReportFromDataCreate(BaseModel):
     dataset_id: Annotated[UUID, Field(title="Dataset Id")]
     avatars_dataset_id: Annotated[UUID, Field(title="Avatars Dataset Id")]
@@ -467,128 +447,6 @@ class ResetPasswordRequest(BaseModel):
     token: Annotated[UUID, Field(title="Token")]
 
 
-class SignalBatchDatasetMapping(BaseModel):
-    original_id: Annotated[UUID, Field(title="Original Id")]
-    avatars_id: Annotated[UUID, Field(title="Avatars Id")]
-
-
-class SignalMetricsBatchParameters(BaseModel):
-    """
-    Parameters to configure a SignalMetricsBatchJob.
-
-    There are two main use-cases:
-        1. Launching a SignalMetricsBatchJob after an AvatarizationBatchJob
-        2. Launching a SignalMetricsBatchJob without applying the avatar method
-
-    1. Launching a SignalMetricsBatchJob after an AvatarizationBatchJob
-
-    By specifying ``avatarization_batch_job_id``, we can gather all the necessary information
-    from the database, namely which batches to pair together when computing the metrics.
-
-    You can add parameters in ``common_parameters`` that will apply to the training
-    batch as well as all the other batches.
-
-    If you want to manually select which avatar batch get's paired with which original batch,
-    you'll have to refer to use-case 2.
-
-    >>> parameters = SignalMetricsBatchParameters(
-    ...     avatarization_batch_job_id='c43c7cc7-9b66-4293-b88f-b5dbd07e1f95',
-    ... )
-    >>> parameters = SignalMetricsBatchParameters(
-    ...     avatarization_batch_job_id='c43c7cc7-9b66-4293-b88f-b5dbd07e1f95',
-    ...     common_parameters=CommonSignalMetricsParameters(seed=42),
-    ... )
-
-    2. Launching a SignalMetricsBatchJob without applying the avatar method
-
-    If you want more control over which avatar batch get's paired with which original batch,
-    or you want to compute metrics on datasets that did not have the avatar method applied
-    to them, you can follow the steps laid out below.
-
-    You'll have to split and upload the original and avatar data batches
-    before launching the SignalMetricsBatchJob.
-
-    Suppose you have the original training batch dataset as ``training_original_id``,
-    the avatar training batch dataset as ``training_avatars_id``,
-    as well as a list of all the other batch dataset identifiers as
-    ``original_dataset_ids``, and ``avatars_dataset_ids``, and that all these have been uploaded
-    to the server.
-
-    You need to specify the training dataset identifiers that will be used to
-    fit the anonymization. This can be done with ``training_dataset_mapping``.
-    With ``batch_dataset_mappings`` you specify which avatar batch get's paired
-    with which original batch. Both of these use instances of ``SignalBatchDatasetMapping``.
-
-    ``common_parameters`` is where you'll add any parameters that you want the
-    computation to use with an instance of ``CommonSignalMetricsParameters``.
-
-    Because you haven't launched an ``AvatarizationBatchJob``, you set the
-    ``avatarization_batch_job_id`` identifier to ``None``.
-
-    >>> training_original_id = 'cf8e8dae-5d52-43b6-a6e6-be246ee35185'
-    >>> training_avatars_id = 'e9dcdd58-24ea-4028-84df-778c0c1b5777'
-    >>> original_dataset_ids = [
-    ...     '00d332f6-4971-4589-8d12-0d14d2d929ee',
-    ...     '65ac8062-d232-4c85-8beb-36c8235826ee',
-    ... ]
-    >>> avatars_dataset_ids = [
-    ...     '2fd3d8cc-157b-4bc4-9a92-bc54f1a57cb9',
-    ...     '97c1d3a0-0f63-424a-92ba-147c76a13c66',
-    ... ]
-    >>> batch_dataset_mappings = [
-    ...     SignalBatchDatasetMapping(
-    ...         avatars_id=avatars_dataset_id, original_id=original_dataset_id
-    ...     )
-    ...     for original_dataset_id, avatars_dataset_id in zip(
-    ...         original_dataset_ids, avatars_dataset_ids
-    ...     )
-    ... ]
-    >>> parameters = SignalMetricsBatchParameters(
-    ...     avatarization_batch_job_id=None,
-    ...     common_parameters=CommonSignalMetricsParameters(seed=42),
-    ...     training_dataset_mapping=SignalBatchDatasetMapping(
-    ...         avatars_id=training_avatars_id,
-    ...         original_id=training_original_id,
-    ...     ),
-    ...     batch_dataset_mappings=batch_dataset_mappings
-    ... )
-    """
-
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    avatarization_batch_job_id: Annotated[
-        Optional[UUID],
-        Field(
-            description="Identifier of the avatarization batch job that was launched prior to this signal metrics batch job. This has to be set to None if you are computing signal metrics without applying the avatar method beforehand. Setting it to ``None`` requires ``training_dataset_mapping`` and ``batch_dataset_mappings`` to be set.",
-            title="Avatarization Batch Job Id",
-        ),
-    ] = None
-    training_dataset_mapping: Annotated[
-        Optional[SignalBatchDatasetMapping],
-        Field(
-            description="Dataset identifiers for the training batch. The dataset identifiers specified here will be used to fit the anonymization."
-        ),
-    ] = None
-    common_parameters: Annotated[
-        Optional[CommonSignalMetricsParameters],
-        Field(
-            description="Parameters to use during the computation of the privacy metrics. These will be applied on all the batches, including the training batch."
-        ),
-    ] = None
-    seed: Annotated[
-        Optional[int],
-        Field(description="Seed used to generate the random state.", title="Seed"),
-    ] = None
-    batch_dataset_mappings: Annotated[
-        Optional[List[SignalBatchDatasetMapping]],
-        Field(
-            description="List of pairs of dataset identifiers. You should not specify again the dataset identifiers that were specified in ``training_dataset_mapping``.",
-            title="Batch Dataset Mappings",
-        ),
-    ] = None
-
-
 class SignalMetricsParameters(BaseModel):
     """
     Parameters to configure a SignalMetricsJob.
@@ -598,9 +456,6 @@ class SignalMetricsParameters(BaseModel):
         extra="allow",
     )
     original_id: Annotated[UUID, Field(title="Original Id")]
-    persistance_job_id: Annotated[Optional[UUID], Field(title="Persistance Job Id")] = (
-        None
-    )
     avatarization_job_id: Annotated[
         Optional[UUID], Field(title="Avatarization Job Id")
     ] = None
@@ -877,9 +732,6 @@ class PrivacyMetricsParameters(BaseModel):
         extra="allow",
     )
     original_id: Annotated[UUID, Field(title="Original Id")]
-    persistance_job_id: Annotated[Optional[UUID], Field(title="Persistance Job Id")] = (
-        None
-    )
     avatarization_job_id: Annotated[
         Optional[UUID], Field(title="Avatarization Job Id")
     ] = None
@@ -943,39 +795,6 @@ class PrivacyMetricsParameters(BaseModel):
         Optional[int],
         Field(description="Seed used to generate the random state.", title="Seed"),
     ] = None
-
-
-class PrivacyMetricsPerBatchResult(BaseModel):
-    hidden_rate: Annotated[float, Field(title="Hidden Rate")]
-    local_cloaking: Annotated[float, Field(title="Local Cloaking")]
-    distance_to_closest: Annotated[
-        Optional[float], Field(title="Distance To Closest")
-    ] = None
-    closest_distances_ratio: Annotated[
-        Optional[float], Field(title="Closest Distances Ratio")
-    ] = None
-    column_direct_match_protection: Annotated[
-        float, Field(title="Column Direct Match Protection")
-    ]
-    categorical_hidden_rate: Annotated[
-        Optional[float], Field(title="Categorical Hidden Rate")
-    ] = None
-    row_direct_match_protection: Annotated[
-        float, Field(title="Row Direct Match Protection")
-    ]
-    correlation_protection_rate: Annotated[
-        Optional[float], Field(title="Correlation Protection Rate")
-    ] = None
-    inference_continuous: Annotated[
-        Optional[float], Field(title="Inference Continuous")
-    ] = None
-    inference_categorical: Annotated[
-        Optional[float], Field(title="Inference Categorical")
-    ] = None
-    closest_rate: Annotated[Optional[float], Field(title="Closest Rate")] = None
-    targets: PrivacyMetricsTargets
-    original_id: Annotated[UUID, Field(title="Original Id")]
-    unshuffled_avatars_id: Annotated[UUID, Field(title="Unshuffled Avatars Id")]
 
 
 class PrivacyMetricsPerMultiTableDataset(BaseModel):
@@ -1150,23 +969,8 @@ class SignalMetrics(BaseModel):
     targets: SignalMetricsTargets
 
 
-class SignalMetricsBatchJobCreate(BaseModel):
-    parameters: SignalMetricsBatchParameters
-
-
 class SignalMetricsJobCreate(BaseModel):
     parameters: SignalMetricsParameters
-
-
-class SignalMetricsPerBatchResult(BaseModel):
-    hellinger_mean: Annotated[float, Field(title="Hellinger Mean")]
-    hellinger_std: Annotated[float, Field(title="Hellinger Std")]
-    correlation_difference_ratio: Annotated[
-        Optional[float], Field(title="Correlation Difference Ratio")
-    ] = None
-    targets: SignalMetricsTargets
-    original_id: Annotated[UUID, Field(title="Original Id")]
-    avatars_id: Annotated[UUID, Field(title="Avatars Id")]
 
 
 class SignalMetricsPerDataset(BaseModel):
@@ -1246,34 +1050,6 @@ class SignalMetricsJob(BaseModel):
     current_progress: Optional[JobProgress] = None
 
 
-class AvatarizationBatchParameters(BaseModel):
-    """
-    Parameters to create a batch anonymization job.
-
-    It contains the seed parameter.
-    """
-
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    k: Annotated[int, Field(title="K")]
-    column_weights: Annotated[
-        Optional[Dict[str, float]], Field(title="Column Weights")
-    ] = None
-    ncp: Annotated[Optional[int], Field(title="Ncp")] = None
-    imputation: Optional[ImputationParameters] = None
-    use_categorical_reduction: Annotated[
-        Optional[bool], Field(title="Use Categorical Reduction")
-    ] = None
-    to_categorical_threshold: Annotated[
-        Optional[int], Field(title="To Categorical Threshold")
-    ] = None
-    exclude_variables: Optional[ExcludeVariablesParameters] = None
-    training_dataset_id: Annotated[UUID, Field(title="Training Dataset Id")]
-    dataset_ids: Annotated[List[UUID], Field(min_length=1, title="Dataset Ids")]
-    seed: Annotated[Optional[int], Field(title="Seed")] = None
-
-
 class AvatarizationParameters(BaseModel):
     """
     Parameters to create an anonymization job.
@@ -1293,20 +1069,9 @@ class AvatarizationParameters(BaseModel):
     use_categorical_reduction: Annotated[
         Optional[bool], Field(title="Use Categorical Reduction")
     ] = None
-    to_categorical_threshold: Annotated[
-        Optional[int], Field(title="To Categorical Threshold")
-    ] = None
     exclude_variables: Optional[ExcludeVariablesParameters] = None
     dataset_id: Annotated[UUID, Field(title="Dataset Id")]
     seed: Annotated[Optional[int], Field(title="Seed")] = None
-
-
-class AvatarizationPerBatchResult(BaseModel):
-    privacy_metrics: Optional[PrivacyMetrics] = None
-    signal_metrics: Optional[SignalMetrics] = None
-    avatars_dataset: Dataset
-    sensitive_unshuffled_avatars_datasets: Dataset
-    original_id: Annotated[UUID, Field(title="Original Id")]
 
 
 class AvatarizationResult(BaseModel):
@@ -1342,9 +1107,6 @@ class AvatarizationWithTimeSeriesParameters(BaseModel):
     imputation: Optional[ImputationParameters] = None
     use_categorical_reduction: Annotated[
         Optional[bool], Field(title="Use Categorical Reduction")
-    ] = None
-    to_categorical_threshold: Annotated[
-        Optional[int], Field(title="To Categorical Threshold")
     ] = None
     exclude_variables: Optional[ExcludeVariablesParameters] = None
     vanilla_dataset_id: Annotated[
@@ -1384,9 +1146,6 @@ class BaseAvatarizationParameters(BaseModel):
     use_categorical_reduction: Annotated[
         Optional[bool], Field(title="Use Categorical Reduction")
     ] = None
-    to_categorical_threshold: Annotated[
-        Optional[int], Field(title="To Categorical Threshold")
-    ] = None
     exclude_variables: Optional[ExcludeVariablesParameters] = None
     dataset_id: Annotated[UUID, Field(title="Dataset Id")]
 
@@ -1406,9 +1165,6 @@ class BaseAvatarizationWithTimeSeriesParameters(BaseModel):
     imputation: Optional[ImputationParameters] = None
     use_categorical_reduction: Annotated[
         Optional[bool], Field(title="Use Categorical Reduction")
-    ] = None
-    to_categorical_threshold: Annotated[
-        Optional[int], Field(title="To Categorical Threshold")
     ] = None
     exclude_variables: Optional[ExcludeVariablesParameters] = None
     vanilla_dataset_id: Annotated[
@@ -1438,9 +1194,6 @@ class BasePrivacyMetricsParameters(BaseModel):
         extra="allow",
     )
     original_id: Annotated[UUID, Field(title="Original Id")]
-    persistance_job_id: Annotated[Optional[UUID], Field(title="Persistance Job Id")] = (
-        None
-    )
     avatarization_job_id: Annotated[
         Optional[UUID], Field(title="Avatarization Job Id")
     ] = None
@@ -1590,68 +1343,6 @@ class BasePrivacyMetricsWithTimeSeriesParameters(BaseModel):
     ]
 
 
-class CommonPrivacyMetricsParameters(BaseModel):
-    """
-    Parameters to configure common privacy metrics parameters.
-    """
-
-    imputation: Annotated[
-        Optional[ImputationParameters],
-        Field(
-            description="Imputation parameters used to preprocess avatars data for metrics computation."
-        ),
-    ] = None
-    ncp: Annotated[
-        Optional[int],
-        Field(
-            description="Number of components used for distance based metrics computation. Default behavior similar to avatarization. If unspecified, ncp is set to the minimum value between 5 and the number of variables after one hot encoding. Note: we recommend using to use the same ncp as during the avatarization to check the worst-case scenario.",
-            title="Ncp",
-        ),
-    ] = None
-    use_categorical_reduction: Annotated[
-        Optional[bool],
-        Field(
-            description="Parameter to vectorize categorical variables using cat2vec. See :class:`AvatarizationParameters` for more details. Note: we recommend using the same parameter as during the avatarization.",
-            title="Use Categorical Reduction",
-        ),
-    ] = None
-    known_variables: Annotated[
-        Optional[List[str]],
-        Field(
-            description="Variables considered to be known by the attacker. Used to measure some specific privacy metrics. Note: we recommend using demographic variables as they are the most likely to be known by an attacker.",
-            title="Known Variables",
-        ),
-    ] = None
-    target: Annotated[
-        Optional[str],
-        Field(
-            description="The target variable to be inferred. Used to measure some specific privacy metrics. Must be used together with ``known_variables``. Note: we recommend using a sensitive variable",
-            title="Target",
-        ),
-    ] = None
-    closest_rate_percentage_threshold: Annotated[
-        Optional[ClosestRatePercentageThresholdItem],
-        Field(
-            description="Threshold of closest original individuals to define a distance threshold. Any avatar data generated closer from an original than the distance threshold, is considered at risk.",
-            title="Closest Rate Percentage Threshold",
-        ),
-    ] = None
-    closest_rate_ratio_threshold: Annotated[
-        Optional[ClosestRateRatioThresholdItem],
-        Field(
-            description="Closest distance ratio threshold below which an avatar data is considered too close to an original and too isolated from the rest to be safe.",
-            title="Closest Rate Ratio Threshold",
-        ),
-    ] = None
-    categorical_hidden_rate_variables: Annotated[
-        Optional[List[str]],
-        Field(
-            description="List of categorical variables to compute the categorical hidden rate.",
-            title="Categorical Hidden Rate Variables",
-        ),
-    ] = []
-
-
 class MetaPrivacyMetrics(BaseModel):
     details: Annotated[
         List[
@@ -1667,135 +1358,6 @@ class MetaSignalMetrics(BaseModel):
     details: Annotated[
         List[Union[SignalMetricsPerDataset, TimeSeriesSignalMetricsPerDataset]],
         Field(title="Details"),
-    ]
-
-
-class PrivacyMetricsBatchParameters(BaseModel):
-    """
-    Parameters to configure a PrivacyMetricsBatchJob.
-
-    There are two main use-cases:
-        1. Launching a PrivacyMetricsBatchJob after an AvatarizationBatchJob
-        2. Launching a PrivacyMetricsBatchJob without applying the avatar method
-
-    1. Launching a PrivacyMetricsBatchJob after an AvatarizationBatchJob
-
-    By specifying ``avatarization_batch_job_id``, we can gather all the necessary information
-    from the database, namely which batches to pair together when computing the metrics.
-
-    You can add parameters in ``training_dataset_mapping`` that will apply to the training
-    batch as well as all the other batches.
-
-    If you want to manually select which avatar batch get's paired with which original batch,
-    you'll have to refer to use-case 2.
-
-    >>> parameters = PrivacyMetricsBatchParameters(
-    ...     avatarization_batch_job_id='c43c7cc7-9b66-4293-b88f-b5dbd07e1f95',
-    ... )
-    >>> parameters = PrivacyMetricsBatchParameters(
-    ...     avatarization_batch_job_id='c43c7cc7-9b66-4293-b88f-b5dbd07e1f95',
-    ...     common_parameters=CommonPrivacyMetricsParameters(ncp=10),
-    ... )
-
-    2. Launching a PrivacyMetricsBatchJob without applying the avatar method
-
-    If you want more control over which avatar batch get's paired with which original batch,
-    or you want to compute metrics on datasets that did not have the avatar method applied
-    to them, you can follow the steps laid out below.
-
-    You'll have to split and upload the original and unshuffled avatar data batches
-    before launching the PrivacyMetricsBatchJob.
-
-    Suppose you have the original training batch dataset as ``training_original_id``,
-    the unshuffled avatars training batch dataset as ``training_avatars_id``,
-    as well as a list of all the other batch dataset identifiers as
-    ``original_dataset_ids``, and ``avatars_dataset_ids``, and that all these have been uploaded
-    to the server.
-
-    You need to specify the training dataset identifiers that will be used to
-    fit the anonymization.
-    This can be done with ``training_dataset_mapping``.
-    With ``batch_dataset_mappings`` you specify which avatar batch get's paired
-    with which original batch. Both of these use instances of ``PrivacyBatchDatasetMapping``.
-
-    ``common_parameters`` is where you'll add any parameters
-    that you want the computation to use with an instance of ``CommonPrivacyMetricsParameters``.
-
-    Because you haven't launched an ``AvatarizationBatchJob``, you have to set the
-    ``avatarization_batch_job_id`` identifier to ``None``.
-
-    >>> training_original_id = 'cf8e8dae-5d52-43b6-a6e6-be246ee35185'
-    >>> training_avatars_id = 'e9dcdd58-24ea-4028-84df-778c0c1b5777'
-    >>> original_dataset_ids = [
-    ...     '00d332f6-4971-4589-8d12-0d14d2d929ee',
-    ...     '65ac8062-d232-4c85-8beb-36c8235826ee',
-    ... ]
-    >>> avatars_dataset_ids = [
-    ...     '2fd3d8cc-157b-4bc4-9a92-bc54f1a57cb9',
-    ...     '97c1d3a0-0f63-424a-92ba-147c76a13c66',
-    ... ]
-    >>> batch_dataset_mappings = [
-    ...     PrivacyBatchDatasetMapping(
-    ...         unshuffled_avatars_id=avatars_dataset_id, original_id=original_dataset_id
-    ...     )
-    ...     for original_dataset_id, avatars_dataset_id in zip(
-    ...         original_dataset_ids, avatars_dataset_ids
-    ...     )
-    ... ]
-    >>> parameters = PrivacyMetricsBatchParameters(
-    ...     avatarization_batch_job_id=None,
-    ...     common_parameters=CommonPrivacyMetricsParameters(
-    ...         ncp=10,
-    ...     ),
-    ...        training_dataset_mapping = PrivacyBatchDatasetMapping(
-    ...         unshuffled_avatars_id=training_avatars_id,
-    ...         original_id=training_original_id
-    ...        ),
-    ...     batch_dataset_mappings=batch_dataset_mappings
-    ... )
-    """
-
-    model_config = ConfigDict(
-        extra="allow",
-    )
-    avatarization_batch_job_id: Annotated[
-        Optional[UUID],
-        Field(
-            description="Identifier of the avatarization batch job that was launched prior to this privacy metrics batch job. This has to be set to None if you are computing privacy metrics without applying the avatar method beforehand. Setting it to ``None`` requires ``training_dataset_mapping`` and ``batch_dataset_mappings`` to be set.",
-            title="Avatarization Batch Job Id",
-        ),
-    ] = None
-    training_dataset_mapping: Annotated[
-        Optional[PrivacyBatchDatasetMapping],
-        Field(
-            description="Dataset identifiers for the training batch. The dataset identifiers specified here will be used to fit the anonymization."
-        ),
-    ] = None
-    common_parameters: Annotated[
-        Optional[CommonPrivacyMetricsParameters],
-        Field(
-            description="Parameters to use during the computation of the privacy metrics. These will be applied on all the batches, including the training batch."
-        ),
-    ] = None
-    seed: Annotated[
-        Optional[int],
-        Field(description="Seed used to generate the random state.", title="Seed"),
-    ] = None
-    batch_dataset_mappings: Annotated[
-        Optional[List[PrivacyBatchDatasetMapping]],
-        Field(
-            description="List of pairs of dataset identifiers. You should not specify again the dataset identifiers that were specified in ``training_dataset_mapping``.",
-            title="Batch Dataset Mappings",
-        ),
-    ] = None
-
-
-class PrivacyMetricsBatchResult(BaseModel):
-    worst_metrics: PrivacyMetrics
-    mean_metrics: PrivacyMetrics
-    training_metrics: PrivacyMetricsPerBatchResult
-    batch_metrics: Annotated[
-        List[PrivacyMetricsPerBatchResult], Field(title="Batch Metrics")
     ]
 
 
@@ -1903,14 +1465,6 @@ class PrivacyMetricsWithTimeSeriesJobCreate(BaseModel):
     parameters: PrivacyMetricsWithTimeSeriesParameters
 
 
-class SignalMetricsBatchResult(BaseModel):
-    mean_metrics: SignalMetrics
-    training_metrics: SignalMetricsPerBatchResult
-    batch_metrics: Annotated[
-        List[SignalMetricsPerBatchResult], Field(title="Batch Metrics")
-    ]
-
-
 class AvatarizationJob(BaseModel):
     id: Annotated[UUID, Field(title="Id")]
     kind: JobKind
@@ -1932,18 +1486,6 @@ class AvatarizationWithTimeSeriesJob(BaseModel):
     traceback: Annotated[Optional[str], Field(title="Traceback")] = None
     result: Optional[AvatarizationWithTimeSeriesResult] = None
     parameters: AvatarizationWithTimeSeriesParameters
-    current_progress: Optional[JobProgress] = None
-
-
-class PrivacyMetricsBatchJob(BaseModel):
-    id: Annotated[UUID, Field(title="Id")]
-    kind: JobKind
-    created_at: Annotated[datetime, Field(title="Created At")]
-    status: JobStatus
-    error_message: Annotated[Optional[str], Field(title="Error Message")] = None
-    traceback: Annotated[Optional[str], Field(title="Traceback")] = None
-    result: Optional[PrivacyMetricsBatchResult] = None
-    parameters: PrivacyMetricsBatchParameters
     current_progress: Optional[JobProgress] = None
 
 
@@ -1983,18 +1525,6 @@ class PrivacyMetricsWithTimeSeriesJob(BaseModel):
     current_progress: Optional[JobProgress] = None
 
 
-class SignalMetricsBatchJob(BaseModel):
-    id: Annotated[UUID, Field(title="Id")]
-    kind: JobKind
-    created_at: Annotated[datetime, Field(title="Created At")]
-    status: JobStatus
-    error_message: Annotated[Optional[str], Field(title="Error Message")] = None
-    traceback: Annotated[Optional[str], Field(title="Traceback")] = None
-    result: Optional[SignalMetricsBatchResult] = None
-    parameters: SignalMetricsBatchParameters
-    current_progress: Optional[JobProgress] = None
-
-
 class SignalMetricsWithTimeSeriesJob(BaseModel):
     id: Annotated[UUID, Field(title="Id")]
     kind: JobKind
@@ -2029,19 +1559,6 @@ class Advice(BaseModel):
             title="More Details",
         ),
     ] = {}
-
-
-class AvatarizationBatchJobCreate(BaseModel):
-    parameters: AvatarizationBatchParameters
-
-
-class AvatarizationBatchResult(BaseModel):
-    privacy_metrics: Optional[PrivacyMetrics] = None
-    signal_metrics: Optional[SignalMetrics] = None
-    training_result: AvatarizationPerBatchResult
-    batch_results: Annotated[
-        List[AvatarizationPerBatchResult], Field(title="Batch Results")
-    ]
 
 
 class AvatarizationJobCreate(BaseModel):
@@ -2119,10 +1636,6 @@ class AvatarizationWithTimeSeriesJobCreate(BaseModel):
     parameters: AvatarizationWithTimeSeriesParameters
 
 
-class PrivacyMetricsBatchJobCreate(BaseModel):
-    parameters: PrivacyMetricsBatchParameters
-
-
 class PrivacyMetricsGeolocationJobCreate(BaseModel):
     parameters: PrivacyMetricsGeolocationParameters
 
@@ -2140,18 +1653,6 @@ class AdviceJob(BaseModel):
     traceback: Annotated[Optional[str], Field(title="Traceback")] = None
     result: Optional[Advice] = None
     parameters: AdviceParameters
-    current_progress: Optional[JobProgress] = None
-
-
-class AvatarizationBatchJob(BaseModel):
-    id: Annotated[UUID, Field(title="Id")]
-    kind: JobKind
-    created_at: Annotated[datetime, Field(title="Created At")]
-    status: JobStatus
-    error_message: Annotated[Optional[str], Field(title="Error Message")] = None
-    traceback: Annotated[Optional[str], Field(title="Traceback")] = None
-    result: Optional[AvatarizationBatchResult] = None
-    parameters: AvatarizationBatchParameters
     current_progress: Optional[JobProgress] = None
 
 

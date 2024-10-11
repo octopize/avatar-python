@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       jupytext_version: 1.16.4
 # ---
 
 # # Tutorial 5: Custom processors
@@ -185,6 +185,10 @@ result = client.pipelines.avatarization_pipeline_with_processors(
     per_request_timeout=1000,
     timeout=1000,
 )
+
+print(result.avatarization_job_id)
+print(result.privacy_job_id)
+print(result.signal_job_id)
 # -
 
 avatars = result.post_processed_avatars

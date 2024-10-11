@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 8.0.0
+# API Version : 11.7.0
 
 
 import logging
@@ -34,8 +34,6 @@ from avatars.constants import DEFAULT_TIMEOUT
 from avatars.exceptions import Timeout
 from avatars.models import AdviceJob  # noqa: F401
 from avatars.models import AdviceJobCreate  # noqa: F401
-from avatars.models import AvatarizationBatchJob  # noqa: F401
-from avatars.models import AvatarizationBatchJobCreate  # noqa: F401
 from avatars.models import AvatarizationJob  # noqa: F401
 from avatars.models import AvatarizationJobCreate  # noqa: F401
 from avatars.models import AvatarizationMultiTableJob  # noqa: F401
@@ -54,8 +52,6 @@ from avatars.models import GenericJob  # noqa: F401
 from avatars.models import Login  # noqa: F401
 from avatars.models import LoginResponse  # noqa: F401
 from avatars.models import PatchDataset  # noqa: F401
-from avatars.models import PrivacyMetricsBatchJob  # noqa: F401
-from avatars.models import PrivacyMetricsBatchJobCreate  # noqa: F401
 from avatars.models import PrivacyMetricsGeolocationJob  # noqa: F401
 from avatars.models import PrivacyMetricsGeolocationJobCreate  # noqa: F401
 from avatars.models import PrivacyMetricsJob  # noqa: F401
@@ -67,19 +63,15 @@ from avatars.models import PrivacyMetricsWithTimeSeriesJobCreate  # noqa: F401
 from avatars.models import Projections  # noqa: F401
 from avatars.models import Report  # noqa: F401
 from avatars.models import ReportCreate  # noqa: F401
-from avatars.models import ReportFromBatchCreate  # noqa: F401
 from avatars.models import ReportFromDataCreate  # noqa: F401
 from avatars.models import ReportGeolocationPrivacyCreate  # noqa: F401
 from avatars.models import ResetPasswordRequest  # noqa: F401
-from avatars.models import SignalMetricsBatchJob  # noqa: F401
-from avatars.models import SignalMetricsBatchJobCreate  # noqa: F401
 from avatars.models import SignalMetricsJob  # noqa: F401
 from avatars.models import SignalMetricsJobCreate  # noqa: F401
 from avatars.models import SignalMetricsWithTimeSeriesJob  # noqa: F401
 from avatars.models import SignalMetricsWithTimeSeriesJobCreate  # noqa: F401
 from avatars.models import User  # noqa: F401
 from avatars.models import (
-    AvatarizationBatchResult,
     AvatarizationPipelineCreate,
     AvatarizationPipelineResult,
     ColumnDetail,
@@ -244,7 +236,7 @@ class Datasets:
             )
         )
 
-        _source: Optional[Union[str, FileLike]] = request or source
+        _source: Optional[Union[str, FileLike]] = request or source  # type: ignore[assignment]
         return self.create_dataset(source=_source, name=name, timeout=timeout)
 
     def create_dataset(
@@ -289,7 +281,7 @@ class Datasets:
             "params": dict(name=name, filetype=filetype),
         }
 
-        result = self.client.request(**kwargs)
+        result = self.client.request(**kwargs)  # type: ignore[arg-type]
 
         return Dataset(**result)
 
@@ -591,24 +583,6 @@ class Jobs:
 
         return _Jobs(self.client).create_avatarization_job(*args, **kwargs)
 
-    def create_avatarization_batch_job(
-        self,
-        request: AvatarizationBatchJobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> AvatarizationBatchJob:
-        """Create an avatarization batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            request,
-        ]
-
-        return _Jobs(self.client).create_avatarization_batch_job(*args, **kwargs)
-
     def create_avatarization_with_time_series_job(
         self,
         request: AvatarizationWithTimeSeriesJobCreate,
@@ -683,24 +657,6 @@ class Jobs:
 
         return _Jobs(self.client).create_privacy_metrics_job(*args, **kwargs)
 
-    def create_privacy_metrics_batch_job(
-        self,
-        request: PrivacyMetricsBatchJobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> PrivacyMetricsBatchJob:
-        """Create a privacy metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            request,
-        ]
-
-        return _Jobs(self.client).create_privacy_metrics_batch_job(*args, **kwargs)
-
     def create_privacy_metrics_time_series_job(
         self,
         request: PrivacyMetricsWithTimeSeriesJobCreate,
@@ -738,24 +694,6 @@ class Jobs:
         ]
 
         return _Jobs(self.client).create_signal_metrics_time_series_job(*args, **kwargs)
-
-    def create_signal_metrics_batch_job(
-        self,
-        request: SignalMetricsBatchJobCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> SignalMetricsBatchJob:
-        """Create a signal metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            request,
-        ]
-
-        return _Jobs(self.client).create_signal_metrics_batch_job(*args, **kwargs)
 
     def create_privacy_metrics_multi_table_job(
         self,
@@ -835,26 +773,6 @@ class Jobs:
 
         return _Jobs(self.client).get_avatarization_job(*args, **kwargs)
 
-    def get_avatarization_batch_job(
-        self,
-        id: str,
-        *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> AvatarizationBatchJob:
-        """Get an avatarization batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "per_request_timeout": per_request_timeout,
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            id,
-        ]
-
-        return _Jobs(self.client).get_avatarization_batch_job(*args, **kwargs)
-
     def get_avatarization_time_series_job(
         self,
         id: str,
@@ -915,26 +833,6 @@ class Jobs:
 
         return _Jobs(self.client).get_signal_metrics(*args, **kwargs)
 
-    def get_signal_metrics_batch_job(
-        self,
-        id: str,
-        *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> SignalMetricsBatchJob:
-        """Get a signal metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "per_request_timeout": per_request_timeout,
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            id,
-        ]
-
-        return _Jobs(self.client).get_signal_metrics_batch_job(*args, **kwargs)
-
     def get_signal_metrics_time_series_job(
         self,
         id: str,
@@ -974,26 +872,6 @@ class Jobs:
         ]
 
         return _Jobs(self.client).get_privacy_metrics(*args, **kwargs)
-
-    def get_privacy_metrics_batch_job(
-        self,
-        id: str,
-        *,
-        per_request_timeout: Optional[int] = DEFAULT_TIMEOUT,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> PrivacyMetricsBatchJob:
-        """Get a privacy metrics batch job."""
-
-        kwargs: Dict[str, Any] = {
-            "per_request_timeout": per_request_timeout,
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            id,
-        ]
-
-        return _Jobs(self.client).get_privacy_metrics_batch_job(*args, **kwargs)
 
     def get_privacy_metrics_time_series_job(
         self,
@@ -1230,27 +1108,6 @@ class Reports:
 
         return _Reports(self.client).create_report_from_data(*args, **kwargs)
 
-    def create_report_from_batch(
-        self,
-        request: ReportFromBatchCreate,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Report:
-        """Create an anonymization report from batch job identifiers.
-
-        The report will be generated with the worst privacy_metrics and the mean signal_metrics.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "timeout": timeout,
-        }
-
-        args: List[Any] = [
-            request,
-        ]
-
-        return _Reports(self.client).create_report_from_batch(*args, **kwargs)
-
     def create_geolocation_privacy_report(
         self,
         request: ReportGeolocationPrivacyCreate,
@@ -1389,11 +1246,21 @@ class PandasIntegration:
         **kwargs: Dict[str, Any],  # to collect should_stream
     ) -> Dataset:
 
+        # Reset the index of the dataframe
+        request = request.reset_index(drop=True)
+
         if "should_stream" in kwargs:
             warnings.warn(
                 "The `should_stream` parameter is deprecated and will be removed in a future version. "
                 "All uploads are now streamed by default.",
                 DeprecationWarning,
+            )
+
+        if not set(identifier_variables).issubset(set(request.columns)):
+            missing_columns = set(identifier_variables) - set(request.columns)
+            raise ValueError(
+                "Expected all identifier variables to be present in the dataframe."
+                f" Got {missing_columns}"
             )
 
         for col in request.columns:
@@ -1667,86 +1534,6 @@ def upload_batch_and_get_order(
         batch_mapping[dataset] = dataframe.index
 
     return training_dataset.id, datasets_split_ids, batch_mapping
-
-
-def download_avatar_dataframe_from_batch(
-    client: ApiClient,
-    avatarization_batch_result: AvatarizationBatchResult,
-    timeout: int = DEFAULT_TIMEOUT,
-    filetype: FileType = FileType.parquet,
-) -> pd.DataFrame:
-    """Download the shuffled avatar dataframe from batch result.
-    Arguments
-    ---------
-        client:
-            Api client
-        avatarization_batch_result:
-            Result of the batch avatarization
-    Returns
-    -------
-        the concatenated shuffled avatar dataframe
-    """
-    training_df = client.pandas_integration.download_dataframe(
-        str(avatarization_batch_result.training_result.avatars_dataset.id),
-        filetype=filetype,
-        timeout=timeout,
-    )
-    splits_df = [
-        client.pandas_integration.download_dataframe(
-            str(batch_results.avatars_dataset.id),
-            filetype=filetype,
-            timeout=timeout,
-        )
-        for batch_results in avatarization_batch_result.batch_results
-    ]
-    return pd.concat([training_df] + splits_df)
-
-
-def download_sensitive_unshuffled_avatar_dataframe_from_batch(
-    client: ApiClient,
-    avatarization_batch_result: AvatarizationBatchResult,
-    order: Dict[UUID, pd.Index],
-    timeout: int = DEFAULT_TIMEOUT,
-    filetype: FileType = FileType.parquet,
-) -> pd.DataFrame:
-    """Download the sensitive unshuffled avatar dataframe from batch result.
-
-    The avatar dataframe is ordered in the original dataframe order.
-    Arguments
-    ---------
-        client:
-            Api client
-        avatarization_batch_result:
-            Result of the batch avatarization
-        order:
-            index order for each dataset batch
-    Returns
-    -------
-        concatenated:
-            the concatenated avatar dataframe with the row order of the original dataframe
-    """
-    avatar_training_id = (
-        avatarization_batch_result.training_result.sensitive_unshuffled_avatars_datasets.id
-    )
-    original_training_id = avatarization_batch_result.training_result.original_id
-    training_df = client.pandas_integration.download_dataframe(
-        str(avatar_training_id), filetype=filetype, timeout=timeout
-    )
-    training_df.index = order[original_training_id]
-
-    split_dfs = []
-    for batch_results in avatarization_batch_result.batch_results:
-        avatar_dataset_id = batch_results.sensitive_unshuffled_avatars_datasets.id
-        original_dataset_id = batch_results.original_id
-
-        split = client.pandas_integration.download_dataframe(
-            str(avatar_dataset_id), filetype=filetype, timeout=timeout
-        )
-        split.index = order[original_dataset_id]
-        split_dfs.append(split)
-
-    concatenated = pd.concat([training_df] + split_dfs).sort_index()
-    return concatenated
 
 
 # This file has been generated - DO NOT MODIFY
