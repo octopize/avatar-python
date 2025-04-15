@@ -24,13 +24,14 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from avatar_yaml.models.parameters import ProjectionType
 from avatar_yaml.models.schema import LinkMethod
 
 from avatars.manager import Manager
 
 # The following are not necessary to run avatar but are used in this tutorial
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://scaleway-prod.octopize.app/api")
+url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
@@ -179,27 +180,32 @@ plot.show()
 runner = manager.create_runner()
 
 # Then upload the data
-runner.add_table("vanilla", vanilla_df,
-                 individual_level=True,primary_key="id")
-runner.add_table("sensor1", ts1_df,
-                 primary_key="primary_key",
-                 foreign_keys=["id"],
-                 time_series_time="t")
-runner.add_table("sensor2", ts2_df,
-                 primary_key="primary_key",
-                 foreign_keys=["id"],
-                 time_series_time="t")
+runner.add_table("vanilla", vanilla_df, individual_level=True, primary_key="id")
+runner.add_table(
+    "sensor1", ts1_df, primary_key="primary_key", foreign_keys=["id"], time_series_time="t"
+)
+runner.add_table(
+    "sensor2", ts2_df, primary_key="primary_key", foreign_keys=["id"], time_series_time="t"
+)
 
 # %% [markdown]
 # ### add links between tables
 
 # %%
 runner.add_link(
-    parent_table_name='vanilla', parent_field='id', child_table_name='sensor1', child_field='id', method=LinkMethod.TIME_SERIES,
+    parent_table_name="vanilla",
+    parent_field="id",
+    child_table_name="sensor1",
+    child_field="id",
+    method=LinkMethod.TIME_SERIES,
 )
 
 runner.add_link(
-    parent_table_name='vanilla', parent_field='id', child_table_name='sensor2', child_field='id', method=LinkMethod.TIME_SERIES,
+    parent_table_name="vanilla",
+    parent_field="id",
+    child_table_name="sensor2",
+    child_field="id",
+    method=LinkMethod.TIME_SERIES,
 )
 
 # %% [markdown]
@@ -215,12 +221,16 @@ runner.add_link(
 
 # %%
 runner.set_parameters("vanilla", k=5)
-runner.set_parameters("sensor1", time_series_projection_type='flatten',time_series_nf=10)
-runner.set_parameters("sensor2", time_series_projection_type='flatten',time_series_nf=10)
+runner.set_parameters(
+    "sensor1", time_series_projection_type=ProjectionType.FLATTEN, time_series_nf=10
+)
+runner.set_parameters(
+    "sensor2", time_series_projection_type=ProjectionType.FLATTEN, time_series_nf=10
+)
 
 # %%
 runner.run()
-results=runner.get_all_results()
+results = runner.get_all_results()
 
 # %% [markdown]
 # ### Retrieve avatars
@@ -231,14 +241,14 @@ results=runner.get_all_results()
 # ### Checking your avatars: vanilla data
 
 # %%
-avatars_vanilla=runner.shuffled("vanilla")
+avatars_vanilla = runner.shuffled("vanilla")
 avatars_vanilla.head()
 
 # %% [markdown]
 # ### Checking your avatars: `sensor1` and `sensor2`
 
 # %%
-avatars_ts1_df=runner.shuffled("sensor1")
+avatars_ts1_df = runner.shuffled("sensor1")
 avatars_ts1_df.head()
 
 # %%
@@ -269,7 +279,7 @@ plot.show()
 # ### Checking your avatars: `sensor3`
 
 # %%
-avatars_ts2_df=runner.shuffled("sensor2")
+avatars_ts2_df = runner.shuffled("sensor2")
 avatars_ts2_df.head()
 
 # %%

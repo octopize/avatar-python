@@ -182,7 +182,44 @@ class Runner:
         closest_rate_ratio_threshold: float | None = None,
         categorical_hidden_rate_variables: list[str] | None = None,
     ):
-        """Set the parameters for the table."""
+        """
+        Set the parameters for the table.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table.
+        k
+            Number of nearest neighbors to consider for KNN-based methods.
+        ncp
+            Number of dimensions to consider for the KNN algorithm.
+        use_categorical_reduction
+            Whether to transform categorical variables into a latent numerical space before projection.
+        column_weights
+            Dictionary mapping column names to their respective weights, indicating the importance of each variable during the projection process.
+        exclude_variable_names
+            List of variable names to exclude from the projection.
+        exclude_replacement_strategy : ExcludeVariablesMethod, optional
+            Strategy for replacing excluded variables. Options: ROW_ORDER, COORDINATE_SIMILARITY.
+        imputation_method
+            Method for imputing missing values. Options: ImputeMethod.KNN, ImputeMethod.MODE, ImputeMethod.MEDIAN, ImputeMethod.MEAN, ImputeMethod.FAST_KNN.
+        imputation_k
+            Number of neighbors to use for imputation if the method is KNN or FAST_KNN.
+        imputation_training_fraction
+            Fraction of the dataset to use for training the imputation model when using KNN or FAST_KNN.
+        time_series_nf
+            In time series context, number of degrees of freedom to retain in time series projections.
+        time_series_projection_type
+            In time series context, type of projection for time series. Options: ProjectionType.FCPA, ProjectionType.FLATTEN default is FCPA.
+        time_series_method
+            In time series context, method for aligning series. Options: AlignmentMethod.SPECIFIED, AlignmentMethod.MAX, AlignmentMethod.MIN, AlignmentMethod.MEAN.
+        time_series_nb_points
+            In time series context, number of points to generate for time series.
+        known_variables
+            List of known variables to be used for privacy metrics. These are variables that could be easily known by an attacker.
+        target
+            Target variable to predict, used for signal metrics.
+        """
         imputation = imputation_method.value if imputation_method else None
         if k:
             replacement_strategy = (

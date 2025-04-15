@@ -35,7 +35,7 @@ from avatars.manager import Manager
 # The following are not necessary to run avatar but are used in this tutorial
 from avatars.models import JobKind
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://scaleway-prod.octopize.app/api")
+url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
@@ -92,21 +92,27 @@ visit.head()
 # First initialize the runner
 runner = manager.create_runner()
 
-runner.add_table("patient",
-                patient,
-                primary_key="p_id",
-                individual_level=True, )
+runner.add_table(
+    "patient",
+    patient,
+    primary_key="p_id",
+    individual_level=True,
+)
 
-runner.add_table("doctor",
-                doctor,
-                primary_key="d_id",
-                individual_level=True, )
+runner.add_table(
+    "doctor",
+    doctor,
+    primary_key="d_id",
+    individual_level=True,
+)
 
 
-runner.add_table("visit",
-                visit,
-                primary_key="visit_id",
-                foreign_keys=["patient_id", "doctor_id"],)
+runner.add_table(
+    "visit",
+    visit,
+    primary_key="visit_id",
+    foreign_keys=["patient_id", "doctor_id"],
+)
 
 # %% [markdown]
 # ## Parameters setup
@@ -133,31 +139,42 @@ runner.add_table("visit",
 # - A link is a relation between 1 parent table and 1 child table
 
 # %%
-runner.add_link(parent_table_name="patient",
-                child_table_name="visit",
-                parent_field="p_id",
-                child_field="patient_id",
-                method=LinkMethod.LINEAR_SUM_ASSIGNMENT)
+runner.add_link(
+    parent_table_name="patient",
+    child_table_name="visit",
+    parent_field="p_id",
+    child_field="patient_id",
+    method=LinkMethod.LINEAR_SUM_ASSIGNMENT,
+)
 # Linear sum assignment consumes lots of ressource. Change the method if you have a large dataset.
 
-runner.add_link(parent_table_name="doctor",
-                child_table_name="visit",
-                parent_field="d_id",
-                child_field="doctor_id",
-                method=LinkMethod.LINEAR_SUM_ASSIGNMENT)
+runner.add_link(
+    parent_table_name="doctor",
+    child_table_name="visit",
+    parent_field="d_id",
+    child_field="doctor_id",
+    method=LinkMethod.LINEAR_SUM_ASSIGNMENT,
+)
 
 # The k parameter for each table needs to be adjusted regarding the number of records.
-runner.set_parameters("patient", k=15,known_variables=[
-            "gender",
-            "age",
-        ],
-        target="weight",)
-runner.set_parameters("doctor", k=5,
-                              known_variables=[
-            "age",
-        ],
-        target="job",)
-runner.set_parameters("visit", k=30 )
+runner.set_parameters(
+    "patient",
+    k=15,
+    known_variables=[
+        "gender",
+        "age",
+    ],
+    target="weight",
+)
+runner.set_parameters(
+    "doctor",
+    k=5,
+    known_variables=[
+        "age",
+    ],
+    target="job",
+)
+runner.set_parameters("visit", k=30)
 
 # %% [markdown]
 # ## Anonymization
@@ -166,7 +183,7 @@ runner.set_parameters("visit", k=30 )
 runner.run()
 
 # %%
-results=runner.get_all_results()
+results = runner.get_all_results()
 
 # Get back avatar tables from the results
 # Patient
@@ -212,7 +229,6 @@ for method in runner.privacy_metrics("patient"):
     print(f"   Hidden rate : {method['hidden_rate']}")
 
 
-
 # %% [markdown]
 # Key understandings:
 # - **Standalone**: Indicates that the patient table, when considered independently, is protected.
@@ -233,7 +249,9 @@ for method in runner.privacy_metrics("doctor"):
 # %%
 print("*** Privacy metrics on the visit table***")
 for method in runner.privacy_metrics("visit"):
-    print(f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}")
+    print(
+        f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}"
+    )
     print(f"   Hidden rate : {method['hidden_rate']}")
 
 
@@ -287,8 +305,10 @@ for method in runner.signal_metrics("doctor"):
 # %%
 print("*** Signal metrics on the visit table***")
 for method in runner.signal_metrics("visit"):
-    print(f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}")
-    if method['metadata']['computation_type'] == 'standalone':
+    print(
+        f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}"
+    )
+    if method["metadata"]["computation_type"] == "standalone":
         print(f"   Hellinger mean : {method['hellinger_mean']}")
     print(f"   Correlation difference ratio : {method['correlation_difference_ratio']}")
 
@@ -318,12 +338,8 @@ map_color = {"original": ORIGINAL_COLOR, "avatar": AVATAR_COLOR}
 day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
 doctor_avatar_renamed = doctor_avatar.rename(columns={"age": "age_doctor"})
-visit_avatar_flat = visit_avatar.join(
-    doctor_avatar_renamed.set_index("d_id"), on="doctor_id"
-)
-visit_avatar_flat = visit_avatar_flat.join(
-    patient_avatar.set_index("p_id"), on="patient_id"
-)
+visit_avatar_flat = visit_avatar.join(doctor_avatar_renamed.set_index("d_id"), on="doctor_id")
+visit_avatar_flat = visit_avatar_flat.join(patient_avatar.set_index("p_id"), on="patient_id")
 
 
 doctor_renamed = doctor.rename(columns={"age": "age_doctor"})
@@ -399,7 +415,6 @@ sns.countplot(
     hue="job",
     ax=axes[0],
     palette=[ORIGINAL_COLOR, "lightgrey"],
-
 )
 sns.countplot(
     data=visit_avatar_flat,
@@ -415,9 +430,7 @@ axes[1].set_title("Avatar")
 # ### Patient x Doctor
 
 # %%
-sns.kdeplot(
-    data=visit_flat, x="age", y="age_doctor", fill=True, color=ORIGINAL_COLOR, alpha=0.8
-)
+sns.kdeplot(data=visit_flat, x="age", y="age_doctor", fill=True, color=ORIGINAL_COLOR, alpha=0.8)
 sns.kdeplot(
     data=visit_avatar_flat,
     x="age",

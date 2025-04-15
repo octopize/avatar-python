@@ -1,8 +1,8 @@
-USER_ID := env_var_or_default("USER_ID", `uuidgen`)
 AVATAR_USERNAME := env_var("AVATAR_USERNAME")
 AVATAR_PASSWORD := env_var("AVATAR_PASSWORD")
 AVATAR_BASE_API_URL := env_var_or_default("AVATAR_BASE_API_URL", "http://localhost:8080/api")
 
+USER_ID := env_var_or_default("USER_ID", `uuidgen`)
 VENV_NAME := "notebooks/env"
 TUTORIAL_REQUIREMENTS := "requirements-tutorial.txt"
 default:
@@ -31,10 +31,3 @@ pip-install-tutorial:
 notebook:
     just pip-install-tutorial
     PATH="{{VENV_NAME}}/bin:$PATH" VIRTUAL_ENV="{{VENV_NAME}}" AVATAR_BASE_API_URL={{AVATAR_BASE_API_URL}} AVATAR_USERNAME={{AVATAR_USERNAME}} AVATAR_PASSWORD={{AVATAR_PASSWORD}} jupyter notebook notebooks
-
-lci :
-    uv run ruff check
-    uv run ruff format
-    uv run ruff check
-    uv run mypy
-    uv run python -m pytest tests/*.py

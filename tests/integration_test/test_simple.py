@@ -15,8 +15,6 @@ def test_main(
     password: str = os.getenv("AVATAR_PASSWORD", ""),
     dataset_path: str = "tests/fixtures/iris.csv",
 ) -> int:
-    print(username, password, base_api_url)
-    print(os.getenv("STORAGE_ENDPOINT_URL", ""))
     logger.info("Running main test")
     manager = Manager(base_url=base_api_url)
     manager.authenticate(username, password)

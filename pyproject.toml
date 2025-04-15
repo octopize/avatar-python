@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"

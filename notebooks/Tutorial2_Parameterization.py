@@ -31,7 +31,7 @@ from avatars.manager import Manager
 # The following are not necessary to run avatar but are used in this tutorial
 from avatars.models import JobKind
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://scaleway-prod.octopize.app/api")
+url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
@@ -88,7 +88,7 @@ print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-original_coord_k_2, avatars_coord_k_2  = runner.projections("iris")
+original_coord_k_2, avatars_coord_k_2 = runner.projections("iris")
 
 # %%
 # Create a new runner to run with a different k
@@ -110,7 +110,7 @@ print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-original_coord_k_30, avatars_coord_k_30  = runner.projections("iris")
+original_coord_k_30, avatars_coord_k_30 = runner.projections("iris")
 
 
 # %% [markdown]
@@ -122,8 +122,9 @@ original_coord_k_30, avatars_coord_k_30  = runner.projections("iris")
 # %% [markdown]
 # By looking at originals and avatars in the projected space, we can observe the area covered by avatars and if it covers the same space as the original data.
 
+
 # %%
-def plot_coordinates(original_coord, avatars_coord, k: int |  None = None):
+def plot_coordinates(original_coord, avatars_coord, k: int | None = None):
     projections_records = np.array(original_coord)[
         :, 0:2
     ]  # First 2 dimensions of projected records
@@ -151,6 +152,8 @@ def plot_coordinates(original_coord, avatars_coord, k: int |  None = None):
     )
 
     ax.set_title(f"Projection of originals and avatars {k=}")
+
+
 plot_coordinates(original_coord_k_2, avatars_coord_k_2, 2)
 
 # %%
@@ -207,8 +210,8 @@ use_categorical_reduction = True
 # Metrics are computed after re-assignment of the excluded variables, so a variable that has been excluded is still anonymized as long as the privacy targets are reached.
 
 # %%
-exclude_variable_names=["variety"]
-exclude_replacement_strategy='coordinate_similarity'
+exclude_variable_names = ["variety"]
+exclude_replacement_strategy = "coordinate_similarity"
 
 # %% [markdown]
 # ## Missing data
@@ -222,7 +225,7 @@ exclude_replacement_strategy='coordinate_similarity'
 # These parameters allow you to choose the method to impute the missing values. `imputation_method` could be : `fast_knn`, `knn` , `mean` , `mode`, `median`. By default we use the `fast_knn` method.
 
 # %%
-imputation_method="mean"
+imputation_method = "mean"
 
 # %% [markdown]
 # # Running the avatarization

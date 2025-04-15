@@ -22,7 +22,7 @@ from avatars.manager import Manager
 
 # The following are not necessary to run avatar but are used in this tutorial
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://scaleway-prod.octopize.app/api")
+url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
@@ -48,7 +48,7 @@ runner.set_parameters("wbcd", k=15)
 # Run the pipeline with avatarization, privacy and signal metrics and report
 runner.run()
 # Get the results
-results=runner.get_all_results()
+results = runner.get_all_results()
 
 # %% [markdown]
 # ## Retrieve avatars
@@ -76,4 +76,4 @@ for key, value in runner.signal_metrics("wbcd").items():
 # ## Retrieving the avatarization report
 
 # %%
-runner.download_report('my_report.pdf')
+runner.download_report("my_report.pdf")
