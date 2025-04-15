@@ -3,64 +3,68 @@
 #   jupytext:
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.4
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.17.0
 # ---
 
+# %% [markdown]
 # # Tutorial 2: Parameterizing an avatarization
 
+# %% [markdown]
 # In this tutorial, we will learn how to set key parameters of the avatarization and how they impact privacy and utility.
 
+# %% [markdown]
 # ## Connection
 
-# +
+# %%
+# This is the main file for the Avatar tutorial.
 import os
 
-url = os.environ.get("AVATAR_BASE_URL")
-username = os.environ.get("AVATAR_USERNAME")
-password = os.environ.get("AVATAR_PASSWORD")
-# -
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
-# Run the following cell if your environment does not have all the listed packages already installed.
-
-# +
-# This is the client that you'll be using for all of your requests
-from avatars.client import ApiClient
-from avatars.models import (
-    AvatarizationJobCreate,
-    AvatarizationParameters,
-    AdviceJobCreate,
-    AdviceParameters,
-    AvatarizationPipelineCreate,
-)
-from avatars.models import ReportCreate
+from avatars.manager import Manager
 
 # The following are not necessary to run avatar but are used in this tutorial
-import pandas as pd
-import io
-import numpy as np
+from avatars.models import JobKind
 
-import seaborn as sns
-import matplotlib.pyplot as plt
+url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
+username = os.environ.get("AVATAR_USERNAME")
+password = os.environ.get("AVATAR_PASSWORD")
 
+# %% [markdown]
+# Run the following cell if your environment does not have all the listed packages already installed.
+
+# %%
 # Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
-client = ApiClient(base_url=url)
-client.authenticate(username=username, password=password)
-
+manager = Manager(base_url=url)
+# Authenticate with the server
+manager.authenticate(username, password)
 # Verify that we can connect to the API server
-client.health.get_health()
-# -
+manager.get_health()
 
+# %% [markdown]
 # ## Loading data
 #
 # This tutorial uses the `iris` dataset, allowing us to run several avatarization without delays.
 
-df = pd.read_csv("../fixtures/iris.csv")
-dataset = client.pandas_integration.upload_dataframe(df)
+# %%
+df = pd.read_csv("fixtures/iris.csv")
 
+# %%
 df.head()
 
+# %%
+# The runner is the object that will be used to upload data to the server and run the avatarization
+runner = manager.create_runner()
+
+# Then upload the data, you can either use a pandas dataframe or a file
+runner.add_table("iris", df)
+
+# %% [markdown]
 # ## Varying k
 #
 # The parameter *k* can be used to control the tradeoff between privacy and utility. To increase privacy, we recommend increasing the value of k. Because k is the parameter that also impacts the most the utility, it is recommended to alter it gradually.
@@ -68,142 +72,122 @@ df.head()
 # We demonstrate here the effect of varying *k*.
 #
 
-# +
+# %%
 # Set k
 k = 2
+runner.set_parameters("iris", k=k)
 
-# Create and run avatarization
-job_small_k = client.jobs.create_full_avatarization_job(
-    AvatarizationJobCreate(
-        parameters=AvatarizationParameters(k=k, dataset_id=dataset.id)
-    )
-)
-job_small_k = client.jobs.get_avatarization_job(id=job_small_k.id, timeout=100)
-print(job_small_k.id)
+runner.run()
 
 # Retrieve selected metric
-hidden_rate = job_small_k.result.privacy_metrics.hidden_rate
-local_cloaking = job_small_k.result.privacy_metrics.local_cloaking
-hellinger_distance = job_small_k.result.signal_metrics.hellinger_mean
+hidden_rate = runner.privacy_metrics("iris")["hidden_rate"]
+local_cloaking = runner.privacy_metrics("iris")["local_cloaking"]
+hellinger_distance = runner.signal_metrics("iris")["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-# +
+original_coord_k_2, avatars_coord_k_2 = runner.projections("iris")
+
+# %%
+# Create a new runner to run with a different k
+runner = manager.create_runner()
+runner.add_table("iris", "fixtures/iris.csv")
+
 # Set k
 k = 30
+runner.set_parameters("iris", k=k)
 
-# Create and run avatarization
-job_large_k = client.jobs.create_full_avatarization_job(
-    AvatarizationJobCreate(
-        parameters=AvatarizationParameters(k=k, dataset_id=dataset.id)
-    )
-)
-job_large_k = client.jobs.get_avatarization_job(id=job_large_k.id, timeout=100)
-print(job_large_k.id)
+runner.run()
 
 # Retrieve selected metric
-hidden_rate = job_large_k.result.privacy_metrics.hidden_rate
-local_cloaking = job_large_k.result.privacy_metrics.local_cloaking
-hellinger_distance = job_large_k.result.signal_metrics.hellinger_mean
+hidden_rate = runner.privacy_metrics("iris")["hidden_rate"]
+local_cloaking = runner.privacy_metrics("iris")["local_cloaking"]
+hellinger_distance = runner.signal_metrics("iris")["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
-# -
 
+original_coord_k_30, avatars_coord_k_30 = runner.projections("iris")
+
+
+# %% [markdown]
 # We observe that we are able to increase the level of privacy by simply increasing *k*. But this is at the expense of the utility.
 
+# %% [markdown]
 # ## Visualization of originals and avatars
 
+# %% [markdown]
 # By looking at originals and avatars in the projected space, we can observe the area covered by avatars and if it covers the same space as the original data.
 
-projections = client.metrics.get_job_projections(job_id=job_small_k.id)
-projections_records = np.array(projections.records)[
-    :, 0:2
-]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[
-    :, 0:2
-]  # First 2 dimensions of projected records
 
-projections
+# %%
+def plot_coordinates(original_coord, avatars_coord, k: int | None = None):
+    projections_records = np.array(original_coord)[
+        :, 0:2
+    ]  # First 2 dimensions of projected records
+    projections_avatars = np.array(avatars_coord)[
+        :, 0:2
+    ]  # First 2 dimensions of projected records
 
-# +
-fig, ax = plt.subplots(1, 1)
-sns.scatterplot(
-    ax=ax,
-    x=projections_records[:, 0],
-    y=projections_records[:, 1],
-    alpha=0.6,
-    color="dimgrey",
-    label="Original",
-)
+    fig, ax = plt.subplots(1, 1)
+    sns.scatterplot(
+        ax=ax,
+        x=projections_records[:, 0],
+        y=projections_records[:, 1],
+        alpha=0.6,
+        color="dimgrey",
+        label="Original",
+    )
 
-sns.scatterplot(
-    ax=ax,
-    x=projections_avatars[:, 0],
-    y=projections_avatars[:, 1],
-    alpha=0.6,
-    color="#3BD6B0",
-    label="Avatars",
-)
+    sns.scatterplot(
+        ax=ax,
+        x=projections_avatars[:, 0],
+        y=projections_avatars[:, 1],
+        alpha=0.6,
+        color="#3BD6B0",
+        label="Avatars",
+    )
 
-ax.set_title("Projection of originals and avatars produced with small k")
+    ax.set_title(f"Projection of originals and avatars {k=}")
 
-# +
-projections = client.metrics.get_job_projections(job_id=job_large_k.id)
-projections_records = np.array(projections.records)[
-    :, 0:2
-]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[
-    :, 0:2
-]  # First 2 dimensions of projected records
 
-fig, ax = plt.subplots(1, 1)
-sns.scatterplot(
-    ax=ax,
-    x=projections_records[:, 0],
-    y=projections_records[:, 1],
-    alpha=0.6,
-    color="dimgrey",
-    label="Original",
-)
+plot_coordinates(original_coord_k_2, avatars_coord_k_2, 2)
 
-sns.scatterplot(
-    ax=ax,
-    x=projections_avatars[:, 0],
-    y=projections_avatars[:, 1],
-    alpha=0.6,
-    color="#3BD6B0",
-    label="Avatars",
-)
+# %%
+plot_coordinates(original_coord_k_30, avatars_coord_k_30, 30)
 
-ax.set_title("Projection of originals and avatars produced with large k")
-# -
-
+# %% [markdown]
 # We observe that the area covered by avatars generated with a low *k* is much closer to the area covered by original data points. We can also see that with a low *k*, some avatars are close to original points that are isolated. This may pose a risk of re-identification. This explains the drop in privacy level when reducing *k*.
 #
 # Avatars produced with a large *k* are significantly further away from isolated originals and so ensure their privacy. However **care should be taken in setting *k***  with values that are not too high to prevent a drop in utility level. The drop in utility level is represented by the area covered by avatars being much smaller than the ones of originals.
 
+# %% [markdown]
 # ## Other parameters
 
+# %% [markdown]
 # ### Column weights
 #
 # Column weights represent the importance of each variable during the projection process. The higher the value for one variable, the more the individuals will be separated regarding this variable.
 #
 # By default, all variables are given equal weight of 1, but custom weights can be defined to bias the projection towards some specific variables.
 
+# %%
 column_weights = {"variety": 3}
 
+# %% [markdown]
 # ### Number of components
 #
 # The number of components represents the number of dimensions to consider for the KNN algorithm. With a low value, computation will mostly be based on well-represented variables in the projection.
 #
 # By default, `ncp` is set to 5, meaning that the 5 dimensions in the projected space that represent the most the variance on the data are used when computing neighbors.
 
+# %%
 ncp = 5
 
+# %% [markdown]
 # ### Reduction of highly dimensional data
 #
 # When dealing with variables with a high number of modalities, the number of dimensions created during the projection increase accordingly. This could lead to situations where the number of dimension is too high compared to the number of records.
@@ -212,128 +196,69 @@ ncp = 5
 #
 # By default, `use_categorical_reduction` is set to `False`, meaning that categorical variables are left unprocessed. Furthermore, since categorical variables are converted into 20 dimensions by default, it's recommended to enable this parameter if the total number of modalities in the dataset exceeds 20.
 
-# Turning on categoricalbreduction will 20 numeric columns that embed the categorical columns as vectors
+# %%
+# Turning on categorical reduction will create 20 numeric columns that embed the categorical columns as vectors
 # In this particular example it is conterproductive as it dilutes the signal even more (only three modalities in the original dataset)
 use_categorical_reduction = True
 
-# ### Seed
-#
-# A seed is a helpful feature to enable reproducible experiments. However, a seed should not be set in production to ensure that avatars are unique and that the originals cannot be retro-engineered.
-#
-# By default, `seed` is set to `None`.
+# %% [markdown]
+# ## Categorical variables with large cardinality
 
-seed = 123
+# %% [markdown]
+# The anonymization of datasets containing categorical variables with large cardinality is not trivial. We recommend to exclude the variable from the avatarization before re-assigning it by individual similarity (`coordinate_similarity`) or by the original row order (`row_order`). Using row order is more likely to preserve identifying information than coordinate similarity. Privacy metrics must be calculated at the end of the process to confirm that the data generated is anonymous.
+#
+# Metrics are computed after re-assignment of the excluded variables, so a variable that has been excluded is still anonymized as long as the privacy targets are reached.
 
+# %%
+exclude_variable_names = ["variety"]
+exclude_replacement_strategy = "coordinate_similarity"
+
+# %% [markdown]
+# ## Missing data
+#
+# Missing data is common in datasets and is a property that should be modelled.
+#
+# The Avatar solution can handle variables with missing data without requiring pre-processing. To do so, an additional variable defining whether a value is missing or not will be temporarily added to the data and the missing values will be temporarily imputed. These variables will be part of the anonymization process.
+#
+# In the presence of missing values, the last step in the avatarization will be to remove temporary variables and add back missing values.
+#
+# These parameters allow you to choose the method to impute the missing values. `imputation_method` could be : `fast_knn`, `knn` , `mean` , `mode`, `median`. By default we use the `fast_knn` method.
+
+# %%
+imputation_method = "mean"
+
+# %% [markdown]
+# # Running the avatarization
+
+# %% [markdown]
 # The avatarization can now be run with different parameters
 
-# +
-parameters = AvatarizationParameters(
+# %%
+runner = manager.create_runner()
+runner.add_table("iris", "fixtures/iris.csv")
+
+runner.set_parameters(
+    "iris",
     k=k,
-    dataset_id=dataset.id,
-    column_weights=column_weights,
     ncp=ncp,
-    seed=seed,
+    column_weights=column_weights,
     use_categorical_reduction=use_categorical_reduction,
+    # exclude_variable_names=exclude_variable_names,
+    # exclude_replacement_strategy=exclude_replacement_strategy,
+    # imputation_method=imputation_method,
 )
 
-job = client.jobs.create_full_avatarization_job(
-    AvatarizationJobCreate(parameters=parameters)
-)
-job = client.jobs.get_avatarization_job(id=job.id, timeout=100)
-print(job.id)
-# -
+runner.run(jobs_to_run=[JobKind.standard])
+runner.get_all_results()
 
+# %% [markdown]
 # We will now observe the impact of the parameters on the projections. We recommend executing this last part of the tutorial several times with different settings.
 
-# +
-projections = client.metrics.get_job_projections(job_id=job.id)
-projections_records = np.array(projections.records)[
-    :, 0:2
-]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[
-    :, 0:2
-]  # First 2 dimensions of projected records
+# %%
+original_coord, avatars_coord = runner.projections("iris")
 
-fig, ax = plt.subplots(1, 1)
-sns.scatterplot(
-    ax=ax,
-    x=projections_records[:, 0],
-    y=projections_records[:, 1],
-    alpha=0.6,
-    color="dimgrey",
-    label="Original",
-)
+plot_coordinates(original_coord, avatars_coord, k)
 
-sns.scatterplot(
-    ax=ax,
-    x=projections_avatars[:, 0],
-    y=projections_avatars[:, 1],
-    alpha=0.6,
-    color="#3BD6B0",
-    label="Avatars",
-)
-
-ax.set_title("Projection of originals and avatars produced with custom settings")
-# -
-
-# ### Recommended parameters
-#
-# You can use our tool to find parameters for your avatarization,
-# we use information contained in your dataset to advice you some parameters.
-#
-# These are recommendations, the more you know about your data, the better the avatarization will be.
-
-advice_job = client.jobs.create_advice(
-    AdviceJobCreate(parameters=AdviceParameters(dataset_id=dataset.id))
-)
-advice_job = client.jobs.get_advice(advice_job.id)
-print(advice_job.id)
-print("We recommend using these parameters: ")
-print(advice_job.result.parameters)
-print("Additional advice : ")
-print(advice_job.result.more_details)
-
-# replace the placeholder with the name of your dataframe
-pipeline_str = advice_job.result.python_client_pipeline.replace(
-    "<NAME_OF_YOUR_DF>", "df"
-)
-pipeline_job = client.pipelines.avatarization_pipeline_with_processors(
-    eval(pipeline_str)
-)
-avatars = pipeline_job.post_processed_avatars
-
-# +
-projections = client.metrics.get_job_projections(
-    job_id=pipeline_job.avatarization_job_id
-)
-projections_records = np.array(projections.records)[
-    :, 0:2
-]  # First 2 dimensions of projected records
-projections_avatars = np.array(projections.avatars)[
-    :, 0:2
-]  # First 2 dimensions of projected records
-
-fig, ax = plt.subplots(1, 1)
-sns.scatterplot(
-    ax=ax,
-    x=projections_records[:, 0],
-    y=projections_records[:, 1],
-    alpha=0.6,
-    color="dimgrey",
-    label="Original",
-)
-
-sns.scatterplot(
-    ax=ax,
-    x=projections_avatars[:, 0],
-    y=projections_avatars[:, 1],
-    alpha=0.6,
-    color="#3BD6B0",
-    label="Avatars",
-)
-
-ax.set_title("Projection of originals and avatars produced with adviced parameters")
-# -
-
-# *In the next tutorial, we will show how to use some embedded processors to handle some characteristics of your dataset, for example, the presence of missing values, numeric variables with low cardinality, categorical variables with large cardinality or rare modalities.*
+# %% [markdown]
+# *In the next tutorial, we will show how to run an avatarization with multiple tables.*
 #

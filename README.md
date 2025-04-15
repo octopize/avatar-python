@@ -1,12 +1,8 @@
 # Avatar Python Client
 
-## Documentation
-
-Documentation is available here: <https://python.docs.octopize.io/>
-
 ## Requirements
 
-The `avatars` package requires Python 3.9 or above.
+The `avatars` package requires Python 3.12 or above.
 
 ## Tutorials
 
@@ -18,17 +14,33 @@ We provide a helper script to setup these inside a virtual environments and run 
 
 Simply run the following command:
 
-(NOTE: This assumes that you have the `make` software installed. This may not be the case for Windows by default.)
+(NOTE: This assumes that you have the `just` software installed. This may not be the case for Windows by default.)
 
 ```bash
-make notebook
+just notebook
 ```
 
-If you don't have access to `make` or you want to setup the tutorial requirements manually, you can follow the installation section.
+If you don't have access to `just` or you want to setup the tutorial requirements manually, you can follow the installation section.
 
 ## Installation
 
-See our [documentation](https://python.docs.octopize.io/latest/installation.html) for installation instructions.
+### with pip
+
+```bash
+pip install octopize.avatar
+```
+
+### or, if you're using uv
+
+```bash
+uv add octopize.avatar
+```
+
+### or, if you're using poetry
+
+```bash
+poetry add octopize.avatar
+```
 
 ## License
 
