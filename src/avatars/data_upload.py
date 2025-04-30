@@ -102,12 +102,12 @@ class DataUploader:
 
         if parsed_download.endswith(".pdf"):
             output = fs.read_bytes(parsed_download)
-            writer = "wb"
+            writer_type = "wb"
         else:
             output = fs.read_text(parsed_download)
-            writer = "w"
+            writer_type = "w"
 
         if path:
-            with open(path, writer) as fd:
+            with open(path, writer_type) as fd:
                 fd.write(output)
         return output

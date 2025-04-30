@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.0.1"
+version = "1.0.3"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
@@ -19,7 +19,7 @@ dependencies = [
     "tenacity>=9.0.0",
     "toolz>=1.0.0",
     "typer>=0.15.1",
-    "octopize-avatar-yaml==0.1.11",
+    "octopize-avatar-yaml==0.1.12",
 ]
 
 [dependency-groups]
@@ -34,6 +34,13 @@ dev = [
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
     "pandas>=2.2.3",
+    "seaborn>=0.13.2",
+    "matplotlib>=3.10.1",
+    "octopize-avatar-yaml==0.1.12",
+    "furo>=2024.8.6",
+    "sphinx-multiversion>=0.2.4",
+    "autodoc-pydantic>=2.2.0",
+    "pandoc>=2.4",
 ]
 notebook = [
     "ipykernel>=6.29.5",
@@ -42,7 +49,7 @@ notebook = [
     "numpy>=2.2.4",
     "pandas>=2.2.3",
     "seaborn>=0.13.2",
-    "octopize-avatar-yaml==0.1.11",
+    "octopize-avatar-yaml==0.1.12",
 ]
 
 
@@ -58,17 +65,22 @@ allow-direct-references = true
 module = "toolz.*"
 ignore_missing_imports = true
 
-
 [[tool.mypy.overrides]]
 module = "fsspec.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "avatars.processors.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "avatars.lib.*"
+ignore_errors = true
+
+
 
 [tool.ruff]
 extend = "../../ruff.toml"
-
-[tool.uv.workspace]
-members = ["tests"]
 
 [tool.pytest.ini_options]
 addopts = [

@@ -1,7 +1,6 @@
 import io
 import json
-import secrets
-import string
+import re
 import time
 from enum import StrEnum
 from pathlib import Path
@@ -62,10 +61,20 @@ mapping_result_to_file_name = {
     Results.REPORT: "report.md",
 }
 
+MATCHERS: dict[re.Pattern[str], ColumnType] = {
+    re.compile(r"float"): ColumnType.NUMERIC,
+    re.compile(r"int"): ColumnType.INT,
+    re.compile(r"bool"): ColumnType.BOOL,
+    re.compile(r"datetime"): ColumnType.DATETIME,
+    # FIXME: implement bool ColumnType
+}
+
+DEFAULT_TYPE = ColumnType.CATEGORY
+
 
 class Runner:
-    def __init__(self, api_client: ApiClient, seed: int | None = None) -> None:
-        self.set_name = "".join(secrets.choice(string.ascii_letters) for _ in range(12))
+    def __init__(self, api_client: ApiClient, set_name: str, seed: int | None = None) -> None:
+        self.set_name = set_name
         self.config = Config(set_name=self.set_name, seed=seed)
         self.client = api_client
         self.jobs: dict[JobKind | str, JobCreateResponse] = {}
@@ -79,11 +88,12 @@ class Runner:
         primary_key: str | None = None,
         foreign_keys: list | None = None,
         time_series_time: str | None = None,
-        types: dict[str, ColumnType] | None = None,
+        types: dict[str, ColumnType] = {},
         individual_level: bool | None = None,
         avatar_data: str | None = None,
     ):
         """Add a table to the config and upload the data in the server.
+
         Parameters
         ----------
         table_name
@@ -109,13 +119,10 @@ class Runner:
                 url=self._get_url_results_volume(),
                 result_volume_name=self._get_results_volume_name(),
             )
-        extension = ".csv" if isinstance(data, pd.DataFrame) else Path(data).suffix
-        file = table_name + extension
-        self.client.upload_file(data=data, key=file)
-        avatar_file = None
-        if avatar_data is not None:
-            avatar_file = table_name + "_avatars" + extension
-            self.client.upload_file(data=avatar_data, key=avatar_file)
+
+        file, avatar_file = self.upload_file(table_name, data, avatar_data)
+        if isinstance(data, pd.DataFrame):
+            types = self._get_types(data, types)
 
         self.config.create_table(
             table_name=table_name,
@@ -130,7 +137,52 @@ class Runner:
             individual_level=individual_level,
         )
 
+    def upload_file(
+        self,
+        table_name: str,
+        data: str | pd.DataFrame,
+        avatar_data: str | pd.DataFrame | None = None,
+    ):
+        """Upload a file to the server.
+
+        Parameters
+        ----------
+        data
+            The data to upload. Can be a path to a file or a pandas DataFrame.
+        file_name
+            The name of the file.
+        """
+        extension = ".csv" if isinstance(data, pd.DataFrame) else Path(data).suffix
+        file = table_name + extension
+        self.client.upload_file(data=data, key=file)
+        avatar_file = None
+        if avatar_data is not None:
+            avatar_file = table_name + "_avatars" + extension
+            self.client.upload_file(data=avatar_data, key=avatar_file)
+        return file, avatar_file
+
+    def _get_types(
+        self, data: pd.DataFrame, types: dict[str, ColumnType] = {}
+    ) -> dict[str, ColumnType]:
+        dtypes = {}
+        for column_name, _type in data.dtypes.items():
+            column_name_str = str(column_name)
+            if column_name_str in types:
+                dtypes[column_name_str] = types[column_name_str]
+            else:
+                dtypes[column_name_str] = self._get_type_from_pandas(str(_type))
+        return dtypes
+
+    def _get_type_from_pandas(self, value: str) -> ColumnType:
+        """Return our data type from pandas type."""
+        for matcher, our_type in MATCHERS.items():
+            if matcher.search(value):
+                return our_type
+        return DEFAULT_TYPE
+
     def _get_results_volume_name(self) -> str:
+        if self.config.results_volume and self.config.results_volume.metadata.name:
+            return self.config.results_volume.metadata.name
         return "user-volume-" + str(self.client.users.get_me().id)
 
     def add_link(
@@ -172,6 +224,8 @@ class Runner:
         imputation_method: ImputeMethod | None = None,
         imputation_k: int | None = None,
         imputation_training_fraction: float | None = None,
+        dp_epsilon: float | None = None,
+        dp_preprocess_budget_ratio: float | None = None,
         time_series_nf: int | None = None,
         time_series_projection_type: ProjectionType | None = None,
         time_series_nb_points: int | None = None,
@@ -207,6 +261,10 @@ class Runner:
             Number of neighbors to use for imputation if the method is KNN or FAST_KNN.
         imputation_training_fraction
             Fraction of the dataset to use for training the imputation model when using KNN or FAST_KNN.
+        dp_epsilon
+            Epsilon value for differential privacy.
+        dp_preprocess_budget_ratio
+            Budget ration to allocate when using differential privacy avatarization.
         time_series_nf
             In time series context, number of degrees of freedom to retain in time series projections.
         time_series_projection_type
@@ -221,14 +279,34 @@ class Runner:
             Target variable to predict, used for signal metrics.
         """
         imputation = imputation_method.value if imputation_method else None
-        if k:
-            replacement_strategy = (
-                exclude_replacement_strategy.value if exclude_replacement_strategy else None
+        replacement_strategy = (
+            exclude_replacement_strategy.value if exclude_replacement_strategy else None
+        )
+        if k and dp_epsilon:
+            raise ValueError(
+                "Expected either k or dp_epsilon to be set, not both. "
+                "If you want to use differential privacy, set dp_epsilon and remove k."
             )
+        if k:
+            # Avatarizaztion with avatar method
             self.config.create_avatarization_parameters(
                 table_name=table_name,
                 k=k,
                 ncp=ncp,
+                use_categorical_reduction=use_categorical_reduction,
+                imputation_method=imputation,
+                imputation_k=imputation_k,
+                imputation_training_fraction=imputation_training_fraction,
+                column_weights=column_weights,
+                exclude_variable_names=exclude_variable_names,
+                exclude_replacement_strategy=replacement_strategy,
+            )
+        elif dp_epsilon:
+            # use dp in avatarization
+            self.config.create_avatarization_dp_parameters(
+                table_name=table_name,
+                epsilon=dp_epsilon,
+                preprocess_budget_ratio=dp_preprocess_budget_ratio,
                 use_categorical_reduction=use_categorical_reduction,
                 imputation_method=imputation,
                 imputation_k=imputation_k,
@@ -281,6 +359,7 @@ class Runner:
 
     def delete_parameters(self, table_name: str, parameters_names: list[str] | None = None):
         """Delete parameters from the config.
+
         Parameters
         ----------
         table_name
@@ -292,6 +371,7 @@ class Runner:
 
     def delete_link(self, parent_table_name: str, child_table_name: str):
         """Delete a link from the config.
+
         Parameters
         ----------
         parent_table_name
@@ -303,6 +383,7 @@ class Runner:
 
     def delete_table(self, table_name: str):
         """Delete a table from the config.
+
         Parameters
         ----------
         table_name
@@ -312,6 +393,7 @@ class Runner:
 
     def get_yaml(self, path: str | None = None):
         """Get the yaml config.
+
         Parameters
         ----------
         path
@@ -357,40 +439,10 @@ class Runner:
             self.jobs[parameters_name] = created_job
         return self.jobs
 
-    def run_from_yaml(
-        self,
-        yaml: Path,
-        parameters_name: str,
-        depends_on: list[str] | None = None,
-    ):
-        """Run a job from a yaml config.
-        Parameters
-        ----------
-        yaml
-            The path to the yaml config.
-        parameters_name
-            The name of the jobs to run
-        depends_on
-            The dependencies of the job to run.
-        """
-        str_yaml = yaml.read_text()
-        self.client.resources.put_resources(
-            set_name=self.set_name,
-            yaml_string=str_yaml,
-        )
-
-        created_job = self._create_job(
-            parameters_name=parameters_name,
-            depends_on=depends_on,
-        )
-
-        self.jobs[parameters_name] = created_job
-        return created_job
-
     def _create_job(
         self,
         parameters_name: str,
-        depends_on: list[str] | None = None,
+        depends_on: list[str] = [],
     ):
         # FIXME: use the create_job method from the client instead of creating the request manually
         # the create_job method doesn't return the right object for now.
@@ -409,10 +461,12 @@ class Runner:
     def get_job(self, job_name: JobKind) -> JobResponse:
         """
         Get a job by name.
+
         Parameters
         ----------
         job_name
             The name of the job to get.
+
         Returns
         -------
         JobCreateResponse
@@ -435,6 +489,7 @@ class Runner:
     def _retrieve_job_result_urls(self, job_name: JobKind):
         """
         Get the result of a job by name.
+
         Parameters
         ----------
         job_name
@@ -459,14 +514,17 @@ class Runner:
         self.results_urls[job_name] = self.client.results.get_results(self.jobs[job_name].name)
 
     def _get_all_urls_results(self):
-        """
-        Get all url results.
-        """
+        """Get all url results."""
         for job_name in self.jobs.keys():
             self._retrieve_job_result_urls(job_name)
         return self.results_urls
 
-    def _download_file_using_url(self, url, path: str | None = None) -> TypeResults:
+    def _download_file_using_url(
+        self,
+        url,
+        path: str | None = None,
+        table_name: str | None = None,
+    ) -> TypeResults:
         fileaccess = self.client.results.get_permission_to_download(url)
         data_str = self.client.download_file(fileaccess, path=path)
         if url.endswith(".json"):
@@ -476,10 +534,24 @@ class Runner:
                 data_str = f"[{data_str}]"
             data = json.loads(data_str)
         elif url.endswith(".csv"):
-            data = pd.read_csv(io.StringIO(data_str))
+            data = pd.read_csv(io.StringIO(data_str), dtype=self._get_dtypes(table_name))
         elif url.endswith(".pdf") or url.endswith(".md"):
             data = f"File downloaded successfully to {path}"
         return data
+
+    def _get_dtypes(self, table_name: str | None = None) -> dict[str, str] | None:
+        if table_name not in self.config.tables.keys():
+            return None
+        columns_infos = self.config.tables[table_name].columns
+        dtypes = {}
+        for column in columns_infos if columns_infos is not None else []:
+            if column.type and column.type == ColumnType.CATEGORY:
+                dtypes[column.field] = "object"
+            elif column.type and column.type == ColumnType.DATETIME:
+                dtypes[column.field] = "datetime64[ns]"
+            else:
+                dtypes[column.field] = column.type.value if column.type is not None else "object"
+        return dtypes
 
     def _download_all_files(self):
         self._get_all_urls_results()
@@ -493,19 +565,19 @@ class Runner:
                     continue
 
                 for url in urls:
-                    data = self._download_file_using_url(url)
-                    result_filename = mapping_result_to_file_name[results_name]
-
                     if results_name in {
                         Results.PRIVACY_METRICS.value,
                         Results.SIGNAL_METRICS.value,
                     }:
+                        data = self._download_file_using_url(url)
                         table_name = data[0]["metadata"]["table_name"]
                         table = job.setdefault(table_name, {})
                         table.setdefault(Results(results_name), []).append(data[0])
                     else:
+                        result_filename = mapping_result_to_file_name[results_name]
                         table_name = Path(url).stem.split(f".{result_filename}")[0]
                         table = job.setdefault(table_name, {})
+                        data = self._download_file_using_url(url, table_name=table_name)
                         table[Results(results_name)] = data
 
     def get_specific_result(
@@ -516,6 +588,7 @@ class Runner:
     ) -> TypeResults:
         """
         Download a file from the results.
+
         Parameters
         ----------
         table_name
@@ -524,6 +597,7 @@ class Runner:
             The name of the job to search for.
         result
             The result to search for.
+
         Returns
         -------
         TypeResults
@@ -585,6 +659,7 @@ class Runner:
         return yaml.safe_load(self._get_user_results_volume())["spec"]["url"]
 
     def kill(self):
+        """Method not implemented yet."""
         pass
 
     def shuffled(self, table_name: str) -> TypeResults:
@@ -595,6 +670,7 @@ class Runner:
         ----------
         table_name
             The name of the table to get the shuffled data from.
+
         Returns
         -------
         pd.DataFrame
@@ -611,6 +687,7 @@ class Runner:
         ----------
         table_name
             The name of the table to get the unshuffled data from.
+
         Returns
         -------
         pd.DataFrame
@@ -626,6 +703,7 @@ class Runner:
         ----------
         table_name
             The name of the table to get the privacy metrics from.
+
         Returns
         -------
         dict
@@ -646,6 +724,7 @@ class Runner:
         ----------
         table_name
             The name of the table to get the signal metrics from.
+
         Returns
         -------
         dict
@@ -670,6 +749,7 @@ class Runner:
             The name of the table to get the projections from.
         job_name
             The name of the job to get the projections from by default from avatarization job.
+
         Returns
         -------
         pd.DataFrame
@@ -682,3 +762,223 @@ class Runner:
             table_name, job_name, Results.PROJECTIONS_AVATARS
         )
         return original_coordinates, avatars_coordinates
+
+    def from_yaml(self, yaml_path: str) -> None:
+        """Create a Runner object from a YAML configuration.
+
+        Parameters
+        ----------
+        yaml
+            The path to the yaml to transform.
+
+        Returns
+        -------
+        Runner
+            A Runner object configured based on the YAML content.
+        """
+        list_config = self._load_yaml_config(yaml_path)
+        self._process_yaml_config(list_config)
+
+    def _load_yaml_config(self, yaml_path: str) -> list[dict]:
+        """Load the YAML configuration from a file."""
+        with open(yaml_path, "r") as file:
+            config = yaml.safe_load_all(file)
+            return list(config)  # Convert generator to list
+
+    def _ensure_results_volume(self):
+        """Ensure the results volume is created."""
+        if self.config.results_volume is None:
+            self.config.create_results_volume(
+                url=self._get_url_results_volume(),
+                result_volume_name=self._get_results_volume_name(),
+            )
+
+    def _process_yaml_config(self, list_config: list[dict]) -> None:
+        """Process the YAML configuration into parameters and links."""
+        parameters: dict[str, dict] = {}
+        links: dict[str, dict] = {}
+
+        for item in list_config:
+            kind = item.get("kind")
+            metadata = item.get("metadata", {})
+            spec = item.get("spec", {})
+
+            if kind == "AvatarVolume":
+                self.config.create_volume(volume_name=metadata["name"], url=spec["url"])
+
+            elif kind == "AvatarSchema":
+                self._process_avatar_schema(spec, metadata, links)
+
+            elif kind in {
+                "AvatarParameters",
+                "AvatarSignalMetricsParameters",
+                "AvatarPrivacyMetricsParameters",
+            }:
+                self._process_parameters(spec, parameters)
+
+        self._apply_links(links)
+
+        self._apply_parameters(parameters)
+
+    def _process_avatar_schema(self, spec: dict, metadata: dict, links: dict):
+        """Process AvatarSchema kind from the YAML configuration."""
+        if metadata["name"].endswith("-avatarized"):
+            return
+
+        for table in spec.get("tables", []):
+            self._process_table(table, links)
+
+    def _process_table(self, table: dict, links: dict):
+        """Process a single table from the AvatarSchema."""
+        self._ensure_results_volume()
+        try:
+            base = self.client.results.get_upload_url()
+            user_specific_path = base + f"/{table['name']}"
+            access_url = f"{self.client.base_url}/access?url=" + user_specific_path
+            self._download_file_using_url(url=access_url)
+            original_volume = table["data"]["volume"]
+        except FileNotFoundError:
+            print(f"Error downloading file {table['data']['file']}")
+            print(
+                f"File is not available in the server, upload it with runner.upload_file(table_name='{table['name']}', data='{table['data']['file']}')"
+            )
+            original_volume = VOLUME_NAME
+
+        self.config.create_table(
+            table_name=table["name"],
+            original_volume=original_volume,
+            original_file=table["data"]["file"],
+            avatar_volume=table["avatars_data"]["volume"] if "avatars_data" in table else None,
+            avatar_file=table["avatars_data"]["volume"] if "avatars_data" in table else None,
+            primary_key=next(
+                (col["field"] for col in table["columns"] if col.get("primary_key")),
+                None,
+            ),
+            foreign_keys=[
+                column["field"]
+                for column in table["columns"]
+                if column.get("identifier") and not column.get("primary_key")
+            ],
+            time_series_time=next(
+                (col["field"] for col in table["columns"] if col.get("time_series_time")),
+                None,
+            ),
+            types={
+                col["field"]: ColumnType(col["type"]) for col in table["columns"] if col["type"]
+            },
+            individual_level=table.get("individual_level"),
+        )
+
+        if table.get("links", []):
+            for link in table["links"]:
+                links[table["name"]] = link
+
+    def _process_parameters(self, spec: dict, parameters: dict):
+        """Process parameters from the YAML configuration."""
+        for param_type in [
+            "avatarization",
+            "time_series",
+            "privacy_metrics",
+            "signal_metrics",
+        ]:
+            for table_name, params in spec.get(param_type, {}).items():
+                parameters.setdefault(table_name, {}).update({param_type: params})
+
+    def _apply_links(self, links: dict):
+        """Apply links to the configuration."""
+        for table_name, link in links.items():
+            self.add_link(
+                parent_table_name=table_name,
+                parent_field=link["field"],
+                child_table_name=link["to"]["table"],
+                child_field=link["to"]["field"],
+            )
+
+    def _apply_parameters(self, parameters: dict):
+        """Apply parameters to the configuration."""
+        for table_name, params in parameters.items():
+            avatarization = params.get("avatarization", {})
+            time_series = params.get("time_series", {})
+            privacy_metrics = params.get("privacy_metrics", {})
+
+            exclude_replacement_strategy, exclude_variable_names = self._process_exclude_variables(
+                avatarization
+            )
+            imputation_method, imputation_k, imputation_training_fraction = (
+                self._process_imputation(avatarization)
+            )
+            time_series_projection_type, time_series_nf = self._process_time_series_projection(
+                time_series
+            )
+            time_series_method, time_series_nb_points = self._process_time_series_alignment(
+                time_series
+            )
+
+            self.set_parameters(
+                table_name=table_name,
+                k=avatarization.get("k"),
+                ncp=avatarization.get("ncp"),
+                use_categorical_reduction=avatarization.get("use_categorical_reduction"),
+                column_weights=avatarization.get("column_weights"),
+                exclude_variable_names=exclude_variable_names,
+                exclude_replacement_strategy=exclude_replacement_strategy,
+                imputation_method=imputation_method,
+                imputation_k=imputation_k,
+                imputation_training_fraction=imputation_training_fraction,
+                time_series_nf=time_series_nf,
+                time_series_projection_type=time_series_projection_type,
+                time_series_nb_points=time_series_nb_points,
+                time_series_method=time_series_method,
+                known_variables=privacy_metrics.get("known_variables"),
+                target=privacy_metrics.get("target"),
+            )
+
+    def _process_exclude_variables(self, avatarization: dict):
+        """Process exclude variables from avatarization parameters."""
+        exclude_replacement_strategy = None
+        exclude_variable_names = None
+        if exclude_vars := avatarization.get("exclude_variables", {}):
+            exclude_replacement_strategy = self._get_enum_value(
+                ExcludeVariablesMethod, exclude_vars.get("replacement_strategy")
+            )
+            exclude_variable_names = exclude_vars.get("variable_names")
+        return exclude_replacement_strategy, exclude_variable_names
+
+    def _process_imputation(self, avatarization: dict):
+        """Process imputation parameters."""
+        imputation_method = None
+        imputation_k = None
+        imputation_training_fraction = None
+        if imputation := avatarization.get("imputation"):
+            imputation_method = self._get_enum_value(ImputeMethod, imputation.get("method"))
+            imputation_k = imputation.get("k")
+            imputation_training_fraction = imputation.get("training_fraction")
+        return imputation_method, imputation_k, imputation_training_fraction
+
+    def _process_time_series_projection(self, time_series: dict):
+        """Process time series projection parameters."""
+        time_series_projection_type = None
+        time_series_nf = None
+        if projection := time_series.get("projection"):
+            time_series_projection_type = self._get_enum_value(
+                ProjectionType, projection.get("type")
+            )
+            time_series_nf = projection.get("nf")
+        return time_series_projection_type, time_series_nf
+
+    def _process_time_series_alignment(self, time_series: dict):
+        """Process time series alignment parameters."""
+        time_series_method = None
+        time_series_nb_points = None
+        if alignment := time_series.get("alignment"):
+            time_series_method = self._get_enum_value(AlignmentMethod, alignment.get("method"))
+            time_series_nb_points = alignment.get("nb_points")
+        return time_series_method, time_series_nb_points
+
+    def _get_enum_value(self, enum_class, value: str | None):
+        if value is None:
+            return None
+        try:
+            return enum_class(value)
+        except ValueError:
+            return None
