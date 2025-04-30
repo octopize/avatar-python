@@ -1,7 +1,5 @@
 from avatars.manager import Manager, Runner
 from avatars.models import JobResponseList
-
-
 from tests.conftest import FakeApiClient, JobResponseFactory
 
 EXPECTED_KWARGS = ["get_jobs_returned_value"]
@@ -24,6 +22,6 @@ class TestManager:
         assert len(results) == 1
 
     def test_create_runner(self) -> None:
-        runner = self.manager.create_runner()
+        runner = self.manager.create_runner("test")
         assert runner is not None
         assert type(runner) == Runner

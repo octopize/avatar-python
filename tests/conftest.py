@@ -1,14 +1,12 @@
-import random
 from typing import Callable, Optional
-from uuid import uuid4
+from uuid import UUID, uuid4
 
-from uuid import UUID
 import httpx
+from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
 
 from avatars.client import ApiClient
-from avatars.models import FileAccess, FileCredentials, JobCreateResponse, JobKind, JobResponse
-from polyfactory.factories.pydantic_factory import ModelFactory
+from avatars.models import FileAccess, FileCredentials, JobKind, JobResponse
 
 RequestHandle = Callable[[httpx.Request], httpx.Response]
 
@@ -61,32 +59,47 @@ class FakeJobs:
             progress=1.0,
         )
 
+
 class FakeResults:
     table_name = f"table_{uuid4().hex[:8]}"
+
     def __init__(self, *args, **kwargs):
         kwargs = kwargs or {}
 
     def get_permission_to_download(self, url):
-        return FileAccess(url=url, credentials=FileCredentials(access_key_id="access_key_id",
-                                                                secret_access_key="secret_access_key" ))
+        return FileAccess(
+            url=url,
+            credentials=FileCredentials(
+                access_key_id="access_key_id", secret_access_key="secret_access_key"
+            ),
+        )
+
     def get_results(self, name):
-        return {"shuffled": [f"fakeurl/{self.table_name}.shuffled-0.csv"],
-                "unshuffled":[f"fakeurl/{self.table_name}.unshuffled-0.csv"],
-                "privacy_metrics": [f"fakeurl/{self.table_name}.privacy.json"],
-                "signal_metrics": [f"fakeurl/{self.table_name}.signal.json"],
-                "report": [f"fakeurl/{self.table_name}.report.md"],}
+        return {
+            "shuffled": [f"fakeurl/{self.table_name}.shuffled-0.csv"],
+            "unshuffled": [f"fakeurl/{self.table_name}.unshuffled-0.csv"],
+            "privacy_metrics": [f"fakeurl/{self.table_name}.privacy.json"],
+            "signal_metrics": [f"fakeurl/{self.table_name}.signal.json"],
+            "report": [f"fakeurl/{self.table_name}.report.md"],
+        }
+
+    def get_upload_url(self):
+        raise FileNotFoundError()
 
 
 class FakeResources:
     def __init__(self, *args, **kwargs):
         kwargs = kwargs or {}
 
-    def put_resources(self, set_name,yaml_string) :
+    def put_resources(self, set_name, yaml_string):
         pass
 
-    def get_user_volume(self,volume_name: str,
+    def get_user_volume(
+        self,
+        volume_name: str,
         set_name: str,
-        purpose: str,):
+        purpose: str,
+    ):
         yaml_volume = f"""kind: AvatarVolume
 metadata:
   name: {volume_name}
@@ -95,14 +108,18 @@ spec:
         """
         return yaml_volume
 
+
 class FakeUser(BaseModel):
     id: UUID
+
+
 class FakeUsers:
     def __init__(self, *args, **kwargs):
         kwargs = kwargs or {}
 
     def get_me(self):
         return FakeUser(id=uuid4())
+
 
 class FakeApiClient:
     def __init__(self, *args, **kwargs):
@@ -115,17 +132,21 @@ class FakeApiClient:
         self.results = FakeResults(*args, **kwargs)
         self.resources = FakeResources(*args, **kwargs)
         self.users = FakeUsers(*args, **kwargs)
+        self.base_url = "http://localhost:8000"
 
     def upload_file(self, data, key):
-        return 'File uploaded successfully'
+        return "File uploaded successfully"
+
     def download_file(self, fileaccess, path, table_name=None):
         if fileaccess.url.endswith(".csv"):
             return " 1, 2, 3\n4, 5, 6\n7, 8, 9"
         elif fileaccess.url.endswith(".json"):
-            return '{"key": "value","metadata": {"table_name": "{table}"} }'.replace("{table}", self.results.table_name)
+            return '{"key": "value","metadata": {"table_name": "{table}"} }'.replace(
+                "{table}", self.results.table_name
+            )
 
     def send_request(self, method, url, **kwargs):
-        return {"name":"test", "Location":""}
+        return {"name": "test", "Location": ""}
 
 
 class JobResponseFactory(ModelFactory[JobResponse]):

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.0
+#       jupytext_version: 1.17.1
 # ---
 
 # %% [markdown]
@@ -25,7 +25,7 @@ from avatars.manager import Manager
 # The following are not necessary to run avatar but are used in this tutorial
 from avatars.models import JobKind
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
+url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
@@ -48,7 +48,7 @@ manager.auth_client.health.get_health()
 # In this tutorial, we use the simple and well-known `iris` dataset to demonstrate the main steps of an avatarization.
 
 # %%
-df = pd.read_csv("fixtures/iris.csv")
+df = pd.read_csv("../fixtures/iris.csv")
 
 # %%
 df
@@ -56,7 +56,7 @@ df
 # %%
 
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner()
+runner = manager.create_runner("iris_k5")
 
 # Then upload the data, you can either use a pandas dataframe or a file
 runner.add_table("iris", df)
@@ -68,9 +68,7 @@ runner.add_table("iris", df)
 runner.set_parameters("iris", k=5)
 
 # %%
-avatarization_job = (
-    runner.run()
-)  # by default we run all jobs : avatarization, privacy and signal metrics and report
+avatarization_job = runner.run() # by default we run all jobs : avatarization, privacy and signal metrics and report
 # You can also choose to run only the avatarization job for example
 # avatarization_job = runner.run(job_kind=JobKind.standard)
 
@@ -78,7 +76,7 @@ avatarization_job = (
 # ## Retrieving the completed avatarization job
 
 # %%
-results = runner.get_all_results()
+results=runner.get_all_results()
 
 # %% [markdown]
 # ## Retrieving the avatars
@@ -102,7 +100,7 @@ runner.signal_metrics("iris")
 # # Download the report
 
 # %%
-runner.download_report("my_report.pdf")
+runner.download_report('my_report.pdf')
 
 # %% [markdown]
 # # How to print an error message
@@ -113,7 +111,7 @@ runner.download_report("my_report.pdf")
 # The following section show how to print an error message.
 
 # %%
-runner = manager.create_runner()
+runner = manager.create_runner("iris_fail")
 runner.add_table("iris", df)
 
 runner.set_parameters("iris", k=500)  # k is too big (bigger than the dataset !)

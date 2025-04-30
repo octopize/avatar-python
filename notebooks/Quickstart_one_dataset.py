@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.0
+#       jupytext_version: 1.17.1
 # ---
 
 # %% [markdown]
@@ -22,7 +22,7 @@ from avatars.manager import Manager
 
 # The following are not necessary to run avatar but are used in this tutorial
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://scaleway-prod.octopize.app/api")
+url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
@@ -37,9 +37,10 @@ manager.authenticate(username, password)
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner()
+runner = manager.create_runner(set_name="test_wbcd")
+# You can then find the result of the avatarization in the web with the set_name
 # Then you need to upload the data to the server
-runner.add_table("wbcd", "fixtures/wbcd.csv")
+runner.add_table("wbcd", "../fixtures/wbcd.csv")
 # Choose the parameters for the avatarization
 
 
@@ -48,7 +49,7 @@ runner.set_parameters("wbcd", k=15)
 # Run the pipeline with avatarization, privacy and signal metrics and report
 runner.run()
 # Get the results
-results = runner.get_all_results()
+results=runner.get_all_results()
 
 # %% [markdown]
 # ## Retrieve avatars
@@ -76,4 +77,4 @@ for key, value in runner.signal_metrics("wbcd").items():
 # ## Retrieving the avatarization report
 
 # %%
-runner.download_report("my_report.pdf")
+runner.download_report('my_report.pdf')

@@ -60,7 +60,7 @@ def test_split_column_types_different_int(
 
 @pytest.mark.parametrize("dtype_float", [np.float64, np.float32, np.float16])
 def test_split_column_types_different_float(
-    many_dtypes_df: pd.DataFrame, dtype_float: np.float_
+    many_dtypes_df: pd.DataFrame, dtype_float: np.float64
 ) -> None:
     test_categorical = [2, 3]
     test_continuous = [0, 1]

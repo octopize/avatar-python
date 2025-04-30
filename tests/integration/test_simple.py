@@ -13,14 +13,14 @@ def test_main(
     base_api_url: str = os.getenv("AVATAR_BASE_API_URL", ""),
     username: str = os.getenv("AVATAR_USERNAME", ""),
     password: str = os.getenv("AVATAR_PASSWORD", ""),
-    dataset_path: str = "tests/fixtures/iris.csv",
+    dataset_path: str = "fixtures/iris.csv",
 ) -> int:
     logger.info("Running main test")
     manager = Manager(base_url=base_api_url)
     manager.authenticate(username, password)
 
     df = pd.read_csv(dataset_path)
-    runner = manager.create_runner()
+    runner = manager.create_runner(set_name="iris")
     runner.add_table("iris", data=df)
 
     runner.set_parameters("iris", k=5)

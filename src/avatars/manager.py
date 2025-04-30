@@ -36,9 +36,9 @@ class Manager:
             token = UUID(token)
         self.auth_client.reset_password(email, new_password, new_password_repeated, token)
 
-    def create_runner(self) -> Runner:
+    def create_runner(self, set_name: str) -> Runner:
         """Create a new runner."""
-        return Runner(api_client=self.auth_client)
+        return Runner(api_client=self.auth_client, set_name=set_name)
 
     def get_last_results(self, count: int = 1) -> list[dict[str, str]]:
         """Get the last n results."""
@@ -65,3 +65,14 @@ class Manager:
     def get_health(self) -> dict[str, str]:
         """Get the health of the server."""
         return self.auth_client.health.get_health()
+
+    def create_runner_from_yaml(self, yaml_path: str, set_name: str) -> Runner:
+        """Create a new runner from a yaml file.
+        Parameters
+        ----------
+            yaml_path: The path to the yaml file.
+            set_name: The name of the set.
+        """
+        runner = self.create_runner(set_name=set_name)
+        runner.from_yaml(yaml_path)
+        return runner
