@@ -27,7 +27,6 @@ username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
 
 # %%
-# Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 manager = Manager(base_url=url)
 # Authenticate with the server
 manager.authenticate(username, password)

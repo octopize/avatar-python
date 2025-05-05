@@ -39,7 +39,6 @@ password = os.environ.get("AVATAR_PASSWORD")
 # Run the following cell if your environment does not have all the listed packages already installed.
 
 # %%
-# Change this to your actual server endpoint, e.g. base_url="https://avatar.company.com"
 manager = Manager(base_url=url)
 # Authenticate with the server
 manager.authenticate(username, password)
