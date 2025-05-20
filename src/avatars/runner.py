@@ -2,12 +2,18 @@ import io
 import json
 import re
 import time
+from dataclasses import asdict
 from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, Union
 
 import pandas as pd
 import yaml
+from avatar_yaml import (
+    AvatarizationDPParameters,
+    AvatarizationParameters,
+    PrivacyMetricsParameters,
+)
 from avatar_yaml import Config as Config
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
@@ -16,6 +22,7 @@ from avatar_yaml.models.parameters import (
     ProjectionType,
 )
 from avatar_yaml.models.schema import ColumnType, LinkMethod
+from toolz import keymap
 
 from avatars.client import ApiClient
 from avatars.models import JobCreateRequest, JobCreateResponse, JobKind, JobResponse
@@ -37,6 +44,7 @@ DEFAULT_RETRY_INTERVAL = 5
 
 
 class Results(StrEnum):
+    ADVICE = "advice"
     SHUFFLED = "shuffled"
     UNSHUFFLED = "unshuffled"
     PRIVACY_METRICS = "privacy_metrics"
@@ -46,11 +54,13 @@ class Results(StrEnum):
     PROJECTIONS_AVATARS = "projections-avatars"
     METADATA = "run_metadata"
     REPORT = "report"
+    META_METRICS = "meta_metrics"
 
 
 TypeResults = dict | pd.DataFrame | str | list[dict]
 
 mapping_result_to_file_name = {
+    Results.ADVICE: "advice.json",
     Results.SHUFFLED: "shuffled",
     Results.UNSHUFFLED: "unshuffled",
     Results.PRIVACY_METRICS: "privacy.json",
@@ -136,6 +146,43 @@ class Runner:
             types=types,
             individual_level=individual_level,
         )
+
+    def advise_parameters(self, table_name: str | None = None) -> None:
+        """Fill the parameters set with the server recommendation.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table. If None, all tables will be used.
+        """
+        yaml = self.config.get_advice_yaml(name=JobKind.advice.value)
+        self.client.resources.put_resources(
+            set_name=self.set_name,
+            yaml_string=yaml,
+        )
+        if table_name:
+            tables = [table_name]
+        else:
+            tables = list(self.config.tables.keys())
+        for table_name in tables:
+            name = self.config.get_parameters_advice_name(JobKind.advice.value, table_name)
+            created_job = self._create_job(parameters_name=name)
+            self.jobs[name] = created_job
+        results = self.get_all_results()
+
+        for advice_result, table_name in zip(results.values(), tables):
+            [param] = [
+                param["advice"]["parameters"]
+                for param in advice_result[table_name + ".advice"][Results.ADVICE]
+                if param["table_name"] == table_name
+            ]  # FIXME: https://github.com/octopize/avatar/issues/3858
+
+            self.set_parameters(
+                k=param["k"],
+                use_categorical_reduction=param["use_categorical_reduction"],
+                ncp=param["ncp"],
+                table_name=table_name,
+            )
 
     def upload_file(
         self,
@@ -287,6 +334,17 @@ class Runner:
                 "Expected either k or dp_epsilon to be set, not both. "
                 "If you want to use differential privacy, set dp_epsilon and remove k."
             )
+        # reset the parameters if they were already set
+        if self.config.avatarization and self.config.avatarization.get(table_name):
+            del self.config.avatarization[table_name]
+        if self.config.avatarization_dp and self.config.avatarization_dp.get(table_name):
+            del self.config.avatarization_dp[table_name]
+        if self.config.privacy_metrics and self.config.privacy_metrics.get(table_name):
+            del self.config.privacy_metrics[table_name]
+        if self.config.signal_metrics and self.config.signal_metrics.get(table_name):
+            del self.config.signal_metrics[table_name]
+        if self.config.time_series and self.config.time_series.get(table_name):
+            del self.config.time_series[table_name]
         if k:
             # Avatarizaztion with avatar method
             self.config.create_avatarization_parameters(
@@ -301,11 +359,13 @@ class Runner:
                 exclude_variable_names=exclude_variable_names,
                 exclude_replacement_strategy=replacement_strategy,
             )
+
         elif dp_epsilon:
             # use dp in avatarization
             self.config.create_avatarization_dp_parameters(
                 table_name=table_name,
                 epsilon=dp_epsilon,
+                ncp=ncp,
                 preprocess_budget_ratio=dp_preprocess_budget_ratio,
                 use_categorical_reduction=use_categorical_reduction,
                 imputation_method=imputation,
@@ -356,6 +416,187 @@ class Runner:
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
         )
+
+    def update_parameters(self, table_name: str, **kwargs) -> None:
+        """
+        Update specific parameters for the table while preserving other existing parameters.
+        Only updates the parameters that are provided, keeping existing values for others.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table.
+        **kwargs
+            The parameters to update. Only parameters that are provided will be updated.
+            See set_parameters for the full list of available parameters.
+        """
+        # Get current parameters for this table
+        current_params = self._extract_current_parameters(table_name)
+
+        # Update only the parameters that were provided
+        for param_name, param_value in kwargs.items():
+            current_params[param_name] = param_value
+        # Apply all parameters back using set_parameters
+        self.set_parameters(table_name=table_name, **current_params)
+
+    def _extract_current_parameters(self, table_name: str) -> dict:
+        """Extract the current parameters for a given table.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the current parameters for the table as it is used in set_parameters.
+        """
+
+        current_params: dict[str, Any] = {}
+
+        # Extract avatarization parameters
+        if (
+            self.config.avatarization is not None
+            and table_name in self.config.avatarization.keys()
+        ):
+            # Standard avatarization parameters
+            params: Optional[
+                Union[AvatarizationParameters, AvatarizationDPParameters, PrivacyMetricsParameters]
+            ] = self.config.avatarization[table_name]
+            if isinstance(params, AvatarizationParameters):
+                current_params.update(
+                    {
+                        "k": params.k,
+                        "column_weights": params.column_weights,
+                        "use_categorical_reduction": params.use_categorical_reduction,
+                        "ncp": params.ncp,
+                    }
+                )
+                current_params.update(self._extract_exclude_parameters(params))
+        elif (
+            self.config.avatarization_dp is not None
+            and table_name in self.config.avatarization_dp.keys()
+        ):
+            # DP avatarization parameters
+            params = self.config.avatarization_dp[table_name]
+            if isinstance(params, AvatarizationDPParameters):
+                current_params.update(
+                    {
+                        "dp_epsilon": params.epsilon if params.epsilon else None,
+                        "dp_preprocess_budget_ratio": params.preprocess_budget_ratio
+                        if params.preprocess_budget_ratio
+                        else None,
+                        "column_weights": params.column_weights,
+                        "use_categorical_reduction": params.use_categorical_reduction,
+                        "ncp": params.ncp,
+                    }
+                )
+                current_params.update(self._extract_exclude_parameters(params))
+
+        elif (
+            self.config.privacy_metrics is not None
+            and self.config.privacy_metrics.get(table_name) is not None
+        ):
+            params = self.config.privacy_metrics[table_name]
+            current_params.update(
+                {
+                    "use_categorical_reduction": params.use_categorical_reduction,
+                    "ncp": params.ncp,
+                }
+            )
+        else:
+            params = None  # No parameters has been preset
+
+        # Extract imputation parameters
+        if params and params.imputation:
+            current_params.update(
+                {
+                    "imputation_method": ImputeMethod(params.imputation["method"])
+                    if params.imputation["method"]
+                    else None,
+                    "imputation_k": params.imputation["k"] if params.imputation["k"] else None,
+                    "imputation_training_fraction": params.imputation["training_fraction"]
+                    if params.imputation["training_fraction"]
+                    else None,
+                }
+            )
+
+        # Extract time series parameters
+        if self.config.time_series and table_name in self.config.time_series.keys():
+            ts_params = self.config.time_series[table_name]
+
+            # Projection parameters
+            if ts_params.projection:
+                current_params.update(
+                    {
+                        "time_series_nf": ts_params.projection["nf"]
+                        if ts_params.projection["nf"]
+                        else None,
+                        "time_series_projection_type": ProjectionType(
+                            ts_params.projection["projection_type"]
+                        )
+                        if ts_params.projection["projection_type"]
+                        else None,
+                    }
+                )
+
+            # Alignment parameters
+            if ts_params.alignment:
+                current_params.update(
+                    {
+                        "time_series_nb_points": ts_params.alignment["nb_points"]
+                        if ts_params.alignment["nb_points"]
+                        else None,
+                        "time_series_method": AlignmentMethod(ts_params.alignment["method"])
+                        if ts_params.alignment["method"]
+                        else None,
+                    }
+                )
+
+        # Extract privacy metrics parameters
+        if (
+            self.config.privacy_metrics is not None
+            and table_name in self.config.privacy_metrics.keys()
+        ):
+            pm_params = self.config.privacy_metrics[table_name]
+            current_params.update(
+                {
+                    "known_variables": pm_params.known_variables,
+                    "target": pm_params.target,
+                    "closest_rate_percentage_threshold": pm_params.closest_rate_percentage_threshold,
+                    "closest_rate_ratio_threshold": pm_params.closest_rate_ratio_threshold,
+                    "categorical_hidden_rate_variables": pm_params.categorical_hidden_rate_variables,
+                }
+            )
+
+        return current_params
+
+    def _extract_exclude_parameters(self, params) -> dict:
+        """Extract exclude variables parameters from parameter object.
+
+        Parameters
+        ----------
+        params:
+            The parameters object that contains exclude_variables information.
+
+        Returns
+        -------
+        A dictionary containing exclude_variable_names and exclude_replacement_strategy parameters.
+        """
+        result = {}
+        if params.exclude_variables:
+            result["exclude_variable_names"] = (
+                params.exclude_variables["variable_names"]
+                if params.exclude_variables["variable_names"]
+                else None
+            )
+            result["exclude_replacement_strategy"] = (
+                ExcludeVariablesMethod(params.exclude_variables["replacement_strategy"])
+                if params.exclude_variables["replacement_strategy"]
+                else None
+            )
+        return result
 
     def delete_parameters(self, table_name: str, parameters_names: list[str] | None = None):
         """Delete parameters from the config.
@@ -429,8 +670,6 @@ class Runner:
                     self.jobs[JobKind.privacy_metrics].Location,
                     self.jobs[JobKind.signal_metrics].Location,
                 ]
-                if len(self.config.tables) > 1:
-                    continue
 
             created_job = self._create_job(
                 parameters_name=parameters_name.value,
@@ -561,6 +800,7 @@ class Runner:
                 if (
                     results_name == Results.REPORT_IMAGES.value
                     or results_name == Results.REPORT.value
+                    or results_name == Results.META_METRICS.value
                 ):
                     continue
 
@@ -601,7 +841,7 @@ class Runner:
         Returns
         -------
         TypeResults
-            Either a pandas DataFrame or a dictionary or a list of dictionnary depending on the result type.
+            Either a pandas DataFrame or a dictionary or a list of dictionary depending on the result type.
         """
         if job_name not in self.jobs.keys():
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
@@ -622,6 +862,24 @@ class Runner:
         The data can be a pandas DataFrame or a dictionary depending on the result type.
         """
         self._download_all_files()
+
+        def unescape_table_names(results, transform_func):
+            return {
+                job_name: keymap(transform_func, table_results)
+                for job_name, table_results in results.items()
+            }
+
+        def _unescape(s: str) -> str:
+            reversed_replacements = {
+                "_dot_": ".",
+                "_slash_": "/",
+                "_ampersand_": "&",
+                "_plus_": "+",
+            }
+            pattern = re.compile("|".join(re.escape(k) for k in reversed_replacements.keys()))
+            return pattern.sub(lambda match: reversed_replacements[match.group(0)], s)
+
+        self.results = unescape_table_names(self.results, _unescape)
         return self.results
 
     def download_report(self, path: str | None = None):
@@ -633,10 +891,6 @@ class Runner:
         path
             The path to save the report.
         """
-        if len(self.config.tables) > 1:
-            raise NotImplementedError(
-                "Report generation for multiple tables is not yet implemented."
-            )
         if self.results_urls.get(JobKind.report) is None:
             self._retrieve_job_result_urls(JobKind.report)
         report = self.results_urls[JobKind.report][Results.REPORT][0]
@@ -654,6 +908,32 @@ class Runner:
         return self.client.resources.get_user_volume(
             volume_name=self._get_results_volume_name(), set_name=self.set_name, purpose="results"
         )
+
+    def print_parameters(self, table_name: str | None = None) -> None:
+        """Print the parameters for a table.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table.
+            If None, all parameters will be printed.
+        """
+        if table_name is None:
+            for table_name in self.config.tables.keys():
+                self.print_parameters(table_name)
+            return
+        if table_name not in self.config.tables.keys():
+            raise ValueError(f"Expected table '{table_name}' to be created. Try running it first.")
+
+        print(f"--- Avatarization parameters for {table_name}: ---")
+
+        print(asdict(self.config.avatarization[table_name]))
+        print("\n")
+        print(f"--- Privacy metrics for {table_name}: ---")
+        print(asdict(self.config.privacy_metrics[table_name]))
+        print("\n")
+        print(f"--- Signal metrics for {table_name}: ---")
+        print(asdict(self.config.signal_metrics[table_name]))
 
     def _get_url_results_volume(self):
         return yaml.safe_load(self._get_user_results_volume())["spec"]["url"]

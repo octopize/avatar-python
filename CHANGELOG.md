@@ -1,5 +1,10 @@
 # Changelog
 
+## NEXT RELEASE
+
+- feat: support generating multitable reports
+- feat: add advisor functionality
+
 ## 1.0.3 - 2025/04/30
 
 - feat: make mandatory a set_name in the runner

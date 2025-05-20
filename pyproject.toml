@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.0.3"
+version = "1.0.4"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
@@ -11,6 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fsspec>=2024.12.0",
     "httpx>=0.28.1",
+    "octopize-avatar-yaml",
     "pydantic>=2.10.4",
     "pydantic-settings>=2.7.0",
     "pyyaml>=6.0.2",
@@ -19,7 +20,6 @@ dependencies = [
     "tenacity>=9.0.0",
     "toolz>=1.0.0",
     "typer>=0.15.1",
-    "octopize-avatar-yaml==0.1.12",
 ]
 
 [dependency-groups]
@@ -36,11 +36,11 @@ dev = [
     "pandas>=2.2.3",
     "seaborn>=0.13.2",
     "matplotlib>=3.10.1",
-    "octopize-avatar-yaml==0.1.12",
     "furo>=2024.8.6",
     "sphinx-multiversion>=0.2.4",
     "autodoc-pydantic>=2.2.0",
     "pandoc>=2.4",
+    "nbconvert>=7.16.6",
 ]
 notebook = [
     "ipykernel>=6.29.5",
@@ -49,7 +49,6 @@ notebook = [
     "numpy>=2.2.4",
     "pandas>=2.2.3",
     "seaborn>=0.13.2",
-    "octopize-avatar-yaml==0.1.12",
 ]
 
 
@@ -78,7 +77,6 @@ module = "avatars.lib.*"
 ignore_errors = true
 
 
-
 [tool.ruff]
 extend = "../../ruff.toml"
 
@@ -90,6 +88,14 @@ addopts = [
 ]
 # Recommended by pytest
 pythonpath = "src"
+filterwarnings = [
+    "error",
+    "ignore:datetime.datetime.utcnow:DeprecationWarning:botocore",
+    # Remove once https://github.com/mwaskom/seaborn/issues/3804 has been releases (seaborn >0.13.2)
+    "ignore:vert.* bool will be deprecated in a future version:PendingDeprecationWarning:seaborn",
+
+]
+
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/avatars"]

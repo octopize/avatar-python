@@ -698,11 +698,17 @@ class BaseClient:
         self, *, ctx: Optional[ClientContext] = None, **kwargs: Any
     ) -> Generator[ClientContext, None, None]:
         with ExitStack() as stack:
-            http_client = self._http_client or httpx.Client(
-                base_url=self.base_url,
-                timeout=self.timeout,
-                verify=self.should_verify_ssl,
-            )
+            if not self._http_client:
+                http_client = stack.enter_context(
+                    httpx.Client(
+                        base_url=self.base_url,
+                        timeout=self.timeout,
+                        verify=self.should_verify_ssl,
+                    )
+                )
+            else:
+                # Will be closed by the caller
+                http_client = self._http_client
 
             # Grab special keys
             headers: dict[str, Any] = pop_or(kwargs, "headers", {})

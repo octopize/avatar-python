@@ -28,12 +28,15 @@
 # ## Connection
 
 # %%
-import os
-
-import pandas as pd
-
 from avatars.manager import Manager
 from avatars.models import JobKind
+from avatars.runner import Results
+import numpy as np
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
 
 url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
@@ -72,7 +75,6 @@ df["city"].value_counts()
 
 # %%
 from avatars.processors import GroupModalitiesProcessor
-
 group_modalities_processor = GroupModalitiesProcessor(
     min_unique=10,  # number of modalities for a variable to be considered for grouping
     global_threshold=25,  # if considered for grouping, number of individuals in modality to preserve it

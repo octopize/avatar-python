@@ -6,6 +6,10 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
+#   kernelspec:
+#     display_name: octopize-avatar
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -16,14 +20,15 @@
 
 # %%
 # This is the main file for the Avatar tutorial.
-import os
-
-import pandas as pd
-
 from avatars.manager import Manager
-
 # The following are not necessary to run avatar but are used in this tutorial
 from avatars.models import JobKind
+from avatars.runner import Results
+
+import pandas as pd
+import os
+import secrets
+
 
 url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
@@ -53,9 +58,10 @@ df = pd.read_csv("../fixtures/iris.csv")
 df
 
 # %%
+from avatars.runner import Runner
 
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner("iris_k5")
+runner = manager.create_runner(f"iris_k5_{secrets.token_hex(4)}")
 
 # Then upload the data, you can either use a pandas dataframe or a file
 runner.add_table("iris", df)
@@ -110,7 +116,7 @@ runner.download_report('my_report.pdf')
 # The following section show how to print an error message.
 
 # %%
-runner = manager.create_runner("iris_fail")
+runner = manager.create_runner(f"iris_fail_{secrets.token_hex(4)}")
 runner.add_table("iris", df)
 
 runner.set_parameters("iris", k=500)  # k is too big (bigger than the dataset !)

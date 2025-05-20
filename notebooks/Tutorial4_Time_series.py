@@ -6,6 +6,10 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
+#   kernelspec:
+#     display_name: octopize-avatar
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -19,17 +23,19 @@
 
 # %%
 # This is the main file for the Avatar tutorial.
-import os
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from avatar_yaml.models.parameters import ProjectionType
-from avatar_yaml.models.schema import LinkMethod
-
 from avatars.manager import Manager
-
 # The following are not necessary to run avatar but are used in this tutorial
+from avatars.models import JobKind
+from avatars.runner import Results
+from avatar_yaml.models.schema import LinkMethod
+from avatar_yaml.models.parameters import ProjectionType
+import numpy as np
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import secrets
 
 url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
@@ -76,7 +82,7 @@ ts2_df
 
 # %%
 from typing import Optional, Tuple
-
+import matplotlib.pyplot as plt
 import matplotlib
 
 
@@ -176,7 +182,7 @@ plot.show()
 
 # %%
 # First initialize the runner
-runner = manager.create_runner("tutorial_time_series")
+runner = manager.create_runner(f"tutorial_time_series_{secrets.token_hex(4)}")
 
 # Then upload the data
 runner.add_table("vanilla", vanilla_df,

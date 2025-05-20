@@ -6,6 +6,10 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
+#   kernelspec:
+#     display_name: octopize-avatar
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -13,7 +17,7 @@
 #
 
 # %% [markdown]
-# In this tutorial, we will execute the avatarization of a multi-table dataset. If you want to know more about how the anonymization is performed, you can read [this page](https://docs.octopize.io/docs/understanding/multi_table/).
+#   In this tutorial, we will execute the avatarization of a multi-table dataset. If you want to know more about how the anonymization is performed, you can read [this page](https://docs.octopize.io/docs/principles/method/multi_table/).
 #
 
 # %% [markdown]
@@ -21,19 +25,18 @@
 
 # %%
 # This is the main file for the Avatar tutorial.
-import os
-
-import matplotlib.pyplot as plt
-
-# %matplotlib inline
-import pandas as pd
-import seaborn as sns
-from avatar_yaml.models.schema import LinkMethod
-
 from avatars.manager import Manager
-
 # The following are not necessary to run avatar but are used in this tutorial
 from avatars.models import JobKind
+from avatars.runner import Results
+from avatar_yaml.models.schema import LinkMethod
+import numpy as np
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+# # %matplotlib inline
+import pandas as pd
+import os
 
 url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
@@ -145,18 +148,16 @@ runner.add_link(parent_table_name="doctor",
                 child_field="doctor_id",
                 method=LinkMethod.LINEAR_SUM_ASSIGNMENT)
 
-# The k parameter for each table needs to be adjusted regarding the number of records.
-runner.set_parameters("patient", k=15,known_variables=[
+
+
+# %%
+runner.advise_parameters()
+runner.update_parameters("patient" ,known_variables=[
             "gender",
             "age",
-        ],
-        target="weight",)
-runner.set_parameters("doctor", k=5,
-                              known_variables=[
-            "age",
-        ],
-        target="job",)
-runner.set_parameters("visit", k=30 )
+        ])
+
+runner.print_parameters()
 
 # %% [markdown]
 # ## Anonymization
@@ -298,6 +299,12 @@ for method in runner.signal_metrics("visit"):
 # - **Standalone**: The avatarization of the visit table preserves the original distribution well.
 # - **to_bottom_information_propagated with table doctor**: The correlation between the doctor and visit table is well preserved.
 # - **to_bottom_information_propagated with table patient**: The correlation between the patient and visit table is well preserved.
+
+# %% [markdown]
+# ## Download Report
+
+# %%
+runner.download_report("multitable-report.pdf")
 
 # %% [markdown]
 # ## Multivariate comparison

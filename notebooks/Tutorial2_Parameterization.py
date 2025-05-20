@@ -6,6 +6,10 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
+#   kernelspec:
+#     display_name: octopize-avatar
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -19,21 +23,22 @@
 
 # %%
 # This is the main file for the Avatar tutorial.
-import os
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
-
 from avatars.manager import Manager
-
 # The following are not necessary to run avatar but are used in this tutorial
 from avatars.models import JobKind
+import numpy as np
+
+import seaborn as sns
+import secrets
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
 
 url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME")
 password = os.environ.get("AVATAR_PASSWORD")
+
+# %%
 
 # %% [markdown]
 # Run the following cell if your environment does not have all the listed packages already installed.
@@ -44,94 +49,6 @@ manager = Manager(base_url=url)
 manager.authenticate(username, password)
 # Verify that we can connect to the API server
 manager.get_health()
-
-# %%
-# !pip install openpyxl
-
-# %%
-df = pd.read_excel("downloaded/PULWAR_WP1_Simulated_sample.xlsx")
-
-# %%
-df["Experience_apprentissage_3_levels"] = df["Experience_apprentissage_3_levels"].apply(
-    lambda x: 'None' if pd.isna(x) else x
-).astype('category')
-column_order=df.columns.tolist()
-sexism_to_combine = [
-    'confronteavancessex',
-    'situationsexisme.SQ001.',
-    'situationsexisme.SQ002.',
-    'situationsexisme.SQ003.',
-    'situationsexisme.SQ004.',
-    'situationsexisme.SQ005.'
-]
-
-mentor_to_combine = (
-    ["presencementor", "statutmentor", "sexmentor"] +
-    [f"mentor.{str(i).zfill(2)}" for i in range(1, 38)]
-)
-
-# Create the combination columns
-df['sexism_combination'] = df[sexism_to_combine].apply(lambda x: '_'.join(x.astype(str)), axis=1)
-df['mentor_combination'] = df[mentor_to_combine].apply(
-    lambda x: '_'.join('' if pd.isna(val) else str(val) for val in x), axis=1
-)
-
-# Save the mapping from combinations to original values
-sexism_combination_mapping = df.set_index('sexism_combination')[sexism_to_combine].drop_duplicates().to_dict(orient='index')
-mentor_combination_mapping = df.set_index('mentor_combination')[mentor_to_combine].drop_duplicates().to_dict(orient='index')
-
-# drop columns for anonymization
-df.drop(columns=sexism_to_combine, inplace=True)
-df.drop(columns=mentor_to_combine, inplace=True)
-
-# for all columns that have less than 20 unique values, we will use the "categorical" type
-for col in df.columns:
-    if df[col].nunique() < 20:
-        df[col] = df[col].astype('category')
-
-runner = manager.create_runner("PA_sexism")
-runner.add_table("bennoittest", df)
-runner.set_parameters("bennoittest", k=5, use_categorical_reduction=True, column_weights={"age": 3, "accesHU": 3})
-avatarization_job = runner.run()
-results=runner.get_all_results()
-avatars = runner.sensitive_unshuffled("bennoittest")
-avatars = df.copy()
-
-restored_sexism = avatars['sexism_combination'].map(sexism_combination_mapping).apply(pd.Series)
-restored_mentor = avatars['mentor_combination'].map(mentor_combination_mapping).apply(pd.Series)
-
-avatars = avatars.join(restored_sexism)
-avatars = avatars.join(restored_mentor)
-
-avatars.drop(columns=['sexism_combination', 'mentor_combination'], inplace=True)
-avatars = avatars[column_order]
-
-# %%
-runner.download_report("BENOIT/report.pdf")
-
-# %%
-runner.shuffled("bennoittest").to_csv("BENOIT/shuffled.csv", index=False)
-
-
-# %%
-runner.sensitive_unshuffled("bennoittest").to_csv("BENOIT/unshuffled.csv", index=False)
-
-# %%
-import json
-
-with open("BENOIT/privacy_metrics.json", "w") as file:
-    privacy_metrics_json = json.dumps(runner.privacy_metrics("bennoittest"), indent=4)
-    file.write(privacy_metrics_json)
-print("Privacy metrics saved to privacy_metrics.json")
-
-# %%
-with open("BENOIT/signal_metrics.json", "w") as file:
-    signal_metrics_json = json.dumps(runner.signal_metrics("bennoittest"), indent=4)
-    file.write(signal_metrics_json)
-print("Privacy metrics saved to signal_metrics.json")
-
-# %%
-avatars = avatars[column_order]
 
 # %% [markdown]
 # ## Loading data
@@ -146,7 +63,7 @@ df.head()
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner("iris_k2")
+runner = manager.create_runner(f"iris_k2_{secrets.token_hex(4)}")
 
 # Then upload the data, you can either use a pandas dataframe or a file
 runner.add_table("iris", df)
@@ -179,7 +96,7 @@ original_coord_k_2, avatars_coord_k_2  = runner.projections("iris")
 
 # %%
 # Create a new runner to run with a different k
-runner = manager.create_runner("iris_k30")
+runner = manager.create_runner(f"iris_k30_{secrets.token_hex(4)}")
 runner.add_table("iris", "../fixtures/iris.csv")
 
 # Set k
@@ -318,7 +235,7 @@ imputation_method="mean"
 # The avatarization can now be run with different parameters
 
 # %%
-runner = manager.create_runner("iris_multi_params")
+runner = manager.create_runner(f"iris_multi_params_{secrets.token_hex(4)}")
 runner.add_table("iris", "../fixtures/iris.csv")
 
 runner.set_parameters(
@@ -342,6 +259,34 @@ runner.get_all_results()
 original_coord, avatars_coord = runner.projections("iris")
 
 plot_coordinates(original_coord, avatars_coord, k)
+
+# %% [markdown]
+# ## Get suggestions for a parameter set
+#
+# If you don't need to refine the parameter set around your usage, you can use the application's recommendations.
+#
+
+# %%
+
+runner = manager.create_runner(f"iris_automated_{secrets.token_hex(4)}")
+
+runner.add_table("iris", "../fixtures/iris.csv")
+runner.advise_parameters()
+
+# See the automated parameters
+runner.print_parameters()
+
+# %%
+runner.run()
+
+
+# %% [markdown]
+# You can also update the suggested parameters:
+
+# %%
+runner.update_parameters("iris", k=2)
+runner.print_parameters()
+runner.run()
 
 # %% [markdown]
 # *In the next tutorial, we will show how to run an avatarization with multiple tables.*
