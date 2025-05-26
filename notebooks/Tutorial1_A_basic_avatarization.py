@@ -6,10 +6,6 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
-#   kernelspec:
-#     display_name: octopize-avatar
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -19,20 +15,17 @@
 # In this tutorial, we will connect to a server to perform the avatarization of a dataset that does not require any pre-processing. We'll retrieve the anonymized dataset and the associated avatarization report.
 
 # %%
-# This is the main file for the Avatar tutorial.
-from avatars.manager import Manager
-# The following are not necessary to run avatar but are used in this tutorial
-from avatars.models import JobKind
-from avatars.runner import Results
-
-import pandas as pd
 import os
 import secrets
 
+import pandas as pd
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
-username = os.environ.get("AVATAR_USERNAME")
-password = os.environ.get("AVATAR_PASSWORD")
+from avatars.manager import Manager
+from avatars.models import JobKind
+
+url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
+username = os.environ.get("AVATAR_USERNAME", "")
+password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
 manager = Manager(base_url=url)
@@ -58,8 +51,6 @@ df = pd.read_csv("../fixtures/iris.csv")
 df
 
 # %%
-from avatars.runner import Runner
-
 # The runner is the object that will be used to upload data to the server and run the avatarization
 runner = manager.create_runner(f"iris_k5_{secrets.token_hex(4)}")
 
@@ -73,7 +64,9 @@ runner.add_table("iris", df)
 runner.set_parameters("iris", k=5)
 
 # %%
-avatarization_job = runner.run() # by default we run all jobs : avatarization, privacy and signal metrics and report
+avatarization_job = (
+    runner.run()
+)  # by default we run all jobs : avatarization, privacy and signal metrics and report
 # You can also choose to run only the avatarization job for example
 # avatarization_job = runner.run(job_kind=JobKind.standard)
 
@@ -81,7 +74,7 @@ avatarization_job = runner.run() # by default we run all jobs : avatarization, p
 # ## Retrieving the completed avatarization job
 
 # %%
-results=runner.get_all_results()
+results = runner.get_all_results()
 
 # %% [markdown]
 # ## Retrieving the avatars
@@ -93,19 +86,19 @@ runner.shuffled("iris").head()
 # ## Retrieving the privacy metrics
 
 # %%
-runner.privacy_metrics("iris")
+runner.privacy_metrics("iris")[0]
 
 # %% [markdown]
 # ## Retrieving the signal metrics
 
 # %%
-runner.signal_metrics("iris")
+runner.signal_metrics("iris")[0]
 
 # %% [markdown]
 # # Download the report
 
 # %%
-runner.download_report('my_report.pdf')
+runner.download_report("my_report.pdf")
 
 # %% [markdown]
 # # How to print an error message

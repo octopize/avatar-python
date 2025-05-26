@@ -12,15 +12,13 @@ TUTORIAL_REQUIREMENTS := "requirements-tutorial.txt"
 TEST_TUTORIAL_FILE := "tests/integration/test_tutorials.py"
 CURRENT_BRANCH:=`git branch --show-current`
 
-
 import '../../justfiles/python.just'
 import '../../justfiles/oci.just'
 # Allow PY_PKG_NAME to be redefined because the name of the package is different from the name of the directory
 set allow-duplicate-variables
 PY_PKG_NAME := "avatars"
 
-# TODO: Uncomment, right now there are too many typecheck errors in notebooks
-# PY_EXTRA_DIR := "notebooks"
+PY_EXTRA_DIR := "notebooks"
 
 default:
     @just -l
@@ -29,7 +27,6 @@ notebook: generate-py pip-install-tutorial start-notebooks
 
 set allow-duplicate-recipes
 test-integration:
-    uv run python -m pytest tests/integration --ignore={{TEST_TUTORIAL_FILE}}
     just test-tutorials
 
 test-tutorials: generate-py pip-install-tutorial run-test-tutorials
@@ -56,8 +53,11 @@ doc-build:
 
 @format-notebooks:
     uv run jupyter nbconvert --clear-output --ClearMetadataPreprocessor.enabled=True --inplace notebooks/*.ipynb
+    @just lint-fix notebooks/
 
 
+run-from-yaml PATH_TO_YAML:
+    uv run ./bin/run_avatarization.py --yaml {{PATH_TO_YAML}}
 
 # Build and open the documentation
 doc: doc-build
@@ -126,7 +126,19 @@ run-test-tutorials:
 
 [private]
 copy-to-old-repo: ## Copy the files to the old python repo
-	rsync -rav --include="src/***" --include="tests/***" --include="CHANGELOG.md" --include="uv.lock" --include="pyproject.toml" --include="justfile" --include="requirements-tutorial.txt" --include="notebooks/***" --include="README.md" --exclude="notebooks/env/***" --exclude="*" . {{OLD_CLIENT_OUTPUT_DIR}}
+    rsync -rav \
+        --include="src/***" \
+        --include="tests/***" \
+        --include="CHANGELOG.md" \
+        --include="uv.lock" \
+        --include="pyproject.toml" \
+        --include="justfile" \
+        --include="requirements-tutorial.txt" \
+        --include="notebooks/***" \
+        --include="README.md" \
+        --exclude="notebooks/env/***" \
+        --exclude="**/__pycache__/***" \
+        --exclude="*" . {{OLD_CLIENT_OUTPUT_DIR}}
 
 [private]
 publish: build

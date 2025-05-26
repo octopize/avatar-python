@@ -76,6 +76,7 @@ MATCHERS: dict[re.Pattern[str], ColumnType] = {
     re.compile(r"int"): ColumnType.INT,
     re.compile(r"bool"): ColumnType.BOOL,
     re.compile(r"datetime"): ColumnType.DATETIME,
+    re.compile(r"datetime64\[ns, UTC\]"): ColumnType.DATETIME_TZ,
     # FIXME: implement bool ColumnType
 }
 
@@ -238,7 +239,7 @@ class Runner:
         parent_field: str,
         child_table_name: str,
         child_field: str,
-        method: LinkMethod = LinkMethod.LINEAR_SUM_ASSIGNMENT,  # type: ignore[assignment]
+        method: LinkMethod = LinkMethod.LINEAR_SUM_ASSIGNMENT,
     ):
         """Add a table link to the config.
 
@@ -256,7 +257,7 @@ class Runner:
             The method to use for linking the tables. Defaults to "linear_sum_assignment".
         """
         self.config.create_link(
-            parent_table_name, child_table_name, parent_field, child_field, method
+            parent_table_name, child_table_name, parent_field, child_field, method.value
         )
 
     def set_parameters(
@@ -787,7 +788,11 @@ class Runner:
             if column.type and column.type == ColumnType.CATEGORY:
                 dtypes[column.field] = "object"
             elif column.type and column.type == ColumnType.DATETIME:
-                dtypes[column.field] = "datetime64[ns]"
+                dtypes[column.field] = column.value_type if column.value_type else "datetime64[ns]"
+            elif column.type and column.type == ColumnType.DATETIME_TZ:
+                dtypes[column.field] = (
+                    column.value_type if column.value_type else "datetime64[ns, UTC]"
+                )
             else:
                 dtypes[column.field] = column.type.value if column.type is not None else "object"
         return dtypes
@@ -942,7 +947,7 @@ class Runner:
         """Method not implemented yet."""
         pass
 
-    def shuffled(self, table_name: str) -> TypeResults:
+    def shuffled(self, table_name: str) -> pd.DataFrame:
         """
         Get the shuffled data.
 
@@ -956,9 +961,12 @@ class Runner:
         pd.DataFrame
             The shuffled data as a pandas DataFrame.
         """
-        return self.get_specific_result(table_name, JobKind.standard, Results.SHUFFLED)
+        shuffled = self.get_specific_result(table_name, JobKind.standard, Results.SHUFFLED)
+        if not isinstance(shuffled, pd.DataFrame):
+            raise TypeError(f"Expected a pd.DataFrame, got {type(shuffled)} instead.")
+        return shuffled
 
-    def sensitive_unshuffled(self, table_name: str) -> TypeResults:
+    def sensitive_unshuffled(self, table_name: str) -> pd.DataFrame:
         """
         Get the unshuffled data.
         This is sensitive data and should be used with caution.
@@ -973,9 +981,12 @@ class Runner:
         pd.DataFrame
             The unshuffled data as a pandas DataFrame.
         """
-        return self.get_specific_result(table_name, JobKind.standard, Results.UNSHUFFLED)
+        unshuffled = self.get_specific_result(table_name, JobKind.standard, Results.UNSHUFFLED)
+        if not isinstance(unshuffled, pd.DataFrame):
+            raise TypeError(f"Expected a pd.DataFrame, got {type(unshuffled)} instead.")
+        return unshuffled
 
-    def privacy_metrics(self, table_name: str) -> TypeResults:
+    def privacy_metrics(self, table_name: str) -> list[dict]:
         """
         Get the privacy metrics.
 
@@ -987,16 +998,16 @@ class Runner:
         Returns
         -------
         dict
-            The privacy metrics as a dictionary.
+            The privacy metrics as a list of dictionary.
         """
         results = self.get_specific_result(
             table_name, JobKind.privacy_metrics, Results.PRIVACY_METRICS
         )
-        if len(results) == 1:
-            return results[0]  # type: ignore[return-value]
+        if not isinstance(results, list) or not all(isinstance(item, dict) for item in results):
+            raise TypeError(f"Expected a list[dict], got {type(results)} instead.")
         return results
 
-    def signal_metrics(self, table_name: str) -> TypeResults:
+    def signal_metrics(self, table_name: str) -> list[dict]:
         """
         Get the signal metrics.
 
@@ -1008,18 +1019,18 @@ class Runner:
         Returns
         -------
         dict
-            The signal metrics as a dictionary.
+            The signal metrics as a list of dictionary.
         """
         results = self.get_specific_result(
             table_name, JobKind.signal_metrics, Results.SIGNAL_METRICS
         )
-        if len(results) == 1:
-            return results[0]  # type: ignore[return-value]
+        if not isinstance(results, list) or not all(isinstance(item, dict) for item in results):
+            raise TypeError(f"Expected a list[dict], got {type(results)} instead.")
         return results
 
     def projections(
         self, table_name: str, job_name: JobKind = JobKind.standard
-    ) -> tuple[TypeResults, TypeResults]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Get the projections.
 
@@ -1041,6 +1052,13 @@ class Runner:
         avatars_coordinates = self.get_specific_result(
             table_name, job_name, Results.PROJECTIONS_AVATARS
         )
+        if not (
+            isinstance(avatars_coordinates, pd.DataFrame)
+            and isinstance(original_coordinates, pd.DataFrame)
+        ):
+            raise TypeError(
+                f"Expected a pd.DataFrame, got {type(original_coordinates)} and {type(avatars_coordinates)} instead."
+            )
         return original_coordinates, avatars_coordinates
 
     def from_yaml(self, yaml_path: str) -> None:
@@ -1102,9 +1120,8 @@ class Runner:
 
     def _process_avatar_schema(self, spec: dict, metadata: dict, links: dict):
         """Process AvatarSchema kind from the YAML configuration."""
-        if metadata["name"].endswith("-avatarized"):
+        if metadata["name"].endswith("_avatarized"):
             return
-
         for table in spec.get("tables", []):
             self._process_table(table, links)
 

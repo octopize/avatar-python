@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.0.4"
+version = "1.0.5"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fsspec>=2024.12.0",
     "httpx>=0.28.1",
-    "octopize-avatar-yaml",
+    "octopize-avatar-yaml==0.1.15",
     "pydantic>=2.10.4",
     "pydantic-settings>=2.7.0",
     "pyyaml>=6.0.2",
@@ -20,6 +20,8 @@ dependencies = [
     "tenacity>=9.0.0",
     "toolz>=1.0.0",
     "typer>=0.15.1",
+    "types-jmespath>=1.0.2.20240106",
+    "types-seaborn>=0.13.2.20250516",
 ]
 
 [dependency-groups]
@@ -34,7 +36,6 @@ dev = [
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
     "pandas>=2.2.3",
-    "seaborn>=0.13.2",
     "matplotlib>=3.10.1",
     "furo>=2024.8.6",
     "sphinx-multiversion>=0.2.4",

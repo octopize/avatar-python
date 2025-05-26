@@ -1531,7 +1531,7 @@ wheels = [
 
 [[package]]
 name = "octopize-avatar"
-version = "1.0.3"
+version = "1.0.5"
 source = { editable = "." }
 dependencies = [
     { name = "fsspec" },
@@ -1545,6 +1545,8 @@ dependencies = [
     { name = "tenacity" },
     { name = "toolz" },
     { name = "typer" },
+    { name = "types-jmespath" },
+    { name = "types-seaborn" },
 ]
 
 [package.dev-dependencies]
@@ -1562,7 +1564,6 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
-    { name = "seaborn" },
     { name = "sphinx-multiversion" },
     { name = "types-pyyaml" },
 ]
@@ -1579,7 +1580,7 @@ notebook = [
 requires-dist = [
     { name = "fsspec", specifier = ">=2024.12.0" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "octopize-avatar-yaml" },
+    { name = "octopize-avatar-yaml", specifier = "==0.1.15" },
     { name = "pydantic", specifier = ">=2.10.4" },
     { name = "pydantic-settings", specifier = ">=2.7.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
@@ -1588,6 +1589,8 @@ requires-dist = [
     { name = "tenacity", specifier = ">=9.0.0" },
     { name = "toolz", specifier = ">=1.0.0" },
     { name = "typer", specifier = ">=0.15.1" },
+    { name = "types-jmespath", specifier = ">=1.0.2.20240106" },
+    { name = "types-seaborn", specifier = ">=0.13.2.20250516" },
 ]
 
 [package.metadata.requires-dev]
@@ -1605,7 +1608,6 @@ dev = [
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-cov", specifier = ">=6.1.1" },
     { name = "ruff", specifier = ">=0.8.4" },
-    { name = "seaborn", specifier = ">=0.13.2" },
     { name = "sphinx-multiversion", specifier = ">=0.2.4" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20240917" },
 ]
@@ -1620,15 +1622,15 @@ notebook = [
 
 [[package]]
 name = "octopize-avatar-yaml"
-version = "0.1.14"
+version = "0.1.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/4a/59/0543f49e7eefe41fa6a9b54cdc576d10b6737f87fcb320f1bb558e5b95c7/octopize_avatar_yaml-0.1.14.tar.gz", hash = "sha256:dd9e33fc4600e2b0b3fab61a4182dfcc0a9321cae21c066cfd0f4704203c8b72", size = 28348, upload-time = "2025-05-13T10:20:20.034Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/7d/c1737b8153b249b71af2b11ed9cf049c6f365cfdfe7b673d3ec9b4d928de/octopize_avatar_yaml-0.1.15.tar.gz", hash = "sha256:e1cfe38aa04d1fbc185dbb16940fd381c658ed4e4b75f78d5d3118d2197cb2f1", size = 28368, upload-time = "2025-05-22T14:40:17.881Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6a/77/c3a34d57867b7e7a52db169945f43f5e3ed6f3a3f7ba71950e8b35c6ee3f/octopize_avatar_yaml-0.1.14-py3-none-any.whl", hash = "sha256:25537c9935ce24c5dcc3cc36bc6680e9e3a54ae2895c72c84489e0183357300f", size = 16857, upload-time = "2025-05-13T10:20:18.759Z" },
+    { url = "https://files.pythonhosted.org/packages/ec/6c/3325c6dfb8febebcc0f24146d3319d4bd925f60be2f74da54eb3ae4cd0a9/octopize_avatar_yaml-0.1.15-py3-none-any.whl", hash = "sha256:c6af1882d381b35666fdda61757e915f9fc46e2d63be998d4f8617b40384c10c", size = 16890, upload-time = "2025-05-22T14:40:16.545Z" },
 ]
 
 [[package]]
@@ -2648,6 +2650,15 @@ wheels = [
 ]
 
 [[package]]
+name = "types-jmespath"
+version = "1.0.2.20240106"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1b/e4/1f7414dbca03975f66f1ab1b3f7b3deb7c19b104ef14dd3c99036bbc39b2/types-jmespath-1.0.2.20240106.tar.gz", hash = "sha256:b4a65a116bfc1c700a4fd9d24e2e397f4a431122e0320a77b7f1989a6b5d819e", size = 5071, upload-time = "2024-01-06T02:21:32.871Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f5/30/3d6443f782601dd88820ba31e7668abfec7e19d685ac7f6fbcfd6ebba519/types_jmespath-1.0.2.20240106-py3-none-any.whl", hash = "sha256:c3e715fcaae9e5f8d74e14328fdedc4f2b3f0e18df17f3e457ae0a18e245bde0", size = 6087, upload-time = "2024-01-06T02:21:31.576Z" },
+]
+
+[[package]]
 name = "types-python-dateutil"
 version = "2.9.0.20241206"
 source = { registry = "https://pypi.org/simple" }
@@ -2672,6 +2683,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2d/68/609eed7402f87c9874af39d35942744e39646d1ea9011765ec87b01b2a3c/types_pyyaml-6.0.12.20250402.tar.gz", hash = "sha256:d7c13c3e6d335b6af4b0122a01ff1d270aba84ab96d1a1a1063ecba3e13ec075", size = 17282, upload-time = "2025-04-02T02:56:00.235Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ed/56/1fe61db05685fbb512c07ea9323f06ea727125951f1eb4dff110b3311da3/types_pyyaml-6.0.12.20250402-py3-none-any.whl", hash = "sha256:652348fa9e7a203d4b0d21066dfb00760d3cbd5a15ebb7cf8d33c88a49546681", size = 20329, upload-time = "2025-04-02T02:55:59.382Z" },
+]
+
+[[package]]
+name = "types-seaborn"
+version = "0.13.2.20250516"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pandas-stubs" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5b/95/473165d54e3a0113b09cdeb3d545ddbe6956857556cd42f8c170a68d1f36/types_seaborn-0.13.2.20250516.tar.gz", hash = "sha256:7cf406534f058d1832460b4e5ab0b1a0c26ca67ce4f18ad4817723a35beee93a", size = 29153, upload-time = "2025-05-16T03:08:53.141Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/19/c1/ae7fe4851789de4efa7fa0a73c4f1b2ac1501129b1fd9e961f1ffcabca1a/types_seaborn-0.13.2.20250516-py3-none-any.whl", hash = "sha256:3d90124d587aac36874c23d7fc4b11fa47164cba25e3344dc19922cbec9ab5d0", size = 40813, upload-time = "2025-05-16T03:08:52.241Z" },
 ]
 
 [[package]]

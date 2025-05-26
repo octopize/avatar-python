@@ -28,19 +28,17 @@
 # ## Connection
 
 # %%
+import os
+import secrets
+
+import pandas as pd
+
 from avatars.manager import Manager
 from avatars.models import JobKind
-from avatars.runner import Results
-import numpy as np
 
-import seaborn as sns
-import matplotlib.pyplot as plt
-import pandas as pd
-import os
-
-url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
-username = os.environ.get("AVATAR_USERNAME")
-password = os.environ.get("AVATAR_PASSWORD")
+url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
+username = os.environ.get("AVATAR_USERNAME", "")
+password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
 manager = Manager(base_url=url)
@@ -60,11 +58,7 @@ manager.get_health()
 # Because this is an irreversible operation, this transformation of the data should be done outside the pipeline. The transformed data will be used as a basis for comparison when computing utility and privacy metrics.
 
 # %%
-df = (
-    pd.read_csv("../fixtures/adult_with_cities.csv")
-    .head(1000)
-    .drop(["native-country"], axis=1)
-)
+df = pd.read_csv("../fixtures/adult_with_cities.csv").head(1000).drop(["native-country"], axis=1)
 df.head()
 
 # %% [markdown]
@@ -75,6 +69,7 @@ df["city"].value_counts()
 
 # %%
 from avatars.processors import GroupModalitiesProcessor
+
 group_modalities_processor = GroupModalitiesProcessor(
     min_unique=10,  # number of modalities for a variable to be considered for grouping
     global_threshold=25,  # if considered for grouping, number of individuals in modality to preserve it
@@ -91,12 +86,12 @@ df_preprocessed = group_modalities_processor.preprocess(df)
 df_preprocessed["city"].value_counts()
 
 # %%
-runner = manager.create_runner(set_name="tutorial5")
+runner = manager.create_runner(set_name=f"tutorial5{secrets.token_hex(4)}")
 runner.add_table(
     "adult",
     df_preprocessed,
 )
-runner.set_parameters("adult",k=5)
+runner.set_parameters("adult", k=5)
 runner.run(jobs_to_run=[JobKind.standard])
 runner.get_all_results()
 

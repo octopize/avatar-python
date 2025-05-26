@@ -6,10 +6,6 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
-#   kernelspec:
-#     display_name: octopize-avatar
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -22,23 +18,24 @@
 # ## Connection
 
 # %%
-# This is the main file for the Avatar tutorial.
-from avatars.manager import Manager
-# The following are not necessary to run avatar but are used in this tutorial
-from avatars.models import JobKind
-import numpy as np
-
-import seaborn as sns
-import secrets
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
+import secrets
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
-username = os.environ.get("AVATAR_USERNAME")
-password = os.environ.get("AVATAR_PASSWORD")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from avatar_yaml.models.parameters import (
+    ExcludeVariablesMethod,
+    ImputeMethod,
+)
 
-# %%
+from avatars.manager import Manager
+from avatars.models import JobKind
+
+url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
+username = os.environ.get("AVATAR_USERNAME", "")
+password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %% [markdown]
 # Run the following cell if your environment does not have all the listed packages already installed.
@@ -84,15 +81,15 @@ runner.set_parameters("iris", k=k)
 runner.run()
 
 # Retrieve selected metric
-hidden_rate = runner.privacy_metrics("iris")["hidden_rate"]
-local_cloaking = runner.privacy_metrics("iris")["local_cloaking"]
-hellinger_distance = runner.signal_metrics("iris")["hellinger_mean"]
+hidden_rate = runner.privacy_metrics("iris")[0]["hidden_rate"]
+local_cloaking = runner.privacy_metrics("iris")[0]["local_cloaking"]
+hellinger_distance = runner.signal_metrics("iris")[0]["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-original_coord_k_2, avatars_coord_k_2  = runner.projections("iris")
+original_coord_k_2, avatars_coord_k_2 = runner.projections("iris")
 
 # %%
 # Create a new runner to run with a different k
@@ -106,15 +103,15 @@ runner.set_parameters("iris", k=k)
 runner.run()
 
 # Retrieve selected metric
-hidden_rate = runner.privacy_metrics("iris")["hidden_rate"]
-local_cloaking = runner.privacy_metrics("iris")["local_cloaking"]
-hellinger_distance = runner.signal_metrics("iris")["hellinger_mean"]
+hidden_rate = runner.privacy_metrics("iris")[0]["hidden_rate"]
+local_cloaking = runner.privacy_metrics("iris")[0]["local_cloaking"]
+hellinger_distance = runner.signal_metrics("iris")[0]["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-original_coord_k_30, avatars_coord_k_30  = runner.projections("iris")
+original_coord_k_30, avatars_coord_k_30 = runner.projections("iris")
 
 
 # %% [markdown]
@@ -126,8 +123,9 @@ original_coord_k_30, avatars_coord_k_30  = runner.projections("iris")
 # %% [markdown]
 # By looking at originals and avatars in the projected space, we can observe the area covered by avatars and if it covers the same space as the original data.
 
+
 # %%
-def plot_coordinates(original_coord, avatars_coord, k: int |  None = None):
+def plot_coordinates(original_coord, avatars_coord, k: int | None = None):
     projections_records = np.array(original_coord)[
         :, 0:2
     ]  # First 2 dimensions of projected records
@@ -155,6 +153,8 @@ def plot_coordinates(original_coord, avatars_coord, k: int |  None = None):
     )
 
     ax.set_title(f"Projection of originals and avatars {k=}")
+
+
 plot_coordinates(original_coord_k_2, avatars_coord_k_2, 2)
 
 # %%
@@ -176,7 +176,7 @@ plot_coordinates(original_coord_k_30, avatars_coord_k_30, 30)
 # By default, all variables are given equal weight of 1, but custom weights can be defined to bias the projection towards some specific variables.
 
 # %%
-column_weights = {"variety": 3}
+column_weights = {"variety": 3.0}
 
 # %% [markdown]
 # ### Number of components
@@ -211,8 +211,8 @@ use_categorical_reduction = True
 # Metrics are computed after re-assignment of the excluded variables, so a variable that has been excluded is still anonymized as long as the privacy targets are reached.
 
 # %%
-exclude_variable_names=["variety"]
-exclude_replacement_strategy='coordinate_similarity'
+exclude_variable_names = ["variety"]
+exclude_replacement_strategy = ExcludeVariablesMethod.COORDINATE_SIMILARITY
 
 # %% [markdown]
 # ## Missing data
@@ -226,7 +226,7 @@ exclude_replacement_strategy='coordinate_similarity'
 # These parameters allow you to choose the method to impute the missing values. `imputation_method` could be : `fast_knn`, `knn` , `mean` , `mode`, `median`. By default we use the `fast_knn` method.
 
 # %%
-imputation_method="mean"
+imputation_method = ImputeMethod.MEAN
 
 # %% [markdown]
 # # Running the avatarization
@@ -267,7 +267,6 @@ plot_coordinates(original_coord, avatars_coord, k)
 #
 
 # %%
-
 runner = manager.create_runner(f"iris_automated_{secrets.token_hex(4)}")
 
 runner.add_table("iris", "../fixtures/iris.csv")
@@ -278,7 +277,6 @@ runner.print_parameters()
 
 # %%
 runner.run()
-
 
 # %% [markdown]
 # You can also update the suggested parameters:

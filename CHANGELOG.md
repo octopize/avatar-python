@@ -2,6 +2,10 @@
 
 ## NEXT RELEASE
 
+- fix: use specific avatar-yaml version
+
+## 1.0.4 - 2025/05/20
+
 - feat: support generating multitable reports
 - feat: add advisor functionality
 

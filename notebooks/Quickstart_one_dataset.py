@@ -6,10 +6,6 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
-#   kernelspec:
-#     display_name: octopize-avatar
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -20,18 +16,16 @@
 
 # %%
 # This is the main file for the Avatar tutorial.
-from avatars.manager import Manager
-# The following are not necessary to run avatar but are used in this tutorial
-from avatars.models import JobKind
-from avatars.runner import Results
-
-import pandas as pd
 import os
 import secrets
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
-username = os.environ.get("AVATAR_USERNAME")
-password = os.environ.get("AVATAR_PASSWORD")
+from avatars.manager import Manager
+
+# The following are not necessary to run avatar but are used in this tutorial
+
+url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
+username = os.environ.get("AVATAR_USERNAME", "")
+password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
 manager = Manager(base_url=url)
@@ -49,13 +43,12 @@ runner = manager.create_runner(set_name=f"test_wbcd_{secrets.token_hex(4)}")
 runner.add_table("wbcd", "../fixtures/wbcd.csv")
 # Choose the parameters for the avatarization
 
-
 # %%
 runner.set_parameters("wbcd", k=15)
 # Run the pipeline with avatarization, privacy and signal metrics and report
 runner.run()
 # Get the results
-results=runner.get_all_results()
+results = runner.get_all_results()
 
 # %% [markdown]
 # ## Retrieve avatars
@@ -69,18 +62,18 @@ runner.shuffled("wbcd").head()
 # ## Retrieve privacy metrics
 
 # %%
-for key, value in runner.privacy_metrics("wbcd").items():
+for key, value in runner.privacy_metrics("wbcd")[0].items():
     print(f"{key}: {value}")
 
 # %% [markdown]
 # ## Retrieve signal metrics
 
 # %%
-for key, value in runner.signal_metrics("wbcd").items():
+for key, value in runner.signal_metrics("wbcd")[0].items():
     print(f"{key}: {value}")
 
 # %% [markdown]
 # ## Retrieving the avatarization report
 
 # %%
-runner.download_report('my_report.pdf')
+runner.download_report("my_report.pdf")

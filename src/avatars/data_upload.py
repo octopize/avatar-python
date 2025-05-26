@@ -54,7 +54,9 @@ class DataUploader:
             binary_stream.seek(0)
             self.upload_file_descriptor(binary_stream, key)
         else:
-            raise ValueError("Expected a path to a file or a pandas dataframe to upload")
+            raise ValueError(
+                f"Expected a path to a file or a pandas dataframe to upload, got {type(data)}"
+            )
 
     def upload_file_descriptor(self, fd: BinaryIO, key: str) -> None:
         """Upload a file descriptor to the storage.

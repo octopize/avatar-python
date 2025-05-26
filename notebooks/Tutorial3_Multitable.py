@@ -6,10 +6,6 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.1
-#   kernelspec:
-#     display_name: octopize-avatar
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -24,23 +20,21 @@
 # ### Setup
 
 # %%
-# This is the main file for the Avatar tutorial.
-from avatars.manager import Manager
-# The following are not necessary to run avatar but are used in this tutorial
-from avatars.models import JobKind
-from avatars.runner import Results
-from avatar_yaml.models.schema import LinkMethod
-import numpy as np
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-# # %matplotlib inline
-import pandas as pd
+# %matplotlib inline
 import os
+import secrets
 
-url = os.environ.get("AVATAR_BASE_API_URL","https://www.octopize.app/api")
-username = os.environ.get("AVATAR_USERNAME")
-password = os.environ.get("AVATAR_PASSWORD")
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from avatar_yaml.models.schema import LinkMethod
+
+from avatars.manager import Manager
+from avatars.models import JobKind
+
+url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
+username = os.environ.get("AVATAR_USERNAME", "")
+password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
 manager = Manager(base_url=url)
@@ -92,23 +86,29 @@ visit.head()
 
 # %%
 # First initialize the runner
-runner = manager.create_runner(set_name="tutorial_multitable")
+runner = manager.create_runner(set_name=f"tutorial_multitable{secrets.token_hex(4)}")
 
-runner.add_table("patient",
-                patient,
-                primary_key="p_id",
-                individual_level=True, )
+runner.add_table(
+    "patient",
+    patient,
+    primary_key="p_id",
+    individual_level=True,
+)
 
-runner.add_table("doctor",
-                doctor,
-                primary_key="d_id",
-                individual_level=True, )
+runner.add_table(
+    "doctor",
+    doctor,
+    primary_key="d_id",
+    individual_level=True,
+)
 
 
-runner.add_table("visit",
-                visit,
-                primary_key="visit_id",
-                foreign_keys=["patient_id", "doctor_id"],)
+runner.add_table(
+    "visit",
+    visit,
+    primary_key="visit_id",
+    foreign_keys=["patient_id", "doctor_id"],
+)
 
 # %% [markdown]
 # ## Parameters setup
@@ -135,27 +135,32 @@ runner.add_table("visit",
 # - A link is a relation between 1 parent table and 1 child table
 
 # %%
-runner.add_link(parent_table_name="patient",
-                child_table_name="visit",
-                parent_field="p_id",
-                child_field="patient_id",
-                method=LinkMethod.LINEAR_SUM_ASSIGNMENT)
+runner.add_link(
+    parent_table_name="patient",
+    child_table_name="visit",
+    parent_field="p_id",
+    child_field="patient_id",
+    method=LinkMethod.LINEAR_SUM_ASSIGNMENT,
+)
 # Linear sum assignment consumes lots of ressource. Change the method if you have a large dataset.
 
-runner.add_link(parent_table_name="doctor",
-                child_table_name="visit",
-                parent_field="d_id",
-                child_field="doctor_id",
-                method=LinkMethod.LINEAR_SUM_ASSIGNMENT)
-
-
+runner.add_link(
+    parent_table_name="doctor",
+    child_table_name="visit",
+    parent_field="d_id",
+    child_field="doctor_id",
+    method=LinkMethod.LINEAR_SUM_ASSIGNMENT,
+)
 
 # %%
 runner.advise_parameters()
-runner.update_parameters("patient" ,known_variables=[
-            "gender",
-            "age",
-        ])
+runner.update_parameters(
+    "patient",
+    known_variables=[
+        "gender",
+        "age",
+    ],
+)
 
 runner.print_parameters()
 
@@ -166,7 +171,7 @@ runner.print_parameters()
 runner.run()
 
 # %%
-results=runner.get_all_results()
+results = runner.get_all_results()
 
 # Get back avatar tables from the results
 # Patient
@@ -211,8 +216,6 @@ for method in runner.privacy_metrics("patient"):
     print(f"Computation type : {method['metadata']['computation_type']}")
     print(f"   Hidden rate : {method['hidden_rate']}")
 
-
-
 # %% [markdown]
 # Key understandings:
 # - **Standalone**: Indicates that the patient table, when considered independently, is protected.
@@ -224,7 +227,6 @@ for method in runner.privacy_metrics("doctor"):
     print(f"Computation type : {method['metadata']['computation_type']}")
     print(f"   Hidden rate : {method['hidden_rate']}")
 
-
 # %% [markdown]
 # Key understandings:
 # - **Standalone**: Indicates that the doctor table, when considered independently, is protected.
@@ -233,9 +235,10 @@ for method in runner.privacy_metrics("doctor"):
 # %%
 print("*** Privacy metrics on the visit table***")
 for method in runner.privacy_metrics("visit"):
-    print(f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}")
+    print(
+        f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}"
+    )
     print(f"   Hidden rate : {method['hidden_rate']}")
-
 
 # %% [markdown]
 # Key insights:
@@ -264,7 +267,6 @@ for method in runner.signal_metrics("patient"):
     print(f"Computation type : {method['metadata']['computation_type']}")
     print(f"   Hellinger mean : {method['hellinger_mean']}")
 
-
 # %% [markdown]
 # Key insights:
 #
@@ -277,7 +279,6 @@ for method in runner.signal_metrics("doctor"):
     print(f"Computation type : {method['metadata']['computation_type']}")
     print(f"   Hellinger mean : {method['hellinger_mean']}")
 
-
 # %% [markdown]
 # Key insights:
 #
@@ -287,11 +288,12 @@ for method in runner.signal_metrics("doctor"):
 # %%
 print("*** Signal metrics on the visit table***")
 for method in runner.signal_metrics("visit"):
-    print(f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}")
-    if method['metadata']['computation_type'] == 'standalone':
+    print(
+        f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}"
+    )
+    if method["metadata"]["computation_type"] == "standalone":
         print(f"   Hellinger mean : {method['hellinger_mean']}")
     print(f"   Correlation difference ratio : {method['correlation_difference_ratio']}")
-
 
 # %% [markdown]
 # Key insights:
@@ -324,12 +326,8 @@ map_color = {"original": ORIGINAL_COLOR, "avatar": AVATAR_COLOR}
 day_order = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
 doctor_avatar_renamed = doctor_avatar.rename(columns={"age": "age_doctor"})
-visit_avatar_flat = visit_avatar.join(
-    doctor_avatar_renamed.set_index("d_id"), on="doctor_id"
-)
-visit_avatar_flat = visit_avatar_flat.join(
-    patient_avatar.set_index("p_id"), on="patient_id"
-)
+visit_avatar_flat = visit_avatar.join(doctor_avatar_renamed.set_index("d_id"), on="doctor_id")
+visit_avatar_flat = visit_avatar_flat.join(patient_avatar.set_index("p_id"), on="patient_id")
 
 
 doctor_renamed = doctor.rename(columns={"age": "age_doctor"})
@@ -405,7 +403,6 @@ sns.countplot(
     hue="job",
     ax=axes[0],
     palette=[ORIGINAL_COLOR, "lightgrey"],
-
 )
 sns.countplot(
     data=visit_avatar_flat,
@@ -421,9 +418,7 @@ axes[1].set_title("Avatar")
 # ### Patient x Doctor
 
 # %%
-sns.kdeplot(
-    data=visit_flat, x="age", y="age_doctor", fill=True, color=ORIGINAL_COLOR, alpha=0.8
-)
+sns.kdeplot(data=visit_flat, x="age", y="age_doctor", fill=True, color=ORIGINAL_COLOR, alpha=0.8)
 sns.kdeplot(
     data=visit_avatar_flat,
     x="age",

@@ -323,7 +323,7 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1, time_series_time="col1")
         # Set initial parameters
         runner.set_parameters(
-            "test_table", k=3, time_series_nf=2, time_series_projection_type=ProjectionType.FCPA
+            "test_table", k=3, time_series_nf=2, time_series_projection_type=ProjectionType.FPCA
         )
 
         # Update time series parameters
@@ -334,7 +334,7 @@ class TestRunner:
         # Verify time series parameters were updated
         assert runner.config.time_series["test_table"].projection["nf"] == 2  # Preserved
         assert (
-            runner.config.time_series["test_table"].projection["projection_type"] == "fcpa"
+            runner.config.time_series["test_table"].projection["projection_type"] == "fpca"
         )  # Preserved
         assert runner.config.time_series["test_table"].alignment["method"] == "mean"  # Updated
         assert runner.config.time_series["test_table"].alignment["nb_points"] == 10  # Updated
@@ -437,7 +437,7 @@ class TestRunner:
             "test_table",
             k=3,
             time_series_nf=5,
-            time_series_projection_type=ProjectionType.FCPA,
+            time_series_projection_type=ProjectionType.FPCA,
             time_series_nb_points=10,
             time_series_method=AlignmentMethod.MAX,
         )
@@ -447,6 +447,6 @@ class TestRunner:
 
         # Verify time series parameters are extracted correctly
         assert current_params["time_series_nf"] == 5
-        assert current_params["time_series_projection_type"] == ProjectionType.FCPA
+        assert current_params["time_series_projection_type"] == ProjectionType.FPCA
         assert current_params["time_series_nb_points"] == 10
         assert current_params["time_series_method"] == AlignmentMethod.MAX
