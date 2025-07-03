@@ -55,6 +55,20 @@ class Results(StrEnum):
     METADATA = "run_metadata"
     REPORT = "report"
     META_METRICS = "meta_metrics"
+    FIGURES = "figures"
+    FIGURES_METADATA = "figures_metadata"
+
+
+RESULTS_TO_DOWNLOAD = [
+    Results.ADVICE,
+    Results.SHUFFLED,
+    Results.UNSHUFFLED,
+    Results.PRIVACY_METRICS,
+    Results.SIGNAL_METRICS,
+    Results.PROJECTIONS_ORIGINAL,
+    Results.PROJECTIONS_AVATARS,
+    Results.METADATA,
+]
 
 
 TypeResults = dict | pd.DataFrame | str | list[dict]
@@ -296,33 +310,49 @@ class Runner:
         ncp
             Number of dimensions to consider for the KNN algorithm.
         use_categorical_reduction
-            Whether to transform categorical variables into a latent numerical space before projection.
+            Whether to transform categorical variables into a
+            latent numerical space before projection.
         column_weights
-            Dictionary mapping column names to their respective weights, indicating the importance of each variable during the projection process.
+            Dictionary mapping column names to their respective weights,
+            indicating the importance of each variable during the projection process.
         exclude_variable_names
             List of variable names to exclude from the projection.
         exclude_replacement_strategy : ExcludeVariablesMethod, optional
             Strategy for replacing excluded variables. Options: ROW_ORDER, COORDINATE_SIMILARITY.
         imputation_method
-            Method for imputing missing values. Options: ImputeMethod.KNN, ImputeMethod.MODE, ImputeMethod.MEDIAN, ImputeMethod.MEAN, ImputeMethod.FAST_KNN.
+            Method for imputing missing values.
+            Options:
+                ImputeMethod.KNN
+                ImputeMethod.MODE
+                ImputeMethod.MEDIAN
+                ImputeMethod.MEAN
+                ImputeMethod.FAST_KNN.
         imputation_k
             Number of neighbors to use for imputation if the method is KNN or FAST_KNN.
         imputation_training_fraction
-            Fraction of the dataset to use for training the imputation model when using KNN or FAST_KNN.
+            Fraction of the dataset to use for training the imputation model
+            when using KNN or FAST_KNN.
         dp_epsilon
             Epsilon value for differential privacy.
         dp_preprocess_budget_ratio
             Budget ration to allocate when using differential privacy avatarization.
         time_series_nf
-            In time series context, number of degrees of freedom to retain in time series projections.
+            In time series context, number of degrees of freedom to
+            retain in time series projections.
         time_series_projection_type
-            In time series context, type of projection for time series. Options: ProjectionType.FCPA, ProjectionType.FLATTEN default is FCPA.
+            In time series context, type of projection for time series.
+            Options: ProjectionType.FCPA, ProjectionType.FLATTEN default is FCPA.
         time_series_method
-            In time series context, method for aligning series. Options: AlignmentMethod.SPECIFIED, AlignmentMethod.MAX, AlignmentMethod.MIN, AlignmentMethod.MEAN.
+            In time series context, method for aligning series.
+            Options: AlignmentMethod.SPECIFIED
+                    AlignmentMethod.MAX
+                    AlignmentMethod.MIN
+                    AlignmentMethod.MEAN.
         time_series_nb_points
             In time series context, number of points to generate for time series.
         known_variables
-            List of known variables to be used for privacy metrics. These are variables that could be easily known by an attacker.
+            List of known variables to be used for privacy metrics.
+            These are variables that could be easily known by an attacker.
         target
             Target variable to predict, used for signal metrics.
         """
@@ -451,7 +481,8 @@ class Runner:
         Returns
         -------
         dict
-            A dictionary containing the current parameters for the table as it is used in set_parameters.
+            A dictionary containing the current parameters for
+            the table as it is used in set_parameters.
         """
 
         current_params: dict[str, Any] = {}
@@ -561,15 +592,14 @@ class Runner:
             and table_name in self.config.privacy_metrics.keys()
         ):
             pm_params = self.config.privacy_metrics[table_name]
-            current_params.update(
-                {
-                    "known_variables": pm_params.known_variables,
-                    "target": pm_params.target,
-                    "closest_rate_percentage_threshold": pm_params.closest_rate_percentage_threshold,
-                    "closest_rate_ratio_threshold": pm_params.closest_rate_ratio_threshold,
-                    "categorical_hidden_rate_variables": pm_params.categorical_hidden_rate_variables,
-                }
-            )
+            to_update = {
+                "known_variables": pm_params.known_variables,
+                "target": pm_params.target,
+                "closest_rate_percentage_threshold": pm_params.closest_rate_percentage_threshold,
+                "closest_rate_ratio_threshold": pm_params.closest_rate_ratio_threshold,
+                "categorical_hidden_rate_variables": pm_params.categorical_hidden_rate_variables,
+            }
+            current_params.update(to_update)
 
         return current_params
 
@@ -686,7 +716,7 @@ class Runner:
     ):
         # FIXME: use the create_job method from the client instead of creating the request manually
         # the create_job method doesn't return the right object for now.
-        print(f"Creating {parameters_name} job")
+        print(f"Creating {parameters_name} job")  # noqa: T201
         request = JobCreateRequest(
             set_name=self.set_name, parameters_name=parameters_name, depends_on=depends_on
         )
@@ -802,11 +832,9 @@ class Runner:
         for job_name, results in self.results_urls.items():
             job = self.results.setdefault(job_name, {})
             for results_name, urls in results.items():
-                if (
-                    results_name == Results.REPORT_IMAGES.value
-                    or results_name == Results.REPORT.value
-                    or results_name == Results.META_METRICS.value
-                ):
+                if results_name not in Results:
+                    continue
+                if Results(results_name) not in RESULTS_TO_DOWNLOAD:
                     continue
 
                 for url in urls:
@@ -846,7 +874,7 @@ class Runner:
         Returns
         -------
         TypeResults
-            Either a pandas DataFrame or a dictionary or a list of dictionary depending on the result type.
+            Pandas DataFrame, dictionary, or a list of dictionaries depending on the result type.
         """
         if job_name not in self.jobs.keys():
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
@@ -930,15 +958,15 @@ class Runner:
         if table_name not in self.config.tables.keys():
             raise ValueError(f"Expected table '{table_name}' to be created. Try running it first.")
 
-        print(f"--- Avatarization parameters for {table_name}: ---")
+        print(f"--- Avatarization parameters for {table_name}: ---")  # noqa: T201
 
-        print(asdict(self.config.avatarization[table_name]))
-        print("\n")
-        print(f"--- Privacy metrics for {table_name}: ---")
-        print(asdict(self.config.privacy_metrics[table_name]))
-        print("\n")
-        print(f"--- Signal metrics for {table_name}: ---")
-        print(asdict(self.config.signal_metrics[table_name]))
+        print(asdict(self.config.avatarization[table_name]))  # noqa: T201
+        print("\n")  # noqa: T201
+        print(f"--- Privacy metrics for {table_name}: ---")  # noqa: T201
+        print(asdict(self.config.privacy_metrics[table_name]))  # noqa: T201
+        print("\n")  # noqa: T201
+        print(f"--- Signal metrics for {table_name}: ---")  # noqa: T201
+        print(asdict(self.config.signal_metrics[table_name]))  # noqa: T201
 
     def _get_url_results_volume(self):
         return yaml.safe_load(self._get_user_results_volume())["spec"]["url"]
@@ -1057,7 +1085,8 @@ class Runner:
             and isinstance(original_coordinates, pd.DataFrame)
         ):
             raise TypeError(
-                f"Expected a pd.DataFrame, got {type(original_coordinates)} and {type(avatars_coordinates)} instead."
+                "Expected a pd.DataFrame, "
+                f"got {type(original_coordinates)} and {type(avatars_coordinates)} instead."
             )
         return original_coordinates, avatars_coordinates
 
@@ -1135,11 +1164,33 @@ class Runner:
             self._download_file_using_url(url=access_url)
             original_volume = table["data"]["volume"]
         except FileNotFoundError:
-            print(f"Error downloading file {table['data']['file']}")
-            print(
-                f"File is not available in the server, upload it with runner.upload_file(table_name='{table['name']}', data='{table['data']['file']}')"
+            print(f"Error downloading file {table['data']['file']}")  # noqa: T201
+            print(  # noqa: T201
+                f"File is not available in the server, upload it with runner.upload_file(table_name='{table['name']}', data='{table['data']['file']}')"  # noqa: E501
             )
             original_volume = VOLUME_NAME
+
+        primary_key = None
+        foreign_keys = []
+        time_series_time = None
+        types: dict[str, ColumnType] = {}
+        if table.get("columns"):
+            primary_key = next(
+                (col["field"] for col in table["columns"] if col.get("primary_key")),
+                None,
+            )
+            foreign_keys = [
+                column["field"]
+                for column in table["columns"]
+                if column.get("identifier") and not column.get("primary_key")
+            ]
+            time_series_time = next(
+                (col["field"] for col in table["columns"] if col.get("time_series_time")),
+                None,
+            )
+            types = {
+                col["field"]: ColumnType(col["type"]) for col in table["columns"] if col["type"]
+            }
 
         self.config.create_table(
             table_name=table["name"],
@@ -1147,22 +1198,10 @@ class Runner:
             original_file=table["data"]["file"],
             avatar_volume=table["avatars_data"]["volume"] if "avatars_data" in table else None,
             avatar_file=table["avatars_data"]["volume"] if "avatars_data" in table else None,
-            primary_key=next(
-                (col["field"] for col in table["columns"] if col.get("primary_key")),
-                None,
-            ),
-            foreign_keys=[
-                column["field"]
-                for column in table["columns"]
-                if column.get("identifier") and not column.get("primary_key")
-            ],
-            time_series_time=next(
-                (col["field"] for col in table["columns"] if col.get("time_series_time")),
-                None,
-            ),
-            types={
-                col["field"]: ColumnType(col["type"]) for col in table["columns"] if col["type"]
-            },
+            primary_key=primary_key,
+            foreign_keys=foreign_keys,
+            time_series_time=time_series_time,
+            types=types,
             individual_level=table.get("individual_level"),
         )
 

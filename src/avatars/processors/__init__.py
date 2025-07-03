@@ -1,4 +1,3 @@
-from avatars.processors.datetime import DatetimeProcessor
 from avatars.processors.expected_mean import ExpectedMeanProcessor
 from avatars.processors.geolocation_normalization import (
     GeolocationNormalizationProcessor,

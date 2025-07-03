@@ -21,6 +21,7 @@
 import os
 import secrets
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -66,26 +67,23 @@ ts1_df
 # %%
 ts2_df
 
+
 # %% [markdown]
 # ## Overview of data
 
 # %% [markdown]
 # We provide below a basic visualization function to better understand how the time series data look like.
 
+
 # %%
-from typing import Optional, Tuple
-
-import matplotlib
-
-
 def plot_series(
     df: pd.DataFrame,
     variable_to_plot: str,
     id_variable: str,
     time_variable: str,
     proportion_to_plot: float = 1.0,
-    n_series_to_plot: Optional[int] = None,
-    figsize: Tuple[int, int] = (14, 8),
+    n_series_to_plot: int | None = None,
+    figsize: tuple[int, int] = (14, 8),
 ) -> matplotlib.figure.Figure:
     """Plot given series."""
     if n_series_to_plot is None:

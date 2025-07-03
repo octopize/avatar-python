@@ -93,12 +93,12 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
                 f"Expected a valid `target_variable`, got {self.target_variable} instead"
             )
 
-        if df[self.id_variable].isnull().values.any():
+        if df[self.id_variable].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for id variable, got column with nulls instead"
             )
 
-        if df[self.target_variable].isnull().values.any():
+        if df[self.target_variable].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for target variable, got column with nulls instead"
             )
@@ -177,25 +177,25 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
                 f"got {self.new_difference_variable_name} instead"
             )
 
-        if source[self.id_variable].isnull().values.any():
+        if source[self.id_variable].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for id variable in source, "
                 "got column with nulls instead"
             )
 
-        if source[self.target_variable].isnull().values.any():
+        if source[self.target_variable].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for target variable in source, "
                 "got column with nulls instead"
             )
 
-        if dest[self.new_difference_variable_name].isnull().values.any():
+        if dest[self.new_difference_variable_name].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for `new_difference_variable_name`, "
                 "got column with nulls instead"
             )
 
-        if dest[self.new_first_variable_name].isnull().values.any():
+        if dest[self.new_first_variable_name].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for `new_first_variable_name`, "
                 "got column with nulls instead"

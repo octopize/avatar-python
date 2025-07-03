@@ -60,7 +60,6 @@ build-backend = "hatchling.build"
 [tool.hatch.metadata]
 allow-direct-references = true
 
-
 [[tool.mypy.overrides]]
 module = "toolz.*"
 ignore_missing_imports = true
@@ -69,17 +68,14 @@ ignore_missing_imports = true
 module = "fsspec.*"
 ignore_missing_imports = true
 
-[[tool.mypy.overrides]]
-module = "avatars.processors.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "avatars.lib.*"
-ignore_errors = true
-
-
 [tool.ruff]
 extend = "../../ruff.toml"
+
+[tool.ruff.lint.extend-per-file-ignores]
+# Allow prints and longer lines in notebooks - START
+"notebooks/*Tutorial*" = ["T20", "E501"]
+"notebooks/*Quickstart*" = ["T20", "E501"]
+# Allow prints in notebooks - END
 
 [tool.pytest.ini_options]
 addopts = [

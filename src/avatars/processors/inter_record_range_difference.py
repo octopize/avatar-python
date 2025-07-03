@@ -226,7 +226,7 @@ class InterRecordRangeDifferenceProcessor:
                 "got columns with nulls instead"
             )
 
-        if source[self.sort_by_variable].isnull().values.any():
+        if source[self.sort_by_variable].isnull().sum() > 0:
             raise ValueError(
                 "Expected no missing values for `sort_by_variable` in source, "
                 "got column with nulls instead"

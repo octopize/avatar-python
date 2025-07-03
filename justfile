@@ -28,9 +28,7 @@ notebook: generate-py pip-install-tutorial start-notebooks
 set allow-duplicate-recipes
 test-integration:
     just test-tutorials
-
 test-tutorials: generate-py pip-install-tutorial run-test-tutorials
-
 # Build the docs
 doc-build:
     ##! This script is also used to deploy to production.
@@ -70,6 +68,11 @@ doc-fast:
 	python3 -m webbrowser -t {{DOC_OUTPUT_DIR}}/{{CURRENT_BRANCH}}/index.html
 
 
+@generate-py:  ## Generate .py files from notebooks
+    echo -n "Generating .py files from notebooks..."
+    uv run jupytext notebooks/*.ipynb  --from ipynb --to py > /dev/null 2>&1
+    just format-notebooks  > /dev/null 2>&1
+    echo "Done"
 
 [private]
 @pip-requirements:
@@ -86,14 +89,6 @@ doc-fast:
     "{{VENV_NAME}}/bin/python" -m pip install . > /dev/null 2>&1
     "{{VENV_NAME}}/bin/python" -m pip install pytest pytest-xdist  > /dev/null 2>&1
     echo "Done"
-
-[private]
-@generate-py:  ## Generate .py files from notebooks
-    echo -n "Generating .py files from notebooks..."
-    uv run jupytext notebooks/*.ipynb  --from ipynb --to py > /dev/null 2>&1
-    just format-notebooks  > /dev/null 2>&1
-    echo "Done"
-
 
 
 [private]

@@ -238,15 +238,10 @@ def _get_distribution_data(
         stats_df:
             statistics dataframe.
     """
-    # Define transformations to perform
-    aggregation_dict = {}
-    for col in target_variables:
-        aggregation_dict[col] = ["mean", "std"]
-
     # Perform transformations
-    stats_df = df.groupby(groupby_variables, dropna=False).agg(aggregation_dict).reset_index()
+    stats_df = df.groupby(groupby_variables, dropna=False).agg(["mean", "std"]).reset_index()
 
     # Flatten and set new aggregate variable names
-    stats_df.columns = ["".join(a) for a in stats_df.columns.to_flat_index()]
+    stats_df.columns = pd.Index(["".join(a) for a in stats_df.columns.to_flat_index()])
 
     return stats_df

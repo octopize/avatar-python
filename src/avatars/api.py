@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.5.1
+# API Version : 0.20.0
 
 
 import logging
@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
 from avatars.models import (
     CreateDataset,  # noqa: F401
     CreateUser,  # noqa: F401
+    CreditsInfo,  # noqa: F401
+    FeaturesInfo,  # noqa: F401
     FileAccess,  # noqa: F401
     ForgottenPasswordRequest,  # noqa: F401
     JobCreateRequest,  # noqa: F401
@@ -323,9 +325,9 @@ class Resources:
 
     def get_resource(
         self,
-        set_name: str,
         name: str,
         kind: str,
+        set_name: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
@@ -466,6 +468,42 @@ class Users:
         }
 
         return User(**self.client.request(**kwargs))
+
+    def get_credits_info(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> CreditsInfo:
+        """Get the credits info for a user by id.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/users/credits_info",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return CreditsInfo(**self.client.request(**kwargs))
+
+    def get_features_info(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> FeaturesInfo:
+        """Get the list of features for a user.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/users/features_info",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return FeaturesInfo(**self.client.request(**kwargs))
 
     def get_user(
         self,

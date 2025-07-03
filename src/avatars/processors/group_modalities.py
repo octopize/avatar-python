@@ -112,7 +112,7 @@ class GroupModalitiesProcessor:
                 }
                 for key, value in count.items()
             }
-        df = df.replace(correspondence)
+        df = df.replace(correspondence)  # type: ignore[arg-type]
 
         return df
 

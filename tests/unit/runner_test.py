@@ -162,23 +162,19 @@ class TestRunner:
     def test_from_yaml(self):
         runner = self.manager.create_runner("test")
         runner.from_yaml("fixtures/yaml_from_web.yaml")
-        assert len(runner.config.tables.keys()) == 2
-        assert len(runner.config.avatarization.keys()) == 2
-        assert len(runner.config.privacy_metrics.keys()) == 2
-        assert len(runner.config.signal_metrics.keys()) == 2
-        patient_params = runner.config.avatarization["patient"]
-        assert patient_params.k == 5
-        assert patient_params.ncp == 4
-        assert patient_params.use_categorical_reduction == True
-        assert patient_params.imputation is not None
-        assert patient_params.imputation["method"] == "knn"
-        assert patient_params.exclude_variables is None
-        visit_params = runner.config.avatarization["visit"]
-        assert visit_params.k == 5
-        assert visit_params.ncp == 4
-        assert visit_params.exclude_variables is not None
-        assert visit_params.exclude_variables["variable_names"] == ["doctor_id"]
-        assert visit_params.exclude_variables["replacement_strategy"] == "row_order"
+        assert len(runner.config.tables.keys()) == 1
+        assert len(runner.config.avatarization.keys()) == 1
+        assert len(runner.config.privacy_metrics.keys()) == 1
+        assert len(runner.config.signal_metrics.keys()) == 1
+        iris_params = runner.config.avatarization["iris"]
+        assert iris_params.k == 30
+        assert iris_params.ncp == 4
+        assert iris_params.use_categorical_reduction is True
+        assert iris_params.imputation is not None
+        assert iris_params.imputation["method"] == "mean"
+        assert iris_params.exclude_variables is not None
+        assert iris_params.exclude_variables["variable_names"] == ["variety"]
+        assert iris_params.exclude_variables["replacement_strategy"] == "coordinate_similarity"
 
     def test_report_raises_error(self):
         runner = self.manager.create_runner("test")
@@ -210,11 +206,11 @@ class TestRunner:
         runner.set_parameters("test_table", k=3, ncp=2, use_categorical_reduction=True)
         assert runner.config.avatarization["test_table"].k == 3
         assert runner.config.avatarization["test_table"].ncp == 2
-        assert runner.config.avatarization["test_table"].use_categorical_reduction == True
+        assert runner.config.avatarization["test_table"].use_categorical_reduction
         assert runner.config.privacy_metrics["test_table"].ncp == 2
-        assert runner.config.privacy_metrics["test_table"].use_categorical_reduction == True
+        assert runner.config.privacy_metrics["test_table"].use_categorical_reduction
         assert runner.config.signal_metrics["test_table"].ncp == 2
-        assert runner.config.signal_metrics["test_table"].use_categorical_reduction == True
+        assert runner.config.signal_metrics["test_table"].use_categorical_reduction
 
         runner.delete_parameters("test_table")
         assert len(runner.config.avatarization.keys()) == 0
@@ -256,7 +252,7 @@ class TestRunner:
         # Verify that k was updated and other parameters remained unchanged
         assert runner.config.avatarization["test_table"].k == 5
         assert runner.config.avatarization["test_table"].ncp == 2
-        assert runner.config.avatarization["test_table"].use_categorical_reduction == False
+        assert not runner.config.avatarization["test_table"].use_categorical_reduction
 
     def test_update_parameters_from_standard_to_dp(self):
         """Test updating from standard avatarization to DP avatarization."""
@@ -394,7 +390,7 @@ class TestRunner:
         # Verify extracted parameters match what was set
         assert current_params["k"] == 3
         assert current_params["ncp"] == 2
-        assert current_params["use_categorical_reduction"] == True
+        assert current_params["use_categorical_reduction"]
         assert current_params["column_weights"] == {"col1": 0.7, "col2": 0.3}
         assert current_params["exclude_variable_names"] == ["col2"]
         assert (
@@ -426,7 +422,7 @@ class TestRunner:
         assert current_params["dp_epsilon"] == 0.5
         assert current_params["dp_preprocess_budget_ratio"] == 0.3
         assert current_params["ncp"] == 2
-        assert current_params["use_categorical_reduction"] == True
+        assert current_params["use_categorical_reduction"]
         assert "k" not in current_params
 
     def test_extract_current_parameters_time_series(self):

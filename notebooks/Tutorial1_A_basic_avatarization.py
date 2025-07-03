@@ -68,7 +68,7 @@ avatarization_job = (
     runner.run()
 )  # by default we run all jobs : avatarization, privacy and signal metrics and report
 # You can also choose to run only the avatarization job for example
-# avatarization_job = runner.run(job_kind=JobKind.standard)
+# avatarization_job = runner.run(jobs_to_run=[JobKind.standard])
 
 # %% [markdown]
 # ## Retrieving the completed avatarization job

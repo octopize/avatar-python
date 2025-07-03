@@ -30,4 +30,4 @@ class TestManager:
     def test_create_runner(self) -> None:
         runner = self.manager.create_runner("test")
         assert runner is not None
-        assert type(runner) == Runner
+        assert isinstance(runner, Runner)
