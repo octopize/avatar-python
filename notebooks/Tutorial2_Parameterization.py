@@ -21,15 +21,13 @@
 import os
 import secrets
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import seaborn as sns
 from avatar_yaml.models.parameters import (
     ExcludeVariablesMethod,
     ImputeMethod,
 )
 
+from avatars.constants import PlotKind
 from avatars.manager import Manager
 from avatars.models import JobKind
 
@@ -60,10 +58,10 @@ df.head()
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner(f"iris_k2_{secrets.token_hex(4)}")
+runner_k2 = manager.create_runner(f"iris_k2_{secrets.token_hex(4)}")
 
 # Then upload the data, you can either use a pandas dataframe or a file
-runner.add_table("iris", df)
+runner_k2.add_table("iris", df)
 
 # %% [markdown]
 # ## Varying k
@@ -76,43 +74,41 @@ runner.add_table("iris", df)
 # %%
 # Set k
 k = 2
-runner.set_parameters("iris", k=k)
+runner_k2.set_parameters("iris", k=k)
 
-runner.run()
+runner_k2.run()
 
 # Retrieve selected metric
-hidden_rate = runner.privacy_metrics("iris")[0]["hidden_rate"]
-local_cloaking = runner.privacy_metrics("iris")[0]["local_cloaking"]
-hellinger_distance = runner.signal_metrics("iris")[0]["hellinger_mean"]
+hidden_rate = runner_k2.privacy_metrics("iris")[0]["hidden_rate"]
+local_cloaking = runner_k2.privacy_metrics("iris")[0]["local_cloaking"]
+hellinger_distance = runner_k2.signal_metrics("iris")[0]["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
-
-original_coord_k_2, avatars_coord_k_2 = runner.projections("iris")
 
 # %%
 # Create a new runner to run with a different k
-runner = manager.create_runner(f"iris_k30_{secrets.token_hex(4)}")
-runner.add_table("iris", "../fixtures/iris.csv")
+runner_k30 = manager.create_runner(f"iris_k30_{secrets.token_hex(4)}")
+runner_k30.add_table("iris", "../fixtures/iris.csv")
 
 # Set k
 k = 30
-runner.set_parameters("iris", k=k)
+runner_k30.set_parameters("iris", k=k)
 
-runner.run()
+runner_k30.run()
 
 # Retrieve selected metric
-hidden_rate = runner.privacy_metrics("iris")[0]["hidden_rate"]
-local_cloaking = runner.privacy_metrics("iris")[0]["local_cloaking"]
-hellinger_distance = runner.signal_metrics("iris")[0]["hellinger_mean"]
+hidden_rate = runner_k30.privacy_metrics("iris")[0]["hidden_rate"]
+local_cloaking = runner_k30.privacy_metrics("iris")[0]["local_cloaking"]
+hellinger_distance = runner_k30.signal_metrics("iris")[0]["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
-original_coord_k_30, avatars_coord_k_30 = runner.projections("iris")
-
+# download the projections
+original_coord_k_30, avatars_coord_k_30 = runner_k30.projections("iris")
 
 # %% [markdown]
 # We observe that we are able to increase the level of privacy by simply increasing *k*. But this is at the expense of the utility.
@@ -123,42 +119,13 @@ original_coord_k_30, avatars_coord_k_30 = runner.projections("iris")
 # %% [markdown]
 # By looking at originals and avatars in the projected space, we can observe the area covered by avatars and if it covers the same space as the original data.
 
+# %%
+# if you are having issues rendering the plot in your notebook, you can use the following line to open the plot in your browser
+# runner_k2.render_plot("iris", PlotKind.PROJECTION_3D, open_in_browser=True)
+runner_k2.render_plot("iris", PlotKind.PROJECTION_3D)
 
 # %%
-def plot_coordinates(original_coord, avatars_coord, k: int | None = None):
-    projections_records = np.array(original_coord)[
-        :, 0:2
-    ]  # First 2 dimensions of projected records
-    projections_avatars = np.array(avatars_coord)[
-        :, 0:2
-    ]  # First 2 dimensions of projected records
-
-    fig, ax = plt.subplots(1, 1)
-    sns.scatterplot(
-        ax=ax,
-        x=projections_records[:, 0],
-        y=projections_records[:, 1],
-        alpha=0.6,
-        color="dimgrey",
-        label="Original",
-    )
-
-    sns.scatterplot(
-        ax=ax,
-        x=projections_avatars[:, 0],
-        y=projections_avatars[:, 1],
-        alpha=0.6,
-        color="#3BD6B0",
-        label="Avatars",
-    )
-
-    ax.set_title(f"Projection of originals and avatars {k=}")
-
-
-plot_coordinates(original_coord_k_2, avatars_coord_k_2, 2)
-
-# %%
-plot_coordinates(original_coord_k_30, avatars_coord_k_30, 30)
+runner_k30.render_plot("iris", PlotKind.PROJECTION_3D)
 
 # %% [markdown]
 # We observe that the area covered by avatars generated with a low *k* is much closer to the area covered by original data points. We can also see that with a low *k*, some avatars are close to original points that are isolated. This may pose a risk of re-identification. This explains the drop in privacy level when reducing *k*.
@@ -250,7 +217,6 @@ runner.set_parameters(
 )
 
 runner.run(jobs_to_run=[JobKind.standard])
-runner.get_all_results()
 
 # %% [markdown]
 # We will now observe the impact of the parameters on the projections. We recommend executing this last part of the tutorial several times with different settings.
@@ -258,7 +224,7 @@ runner.get_all_results()
 # %%
 original_coord, avatars_coord = runner.projections("iris")
 
-plot_coordinates(original_coord, avatars_coord, k)
+runner.render_plot("iris", PlotKind.PROJECTION_3D)
 
 # %% [markdown]
 # ## Get suggestions for a parameter set

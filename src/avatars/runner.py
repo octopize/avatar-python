@@ -1,9 +1,8 @@
-import io
-import json
-import re
+import os
+import secrets
 import time
+import webbrowser
 from dataclasses import asdict
-from enum import StrEnum
 from pathlib import Path
 from typing import Any, Optional, Union
 
@@ -22,89 +21,39 @@ from avatar_yaml.models.parameters import (
     ProjectionType,
 )
 from avatar_yaml.models.schema import ColumnType, LinkMethod
-from toolz import keymap
+from IPython.display import HTML, display
 
 from avatars.client import ApiClient
+from avatars.constants import (
+    DEFAULT_RETRY_INTERVAL,
+    DEFAULT_TYPE,
+    ERROR_STATUSES,
+    JOB_EXECUTION_ORDER,
+    MATCHERS,
+    RESULTS_TO_STORE,
+    VOLUME_NAME,
+    PlotKind,
+    Results,
+    TypeResults,
+)
+from avatars.file_downloader import FileDownloader
 from avatars.models import JobCreateRequest, JobCreateResponse, JobKind, JobResponse
-
-VOLUME_NAME = "input"
-
-JOB_EXECUTION_ORDER = [
-    JobKind.standard,
-    JobKind.signal_metrics,
-    JobKind.privacy_metrics,
-    JobKind.report,
-]
-
-ERROR_STATUSES = ["parent_error", "error"]
-
-READY_STATUSES = ["finished", *ERROR_STATUSES]
-
-DEFAULT_RETRY_INTERVAL = 5
-
-
-class Results(StrEnum):
-    ADVICE = "advice"
-    SHUFFLED = "shuffled"
-    UNSHUFFLED = "unshuffled"
-    PRIVACY_METRICS = "privacy_metrics"
-    SIGNAL_METRICS = "signal_metrics"
-    REPORT_IMAGES = "report_images"
-    PROJECTIONS_ORIGINAL = "projections-original"
-    PROJECTIONS_AVATARS = "projections-avatars"
-    METADATA = "run_metadata"
-    REPORT = "report"
-    META_METRICS = "meta_metrics"
-    FIGURES = "figures"
-    FIGURES_METADATA = "figures_metadata"
-
-
-RESULTS_TO_DOWNLOAD = [
-    Results.ADVICE,
-    Results.SHUFFLED,
-    Results.UNSHUFFLED,
-    Results.PRIVACY_METRICS,
-    Results.SIGNAL_METRICS,
-    Results.PROJECTIONS_ORIGINAL,
-    Results.PROJECTIONS_AVATARS,
-    Results.METADATA,
-]
-
-
-TypeResults = dict | pd.DataFrame | str | list[dict]
-
-mapping_result_to_file_name = {
-    Results.ADVICE: "advice.json",
-    Results.SHUFFLED: "shuffled",
-    Results.UNSHUFFLED: "unshuffled",
-    Results.PRIVACY_METRICS: "privacy.json",
-    Results.SIGNAL_METRICS: "signal.json",
-    Results.PROJECTIONS_ORIGINAL: "projections.original",
-    Results.PROJECTIONS_AVATARS: "projections.avatars",
-    Results.METADATA: "run_metadata.json",
-    Results.REPORT: "report.md",
-}
-
-MATCHERS: dict[re.Pattern[str], ColumnType] = {
-    re.compile(r"float"): ColumnType.NUMERIC,
-    re.compile(r"int"): ColumnType.INT,
-    re.compile(r"bool"): ColumnType.BOOL,
-    re.compile(r"datetime"): ColumnType.DATETIME,
-    re.compile(r"datetime64\[ns, UTC\]"): ColumnType.DATETIME_TZ,
-    # FIXME: implement bool ColumnType
-}
-
-DEFAULT_TYPE = ColumnType.CATEGORY
+from avatars.results_organizer import ResultsOrganizer
 
 
 class Runner:
     def __init__(self, api_client: ApiClient, set_name: str, seed: int | None = None) -> None:
-        self.set_name = set_name
-        self.config = Config(set_name=self.set_name, seed=seed)
         self.client = api_client
+        self.set_name = self._get_valid_set_name(set_name)
+        self.config = Config(set_name=self.set_name, seed=seed)
         self.jobs: dict[JobKind | str, JobCreateResponse] = {}
         self.results_urls: dict[JobKind, dict[str, list[str]]] = {}
-        self.results: dict[JobKind, dict[str, list[TypeResults]]] = {}
+        self.file_downloader = FileDownloader(api_client)
+        self.results: ResultsOrganizer = ResultsOrganizer()
+
+    def _get_valid_set_name(self, set_name: str) -> str:
+        """Ensure the set name isn't already created."""
+        return set_name + "_python_" + secrets.token_hex(4)
 
     def add_table(
         self,
@@ -182,20 +131,14 @@ class Runner:
         for table_name in tables:
             name = self.config.get_parameters_advice_name(JobKind.advice.value, table_name)
             created_job = self._create_job(parameters_name=name)
-            self.jobs[name] = created_job
-        results = self.get_all_results()
+            self.jobs[JobKind.advice] = created_job
+            self._download_specific_result(JobKind.advice, Results.ADVICE)
 
-        for advice_result, table_name in zip(results.values(), tables):
-            [param] = [
-                param["advice"]["parameters"]
-                for param in advice_result[table_name + ".advice"][Results.ADVICE]
-                if param["table_name"] == table_name
-            ]  # FIXME: https://github.com/octopize/avatar/issues/3858
-
+        for table_name, advise_parameters in self.results.advice.items():
             self.set_parameters(
-                k=param["k"],
-                use_categorical_reduction=param["use_categorical_reduction"],
-                ncp=param["ncp"],
+                k=advise_parameters["k"],
+                use_categorical_reduction=advise_parameters["use_categorical_reduction"],
+                ncp=advise_parameters["ncp"],
                 table_name=table_name,
             )
 
@@ -783,75 +726,66 @@ class Runner:
 
         self.results_urls[job_name] = self.client.results.get_results(self.jobs[job_name].name)
 
-    def _get_all_urls_results(self):
-        """Get all url results."""
-        for job_name in self.jobs.keys():
-            self._retrieve_job_result_urls(job_name)
-        return self.results_urls
-
-    def _download_file_using_url(
+    def get_specific_result_urls(
         self,
-        url,
-        path: str | None = None,
-        table_name: str | None = None,
-    ) -> TypeResults:
-        fileaccess = self.client.results.get_permission_to_download(url)
-        data_str = self.client.download_file(fileaccess, path=path)
-        if url.endswith(".json"):
-            if not data_str.strip().startswith("["):
-                # Ensures the content is wrapped in a list,
-                # to handle cases where the JSON is not in an array format.
-                data_str = f"[{data_str}]"
-            data = json.loads(data_str)
-        elif url.endswith(".csv"):
-            data = pd.read_csv(io.StringIO(data_str), dtype=self._get_dtypes(table_name))
-        elif url.endswith(".pdf") or url.endswith(".md"):
-            data = f"File downloaded successfully to {path}"
-        return data
-
-    def _get_dtypes(self, table_name: str | None = None) -> dict[str, str] | None:
-        if table_name not in self.config.tables.keys():
-            return None
-        columns_infos = self.config.tables[table_name].columns
-        dtypes = {}
-        for column in columns_infos if columns_infos is not None else []:
-            if column.type and column.type == ColumnType.CATEGORY:
-                dtypes[column.field] = "object"
-            elif column.type and column.type == ColumnType.DATETIME:
-                dtypes[column.field] = column.value_type if column.value_type else "datetime64[ns]"
-            elif column.type and column.type == ColumnType.DATETIME_TZ:
-                dtypes[column.field] = (
-                    column.value_type if column.value_type else "datetime64[ns, UTC]"
-                )
-            else:
-                dtypes[column.field] = column.type.value if column.type is not None else "object"
-        return dtypes
+        job_name: JobKind,
+        result: Results = Results.SHUFFLED,
+    ) -> list[str]:
+        if job_name not in self.jobs.keys():
+            raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
+        if job_name not in self.results_urls:
+            self._retrieve_job_result_urls(job_name)
+        return self.results_urls[job_name][result]
 
     def _download_all_files(self):
-        self._get_all_urls_results()
-        for job_name, results in self.results_urls.items():
-            job = self.results.setdefault(job_name, {})
-            for results_name, urls in results.items():
-                if results_name not in Results:
-                    continue
-                if Results(results_name) not in RESULTS_TO_DOWNLOAD:
-                    continue
+        for job_name in self.jobs.keys():
+            if not self.results_urls or job_name not in self.results_urls.keys():
+                self._retrieve_job_result_urls(job_name)
+            for result in self.results_urls[job_name].keys():
+                for table_name in self.config.tables.keys():
+                    if result in Results:
+                        if Results(result) in RESULTS_TO_STORE:
+                            self.get_specific_result(table_name, job_name, Results(result))
 
-                for url in urls:
-                    if results_name in {
-                        Results.PRIVACY_METRICS.value,
-                        Results.SIGNAL_METRICS.value,
-                    }:
-                        data = self._download_file_using_url(url)
-                        table_name = data[0]["metadata"]["table_name"]
-                        table = job.setdefault(table_name, {})
-                        table.setdefault(Results(results_name), []).append(data[0])
-                    else:
-                        result_filename = mapping_result_to_file_name[results_name]
-                        table_name = Path(url).stem.split(f".{result_filename}")[0]
-                        table = job.setdefault(table_name, {})
-                        data = self._download_file_using_url(url, table_name=table_name)
-                        table[Results(results_name)] = data
+    def _download_specific_result(
+        self,
+        job_name: JobKind,
+        result_name: Results,
+    ) -> None:
+        urls = self.get_specific_result_urls(job_name=job_name, result=result_name)
+        for url in urls:
+            result = self.file_downloader.download_file(url)
+            metadata = self._get_metadata(url, result_name, job_name)
+            table_name = self.results.get_table_name(result_name, url, result, metadata)
+            if table_name is not None:
+                self.results.set_results(
+                    table_name=table_name,
+                    result=result,
+                    result_name=result_name,
+                    metadata=metadata,
+                )
+
+    def _get_metadata(
+        self, url: str, result_name: Results, job_name: JobKind
+    ) -> dict[str, Any] | None:
+        match result_name:
+            case Results.FIGURES:
+                return self._get_figure_metadata(url)
+            case Results.METADATA:
+                return {"kind": job_name}
+            case _:
+                return None
+
+    def _get_figure_metadata(self, url: str) -> dict[str, Any] | None:
+        figures_metadatas = self.file_downloader.download_file(
+            self.results_urls[JobKind.standard][Results.FIGURES_METADATA][0]
+        )
+        if isinstance(figures_metadatas, list):
+            return self.results.find_figure_metadata(figures_metadatas, url)
+        else:
+            raise TypeError(
+                f"Expected a list, got {type(figures_metadatas)} instead for {url} metadata."
+            )
 
     def get_specific_result(
         self,
@@ -859,28 +793,13 @@ class Runner:
         job_name: JobKind,
         result: Results = Results.SHUFFLED,
     ) -> TypeResults:
-        """
-        Download a file from the results.
-
-        Parameters
-        ----------
-        table_name
-            The name of the table to search for.
-        job_name
-            The name of the job to search for.
-        result
-            The result to search for.
-
-        Returns
-        -------
-        TypeResults
-            Pandas DataFrame, dictionary, or a list of dictionaries depending on the result type.
-        """
+        if table_name not in self.config.tables.keys():
+            raise ValueError(f"Expected table '{table_name}' to be created.")
         if job_name not in self.jobs.keys():
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
-        if job_name not in self.results:
-            self.get_all_results()
-        return self.results[job_name][table_name][result]  # type: ignore[call-overload]
+        if self.results.get_results(table_name, result, job_name) is None:
+            self._download_specific_result(job_name, result)
+        return self.results.get_results(table_name, result, job_name)
 
     def get_all_results(self):
         """
@@ -895,24 +814,6 @@ class Runner:
         The data can be a pandas DataFrame or a dictionary depending on the result type.
         """
         self._download_all_files()
-
-        def unescape_table_names(results, transform_func):
-            return {
-                job_name: keymap(transform_func, table_results)
-                for job_name, table_results in results.items()
-            }
-
-        def _unescape(s: str) -> str:
-            reversed_replacements = {
-                "_dot_": ".",
-                "_slash_": "/",
-                "_ampersand_": "&",
-                "_plus_": "+",
-            }
-            pattern = re.compile("|".join(re.escape(k) for k in reversed_replacements.keys()))
-            return pattern.sub(lambda match: reversed_replacements[match.group(0)], s)
-
-        self.results = unescape_table_names(self.results, _unescape)
         return self.results
 
     def download_report(self, path: str | None = None):
@@ -927,7 +828,7 @@ class Runner:
         if self.results_urls.get(JobKind.report) is None:
             self._retrieve_job_result_urls(JobKind.report)
         report = self.results_urls[JobKind.report][Results.REPORT][0]
-        self._download_file_using_url(report, path=path)
+        self.file_downloader.download_file(report, path=path)
 
     def _get_user_results_volume(self) -> str:
         """
@@ -1031,8 +932,8 @@ class Runner:
         results = self.get_specific_result(
             table_name, JobKind.privacy_metrics, Results.PRIVACY_METRICS
         )
-        if not isinstance(results, list) or not all(isinstance(item, dict) for item in results):
-            raise TypeError(f"Expected a list[dict], got {type(results)} instead.")
+        if not isinstance(results, list):
+            raise TypeError(f"Expected a list, got {type(results)} instead.")
         return results
 
     def signal_metrics(self, table_name: str) -> list[dict]:
@@ -1052,13 +953,38 @@ class Runner:
         results = self.get_specific_result(
             table_name, JobKind.signal_metrics, Results.SIGNAL_METRICS
         )
-        if not isinstance(results, list) or not all(isinstance(item, dict) for item in results):
-            raise TypeError(f"Expected a list[dict], got {type(results)} instead.")
+        if not isinstance(results, list):
+            raise TypeError(f"Expected a list, got {type(results)} instead.")
         return results
 
-    def projections(
-        self, table_name: str, job_name: JobKind = JobKind.standard
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def render_plot(self, table_name: str, plot_kind: PlotKind, open_in_browser: bool = False):
+        """
+        Render a plot for a given table.
+        The different plot kinds are defined in the PlotKind enum.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table to get the plot from.
+        plot_kind
+            The kind of plot to render.
+        open_in_browser
+            Whether to save the plot to a file and open it in a browser.
+        """
+        results = self.get_specific_result(table_name, JobKind.standard, Results.FIGURES)
+        if not isinstance(results, dict):
+            raise TypeError(f"Expected a dict, got {type(results)} instead.")
+        if plot_kind not in results:
+            raise ValueError(f"No {plot_kind} found for table '{table_name}'.")
+        plots = results[plot_kind]
+        for idx, plot in enumerate(plots):
+            filename = None
+            if open_in_browser:
+                filename = f"{table_name}_{plot_kind.value}_{idx}.html"
+                self._save_file(plot, filename=filename)
+            self._open_plot(plot, filename=filename)
+
+    def projections(self, table_name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Get the projections.
 
@@ -1066,8 +992,6 @@ class Runner:
         ----------
         table_name
             The name of the table to get the projections from.
-        job_name
-            The name of the job to get the projections from by default from avatarization job.
 
         Returns
         -------
@@ -1075,10 +999,10 @@ class Runner:
             The projections as a pandas DataFrame.
         """
         original_coordinates = self.get_specific_result(
-            table_name, job_name, Results.PROJECTIONS_ORIGINAL
+            table_name, JobKind.standard, Results.PROJECTIONS_ORIGINAL
         )
         avatars_coordinates = self.get_specific_result(
-            table_name, job_name, Results.PROJECTIONS_AVATARS
+            table_name, JobKind.standard, Results.PROJECTIONS_AVATARS
         )
         if not (
             isinstance(avatars_coordinates, pd.DataFrame)
@@ -1161,7 +1085,7 @@ class Runner:
             base = self.client.results.get_upload_url()
             user_specific_path = base + f"/{table['name']}"
             access_url = f"{self.client.base_url}/access?url=" + user_specific_path
-            self._download_file_using_url(url=access_url)
+            self.file_downloader.download_file(url=access_url)
             original_volume = table["data"]["volume"]
         except FileNotFoundError:
             print(f"Error downloading file {table['data']['file']}")  # noqa: T201
@@ -1318,3 +1242,18 @@ class Runner:
             return enum_class(value)
         except ValueError:
             return None
+
+    def _open_plot(self, plot_html: HTML, filename: str | None = None):
+        """Render a plot, optionally saving it and opening it in a browser."""
+        if filename:
+            file_path = os.path.abspath(filename)
+            webbrowser.open(f"file://{file_path}")
+        else:
+            display(plot_html)
+
+    def _save_file(self, file_content: HTML, filename: str | None = None):
+        """Save the HTML file content to a specified path."""
+        if filename is None:
+            return None
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(file_content.data)

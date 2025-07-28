@@ -171,8 +171,6 @@ runner.print_parameters()
 runner.run()
 
 # %%
-results = runner.get_all_results()
-
 # Get back avatar tables from the results
 # Patient
 patient_avatar = runner.shuffled("patient")

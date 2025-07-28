@@ -2,6 +2,19 @@
 
 ## NEXT RELEASE
 
+- feat : add endpoint to render plots
+
+## 1.0.7 - 2025/07/16
+
+- refactor: improve results download
+- fix: compliance with the new api version
+
+## 1.0.6 - 2025/07/03
+
+- fix: compliance with the new api version
+
+## 1.0.5 - 2025/05/26
+
 - fix: use specific avatar-yaml version
 
 ## 1.0.4 - 2025/05/20

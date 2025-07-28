@@ -8,10 +8,10 @@ from avatar_yaml.models.parameters import (
 )
 from avatar_yaml.models.schema import ColumnType
 
+from avatars.constants import Results
 from avatars.manager import Manager
 from avatars.models import JobKind
-from avatars.runner import Results
-from tests.unit.conftest import FakeApiClient
+from tests.unit.conftest import FakeApiClient, JobResponseFactory
 
 
 class TestRunner:
@@ -137,27 +137,22 @@ class TestRunner:
         runner.set_parameters("parent", k=1)
         runner.run()
         runner.get_all_results()
-        assert len(runner.results.keys()) == 4
-        assert list(runner.results.keys()) == [
+
+        assert len(runner.jobs.keys()) == 4
+        assert list(runner.jobs.keys()) == [
             JobKind.standard,
             JobKind.signal_metrics,
             JobKind.privacy_metrics,
             JobKind.report,
         ]
-        assert len(runner.results[JobKind.standard].keys()) == 1
-        for table in runner.results[JobKind.standard].keys():
-            assert isinstance(
-                runner.results[JobKind.standard][table][Results.SHUFFLED], pd.DataFrame
-            )
-            assert isinstance(
-                runner.results[JobKind.standard][table][Results.UNSHUFFLED], pd.DataFrame
-            )
-            assert isinstance(
-                runner.results[JobKind.privacy_metrics][table][Results.PRIVACY_METRICS], list
-            )
-            assert isinstance(
-                runner.results[JobKind.signal_metrics][table][Results.SIGNAL_METRICS], list
-            )
+
+        assert runner.results.shuffled != {}
+        assert runner.results.sensitive_unshuffled != {}
+        assert runner.results.privacy_metrics != {}
+        assert runner.results.signal_metrics != {}
+        assert runner.results.original_projections != {}
+        assert runner.results.avatars_projections != {}
+        assert runner.results.figures != {}
 
     def test_from_yaml(self):
         runner = self.manager.create_runner("test")
@@ -446,3 +441,77 @@ class TestRunner:
         assert current_params["time_series_projection_type"] == ProjectionType.FPCA
         assert current_params["time_series_nb_points"] == 10
         assert current_params["time_series_method"] == AlignmentMethod.MAX
+
+    def test_get_not_created_job(self):
+        """Test getting a job that was not created."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        runner.run(jobs_to_run=[JobKind.standard])
+        with pytest.raises(
+            ValueError, match=f"Expected job '{JobKind.privacy_metrics}' to be created"
+        ):
+            runner.get_status(JobKind.privacy_metrics)
+
+    def test_get_failed_job(self):
+        """Test getting a job that failed."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        runner.run()
+        # Return a failed job response
+        runner.client.jobs.get_job_status = lambda job_id: JobResponseFactory().build(
+            name="name",
+            set_name="set_name",
+            parameters_name="parameters_name",
+            created_at="2023-10-01T00:00:00Z",
+            kind=JobKind.standard,
+            status="error",
+            exception="Job is not valid",
+            done=True,
+            progress=1.0,
+        )
+        with pytest.raises(ValueError, match=f"Job {JobKind.standard} failed with exception:"):
+            runner.get_all_results()
+
+    def test_get_results_on_invalid_table(self):
+        """Test getting results that do not exist."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        runner.run()
+        with pytest.raises(ValueError, match="Expected table 'NOT_VALID' to be created."):
+            runner.get_specific_result(
+                table_name="NOT_VALID", job_name=JobKind.standard, result=Results.SHUFFLED
+            )
+
+    def test_get_results_on_invalid_job(self):
+        """Test getting results that do not exist."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        runner.run(jobs_to_run=[JobKind.standard])
+        with pytest.raises(
+            ValueError,
+            match=f"Expected job '{JobKind.privacy_metrics}' to be created. Try running it first.",
+        ):
+            runner.get_specific_result(
+                table_name="test_table",
+                job_name=JobKind.privacy_metrics,
+                result=Results.PRIVACY_METRICS,
+            )
+
+    def test_print_parameters_invalid_table(self):
+        """Test printing parameters."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3, ncp=2, use_categorical_reduction=True)
+        with pytest.raises(ValueError, match="Expected table 'NOT_VALID' to be created."):
+            runner.print_parameters("NOT_VALID")
+
+    def test_print_parameters_every_table(self):
+        """Test printing parameters."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3, ncp=2, use_categorical_reduction=True)
+        runner.print_parameters()

@@ -324,3 +324,9 @@ for metric_details in runner.signal_metrics("sensor1")[0].items():
 # %%
 for metric_details in runner.signal_metrics("sensor2")[0].items():
     print(metric_details)
+
+# %% [markdown]
+# ## Download report
+
+# %%
+runner.download_report("time_series_report.pdf")

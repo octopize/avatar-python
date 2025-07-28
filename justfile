@@ -133,8 +133,8 @@ copy-to-old-repo: ## Copy the files to the old python repo
         --include="README.md" \
         --exclude="notebooks/env/***" \
         --exclude="**/__pycache__/***" \
+        --exclude="**/.DS_Store" \
         --exclude="*" . {{OLD_CLIENT_OUTPUT_DIR}}
-
 [private]
 publish: build
     #!/usr/bin/env bash
@@ -145,3 +145,6 @@ publish: build
     else
         uv publish --token "$(op items get 34o3isa4fvh2x64i5rbrq5dh6y --fields notesPlain)"
     fi
+
+release *ARGS:
+	cd {{ROOT_DIR}}/scripts/release && uv run ../../scripts/release/src/main.py release-python-client --no-interaction  {{ARGS}}

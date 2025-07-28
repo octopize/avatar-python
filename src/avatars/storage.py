@@ -2,7 +2,6 @@ import os
 from urllib.parse import urljoin, urlparse, urlunparse
 
 import fsspec
-import fsspec.implementations
 import structlog
 
 from avatars.config import config

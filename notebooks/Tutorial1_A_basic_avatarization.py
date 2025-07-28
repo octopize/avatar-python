@@ -71,12 +71,6 @@ avatarization_job = (
 # avatarization_job = runner.run(jobs_to_run=[JobKind.standard])
 
 # %% [markdown]
-# ## Retrieving the completed avatarization job
-
-# %%
-results = runner.get_all_results()
-
-# %% [markdown]
 # ## Retrieving the avatars
 
 # %%

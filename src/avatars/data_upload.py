@@ -84,7 +84,7 @@ class DataUploader:
 
         return fsspec_fs.write_bytes(user_specific_path, content)  # type: ignore[no-any-return] # noqa: E501
 
-    def download_file(self, file_access: FileAccess, path: str | None) -> str:
+    def download_file(self, file_access: FileAccess) -> str | bytes:
         """Download content from the storage to a file.
         Parameters
         ----------
@@ -104,12 +104,7 @@ class DataUploader:
 
         if parsed_download.endswith(".pdf"):
             output = fs.read_bytes(parsed_download)
-            writer_type = "wb"
         else:
             output = fs.read_text(parsed_download)
-            writer_type = "w"
 
-        if path:
-            with open(path, writer_type) as fd:
-                fd.write(output)
         return output
