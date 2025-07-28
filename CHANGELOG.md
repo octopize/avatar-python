@@ -2,6 +2,8 @@
 
 ## NEXT RELEASE
 
+## 1.0.8 - 2025/07/25
+
 - feat : add endpoint to render plots
 
 ## 1.0.7 - 2025/07/16
