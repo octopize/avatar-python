@@ -21,7 +21,6 @@ from avatars.processors.relative_difference import RelativeDifferenceProcessor
 from avatars.processors.to_categorical import ToCategoricalProcessor
 
 __all__ = [
-    "DatetimeProcessor",
     "ExpectedMeanProcessor",
     "GeolocationNormalizationProcessor",
     "GroupModalitiesProcessor",

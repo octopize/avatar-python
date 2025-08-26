@@ -9,7 +9,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
 
 from avatars.client import ApiClient
-from avatars.models import FileAccess, FileCredentials, JobKind, JobResponse
+from avatars.models import FileAccess, FileCredentials, JobKind, JobResponse, ResourceSetResponse
 
 RequestHandle = Callable[[httpx.Request], httpx.Response]
 
@@ -196,13 +196,13 @@ class FakeResources:
     def __init__(self, *args, **kwargs):
         kwargs = kwargs or {}
 
-    def put_resources(self, set_name, yaml_string):
-        pass
+    def put_resources(self, display_name, yaml_string):
+        return ResourceSetResponse(set_name=uuid4(), display_name=display_name)
 
     def get_user_volume(
         self,
         volume_name: str,
-        set_name: str,
+        display_name: str,
         purpose: str,
     ):
         yaml_volume = f"""kind: AvatarVolume
@@ -276,3 +276,4 @@ class FakeApiClient(ApiClient):
 
 class JobResponseFactory(ModelFactory[JobResponse]):
     __model__ = JobResponse
+    __check_model__ = False

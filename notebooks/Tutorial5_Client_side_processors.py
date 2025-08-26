@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.1
+#       jupytext_version: 1.17.2
 # ---
 
 # %% [markdown]
@@ -29,7 +29,6 @@
 
 # %%
 import os
-import secrets
 
 import numpy as np
 import pandas as pd
@@ -90,7 +89,7 @@ df_preprocessed = group_modalities_processor.preprocess(df)
 df_preprocessed["city"].value_counts()
 
 # %%
-runner = manager.create_runner(set_name=f"tutorial5{secrets.token_hex(4)}")
+runner = manager.create_runner(set_name="tutorial5")
 runner.add_table(
     "adult",
     df_preprocessed,
@@ -168,7 +167,7 @@ preprocessed = proportion_processor.preprocess(df)
 preprocessed = relative_difference_processor.preprocess(preprocessed)
 
 # %%
-runner_with_processor = manager.create_runner(set_name=f"tutorial5{secrets.token_hex(4)}")
+runner_with_processor = manager.create_runner(set_name="tutorial5")
 runner_with_processor.add_table(
     "game",
     preprocessed,
@@ -200,7 +199,7 @@ for metric in signal_metrics:
 # Let's try without ...
 
 # %%
-runner_no_processor = manager.create_runner(set_name=f"tutorial5{secrets.token_hex(4)}")
+runner_no_processor = manager.create_runner(set_name="tutorial5")
 runner_no_processor.add_table(
     "game",
     df,
@@ -289,7 +288,7 @@ expected_mean_processor = ExpectedMeanProcessor(
 preprocessed = expected_mean_processor.preprocess(df)
 
 # %%
-runner = manager.create_runner(set_name=f"tutorial5{secrets.token_hex(4)}")
+runner = manager.create_runner(set_name="tutorial5")
 runner.add_table(
     "game",
     preprocessed,
@@ -335,7 +334,7 @@ perturbation_processor = PerturbationProcessor(perturbation_level={"age": 0, "ap
 preprocessed = perturbation_processor.preprocess(df)
 
 # %%
-runner = manager.create_runner(set_name=f"tutorial5{secrets.token_hex(4)}")
+runner = manager.create_runner(set_name="tutorial5")
 runner.add_table(
     "game",
     preprocessed,

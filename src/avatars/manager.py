@@ -6,10 +6,35 @@ from avatars.runner import Runner
 
 
 class Manager:
-    """Manager class for the Avatars user."""
+    """High-level convenience facade for interacting with the Avatar API.
+
+    The ``Manager`` wraps an authenticated :class:`avatars.client.ApiClient` instance
+    and exposes a small, task‑oriented surface area so end users can:
+
+    * authenticate once (``authenticate``)
+    * spin up a :class:`avatars.runner.Runner` (``create_runner`` / ``create_runner_from_yaml``)
+    * quickly inspect recent jobs & results (``get_last_jobs`` / ``get_last_results``)
+    * perform simple platform health checks (``get_health``)
+    * handle password reset flows (``forgotten_password`` / ``reset_password``)
+
+    It deliberately hides the lower-level resource clients (``jobs``, ``results``, ``datasets`` …)
+    unless you access the underlying ``auth_client`` directly. This keeps common workflows
+    succinct while preserving an escape hatch for advanced usage. The ``Runner`` objects created
+    through the manager inherit the authenticated context, so you rarely have to pass tokens or
+    low-level clients around manually.
+
+    Attributes
+    ----------
+    auth_client:
+        The underlying :class:`avatars.client.ApiClient` used to perform all HTTP requests.
+    """
 
     def __init__(self, base_url: str, api_client: ApiClient | None = None) -> None:
         """Initialize the manager with a base url.
+
+        For on-premise deployment without dedicated SSL certificates, you can disable SSL
+        verification:
+        `manager = Manager(api_client=ApiClient(base_url=url, should_verify_ssl=False))`
 
         Args:
         -----
@@ -36,9 +61,9 @@ class Manager:
             token = UUID(token)
         self.auth_client.reset_password(email, new_password, new_password_repeated, token)
 
-    def create_runner(self, set_name: str) -> Runner:
+    def create_runner(self, set_name: str, seed: int | None = None) -> Runner:
         """Create a new runner."""
-        return Runner(api_client=self.auth_client, set_name=set_name)
+        return Runner(api_client=self.auth_client, display_name=set_name, seed=seed)
 
     def get_last_results(self, count: int = 1) -> list[dict[str, str]]:
         """Get the last n results."""
@@ -71,7 +96,7 @@ class Manager:
         Parameters
         ----------
             yaml_path: The path to the yaml file.
-            set_name: The name of the set.
+            set_name: Name of the set of resources.
         """
         runner = self.create_runner(set_name=set_name)
         runner.from_yaml(yaml_path)

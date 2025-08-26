@@ -5,7 +5,11 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.1
+#       jupytext_version: 1.17.2
+#   kernelspec:
+#     display_name: env
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -17,7 +21,6 @@
 # %%
 # This is the main file for the Avatar tutorial.
 import os
-import secrets
 
 from avatars.manager import Manager
 
@@ -37,7 +40,7 @@ manager.authenticate(username, password)
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner(set_name=f"test_wbcd_{secrets.token_hex(4)}")
+runner = manager.create_runner(set_name="test_wbcd")
 # You can then find the result of the avatarization in the web with the set_name
 # Then you need to upload the data to the server
 runner.add_table("wbcd", "../fixtures/wbcd.csv")
@@ -47,8 +50,6 @@ runner.add_table("wbcd", "../fixtures/wbcd.csv")
 runner.set_parameters("wbcd", k=15)
 # Run the pipeline with avatarization, privacy and signal metrics and report
 runner.run()
-# Get the results
-results = runner.get_all_results()
 
 # %% [markdown]
 # ## Retrieve avatars

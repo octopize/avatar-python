@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 0.20.0
+# API Version : 2.4.0
 
 
 import logging
@@ -21,6 +21,7 @@ from avatars.models import (
     Login,  # noqa: F401
     LoginResponse,  # noqa: F401
     ResetPasswordRequest,  # noqa: F401
+    ResourceSetResponse,  # noqa: F401
     User,  # noqa: F401
 )
 
@@ -257,18 +258,34 @@ class Resources:
     def get_user_volume(
         self,
         volume_name: str,
-        set_name: str,
+        display_name: str,
         purpose: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+        """Generate a user volume configuration for a resource set.
+
+        Creates a volume configuration YAML that can be used to mount user data
+        or results for Avatar processing jobs. The volume references a specific
+        resource set by display name.
+
+        Args:
+            volume_name: Name for the generated volume configuration
+            display_name: Display name of the resource set to create volume for
+            purpose: Whether this volume is for "input" data or "results" output
+            user: Current authenticated user
+
+        Returns:
+            Plain text response containing the volume configuration YAML
+        """
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/resources/volume",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 volume_name=volume_name,
-                set_name=set_name,
+                display_name=display_name,
                 purpose=purpose,
             ),
         }
@@ -281,27 +298,26 @@ class Resources:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+        """Retrieve all resources from a resource set.
+
+        Returns all resources in a resource set as YAML content. The set is
+        identified by its UUID.
+
+        Args:
+            user: Current authenticated user
+            set_name: UUID of the resource set to retrieve
+
+        Returns:
+            YamlResponse containing all resources in the set as YAML
+
+        Raises:
+            HTTPException: 404 if the resource set does not exist
+        """
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/resources/{set_name}",  # noqa: F541
             "timeout": timeout,
-        }
-
-        return self.client.request(**kwargs)
-
-    def put_resources(
-        self,
-        set_name: str,
-        yaml_string: str,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        kwargs: Dict[str, Any] = {
-            "method": "put",
-            "url": f"/resources/{set_name}",  # noqa: F541
-            "timeout": timeout,
-            "content": yaml_string,
-            "headers": {"Content-Type": "application/yaml"},
         }
 
         return self.client.request(**kwargs)
@@ -312,7 +328,25 @@ class Resources:
         yaml_string: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
+    ) -> ResourceSetResponse:
+        """Add new resources to an existing resource set.
+
+        Adds resources defined in YAML format to a resource set identified by UUID.
+        The resource set must already exist. This endpoint appends to existing
+        resources rather than replacing them.
+
+        Args:
+            user: Current authenticated user
+            set_name: UUID of the resource set to add to
+            yaml: YAML content defining the resources to add
+
+        Returns:
+            ResourceSetResponse containing the set UUID and display name
+
+        Raises:
+            HTTPException: 404 if the resource set does not exist
+        """
+
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/resources/{set_name}",  # noqa: F541
@@ -321,23 +355,39 @@ class Resources:
             "headers": {"Content-Type": "application/yaml"},
         }
 
-        return self.client.request(**kwargs)
+        return ResourceSetResponse(**self.client.request(**kwargs))
 
-    def get_resource(
+    def put_resources(
         self,
-        name: str,
-        kind: str,
-        set_name: str,
+        display_name: str,
+        yaml_string: str,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
+    ) -> ResourceSetResponse:
+        """Create a new version of a resource set with complete replacement.
+
+        Creates a brand new resource set with a fresh UUID, replacing all resources
+        with the provided YAML content. This implements versioning - the old set
+        remains unchanged while a new version is created with the same display name.
+
+        Args:
+            user: Current authenticated user
+            display_name: Human-readable name for the resource set (preserved across versions)
+            yaml: YAML content defining all resources for the new version
+
+        Returns:
+            ResourceSetResponse with the new UUID and the same display name
+        """
+
         kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/resources/{set_name}/{name},{kind}",  # noqa: F541
+            "method": "put",
+            "url": f"/resources/{display_name}",  # noqa: F541
             "timeout": timeout,
+            "content": yaml_string,
+            "headers": {"Content-Type": "application/yaml"},
         }
 
-        return self.client.request(**kwargs)
+        return ResourceSetResponse(**self.client.request(**kwargs))
 
 
 class Results:

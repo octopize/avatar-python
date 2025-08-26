@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.1
+#       jupytext_version: 1.17.2
 # ---
 
 # %% [markdown]
@@ -19,7 +19,6 @@
 
 # %%
 import os
-import secrets
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -172,7 +171,7 @@ plot.show()
 
 # %%
 # First initialize the runner
-runner = manager.create_runner(f"tutorial_time_series_{secrets.token_hex(4)}")
+runner = manager.create_runner("tutorial_time_series")
 
 # Then upload the data
 runner.add_table("vanilla", vanilla_df, individual_level=True, primary_key="id")

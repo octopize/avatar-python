@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.1
+#       jupytext_version: 1.17.2
 # ---
 
 # %% [markdown]
@@ -19,7 +19,6 @@
 
 # %%
 import os
-import secrets
 
 import pandas as pd
 from avatar_yaml.models.parameters import (
@@ -58,7 +57,7 @@ df.head()
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner_k2 = manager.create_runner(f"iris_k2_{secrets.token_hex(4)}")
+runner_k2 = manager.create_runner("iris_k2")
 
 # Then upload the data, you can either use a pandas dataframe or a file
 runner_k2.add_table("iris", df)
@@ -89,7 +88,7 @@ print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
 # %%
 # Create a new runner to run with a different k
-runner_k30 = manager.create_runner(f"iris_k30_{secrets.token_hex(4)}")
+runner_k30 = manager.create_runner("iris_k30")
 runner_k30.add_table("iris", "../fixtures/iris.csv")
 
 # Set k
@@ -202,7 +201,7 @@ imputation_method = ImputeMethod.MEAN
 # The avatarization can now be run with different parameters
 
 # %%
-runner = manager.create_runner(f"iris_multi_params_{secrets.token_hex(4)}")
+runner = manager.create_runner("iris_multi_params")
 runner.add_table("iris", "../fixtures/iris.csv")
 
 runner.set_parameters(
@@ -233,7 +232,7 @@ runner.render_plot("iris", PlotKind.PROJECTION_3D)
 #
 
 # %%
-runner = manager.create_runner(f"iris_automated_{secrets.token_hex(4)}")
+runner = manager.create_runner("iris_automated")
 
 runner.add_table("iris", "../fixtures/iris.csv")
 runner.advise_parameters()
@@ -251,6 +250,49 @@ runner.run()
 runner.update_parameters("iris", k=2)
 runner.print_parameters()
 runner.run()
+
+# %% [markdown]
+# ## Compute specific privacy metrics
+#
+# By configuring the privacy metric parameters, you can simulate specific attack scenarios and adjust the thresholds to suit your use case.
+
+# %% [markdown]
+# - **`known_variables`**:
+#   List of variables that an attacker is likely to know. This list is used to simulate more realistic attack scenarios, where the attacker only has access to a limited subset of information (typically demographic data). This parameter must be defined alongside the **`target`** and is used to evaluate the **linkability** risk.
+#
+# - **`target`**:
+#   Name of a sensitive variable that an attacker might try to infer. This parameter must be used in conjunction with **`known_variables`** and enables the evaluation of **inference** risk.
+#
+# - **`quantile_threshold`**:
+#   Quantile of the holdout distribution used to define a distance and ratio threshold for computing the closest rate.
+#   _Example: If set to 5 (default), any avatar falling below the 5th percentile of the holdout distance distribution is considered at risk._
+
+# %%
+runner_privacy = manager.create_runner("iris_multi_params")
+runner_privacy.add_table("iris", "../fixtures/iris.csv")
+
+runner_privacy.set_parameters(
+    "iris",
+    k=10,
+    known_variables=["sepal.length", "sepal.width"],
+    target="variety",
+    quantile_threshold=5,
+)
+
+runner_privacy.run(jobs_to_run=[JobKind.standard, JobKind.privacy_metrics])
+
+# Retrieve specific metrics
+correlation_protection_rate = runner_privacy.privacy_metrics("iris")[0][
+    "correlation_protection_rate"
+]
+inference_rate = runner_privacy.privacy_metrics("iris")[0]["inference_categorical"]
+closest_rate_tunned = runner_privacy.privacy_metrics("iris")[0]["closest_rate"]
+
+print(
+    f"the correlation_protection_rate metric measuring linkability is : {correlation_protection_rate}"
+)
+print(f"the inference_rate metric measuring inference is : {inference_rate}")
+print(f"the closest_rate_tunned metric measuring singling out is : {closest_rate_tunned}")
 
 # %% [markdown]
 # *In the next tutorial, we will show how to run an avatarization with multiple tables.*

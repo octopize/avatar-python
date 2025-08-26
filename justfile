@@ -11,9 +11,11 @@ VENV_NAME := "notebooks/env"
 TUTORIAL_REQUIREMENTS := "requirements-tutorial.txt"
 TEST_TUTORIAL_FILE := "tests/integration/test_tutorials.py"
 CURRENT_BRANCH:=`git branch --show-current`
+RELEASE_TARGET := "release-python-client"
 
 import '../../justfiles/python.just'
 import '../../justfiles/oci.just'
+
 # Allow PY_PKG_NAME to be redefined because the name of the package is different from the name of the directory
 set allow-duplicate-variables
 PY_PKG_NAME := "avatars"
@@ -28,7 +30,9 @@ notebook: generate-py pip-install-tutorial start-notebooks
 set allow-duplicate-recipes
 test-integration:
     just test-tutorials
+
 test-tutorials: generate-py pip-install-tutorial run-test-tutorials
+
 # Build the docs
 doc-build:
     ##! This script is also used to deploy to production.
@@ -145,6 +149,3 @@ publish: build
     else
         uv publish --token "$(op items get 34o3isa4fvh2x64i5rbrq5dh6y --fields notesPlain)"
     fi
-
-release *ARGS:
-	cd {{ROOT_DIR}}/scripts/release && uv run ../../scripts/release/src/main.py release-python-client --no-interaction  {{ARGS}}

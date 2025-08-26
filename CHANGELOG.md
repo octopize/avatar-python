@@ -2,6 +2,10 @@
 
 ## NEXT RELEASE
 
+## 1.0.9 - 2025/08/26
+
+- BREAKING: deprecated ratio and distance thresholds
+
 ## 1.0.8 - 2025/07/25
 
 - feat : add endpoint to render plots

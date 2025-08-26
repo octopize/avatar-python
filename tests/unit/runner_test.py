@@ -301,12 +301,18 @@ class TestRunner:
         runner.set_parameters("test_table", k=3, imputation_method=ImputeMethod.MEDIAN)
 
         # Update imputation method and add k parameter
-        runner.update_parameters("test_table", imputation_method=ImputeMethod.KNN, imputation_k=5)
+        runner.update_parameters(
+            "test_table",
+            imputation_method=ImputeMethod.KNN,
+            imputation_k=5,
+            imputation_return_data_imputed=True,
+        )
 
         # Verify imputation parameters were updated
         assert runner.config.avatarization["test_table"].imputation["method"] == "knn"
         assert runner.config.avatarization["test_table"].imputation["k"] == 5
         assert runner.config.avatarization["test_table"].k == 3  # Original k preserved
+        assert runner.config.avatarization["test_table"].imputation["return_data_imputed"] is True
 
     def test_update_parameters_with_time_series(self):
         """Test updating time series parameters."""
@@ -342,13 +348,13 @@ class TestRunner:
             "test_table",
             known_variables=["col2"],
             target="col1",
-            closest_rate_percentage_threshold=0.8,
+            quantile_threshold=80,
         )
 
         # Verify privacy metrics parameters were updated
         assert runner.config.privacy_metrics["test_table"].known_variables == ["col2"]
         assert runner.config.privacy_metrics["test_table"].target == "col1"
-        assert runner.config.privacy_metrics["test_table"].closest_rate_percentage_threshold == 0.8
+        assert runner.config.privacy_metrics["test_table"].quantile_threshold == 80
         assert runner.config.avatarization["test_table"].k == 3  # Original k preserved
 
     def test_update_parameters_when_nothing_was_set(self):
@@ -375,6 +381,7 @@ class TestRunner:
             imputation_method=ImputeMethod.KNN,
             imputation_k=5,
             imputation_training_fraction=0.8,
+            imputation_return_data_imputed=True,
             known_variables=["col1"],
             target="col2",
         )
@@ -395,6 +402,7 @@ class TestRunner:
         assert current_params["imputation_method"] == ImputeMethod.KNN
         assert current_params["imputation_k"] == 5
         assert current_params["imputation_training_fraction"] == 0.8
+        assert current_params["imputation_return_data_imputed"] is True
         assert current_params["known_variables"] == ["col1"]
         assert current_params["target"] == "col2"
 

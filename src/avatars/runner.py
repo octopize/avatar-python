@@ -1,10 +1,10 @@
 import os
-import secrets
 import time
 import webbrowser
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Optional, Union
+from uuid import UUID
 
 import pandas as pd
 import yaml
@@ -42,18 +42,15 @@ from avatars.results_organizer import ResultsOrganizer
 
 
 class Runner:
-    def __init__(self, api_client: ApiClient, set_name: str, seed: int | None = None) -> None:
+    def __init__(self, api_client: ApiClient, display_name: str, seed: int | None = None) -> None:
         self.client = api_client
-        self.set_name = self._get_valid_set_name(set_name)
-        self.config = Config(set_name=self.set_name, seed=seed)
+        self.display_name = display_name
+        self.set_name: str | None = None
+        self.config = Config(set_name=self.display_name, seed=seed)
         self.jobs: dict[JobKind | str, JobCreateResponse] = {}
         self.results_urls: dict[JobKind, dict[str, list[str]]] = {}
         self.file_downloader = FileDownloader(api_client)
         self.results: ResultsOrganizer = ResultsOrganizer()
-
-    def _get_valid_set_name(self, set_name: str) -> str:
-        """Ensure the set name isn't already created."""
-        return set_name + "_python_" + secrets.token_hex(4)
 
     def add_table(
         self,
@@ -120,10 +117,12 @@ class Runner:
             The name of the table. If None, all tables will be used.
         """
         yaml = self.config.get_advice_yaml(name=JobKind.advice.value)
-        self.client.resources.put_resources(
-            set_name=self.set_name,
+        resource_response = self.client.resources.put_resources(
+            display_name=self.display_name,
             yaml_string=yaml,
         )
+        # Update set_name with the actual UUID returned by the backend
+        self.set_name = str(resource_response.set_name)
         if table_name:
             tables = [table_name]
         else:
@@ -229,6 +228,7 @@ class Runner:
         imputation_method: ImputeMethod | None = None,
         imputation_k: int | None = None,
         imputation_training_fraction: float | None = None,
+        imputation_return_data_imputed: bool | None = None,
         dp_epsilon: float | None = None,
         dp_preprocess_budget_ratio: float | None = None,
         time_series_nf: int | None = None,
@@ -237,12 +237,10 @@ class Runner:
         time_series_method: AlignmentMethod | None = None,
         known_variables: list[str] | None = None,
         target: str | None = None,
-        closest_rate_percentage_threshold: float | None = None,
-        closest_rate_ratio_threshold: float | None = None,
+        quantile_threshold: int | None = None,
         categorical_hidden_rate_variables: list[str] | None = None,
     ):
-        """
-        Set the parameters for the table.
+        """Set the parameters for a given table.
 
         Parameters
         ----------
@@ -263,18 +261,16 @@ class Runner:
         exclude_replacement_strategy : ExcludeVariablesMethod, optional
             Strategy for replacing excluded variables. Options: ROW_ORDER, COORDINATE_SIMILARITY.
         imputation_method
-            Method for imputing missing values.
-            Options:
-                ImputeMethod.KNN
-                ImputeMethod.MODE
-                ImputeMethod.MEDIAN
-                ImputeMethod.MEAN
-                ImputeMethod.FAST_KNN.
+            Method for imputing missing values. Options: ``ImputeMethod.KNN``,
+            ``ImputeMethod.MODE``, ``ImputeMethod.MEDIAN``, ``ImputeMethod.MEAN``,
+            ``ImputeMethod.FAST_KNN``.
         imputation_k
             Number of neighbors to use for imputation if the method is KNN or FAST_KNN.
         imputation_training_fraction
             Fraction of the dataset to use for training the imputation model
             when using KNN or FAST_KNN.
+        imputation_return_data_imputed:
+            Whether to return the data with imputed values.
         dp_epsilon
             Epsilon value for differential privacy.
         dp_preprocess_budget_ratio
@@ -283,14 +279,12 @@ class Runner:
             In time series context, number of degrees of freedom to
             retain in time series projections.
         time_series_projection_type
-            In time series context, type of projection for time series.
-            Options: ProjectionType.FCPA, ProjectionType.FLATTEN default is FCPA.
+            In time series context, type of projection for time series. Options:
+            ``ProjectionType.FCPA`` (default) or ``ProjectionType.FLATTEN``.
         time_series_method
-            In time series context, method for aligning series.
-            Options: AlignmentMethod.SPECIFIED
-                    AlignmentMethod.MAX
-                    AlignmentMethod.MIN
-                    AlignmentMethod.MEAN.
+            In time series context, method for aligning series. Options:
+            ``AlignmentMethod.SPECIFIED``, ``AlignmentMethod.MAX``,
+            ``AlignmentMethod.MIN``, ``AlignmentMethod.MEAN``.
         time_series_nb_points
             In time series context, number of points to generate for time series.
         known_variables
@@ -329,6 +323,7 @@ class Runner:
                 imputation_method=imputation,
                 imputation_k=imputation_k,
                 imputation_training_fraction=imputation_training_fraction,
+                imputation_return_data_imputed=imputation_return_data_imputed,
                 column_weights=column_weights,
                 exclude_variable_names=exclude_variable_names,
                 exclude_replacement_strategy=replacement_strategy,
@@ -377,9 +372,9 @@ class Runner:
             imputation_training_fraction=imputation_training_fraction,
             known_variables=known_variables,
             target=target,
-            closest_rate_percentage_threshold=closest_rate_percentage_threshold,
-            closest_rate_ratio_threshold=closest_rate_ratio_threshold,
+            quantile_threshold=quantile_threshold,
             categorical_hidden_rate_variables=categorical_hidden_rate_variables,
+            imputation_return_data_imputed=imputation_return_data_imputed,
         )
 
         self.config.create_signal_metrics_parameters(
@@ -389,6 +384,7 @@ class Runner:
             imputation_method=imputation,
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
+            imputation_return_data_imputed=imputation_return_data_imputed,
         )
 
     def update_parameters(self, table_name: str, **kwargs) -> None:
@@ -494,6 +490,9 @@ class Runner:
                     "imputation_training_fraction": params.imputation["training_fraction"]
                     if params.imputation["training_fraction"]
                     else None,
+                    "imputation_return_data_imputed": params.imputation["return_data_imputed"]
+                    if params.imputation["return_data_imputed"]
+                    else None,
                 }
             )
 
@@ -538,8 +537,7 @@ class Runner:
             to_update = {
                 "known_variables": pm_params.known_variables,
                 "target": pm_params.target,
-                "closest_rate_percentage_threshold": pm_params.closest_rate_percentage_threshold,
-                "closest_rate_ratio_threshold": pm_params.closest_rate_ratio_threshold,
+                "quantile_threshold": pm_params.quantile_threshold,
                 "categorical_hidden_rate_variables": pm_params.categorical_hidden_rate_variables,
             }
             current_params.update(to_update)
@@ -619,10 +617,12 @@ class Runner:
     def run(self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER):
         yaml = self.get_yaml()
 
-        self.client.resources.put_resources(
-            set_name=self.set_name,
+        resource_response = self.client.resources.put_resources(
+            display_name=self.display_name,
             yaml_string=yaml,
         )
+        # Update set_name with the actual UUID returned by the backend
+        self.set_name = str(resource_response.set_name)
         jobs_to_run = sorted(jobs_to_run, key=lambda job: JOB_EXECUTION_ORDER.index(job))
         for parameters_name in jobs_to_run:
             depends_on = []
@@ -661,7 +661,7 @@ class Runner:
         # the create_job method doesn't return the right object for now.
         print(f"Creating {parameters_name} job")  # noqa: T201
         request = JobCreateRequest(
-            set_name=self.set_name, parameters_name=parameters_name, depends_on=depends_on
+            set_name=UUID(self.set_name), parameters_name=parameters_name, depends_on=depends_on
         )
         kwargs: dict[str, Any] = {
             "method": "post",
@@ -840,7 +840,9 @@ class Runner:
             The user volume.
         """
         return self.client.resources.get_user_volume(
-            volume_name=self._get_results_volume_name(), set_name=self.set_name, purpose="results"
+            volume_name=self._get_results_volume_name(),
+            display_name=self.display_name,
+            purpose="results",
         )
 
     def print_parameters(self, table_name: str | None = None) -> None:

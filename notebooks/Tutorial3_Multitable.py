@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.1
+#       jupytext_version: 1.17.2
 # ---
 
 # %% [markdown]
@@ -22,7 +22,6 @@
 # %%
 # %matplotlib inline
 import os
-import secrets
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -86,7 +85,7 @@ visit.head()
 
 # %%
 # First initialize the runner
-runner = manager.create_runner(set_name=f"tutorial_multitable{secrets.token_hex(4)}")
+runner = manager.create_runner(set_name="tutorial_multitable")
 
 runner.add_table(
     "patient",

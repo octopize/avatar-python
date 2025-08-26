@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.1
+#       jupytext_version: 1.17.2
 # ---
 
 # %% [markdown]
@@ -16,7 +16,6 @@
 
 # %%
 import os
-import secrets
 
 import pandas as pd
 
@@ -52,7 +51,7 @@ df
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner = manager.create_runner(f"iris_k5_{secrets.token_hex(4)}")
+runner = manager.create_runner("iris_k5")
 
 # Then upload the data, you can either use a pandas dataframe or a file
 runner.add_table("iris", df)
@@ -103,7 +102,7 @@ runner.download_report("my_report.pdf")
 # The following section show how to print an error message.
 
 # %%
-runner = manager.create_runner(f"iris_fail_{secrets.token_hex(4)}")
+runner = manager.create_runner("iris_fail")
 runner.add_table("iris", df)
 
 runner.set_parameters("iris", k=500)  # k is too big (bigger than the dataset !)
