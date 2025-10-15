@@ -6,7 +6,6 @@ DOC_SOURCE_DIR := "doc/source"
 DOC_OUTPUT_DIR := env_var_or_default("DOC_OUTPUT_DIR", "doc/build/html")
 OLD_CLIENT_OUTPUT_DIR := env_var_or_default("OLD_CLIENT_OUTPUT_DIR", "../../../avatar-python/")
 
-USER_ID := env_var_or_default("USER_ID", `uuidgen`)
 VENV_NAME := "notebooks/env"
 TUTORIAL_REQUIREMENTS := "requirements-tutorial.txt"
 TEST_TUTORIAL_FILE := "tests/integration/test_tutorials.py"
@@ -109,8 +108,7 @@ start-notebooks:
 run-test-tutorials:
     #! /usr/bin/env bash
     {{SHOPTS}}
-    NB_FILES=$(find notebooks -name "*.ipynb" | wc -l)
-    echo $NB_FILES
+    NB_FILES=$(find notebooks -maxdepth 1 -name "*.ipynb" | wc -l)
     if [ $NB_FILES -eq 0 ]; then
         echo "No notebooks found"
         exit 1
@@ -122,6 +120,26 @@ run-test-tutorials:
     AVATAR_USERNAME={{AVATAR_USERNAME}} \
     AVATAR_PASSWORD={{AVATAR_PASSWORD}} \
     python -m pytest -n "$NB_FILES" {{TEST_TUTORIAL_FILE}}
+
+
+# Override lci from python.just to add client-specific steps
+# The dependency 'generate-python' will run before the base lci commands
+lci: generate-python
+    @echo -e "\n\e[38;2;0;255;0mRunning standard lci steps\e[0m"
+    @just lint-fix
+    @just lint
+    @just typecheck
+    @just test
+    @if just --list | grep -q "test-integration"; then \
+        just test-integration; \
+    else \
+        echo -e "\e[38;2;255;0;0mNo integration test set on this folder\e[0m"; \
+    fi
+
+
+# Autogenerate python client
+generate-python:
+	make -C ../../client generate-python
 
 [private]
 copy-to-old-repo: ## Copy the files to the old python repo

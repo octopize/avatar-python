@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.4.0
+# API Version : 2.20.0
 
 import warnings
 from dataclasses import dataclass
@@ -71,7 +71,7 @@ class ApiClient(BaseClient):
         # Importing here to prevent circular import
         from avatars.api import (
             Auth,
-            Datasets,
+            Compatibility,
             Health,
             Jobs,
             Openapi,
@@ -82,15 +82,17 @@ class ApiClient(BaseClient):
         from avatars.data_upload import DataUploader
 
         self.auth = Auth(self)
-        self.datasets = Datasets(self)
+        self.compatibility = Compatibility(self)
         self.health = Health(self)
         self.jobs = Jobs(self)
         self.openapi = Openapi(self)
         self.resources = Resources(self)
         self.results = Results(self)
         self.users = Users(self)
-        self.upload_file = DataUploader(self).upload_file
-        self.download_file = DataUploader(self).download_file
+
+        data_uploader = DataUploader(self, should_verify_ssl=should_verify_ssl)
+        self.upload_file = data_uploader.upload_file
+        self.download_file = data_uploader.download_file
 
         self.auth_tokens: Optional[AuthTokens] = None
 

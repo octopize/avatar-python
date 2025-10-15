@@ -91,8 +91,10 @@ class ResultsOrganizer(BaseModel):
                         )
             case Results.ADVICE:
                 if isinstance(result, list):
-                    self.advice[table_name] = result[0]["advice"]["parameters"]
-                    # FIXME: https://github.com/octopize/avatar/issues/3858
+                    for item in result:
+                        if item["table_name"] == table_name:
+                            self.advice[table_name] = item["advice"]
+                            break
             case Results.METADATA:
                 if isinstance(result, dict) and metadata is not None:
                     self.run_metadata[metadata["kind"]] = result

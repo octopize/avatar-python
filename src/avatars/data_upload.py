@@ -1,12 +1,12 @@
 import io
 from typing import BinaryIO
 from urllib.parse import parse_qs
-from uuid import UUID
 
 import pandas as pd
 from pydantic_core import Url
 
 from avatars.client import ApiClient
+from avatars.config import config
 from avatars.models import FileAccess
 from avatars.storage import get_filesystem, get_parent
 
@@ -15,26 +15,12 @@ class DataUploader:
     def __init__(
         self,
         api_client: ApiClient,
-        user_id: UUID | None = None,  # for testing
+        should_verify_ssl: bool = True,
+        storage_endpoint_url: str = str(config.STORAGE_ENDPOINT_URL),
     ) -> None:
-        if api_client is None and user_id is None:
-            raise ValueError("Either api_client or user_id must be provided")
-
         self.api_client = api_client
-        self.user_id = user_id
-
-    def _get_own_user_id(self) -> UUID:
-        return self.api_client.users.get_me().id
-
-    def _get_user_id(self) -> UUID:
-        if self.user_id:
-            return self.user_id
-
-        if self.api_client.auth_tokens is None:
-            raise ValueError("ApiClient is not authenticated")
-
-        self.user_id = self._get_own_user_id()
-        return self.user_id
+        self.should_verify_ssl = should_verify_ssl or self.api_client.should_verify_ssl
+        self.storage_endpoint_url = storage_endpoint_url
 
     def upload_file(self, data: str | pd.DataFrame, key: str) -> None:
         """Upload a file to the storage.
@@ -77,6 +63,8 @@ class DataUploader:
             aws_access_key_id=credentials.access_key_id,
             aws_secret_access_key=credentials.secret_access_key,
             storage_path=user_specific_path,
+            storage_endpoint_url=self.storage_endpoint_url,
+            should_verify_ssl=self.should_verify_ssl,
         )
 
         parent = get_parent(user_specific_path)
@@ -100,11 +88,13 @@ class DataUploader:
             aws_access_key_id=credentials.access_key_id,
             aws_secret_access_key=credentials.secret_access_key,
             storage_path=parsed_download,
+            storage_endpoint_url=self.storage_endpoint_url,
+            should_verify_ssl=self.should_verify_ssl,
         )
 
         if parsed_download.endswith(".pdf"):
             output = fs.read_bytes(parsed_download)
         else:
-            output = fs.read_text(parsed_download)
+            output = fs.read_text(parsed_download, encoding="utf-8")
 
         return output

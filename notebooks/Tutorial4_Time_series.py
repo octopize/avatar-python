@@ -27,6 +27,7 @@ import pandas as pd
 from avatar_yaml.models.parameters import ProjectionType
 from avatar_yaml.models.schema import LinkMethod
 
+from avatars.constants import PlotKind
 from avatars.manager import Manager
 
 url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
@@ -246,28 +247,10 @@ avatars_ts1_df = runner.shuffled("sensor1")
 avatars_ts1_df.head()
 
 # %%
-plot = plot_series(
-    df := avatars_ts1_df,
-    variable_to_plot="sensor1",
-    id_variable="id",
-    time_variable="t",
-    proportion_to_plot=1.0,
-    n_series_to_plot=None,
-    figsize=(14, 8),
-)
-plot.show()
+runner.render_plot("sensor1", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
 
 # %%
-plot = plot_series(
-    df := avatars_ts1_df,
-    variable_to_plot="sensor2",
-    id_variable="id",
-    time_variable="t",
-    proportion_to_plot=1.0,
-    n_series_to_plot=None,
-    figsize=(14, 8),
-)
-plot.show()
+runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
 
 # %% [markdown]
 # ### Checking your avatars: `sensor3`
@@ -277,16 +260,7 @@ avatars_ts2_df = runner.shuffled("sensor2")
 avatars_ts2_df.head()
 
 # %%
-plot = plot_series(
-    df := avatars_ts2_df,
-    variable_to_plot="sensor3",
-    id_variable="id",
-    time_variable="t",
-    proportion_to_plot=1.0,
-    n_series_to_plot=None,
-    figsize=(14, 8),
-)
-plot.show()
+runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
 
 # %% [markdown]
 # ## Privacy metrics for time series

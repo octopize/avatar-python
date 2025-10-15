@@ -76,6 +76,12 @@ class PlotKind(StrEnum):
     """A table containing the mean and std of the original and avatar data
     (of the 10 first columns)."""
 
+    RAW_SERIES = "raw_series"
+    """A line plot of the original and avatar time series over time."""
+
+    NORMALIZED_SERIES = "normalized_series"
+    """A line plot of the normalized original and avatar time series over time."""
+
 
 RESULTS_TO_STORE = [
     Results.SHUFFLED,

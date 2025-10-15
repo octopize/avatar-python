@@ -1,7 +1,9 @@
+import warnings
 from uuid import UUID
 
+from avatars import __version__
 from avatars.client import ApiClient
-from avatars.models import JobResponse
+from avatars.models import CompatibilityStatus, JobWithDisplayNameResponse
 from avatars.runner import Runner
 
 
@@ -45,8 +47,35 @@ class Manager:
         else:
             self.auth_client = ApiClient(base_url=base_url)
 
-    def authenticate(self, username: str, password: str) -> None:
+    def authenticate(
+        self, username: str, password: str, should_verify_compatibility: bool = True
+    ) -> None:
         """Authenticate the user with the given username and password."""
+        if should_verify_compatibility:
+            response = self.auth_client.compatibility.is_client_compatible()
+
+            incompatible_statuses = [
+                CompatibilityStatus.incompatible,
+                CompatibilityStatus.unknown,
+            ]
+            if response.status in incompatible_statuses:
+                compat_error_message = "Client is not compatible with the server.\n"
+                compat_error_message += f"Server message: {response.message}.\n"
+                compat_error_message += f"Client version: {__version__}.\n"
+
+                compat_error_message += "Most recent compatible client version: "
+                compat_error_message += f"{response.most_recent_compatible_client}.\n"
+
+                compat_error_message += "To update your client, you can run "
+                compat_error_message += "`pip install --upgrade octopize.avatar`.\n"
+
+                compat_error_message += "To ignore, you can set "
+                compat_error_message += (
+                    "`authenticate(username, password, should_verify_compatibility=False)`."
+                )
+                warnings.warn(compat_error_message, DeprecationWarning)
+                raise DeprecationWarning(compat_error_message)
+
         self.auth_client.authenticate(username, password)
 
     def forgotten_password(self, email: str) -> None:
@@ -77,7 +106,7 @@ class Manager:
 
         return results
 
-    def get_last_jobs(self, count: int = 1) -> dict[str, JobResponse]:
+    def get_last_jobs(self, count: int = 1) -> dict[str, JobWithDisplayNameResponse]:
         """Get the last n results."""
         all_jobs = self.auth_client.jobs.get_jobs().jobs
 

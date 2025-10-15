@@ -87,6 +87,19 @@ def test_set_then_get_results(result_name, job_kind, result, metadata, expected_
     assert_equals(result, retrieved)
 
 
+def test_set_then_get_results_advice():
+    organizer = ResultsOrganizer()
+
+    organizer.set_results(
+        Results.ADVICE,
+        [{"table_name": "table", "advice": {"parameters": {"k": 10}}}],
+        "table",
+    )
+    retrieved = organizer.get_results("table", Results.ADVICE, JobKind.advice)
+
+    assert_equals({"parameters": {"k": 10}}, retrieved)
+
+
 def test_unescape_table_name():
     organizer = ResultsOrganizer()
     escaped_name = "table_dot_name_slash_test"

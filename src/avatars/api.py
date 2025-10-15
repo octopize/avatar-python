@@ -1,13 +1,12 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.4.0
+# API Version : 2.20.0
 
 
 import logging
-from io import BytesIO, StringIO
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
 
 from avatars.models import (
-    CreateDataset,  # noqa: F401
+    CompatibilityResponse,  # noqa: F401
     CreateUser,  # noqa: F401
     CreditsInfo,  # noqa: F401
     FeaturesInfo,  # noqa: F401
@@ -110,26 +109,25 @@ class Auth:
         return self.client.request(**kwargs)
 
 
-class Datasets:
+class Compatibility:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
-    def create_dataset(
+    def is_client_compatible(
         self,
-        request: Union[StringIO, BytesIO],
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        """Create a dataset from file upload."""
+    ) -> CompatibilityResponse:
+        """Verify if the client is compatible with the API."""
 
         kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/datasets",  # noqa: F541
+            "method": "get",
+            "url": f"/check_client",  # noqa: F541
             "timeout": timeout,
-            "file": request,
+            "should_verify_auth": False,
         }
 
-        return self.client.request(**kwargs)
+        return CompatibilityResponse(**self.client.request(**kwargs))
 
 
 class Health:
@@ -258,8 +256,9 @@ class Resources:
     def get_user_volume(
         self,
         volume_name: str,
-        display_name: str,
         purpose: str,
+        set_name: Optional[str] = None,
+        display_name: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
@@ -271,9 +270,10 @@ class Resources:
 
         Args:
             volume_name: Name for the generated volume configuration
-            display_name: Display name of the resource set to create volume for
+            set_name: UUID of the resource set to create volume for (required)
             purpose: Whether this volume is for "input" data or "results" output
             user: Current authenticated user
+            display_name: [DEPRECATED] Use set_name instead. For backward compatibility only.
 
         Returns:
             Plain text response containing the volume configuration YAML
@@ -285,8 +285,9 @@ class Resources:
             "timeout": timeout,
             "params": dict(
                 volume_name=volume_name,
-                display_name=display_name,
                 purpose=purpose,
+                set_name=set_name,
+                display_name=display_name,
             ),
         }
 
@@ -424,6 +425,27 @@ class Results:
         }
 
         return FileAccess(**self.client.request(**kwargs))
+
+    def get_permissions_to_download_batch(
+        self,
+        urls: List[str],
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> List[FileAccess]:
+        """Get permissions for multiple files at once.
+
+        Files that fail permission checks are silently skipped rather than
+        causing the entire batch to fail.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/access/batch",  # noqa: F541
+            "timeout": timeout,
+            "json_data": urls,
+        }
+
+        return [FileAccess(**item) for item in self.client.request(**kwargs)]
 
     def get_upload_url(
         self,

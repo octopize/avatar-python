@@ -25,6 +25,8 @@ def get_filesystem(
     aws_access_key_id: str,
     aws_secret_access_key: str,
     storage_path: str,
+    storage_endpoint_url: str = str(config.STORAGE_ENDPOINT_URL),
+    should_verify_ssl: bool = True,
 ) -> fsspec.AbstractFileSystem:
     """Get the filesystem implementation to the currently used storage backend.
 
@@ -47,7 +49,7 @@ def get_filesystem(
         The exact syntax is described at
         https://docs.octopize.io/docs/deploying/self-hosted/configuration
     """
-    os.environ["FSSPEC_S3_ENDPOINT_URL"] = str(config.STORAGE_ENDPOINT_URL)
+    os.environ["FSSPEC_S3_ENDPOINT_URL"] = storage_endpoint_url
     # We set anon-Ture to avoid the need for credentials. If not specified, the
     # S3FileSystem will try to use the default credentials,
     # and expect the AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables to be set.
@@ -57,7 +59,8 @@ def get_filesystem(
         "client_kwargs": {
             "aws_access_key_id": aws_access_key_id,
             "aws_secret_access_key": aws_secret_access_key,
-            "endpoint_url": str(config.STORAGE_ENDPOINT_URL),
+            "endpoint_url": storage_endpoint_url,
+            "verify": should_verify_ssl,
         },
     }
     filesystem, _ = fsspec.url_to_fs(storage_path, **s3_fs_kwargs)

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pandas as pd
 import pytest
 from avatar_yaml.models.parameters import (
@@ -25,6 +27,12 @@ class TestRunner:
     @classmethod
     def setup_class(cls):
         cls.manager = Manager("http://localhost:8000", FakeApiClient())
+
+    def test_create_runner_add_metadata_and_annotations(self):
+        runner = self.manager.create_runner("test")
+        runner.add_annotations({"key": "value"})
+        assert runner.config.avatar_metadata.spec.display_name == "test"
+        assert runner.config.avatar_metadata.annotations["key"] == "value"
 
     def test_add_table_df(self):
         runner = self.manager.create_runner("test")
@@ -90,6 +98,24 @@ class TestRunner:
         assert runner.config.privacy_metrics["test_table"].ncp == 2
         assert runner.config.signal_metrics["test_table"].ncp == 2
 
+    def test_advise_parameters(self):
+        manager = Manager("http://localhost:8000", FakeApiClient(tables=["test"]))
+        runner = manager.create_runner("test")
+        runner.add_table("test", data=self.df1)
+        runner.advise_parameters("test")
+        assert len(runner.config.advice.keys()) == 1
+        assert runner.config.avatarization["test"].k is not None
+
+    def test_advise_parameters_multitable(self):
+        manager = Manager("http://localhost:8000", FakeApiClient(tables=["parent", "child"]))
+        runner = manager.create_runner("test")
+        runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
+        runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
+        runner.add_link("parent", "id", "child", "id2")
+        runner.advise_parameters()
+        assert runner.config.avatarization["child"].k is not None
+        assert runner.config.avatarization["parent"].k is not None
+
     def test_run(self):
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
@@ -132,7 +158,8 @@ class TestRunner:
         ]
 
     def test_get_all_results(self):
-        runner = self.manager.create_runner("test")
+        manager = Manager("http://localhost:8000", FakeApiClient(tables=["parent"]))
+        runner = manager.create_runner("test")
         runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
         runner.set_parameters("parent", k=1)
         runner.run()
@@ -147,6 +174,32 @@ class TestRunner:
         ]
 
         assert runner.results.shuffled != {}
+        assert runner.results.sensitive_unshuffled != {}
+        assert runner.results.privacy_metrics != {}
+        assert runner.results.signal_metrics != {}
+        assert runner.results.original_projections != {}
+        assert runner.results.avatars_projections != {}
+        assert runner.results.figures != {}
+
+    def test_get_all_results_multitable(self):
+        manager = Manager("http://localhost:8000", FakeApiClient(tables=["parent", "child"]))
+        runner = manager.create_runner("test")
+        runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
+        runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
+        runner.advise_parameters()
+        runner.add_link("parent", "id", "child", "id2")
+        runner.run()
+        runner.get_all_results()
+
+        assert list(runner.jobs.keys()) == [
+            JobKind.advice,
+            JobKind.standard,
+            JobKind.signal_metrics,
+            JobKind.privacy_metrics,
+            JobKind.report,
+        ]
+
+        assert runner.results.shuffled.keys() == {"parent", "child"}
         assert runner.results.sensitive_unshuffled != {}
         assert runner.results.privacy_metrics != {}
         assert runner.results.signal_metrics != {}
@@ -173,8 +226,8 @@ class TestRunner:
 
     def test_report_raises_error(self):
         runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data=self.df1)
-        runner.set_parameters("test_table", k=3)
+        runner.add_table("test", data=self.df1)
+        runner.set_parameters("test", k=3)
         with pytest.raises(
             ValueError, match="Expected Privacy and Signal to be created to run report got"
         ):
@@ -182,9 +235,9 @@ class TestRunner:
 
     def test_delete_table(self):
         runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data=self.df1)
-        runner.delete_table("test_table")
-        assert "test_table" not in runner.config.tables.keys()
+        runner.add_table("test", data=self.df1)
+        runner.delete_table("test")
+        assert "test" not in runner.config.tables.keys()
 
     def test_delete_link(self):
         runner = self.manager.create_runner("test")
@@ -470,7 +523,7 @@ class TestRunner:
         # Return a failed job response
         runner.client.jobs.get_job_status = lambda job_id: JobResponseFactory().build(
             name="name",
-            set_name="set_name",
+            set_name=uuid4(),
             parameters_name="parameters_name",
             created_at="2023-10-01T00:00:00Z",
             kind=JobKind.standard,

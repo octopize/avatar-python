@@ -16,7 +16,7 @@ from tests.unit.conftest import FakeApiClient
     ],
 )
 def test_download_file(url, expected_type):
-    api_client = FakeApiClient()
+    api_client = FakeApiClient(tables=["iris"])
     downloader = FileDownloader(api_client)
 
     result = downloader.download_file(url=url, path="/tmp/test_file.pdf")

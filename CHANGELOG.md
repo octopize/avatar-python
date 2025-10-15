@@ -2,6 +2,14 @@
 
 ## NEXT RELEASE
 
+## 1.3.0 - 2025/10/14
+
+## 1.2.0 - 2025/10/08
+
+## 1.1.0 - 2025/09/23
+
+## 1.0.10 - 2025/09/15
+
 ## 1.0.9 - 2025/08/26
 
 - BREAKING: deprecated ratio and distance thresholds

@@ -6,10 +6,6 @@
 #       format_name: percent
 #       format_version: '1.3'
 #       jupytext_version: 1.17.2
-#   kernelspec:
-#     display_name: env
-#     language: python
-#     name: python3
 # ---
 
 # %% [markdown]
@@ -45,6 +41,11 @@ runner = manager.create_runner(set_name="test_wbcd")
 # Then you need to upload the data to the server
 runner.add_table("wbcd", "../fixtures/wbcd.csv")
 # Choose the parameters for the avatarization
+
+# %%
+# Get recommendations for the parameters
+runner.advise_parameters()
+runner.print_parameters()
 
 # %%
 runner.set_parameters("wbcd", k=15)

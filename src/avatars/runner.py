@@ -14,6 +14,7 @@ from avatar_yaml import (
     PrivacyMetricsParameters,
 )
 from avatar_yaml import Config as Config
+from avatar_yaml.models.advice import AdviceType
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
     ExcludeVariablesMethod,
@@ -51,6 +52,10 @@ class Runner:
         self.results_urls: dict[JobKind, dict[str, list[str]]] = {}
         self.file_downloader = FileDownloader(api_client)
         self.results: ResultsOrganizer = ResultsOrganizer()
+        self.config.create_metadata()
+
+    def add_annotations(self, annotations: dict[str, str]) -> None:
+        self.config.create_metadata(annotations)
 
     def add_table(
         self,
@@ -85,12 +90,6 @@ class Runner:
         avatar_data
             The avatar table if there is one. Can be a path to a file or a pandas DataFrame.
         """
-        if self.config.results_volume is None:
-            self.config.create_results_volume(
-                url=self._get_url_results_volume(),
-                result_volume_name=self._get_results_volume_name(),
-            )
-
         file, avatar_file = self.upload_file(table_name, data, avatar_data)
         if isinstance(data, pd.DataFrame):
             types = self._get_types(data, types)
@@ -116,28 +115,63 @@ class Runner:
         table_name
             The name of the table. If None, all tables will be used.
         """
-        yaml = self.config.get_advice_yaml(name=JobKind.advice.value)
+        self._setup_advice_config()
+        if table_name:
+            tables = [table_name]
+        else:
+            tables = list(self.config.tables.keys())
+        self._create_advice_jobs(tables)
+        self._apply_advice_parameters(tables)
+
+    def _setup_advice_config(self) -> None:
+        """Create advice config and upload resources to server."""
+        self.config.create_advice(advisor_type=[AdviceType.PARAMETERS])
+        yaml = self.config.get_yaml()
         resource_response = self.client.resources.put_resources(
             display_name=self.display_name,
             yaml_string=yaml,
         )
         # Update set_name with the actual UUID returned by the backend
         self.set_name = str(resource_response.set_name)
-        if table_name:
-            tables = [table_name]
-        else:
-            tables = list(self.config.tables.keys())
-        for table_name in tables:
-            name = self.config.get_parameters_advice_name(JobKind.advice.value, table_name)
-            created_job = self._create_job(parameters_name=name)
-            self.jobs[JobKind.advice] = created_job
-            self._download_specific_result(JobKind.advice, Results.ADVICE)
 
-        for table_name, advise_parameters in self.results.advice.items():
+    def _create_advice_jobs(self, tables: list[str]) -> None:
+        """Download advice results for the specified tables."""
+        for table_name in tables:
+            if self.results.advice.get(table_name) is None:
+                name = self.config.get_parameters_advice_name(
+                    name="advice", advisor_type=[AdviceType.PARAMETERS]
+                )
+                created_job = self._create_job(parameters_name=name)
+                self.jobs[JobKind.advice] = created_job
+                self._download_specific_result(JobKind.advice, Results.ADVICE)
+
+    def _apply_advice_parameters(self, tables: list[str]) -> None:
+        """Apply the downloaded advice parameters to each table."""
+        for table_name in tables:
+            advise_parameters = self.results.get_results(
+                table_name, Results.ADVICE, JobKind.advice
+            )
+            if not isinstance(advise_parameters, dict):
+                raise ValueError("Expected advice parameters to be a dictionary")
+
+            imputation_data: dict[str, Any] = {}
+            if advise_parameters.get("imputation") is not None:
+                imputation_result = advise_parameters.get("imputation")
+                if isinstance(imputation_result, dict):
+                    imputation_data = imputation_result
+
+            imputation_method = None
+            if imputation_data.get("method") is not None:
+                imputation_method = ImputeMethod(imputation_data.get("method"))
+
             self.set_parameters(
-                k=advise_parameters["k"],
-                use_categorical_reduction=advise_parameters["use_categorical_reduction"],
-                ncp=advise_parameters["ncp"],
+                k=advise_parameters.get("k"),
+                use_categorical_reduction=advise_parameters.get("use_categorical_reduction"),
+                ncp=advise_parameters.get("ncp"),
+                imputation_method=imputation_method,
+                imputation_k=imputation_data.get("k"),
+                imputation_training_fraction=imputation_data.get("training_fraction"),
+                imputation_return_data_imputed=imputation_data.get("return_data_imputed"),
                 table_name=table_name,
             )
 
@@ -183,11 +217,6 @@ class Runner:
             if matcher.search(value):
                 return our_type
         return DEFAULT_TYPE
-
-    def _get_results_volume_name(self) -> str:
-        if self.config.results_volume and self.config.results_volume.metadata.name:
-            return self.config.results_volume.metadata.name
-        return "user-volume-" + str(self.client.users.get_me().id)
 
     def add_link(
         self,
@@ -615,6 +644,8 @@ class Runner:
         return self.config.get_yaml(path)
 
     def run(self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER):
+        if JobKind.report in jobs_to_run:
+            self.config.create_report()
         yaml = self.get_yaml()
 
         resource_response = self.client.resources.put_resources(
@@ -830,21 +861,6 @@ class Runner:
         report = self.results_urls[JobKind.report][Results.REPORT][0]
         self.file_downloader.download_file(report, path=path)
 
-    def _get_user_results_volume(self) -> str:
-        """
-        Get the results volume.
-
-        Returns
-        -------
-        dict
-            The user volume.
-        """
-        return self.client.resources.get_user_volume(
-            volume_name=self._get_results_volume_name(),
-            display_name=self.display_name,
-            purpose="results",
-        )
-
     def print_parameters(self, table_name: str | None = None) -> None:
         """Print the parameters for a table.
 
@@ -870,9 +886,6 @@ class Runner:
         print("\n")  # noqa: T201
         print(f"--- Signal metrics for {table_name}: ---")  # noqa: T201
         print(asdict(self.config.signal_metrics[table_name]))  # noqa: T201
-
-    def _get_url_results_volume(self):
-        return yaml.safe_load(self._get_user_results_volume())["spec"]["url"]
 
     def kill(self):
         """Method not implemented yet."""
@@ -1016,6 +1029,29 @@ class Runner:
             )
         return original_coordinates, avatars_coordinates
 
+    def table_summary(self, table_name: str) -> pd.DataFrame:
+        """
+        Get the table summary.
+
+        Parameters
+        ----------
+        table_name
+            The name of the table to get the summary from.
+
+        Returns
+        -------
+        pd.DataFrame
+            The table summary as a dataframe.
+        """
+        results = self.get_specific_result(table_name, JobKind.advice, Results.ADVICE)
+        if not isinstance(results, dict) or "summary" not in results.keys():
+            raise ValueError(f"Summary not found in results for table '{table_name}'")
+
+        summary_data = results["summary"]
+        if "stats" not in summary_data.keys():
+            raise ValueError(f"Summary not found in results for table '{table_name}'")
+        return pd.DataFrame(summary_data["stats"])
+
     def from_yaml(self, yaml_path: str) -> None:
         """Create a Runner object from a YAML configuration.
 
@@ -1038,14 +1074,6 @@ class Runner:
             config = yaml.safe_load_all(file)
             return list(config)  # Convert generator to list
 
-    def _ensure_results_volume(self):
-        """Ensure the results volume is created."""
-        if self.config.results_volume is None:
-            self.config.create_results_volume(
-                url=self._get_url_results_volume(),
-                result_volume_name=self._get_results_volume_name(),
-            )
-
     def _process_yaml_config(self, list_config: list[dict]) -> None:
         """Process the YAML configuration into parameters and links."""
         parameters: dict[str, dict] = {}
@@ -1056,10 +1084,7 @@ class Runner:
             metadata = item.get("metadata", {})
             spec = item.get("spec", {})
 
-            if kind == "AvatarVolume":
-                self.config.create_volume(volume_name=metadata["name"], url=spec["url"])
-
-            elif kind == "AvatarSchema":
+            if kind == "AvatarSchema":
                 self._process_avatar_schema(spec, metadata, links)
 
             elif kind in {
@@ -1082,7 +1107,6 @@ class Runner:
 
     def _process_table(self, table: dict, links: dict):
         """Process a single table from the AvatarSchema."""
-        self._ensure_results_volume()
         try:
             base = self.client.results.get_upload_url()
             user_specific_path = base + f"/{table['name']}"
@@ -1166,9 +1190,12 @@ class Runner:
             exclude_replacement_strategy, exclude_variable_names = self._process_exclude_variables(
                 avatarization
             )
-            imputation_method, imputation_k, imputation_training_fraction = (
-                self._process_imputation(avatarization)
-            )
+            (
+                imputation_method,
+                imputation_k,
+                imputation_training_fraction,
+                imputation_return_data_imputed,
+            ) = self._process_imputation(avatarization)
             time_series_projection_type, time_series_nf = self._process_time_series_projection(
                 time_series
             )
@@ -1187,6 +1214,7 @@ class Runner:
                 imputation_method=imputation_method,
                 imputation_k=imputation_k,
                 imputation_training_fraction=imputation_training_fraction,
+                imputation_return_data_imputed=imputation_return_data_imputed,
                 time_series_nf=time_series_nf,
                 time_series_projection_type=time_series_projection_type,
                 time_series_nb_points=time_series_nb_points,
@@ -1215,7 +1243,13 @@ class Runner:
             imputation_method = self._get_enum_value(ImputeMethod, imputation.get("method"))
             imputation_k = imputation.get("k")
             imputation_training_fraction = imputation.get("training_fraction")
-        return imputation_method, imputation_k, imputation_training_fraction
+            imputation_return_data_imputed = imputation.get("return_data_imputed", False)
+        return (
+            imputation_method,
+            imputation_k,
+            imputation_training_fraction,
+            imputation_return_data_imputed,
+        )
 
     def _process_time_series_projection(self, time_series: dict):
         """Process time series projection parameters."""
