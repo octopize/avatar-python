@@ -1,3 +1,5 @@
+import re
+from pathlib import Path
 from uuid import uuid4
 
 import pandas as pd
@@ -15,6 +17,8 @@ from avatars.manager import Manager
 from avatars.models import JobKind
 from tests.unit.conftest import FakeApiClient, JobResponseFactory
 
+FIXTURES_PATH = Path(__file__).parent.parent.parent / "fixtures"
+
 
 class TestRunner:
     manager: Manager
@@ -26,31 +30,65 @@ class TestRunner:
 
     @classmethod
     def setup_class(cls):
-        cls.manager = Manager("http://localhost:8000", FakeApiClient())
+        cls.manager = Manager(api_client=FakeApiClient())
+
+    def setup_method(self):
+        """Create a fresh runner for each test method."""
+        self.runner = self.manager.create_runner("test")
 
     def test_create_runner_add_metadata_and_annotations(self):
-        runner = self.manager.create_runner("test")
-        runner.add_annotations({"key": "value"})
-        assert runner.config.avatar_metadata.spec.display_name == "test"
-        assert runner.config.avatar_metadata.annotations["key"] == "value"
+        self.runner.add_annotations({"key": "value"})
+        assert self.runner.config.avatar_metadata.spec.display_name == "test"
+        assert self.runner.config.avatar_metadata.annotations["key"] == "value"
+
+    def test_create_runner_add_versions_to_metadata(self):
+        versions = self.runner.config.avatar_metadata.annotations
+        assert list(versions.keys()) == ["client_type", "client_version"]
+        assert versions["client_type"] == "python"
+        assert versions["client_version"]
+        # Assert simple semver format: major.minor.patch (e.g., 1.2.3)
+        assert re.match(r"^\d+\.\d+\.\d+$", versions["client_version"])
+
+    def test_add_annotation_do_not_overwrite_versions(self):
+        self.runner.add_annotations({"key": "value"})
+        versions = self.runner.config.avatar_metadata.annotations
+        assert list(versions.keys()) == [
+            "client_type",
+            "client_version",
+            "key",
+        ]
+        assert versions["client_type"] == "python"
+        assert versions["client_version"]
+        assert versions["key"] == "value"
 
     def test_add_table_df(self):
-        runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data=self.df1)
-        assert "test_table" in runner.config.tables.keys()
+        self.runner.add_table("test_table", data=self.df1)
+        assert "test_table" in self.runner.config.tables.keys()
 
     def test_add_table_from_file(self):
-        runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data="../fixtures/iris.csv")
-        assert "test_table" in runner.config.tables.keys()
+        self.runner.add_table("test_table", data="../fixtures/iris.csv")
+        assert "test_table" in self.runner.config.tables.keys()
 
     def test_add_table_with_avatar(self):
-        runner = self.manager.create_runner("test")
-        runner.add_table(
-            "test_table", data="../fixtures/iris.csv", avatar_data="../fixtures/iris.csv"
+        self.runner.add_table(
+            "test_table", data=f"{FIXTURES_PATH}/iris.csv", avatar_data=f"{FIXTURES_PATH}/iris.csv"
         )
-        assert "test_table" in runner.config.tables.keys()
-        assert "test_table" in runner.config.avatar_tables.keys()
+        assert "test_table" in self.runner.config.tables.keys()
+        assert "test_table" in self.runner.config.avatar_tables.keys()
+
+    def test_run_raises_error_when_no_avatar_table(self):
+        self.runner.add_table("test_table", data=self.df1)
+        self.runner.set_parameters("test_table", ncp=2)  # no avatarization parameters
+        with pytest.raises(
+            ValueError, match="Expected Avatar tables to be set to run signal/privacy metrics"
+        ):
+            self.runner.run(jobs_to_run=[JobKind.privacy_metrics])
+
+    def test_run_metrics_with_avatar_table(self):
+        self.runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        self.runner.set_parameters("test_table", ncp=2)
+        self.runner.run(jobs_to_run=[JobKind.privacy_metrics, JobKind.signal_metrics])
+        assert self.runner.jobs.keys() == {JobKind.privacy_metrics, JobKind.signal_metrics}
 
     def test_add_link(self):
         runner = self.manager.create_runner("test")
@@ -99,7 +137,7 @@ class TestRunner:
         assert runner.config.signal_metrics["test_table"].ncp == 2
 
     def test_advise_parameters(self):
-        manager = Manager("http://localhost:8000", FakeApiClient(tables=["test"]))
+        manager = Manager(api_client=FakeApiClient(tables=["test"]))
         runner = manager.create_runner("test")
         runner.add_table("test", data=self.df1)
         runner.advise_parameters("test")
@@ -107,7 +145,7 @@ class TestRunner:
         assert runner.config.avatarization["test"].k is not None
 
     def test_advise_parameters_multitable(self):
-        manager = Manager("http://localhost:8000", FakeApiClient(tables=["parent", "child"]))
+        manager = Manager(api_client=FakeApiClient(tables=["parent", "child"]))
         runner = manager.create_runner("test")
         runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
         runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
@@ -158,7 +196,7 @@ class TestRunner:
         ]
 
     def test_get_all_results(self):
-        manager = Manager("http://localhost:8000", FakeApiClient(tables=["parent"]))
+        manager = Manager(api_client=FakeApiClient(tables=["parent"]))
         runner = manager.create_runner("test")
         runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
         runner.set_parameters("parent", k=1)
@@ -182,7 +220,7 @@ class TestRunner:
         assert runner.results.figures != {}
 
     def test_get_all_results_multitable(self):
-        manager = Manager("http://localhost:8000", FakeApiClient(tables=["parent", "child"]))
+        manager = Manager(api_client=FakeApiClient(tables=["parent", "child"]))
         runner = manager.create_runner("test")
         runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
         runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
@@ -209,7 +247,7 @@ class TestRunner:
 
     def test_from_yaml(self):
         runner = self.manager.create_runner("test")
-        runner.from_yaml("fixtures/yaml_from_web.yaml")
+        runner.from_yaml(f"{FIXTURES_PATH}/yaml_from_web.yaml")
         assert len(runner.config.tables.keys()) == 1
         assert len(runner.config.avatarization.keys()) == 1
         assert len(runner.config.privacy_metrics.keys()) == 1
@@ -545,6 +583,27 @@ class TestRunner:
             runner.get_specific_result(
                 table_name="NOT_VALID", job_name=JobKind.standard, result=Results.SHUFFLED
             )
+
+    def test_run_without_avatarization_parameters(self):
+        """Test runner when avatarization parameters were not set."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", ncp=15)
+        with pytest.raises(
+            ValueError,
+            match="Expected Avatarization parameters to be set to run standard job,",
+        ):
+            runner.run()
+
+    def test_run_without_any_parameters(self):
+        """Test runner when no parameters were set."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        with pytest.raises(
+            ValueError,
+            match="Expected Avatarization parameters to be set to run standard job,",
+        ):
+            runner.run()
 
     def test_get_results_on_invalid_job(self):
         """Test getting results that do not exist."""

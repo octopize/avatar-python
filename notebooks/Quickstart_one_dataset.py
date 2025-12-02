@@ -22,12 +22,11 @@ from avatars.manager import Manager
 
 # The following are not necessary to run avatar but are used in this tutorial
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME", "")
 password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
-manager = Manager(base_url=url)
+manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
 # Authenticate with the server
 manager.authenticate(username, password)
 
@@ -48,7 +47,6 @@ runner.advise_parameters()
 runner.print_parameters()
 
 # %%
-runner.set_parameters("wbcd", k=15)
 # Run the pipeline with avatarization, privacy and signal metrics and report
 runner.run()
 

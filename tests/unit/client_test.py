@@ -7,12 +7,25 @@ import pytest
 
 from avatars.base_client import TimeoutError
 from avatars.client import ApiClient
+from avatars.client_config import ClientConfig
 from tests.unit.conftest import RequestHandle, api_client_factory, mock_httpx_client
+
+
+def prepare_api_client_for(resp: httpx.Response) -> ApiClient:
+    client = mock_httpx_client()
+    client.send = Mock(return_value=resp)  # type: ignore[method-assign]
+
+    return ApiClient(
+        base_url="http://localhost:8000/api/api",
+        http_client=client,
+        should_verify_ssl=False,
+        verify_auth=False,
+    )
 
 
 @patch("httpx.Client")
 def test_should_verify_ssl(mock_client: Any) -> None:
-    base_url = "https://test.com"
+    base_url = "https://test.com/api"
 
     def do_request(api_client: ApiClient, **kwargs: Any) -> None:
         api_client.request("GET", base_url, **kwargs)
@@ -34,29 +47,128 @@ def test_should_verify_ssl(mock_client: Any) -> None:
     mock_client.reset_mock()
 
 
-@pytest.mark.parametrize(
-    "base_url",
-    [
-        '"https://test.com"',
-    ],
-)
-def test_url_is_rejected_if_it_contains_quotes(base_url: str) -> None:
-    # Note there is "quote" within the URL, usually an error related to system
-    # env variable configuration.
-    with pytest.raises(ValueError, match="not to contain quotes"):
-        ApiClient(base_url=base_url)
+class TestApiClientInitialization:
+    @pytest.fixture
+    def minimal_config(self) -> ClientConfig:
+        return ClientConfig(
+            base_api_url="https://octopize.app/api",
+            storage_endpoint_url="https://octopize.app/storage",
+        )
 
-
-def prepare_api_client_for(resp: httpx.Response) -> ApiClient:
-    client = mock_httpx_client()
-    client.send = Mock(return_value=resp)  # type: ignore[method-assign]
-
-    return ApiClient(
-        base_url="http://localhost:8000",
-        http_client=client,
-        should_verify_ssl=False,
-        verify_auth=False,
+    @pytest.mark.parametrize(
+        "base_url",
+        [
+            '"https://test.com/api"',
+        ],
     )
+    def test_url_is_rejected_if_it_contains_quotes(self, base_url: str) -> None:
+        # Note there is "quote" within the URL, usually an error related to system
+        # env variable configuration.
+        with pytest.raises(ValueError, match="not to contain quotes"):
+            ApiClient(base_url=base_url)
+
+    def test_can_create_with_config_only(self, minimal_config: ClientConfig) -> None:
+        """Test that ApiClient can be created with only a Config object."""
+        client = ApiClient(config=minimal_config)
+        assert client.base_url == "https://octopize.app/api"
+
+    def test_can_create_with_kwargs_only(self) -> None:
+        """Test that ApiClient can be created with only keyword arguments."""
+        client = ApiClient(
+            base_url="https://octopize.app/api",
+        )
+        assert client.base_url == "https://octopize.app/api"
+
+    def test_config_with_http_client_is_allowed(self, minimal_config: ClientConfig) -> None:
+        """Test that http_client can be used alongside config."""
+        http_client = httpx.Client()
+        client = ApiClient(config=minimal_config, http_client=http_client)
+        assert client.base_url == "https://octopize.app/api"
+
+    def test_config_with_base_url_raises_error(self, minimal_config: ClientConfig) -> None:
+        """Test that using config with base_url raises ValueError."""
+
+        with pytest.raises(
+            ValueError,
+            match="Cannot provide both 'config' and other parameters \\(base_url\\)",
+        ):
+            ApiClient(
+                config=minimal_config,
+                base_url="https://other.com",
+            )
+
+    def test_config_with_timeout_raises_error(self) -> None:
+        """Test that using config with timeout raises ValueError."""
+        config = ClientConfig(
+            base_api_url="https://octopize.app/api",
+            storage_endpoint_url="https://octopize.app/storage",
+        )
+        with pytest.raises(
+            ValueError,
+            match="Cannot provide both 'config' and other parameters \\(timeout\\)",
+        ):
+            ApiClient(
+                config=config,
+                timeout=120,
+            )
+
+    def test_config_with_should_verify_ssl_raises_error(self) -> None:
+        """Test that using config with should_verify_ssl raises ValueError."""
+        config = ClientConfig(
+            base_api_url="https://octopize.app/api",
+            storage_endpoint_url="https://octopize.app/storage",
+        )
+        with pytest.raises(
+            ValueError,
+            match="Cannot provide both 'config' and other parameters \\(should_verify_ssl\\)",
+        ):
+            ApiClient(
+                config=config,
+                should_verify_ssl=False,
+            )
+
+    def test_config_with_api_key_raises_error(self) -> None:
+        """Test that using config with api_key raises ValueError."""
+        config = ClientConfig(base_api_url="https://octopize.app/api")
+        with pytest.raises(
+            ValueError,
+            match="Cannot provide both 'config' and other parameters \\(api_key\\)",
+        ):
+            ApiClient(
+                config=config,
+                api_key="test-key",
+            )
+
+    def test_config_with_multiple_params_raises_error_listing_all(self) -> None:
+        """Test that using config with multiple params lists all conflicts in error."""
+        config = ClientConfig(base_api_url="https://octopize.app/api")
+        with pytest.raises(
+            ValueError,
+            match="Cannot provide both 'config' and other parameters "
+            "\\(base_url, timeout, api_key\\)",
+        ):
+            ApiClient(
+                config=config,
+                base_url="https://other.com",
+                timeout=120,
+                api_key="test-key",
+            )
+
+    def test_config_settings_are_used(self) -> None:
+        """Test that config settings are properly applied to client."""
+        config = ClientConfig(
+            base_api_url="https://octopize.app/api",
+            timeout=90,
+            should_verify_ssl=False,
+            storage_endpoint_url="https://storage.example.com/storage",
+        )
+        client = ApiClient(config=config, verify_auth=False)
+        assert client.base_url == "https://octopize.app/api"
+        assert client.should_verify_ssl is False
+        # Check storage_endpoint_url is set correctly via ClientConfig
+        assert (
+            str(client.data_uploader.storage_endpoint_url) == "https://storage.example.com/storage"
+        )
 
 
 class TestClientRequest:
@@ -88,7 +200,7 @@ class TestClientRequest:
         client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
 
         api_client = ApiClient(
-            base_url="http://localhost:8000",
+            base_url="http://localhost:8000/api",
             http_client=client,
             should_verify_ssl=False,
             verify_auth=False,
@@ -157,7 +269,7 @@ class TestClientRequest:
         client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
 
         api_client = ApiClient(
-            base_url="http://localhost:8000",
+            base_url="http://localhost:8000/api",
             http_client=client,
             should_verify_ssl=False,
             verify_auth=False,
@@ -180,7 +292,7 @@ class TestClientRequest:
         client.send = Mock(side_effect=side_effects)  # type: ignore[method-assign]
 
         api_client = ApiClient(
-            base_url="http://localhost:8000",
+            base_url="http://localhost:8000/api",
             http_client=client,
             should_verify_ssl=False,
             verify_auth=False,

@@ -5,11 +5,8 @@ import fsspec
 import structlog
 
 from avatars.config import config
-from avatars.log import generate_logger_name, setup_logging
 
-setup_logging()
-
-logger = structlog.get_logger(generate_logger_name(__file__))
+logger = structlog.get_logger(__name__)
 
 
 DEFAULT_FIND_LIMIT = 1000

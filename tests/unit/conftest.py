@@ -9,6 +9,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
 
 from avatars.client import ApiClient
+from avatars.log import setup_logging
 from avatars.models import (
     CompatibilityResponse,
     CompatibilityStatus,
@@ -22,6 +23,8 @@ from avatars.models import (
 )
 
 RequestHandle = Callable[[httpx.Request], httpx.Response]
+
+setup_logging()
 
 
 def mock_httpx_client(handler: Optional[RequestHandle] = None) -> httpx.Client:
@@ -42,7 +45,7 @@ def api_client_factory(handler: Optional[RequestHandle] = None) -> ApiClient:
     """
     http_client = mock_httpx_client(handler)
     return ApiClient(
-        base_url="http://localhost:8000",
+        base_url="http://localhost:8000/api",
         http_client=http_client,
         verify_auth=False,
     )
@@ -168,6 +171,18 @@ class FakeResults:
             ),
         )
 
+    def get_permissions_to_download_batch(self, urls: list[str]):
+        """Return FileAccess objects for all URLs in the batch."""
+        return [
+            FileAccess(
+                url=url,
+                credentials=FileCredentials(
+                    access_key_id="access_key_id", secret_access_key="secret_access_key"
+                ),
+            )
+            for url in urls
+        ]
+
     def get_results(self, job_name):
         results = {}
         for table_name in self.tables:
@@ -278,6 +293,13 @@ class FakeApiClient(ApiClient):
         self.auth = FakeAuth()  # type: ignore
         self.compatibility = FakeCompatibility()  # type: ignore
         self.timeout = 100
+        # Initialize attributes needed for API key authentication
+        self._api_key: Optional[str] = None
+        self._headers: dict[str, str] = {}
+
+    def set_header(self, key: str, value: str) -> None:
+        """Set a header in the client."""
+        self._headers[key] = value
 
     def _update_auth_tokens(
         self, resp: LoginResponse, *, headers: Optional[dict[str, str]] = None

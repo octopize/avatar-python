@@ -31,12 +31,11 @@ from avatar_yaml.models.schema import LinkMethod
 from avatars.manager import Manager
 from avatars.models import JobKind
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME", "")
 password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
-manager = Manager(base_url=url)
+manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
 # Authenticate with the server
 manager.authenticate(username, password)
 

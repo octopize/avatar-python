@@ -44,7 +44,6 @@ from avatars.utils import (
 )
 
 logger = structlog.getLogger(__name__)
-structlog.configure(logger_factory=structlog.stdlib.LoggerFactory())
 
 DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_RETRY_INTERVAL = 5
@@ -184,7 +183,7 @@ class ContextData:
     http_response: Optional[Response] = None
     timeout: float = 0.0
     params: Optional[Dict[str, Any]] = None
-    json_data: Optional[BaseModel] = None
+    json_data: Optional[Union[BaseModel, Dict[str, Any], list[Any]]] = None
     form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None
     data: Optional[str] = None
     files: Optional[FileLikes] = None
@@ -202,8 +201,15 @@ class ContextData:
     def build_params_arg(self) -> Optional[Dict[str, Any]]:
         return remove_optionals(self.params)
 
-    def build_json_data_arg(self) -> Optional[str]:
-        return json_loads(self.json_data.model_dump_json()) if self.json_data else None
+    def build_json_data_arg(self) -> Optional[Union[Dict[str, Any], list[Any]]]:
+        if not self.json_data:
+            return None
+
+        if isinstance(self.json_data, BaseModel):
+            return json_loads(self.json_data.model_dump_json())
+        else:
+            # Handle plain lists, dicts, etc.
+            return self.json_data
 
     def build_form_data_arg(self) -> Mapping[str, Any] | None:
         arg = (
@@ -618,13 +624,14 @@ class BaseClient:
     def __init__(
         self,
         base_url: str,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int = DEFAULT_TIMEOUT,
         should_verify_ssl: bool = True,
         *,
         verify_auth: bool = True,
         on_auth_refresh: Optional[AuthRefreshFunc] = None,
         http_client: Optional[httpx.Client] = None,
         headers: Dict[str, str] = {},
+        api_key: Optional[str] = None,
     ) -> None:
         """Client to communicate with the Avatar API.
 
@@ -640,6 +647,9 @@ class BaseClient:
             allow passing in custom httpx.Client instance, by default None
         verify_auth :, optional
             Bypass client-side authentication verification, by default True
+        api_key :, optional
+            API key for authentication. If provided, uses api-key-v1 scheme
+            instead of Bearer tokens. By default None
         """
         if '"' in base_url:
             raise ValueError(f"Expected base_url not to contain quotes. Got {base_url} instead")
@@ -651,6 +661,13 @@ class BaseClient:
         self._on_auth_refresh = on_auth_refresh
         self._http_client = http_client
         self._headers = {"Avatars-Accept-Created": "yes"} | headers
+        self._api_key: Optional[str] = api_key
+
+        # Set API key auth header if provided
+        if self._api_key:
+            self.set_header("Authorization", f"api-key-v1 {self._api_key}")
+            # Disable auth refresh for API keys since they don't expire
+            self._on_auth_refresh = None
 
     def set_header(self, key: str, value: str) -> None:
         self._headers[key] = value

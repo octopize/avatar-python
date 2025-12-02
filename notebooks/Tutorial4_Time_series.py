@@ -30,12 +30,11 @@ from avatar_yaml.models.schema import LinkMethod
 from avatars.constants import PlotKind
 from avatars.manager import Manager
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME", "")
 password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
-manager = Manager(base_url=url)
+manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
 # Authenticate with the server
 manager.authenticate(username, password)
 # Verify that we can connect to the API server
@@ -125,7 +124,6 @@ plot = plot_series(
     n_series_to_plot=None,
     figsize=(14, 8),
 )
-plot.show()
 
 # %% [markdown]
 # ###  `sensor2` data
@@ -140,7 +138,6 @@ plot = plot_series(
     n_series_to_plot=None,
     figsize=(14, 8),
 )
-plot.show()
 
 # %% [markdown]
 # ### `sensor3` data
@@ -155,7 +152,6 @@ plot = plot_series(
     n_series_to_plot=None,
     figsize=(14, 8),
 )
-plot.show()
 
 # %% [markdown]
 # Now that we know what data we are maniplating, we can anonymize it.
@@ -247,10 +243,14 @@ avatars_ts1_df = runner.shuffled("sensor1")
 avatars_ts1_df.head()
 
 # %%
-runner.render_plot("sensor1", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
+# If you are having issues rendering the plot in your notebook, you can use the following line to open the plot in your browser
+# runner.render_plot("sensor1", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
+runner.render_plot("sensor1", plot_kind=PlotKind.RAW_SERIES)
 
 # %%
-runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
+# If you are having issues rendering the plot in your notebook, you can use the following line to open the plot in your browser
+# runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
+runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES)
 
 # %% [markdown]
 # ### Checking your avatars: `sensor3`
@@ -260,7 +260,9 @@ avatars_ts2_df = runner.shuffled("sensor2")
 avatars_ts2_df.head()
 
 # %%
-runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
+# If you are having issues rendering the plot in your notebook, you can use the following line to open the plot in your browser
+# runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES, open_in_browser=True)
+runner.render_plot("sensor2", plot_kind=PlotKind.RAW_SERIES)
 
 # %% [markdown]
 # ## Privacy metrics for time series

@@ -1,11 +1,12 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.20.0
+# API Version : 2.31.0
 
 
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
 
 from avatars.models import (
+    ApiKey,  # noqa: F401
     CompatibilityResponse,  # noqa: F401
     CreateUser,  # noqa: F401
     CreditsInfo,  # noqa: F401
@@ -35,6 +36,131 @@ DEFAULT_TIMEOUT = 60
 
 
 T = TypeVar("T")
+
+
+class ApiKeys:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def list_api_keys(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> List[ApiKey]:
+        """List all API keys for the authenticated user.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/api-keys",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return [ApiKey(**item) for item in self.client.request(**kwargs)]
+
+    def create_api_key(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Create a new API key for the authenticated user.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/api-keys",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)
+
+    def revoke_all_api_keys(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Revoke all API keys for the authenticated user.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "delete",
+            "url": f"/api-keys",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)
+
+    def get_api_key(
+        self,
+        api_key_id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> ApiKey:
+        """Get details of a specific API key.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/api-keys/{api_key_id}",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return ApiKey(**self.client.request(**kwargs))
+
+    def revoke_api_key(
+        self,
+        api_key_id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Revoke a specific API key.
+
+        This endpoint is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "delete",
+            "url": f"/api-keys/{api_key_id}",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)
+
+    def revoke_api_key_admin(
+        self,
+        user_id: Optional[str] = None,
+        api_key_id: Optional[str] = None,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Revoke API key(s) for another user (admin only).
+
+        Accepts either:
+        - user_id: Revoke all API keys for the specified user
+        - api_key_id: Revoke a specific API key
+
+        This endpoint requires admin permissions and is protected with rate limiting.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "delete",
+            "url": f"/api-keys/admin",  # noqa: F541
+            "timeout": timeout,
+            "params": dict(
+                user_id=user_id,
+                api_key_id=api_key_id,
+            ),
+        }
+
+        return self.client.request(**kwargs)
 
 
 class Auth:
@@ -590,6 +716,20 @@ class Users:
 
         kwargs: Dict[str, Any] = {
             "method": "get",
+            "url": f"/users/{id}",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return User(**self.client.request(**kwargs))
+
+    def delete_user(
+        self,
+        id: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> User:
+        kwargs: Dict[str, Any] = {
+            "method": "delete",
             "url": f"/users/{id}",  # noqa: F541
             "timeout": timeout,
         }

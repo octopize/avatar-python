@@ -4,23 +4,30 @@ from urllib.parse import parse_qs
 
 import pandas as pd
 from pydantic_core import Url
+from structlog import get_logger
 
 from avatars.client import ApiClient
-from avatars.config import config
 from avatars.models import FileAccess
 from avatars.storage import get_filesystem, get_parent
+
+logger = get_logger(__name__)
 
 
 class DataUploader:
     def __init__(
         self,
         api_client: ApiClient,
+        storage_endpoint_url: str,
         should_verify_ssl: bool = True,
-        storage_endpoint_url: str = str(config.STORAGE_ENDPOINT_URL),
     ) -> None:
+        if not storage_endpoint_url:
+            raise ValueError("storage_endpoint_url must be provided to DataUploader")
+
         self.api_client = api_client
         self.should_verify_ssl = should_verify_ssl or self.api_client.should_verify_ssl
         self.storage_endpoint_url = storage_endpoint_url
+
+        logger.debug("datauploader initialized", storage_endpoint_url=storage_endpoint_url)
 
     def upload_file(self, data: str | pd.DataFrame, key: str) -> None:
         """Upload a file to the storage.

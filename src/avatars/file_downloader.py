@@ -1,23 +1,29 @@
 import io
 import json
+from typing import Any
 
 import pandas as pd
 from IPython.display import HTML
 
 from avatars.client import ApiClient
 from avatars.constants import TypeResults
+from avatars.models import FileAccess
 
 
 class FileDownloader:
     def __init__(self, api_client: ApiClient):
         self.client = api_client
 
-    def _download_file_to_str(self, url: str) -> str | bytes:
-        fileaccess = self.client.results.get_permission_to_download(url)
-        data_str = self.client.download_file(file_access=fileaccess)
-        return data_str
+    def _download_with_credentials(self, file_access: FileAccess) -> str | bytes:
+        """Download a file using credentials."""
+        return self.client.download_file(file_access=file_access)
 
-    def _str_to_json(self, str_data: str) -> list[dict]:
+    def _download_file_to_str(self, url: str) -> str | bytes:
+        """Get credentials for a URL and download the file."""
+        file_access = self.client.results.get_permission_to_download(url)
+        return self._download_with_credentials(file_access)
+
+    def _str_to_json(self, str_data: str) -> list[dict[str, Any]]:
         if not str_data.strip().startswith("["):
             str_data = f"[{str_data}]"
         return json.loads(str_data)
@@ -62,3 +68,28 @@ class FileDownloader:
         str_data = self._download_file_to_str(url)
         extension = url.split(".")[-1]
         return self._str_to_results(str_data, f".{extension}", path)
+
+    def download_files_batch(self, urls: list[str]) -> dict[str, TypeResults]:
+        """
+        Download multiple files from the given URLs using batch credential fetching.
+        Returns a dictionary mapping URLs to their downloaded content.
+        """
+        if not urls:
+            return {}
+
+        # Get credentials for all files at once
+        file_accesses = self.client.results.get_permissions_to_download_batch(urls)
+
+        # Create a mapping of URL to FileAccess for easy lookup
+        url_to_access = {access.url: access for access in file_accesses}
+
+        # Download each file using the pre-fetched credentials
+        results = {}
+        for url in urls:
+            if url in url_to_access:
+                str_data = self._download_with_credentials(url_to_access[url])
+                extension = url.split(".")[-1]
+                results[url] = self._str_to_results(str_data, f".{extension}")
+            # Skip files that failed permission check (not in url_to_access)
+
+        return results

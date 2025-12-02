@@ -94,7 +94,7 @@ RESULTS_TO_STORE = [
     Results.FIGURES,
 ]
 
-TypeResults = dict | pd.DataFrame | str | list[dict] | None | HTML
+TypeResults = dict | pd.DataFrame | str | list[dict[str, Any]] | None | HTML
 
 MATCHERS: dict[re.Pattern[str], ColumnType] = {
     re.compile(r"float"): ColumnType.NUMERIC,

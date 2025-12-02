@@ -1,6 +1,5 @@
 import logging.config
 import os
-from contextlib import contextmanager
 
 import structlog
 
@@ -74,15 +73,3 @@ def setup_logging(log_level=LOG_LEVEL):
             },
         }
     )
-
-
-def generate_logger_name(path_to_python_file: str):
-    filename = os.path.splitext(os.path.basename(path_to_python_file))[0]
-    return f"oh.{filename}"
-
-
-@contextmanager
-def log_context(logger, message, **context):
-    logger.info(message, **context)
-    yield
-    logger.info(f"{message}... done", **context)

@@ -30,7 +30,6 @@ from avatars.constants import PlotKind
 from avatars.manager import Manager
 from avatars.models import JobKind
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME", "")
 password = os.environ.get("AVATAR_PASSWORD", "")
 
@@ -38,7 +37,7 @@ password = os.environ.get("AVATAR_PASSWORD", "")
 # Run the following cell if your environment does not have all the listed packages already installed.
 
 # %%
-manager = Manager(base_url=url)
+manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
 # Authenticate with the server
 manager.authenticate(username, password)
 # Verify that we can connect to the API server
@@ -239,6 +238,10 @@ runner.advise_parameters()
 
 # See the automated parameters
 runner.print_parameters()
+
+# %%
+# you can see the table summary read by the server
+runner.table_summary("iris")
 
 # %%
 runner.run()

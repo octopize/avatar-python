@@ -22,12 +22,11 @@ import pandas as pd
 from avatars.manager import Manager
 from avatars.models import JobKind
 
-url = os.environ.get("AVATAR_BASE_API_URL", "https://www.octopize.app/api")
 username = os.environ.get("AVATAR_USERNAME", "")
 password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
-manager = Manager(base_url=url)
+manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
 # Authenticate with the server
 manager.authenticate(username, password)
 
@@ -60,7 +59,11 @@ runner.add_table("iris", df)
 # ## Creating and launching an avatarization job
 
 # %%
-runner.set_parameters("iris", k=5)
+runner.advise_parameters("iris")
+runner.update_parameters("iris", k=5)  # if you want to change a specific parameter
+
+# %%
+runner.table_summary("iris")
 
 # %%
 avatarization_job = (

@@ -24,6 +24,7 @@ from avatar_yaml.models.parameters import (
 from avatar_yaml.models.schema import ColumnType, LinkMethod
 from IPython.display import HTML, display
 
+from avatars import __version__
 from avatars.client import ApiClient
 from avatars.constants import (
     DEFAULT_RETRY_INTERVAL,
@@ -52,10 +53,21 @@ class Runner:
         self.results_urls: dict[JobKind, dict[str, list[str]]] = {}
         self.file_downloader = FileDownloader(api_client)
         self.results: ResultsOrganizer = ResultsOrganizer()
-        self.config.create_metadata()
+
+        annotations = {
+            "client_type": "python",
+            "client_version": __version__,
+        }
+        self.config.create_metadata(annotations)
 
     def add_annotations(self, annotations: dict[str, str]) -> None:
-        self.config.create_metadata(annotations)
+        if self.config.avatar_metadata is None:
+            self.config.create_metadata(annotations)
+            return
+
+        previous_annotations = self.config.avatar_metadata.annotations
+        previous_annotations.update(annotations)
+        self.config.create_metadata(previous_annotations)
 
     def add_table(
         self,
@@ -66,7 +78,7 @@ class Runner:
         time_series_time: str | None = None,
         types: dict[str, ColumnType] = {},
         individual_level: bool | None = None,
-        avatar_data: str | None = None,
+        avatar_data: str | pd.DataFrame | None = None,
     ):
         """Add a table to the config and upload the data in the server.
 
@@ -270,6 +282,9 @@ class Runner:
         categorical_hidden_rate_variables: list[str] | None = None,
     ):
         """Set the parameters for a given table.
+
+        This will overwrite any existing parameters for the table, including parameters set using
+        `advise_parameter()`.
 
         Parameters
         ----------
@@ -657,12 +672,28 @@ class Runner:
         jobs_to_run = sorted(jobs_to_run, key=lambda job: JOB_EXECUTION_ORDER.index(job))
         for parameters_name in jobs_to_run:
             depends_on = []
+            if parameters_name == JobKind.standard:
+                if not self.config.avatarization and not self.config.avatarization_dp:
+                    raise ValueError(
+                        "Expected Avatarization parameters to be set to run standard job, "
+                        "you have to set a k or epsilon parameter using `runner.set_parameter()."
+                    )
             if (
                 parameters_name == JobKind.signal_metrics
                 or parameters_name == JobKind.privacy_metrics
             ):
                 if JobKind.standard in self.jobs.keys():
                     depends_on = [self.jobs[JobKind.standard].Location]
+                else:
+                    for avatar_table in self.config.avatar_tables.values():
+                        if (
+                            avatar_table.avatars_data is None
+                            or avatar_table.avatars_data.file is None
+                        ):
+                            raise ValueError(
+                                "Expected Avatar tables to be set to run signal/privacy metrics "
+                                "job, you have to set avatar_data using `runner.add_table()`."
+                            )
 
             elif parameters_name == JobKind.report:
                 if not self.jobs.get(JobKind.privacy_metrics) or not self.jobs.get(
@@ -784,8 +815,9 @@ class Runner:
         result_name: Results,
     ) -> None:
         urls = self.get_specific_result_urls(job_name=job_name, result=result_name)
-        for url in urls:
-            result = self.file_downloader.download_file(url)
+        # Use batch download to get all file credentials at once
+        downloaded_results = self.file_downloader.download_files_batch(urls)
+        for url, result in downloaded_results.items():
             metadata = self._get_metadata(url, result_name, job_name)
             table_name = self.results.get_table_name(result_name, url, result, metadata)
             if table_name is not None:

@@ -1580,7 +1580,7 @@ wheels = [
 
 [[package]]
 name = "octopize-avatar"
-version = "1.3.0"
+version = "1.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiobotocore" },
