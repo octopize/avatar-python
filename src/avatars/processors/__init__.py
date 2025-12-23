@@ -1,3 +1,4 @@
+from avatars.processors.datetime import DatetimeProcessor
 from avatars.processors.expected_mean import ExpectedMeanProcessor
 from avatars.processors.geolocation_normalization import (
     GeolocationNormalizationProcessor,
@@ -21,6 +22,7 @@ from avatars.processors.relative_difference import RelativeDifferenceProcessor
 from avatars.processors.to_categorical import ToCategoricalProcessor
 
 __all__ = [
+    "DatetimeProcessor",
     "ExpectedMeanProcessor",
     "GeolocationNormalizationProcessor",
     "GroupModalitiesProcessor",

@@ -34,7 +34,7 @@ class FileDownloader:
     def _str_to_html(self, str_data: str) -> HTML:
         return HTML(str_data)
 
-    def _str_to_pdf(self, str_data: bytes, path: str) -> None:
+    def _str_to_file(self, str_data: bytes, path: str) -> None:
         with open(path, "wb") as fd:
             fd.write(str_data)
 
@@ -49,11 +49,11 @@ class FileDownloader:
             case ".csv":
                 if isinstance(str_data, str):
                     data = self._str_to_csv(str_data)
-            case ".pdf":
+            case ".pdf" | ".docx":
                 if path is None:
                     raise ValueError("Expected path to save the PDF file")
                 if isinstance(str_data, bytes):
-                    self._str_to_pdf(str_data, path)
+                    self._str_to_file(str_data, path)
                     data = f"Report saved successfully {path}"
             case ".html":
                 if isinstance(str_data, str):

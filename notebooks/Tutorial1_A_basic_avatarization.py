@@ -18,6 +18,7 @@
 import os
 
 import pandas as pd
+from avatar_yaml.models.parameters import ReportType
 
 from avatars.manager import Manager
 from avatars.models import JobKind
@@ -28,7 +29,7 @@ password = os.environ.get("AVATAR_PASSWORD", "")
 # %%
 manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
 # Authenticate with the server
-manager.authenticate(username, password)
+manager.authenticate(username, password, should_verify_compatibility=False)
 
 # %%
 # Verify that we can connect to the API server
@@ -93,8 +94,20 @@ runner.signal_metrics("iris")[0]
 # %% [markdown]
 # # Download the report
 
+# %% [markdown]
+# We provide 2 kinds of report, a technical report and a PIA (Privacy Impact Assessment) report.
+#
+# The technical evaluation quantifies the re-identification risk associated with potential attacks, the risk analysis report evaluates the likelihood of such attacks occurring and the resources an adversary would need to carry them out.
+#
+# [Adapt your PIA report to your data needs](https://python.docs.octopize.io/main/user_guide.html#how-to-create-a-pia-report)
+
 # %%
+# download the technical report
 runner.download_report("my_report.pdf")
+
+# %%
+# download the PIA report, the PIA report is customizable in manager.create_runner()
+runner.download_report("my_report_pia.docx", report_type=ReportType.PIA)
 
 # %% [markdown]
 # # How to print an error message

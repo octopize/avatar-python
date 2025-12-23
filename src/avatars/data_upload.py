@@ -99,7 +99,7 @@ class DataUploader:
             should_verify_ssl=self.should_verify_ssl,
         )
 
-        if parsed_download.endswith(".pdf"):
+        if parsed_download.endswith(".pdf") or parsed_download.endswith(".docx"):
             output = fs.read_bytes(parsed_download)
         else:
             output = fs.read_text(parsed_download, encoding="utf-8")

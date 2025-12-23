@@ -7,6 +7,8 @@ UNCONFIGURED = "unconfigured"
 DEFAULT_API_URL = "https://www.octopize.app/api"
 DEFAULT_STORAGE_URL = "https://www.octopize.app/storage"
 
+DEFAULT_CRASH_REPORT_PATH = "crash_report.txt"
+
 
 def construct_urls(
     base_url: HttpUrl | None = None,
@@ -115,6 +117,7 @@ class Config(BaseSettings):
     )
     VERIFY_COMPATIBILITY: bool = True
     API_KEY: str | None = None
+    CRASH_REPORT_PATH: str = DEFAULT_CRASH_REPORT_PATH
 
     @model_validator(mode="after")
     def construct_urls_from_base(self) -> Self:

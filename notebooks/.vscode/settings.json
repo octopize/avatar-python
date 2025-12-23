@@ -1,3 +1,7 @@
 {
-    "python-envs.pythonProjects": []
+    "python-envs.pythonProjects": [],
+    "python.defaultInterpreterPath": "${workspaceFolder}/env/bin/python",
+    "jupyter.kernels.excludePythonEnvironments": [
+        "${workspaceFolder}/env/bin/python"
+    ]
 }

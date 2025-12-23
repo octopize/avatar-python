@@ -21,10 +21,7 @@
 import os
 
 import pandas as pd
-from avatar_yaml.models.parameters import (
-    ExcludeVariablesMethod,
-    ImputeMethod,
-)
+from avatar_yaml.models.parameters import ExcludeVariablesMethod, ImputeMethod
 
 from avatars.constants import PlotKind
 from avatars.manager import Manager
@@ -177,7 +174,7 @@ use_categorical_reduction = True
 
 # %%
 exclude_variable_names = ["variety"]
-exclude_replacement_strategy = ExcludeVariablesMethod.COORDINATE_SIMILARITY
+exclude_variable_method = ExcludeVariablesMethod.COORDINATE_SIMILARITY
 
 # %% [markdown]
 # ## Missing data
@@ -209,8 +206,8 @@ runner.set_parameters(
     ncp=ncp,
     column_weights=column_weights,
     use_categorical_reduction=use_categorical_reduction,
-    # exclude_variable_names=exclude_variable_names,
-    # exclude_replacement_strategy=exclude_replacement_strategy,
+    exclude_variable_names=exclude_variable_names,
+    exclude_variable_method=exclude_variable_method,
     # imputation_method=imputation_method,
 )
 
@@ -285,16 +282,20 @@ runner_privacy.set_parameters(
 runner_privacy.run(jobs_to_run=[JobKind.standard, JobKind.privacy_metrics])
 
 # Retrieve specific metrics
-correlation_protection_rate = runner_privacy.privacy_metrics("iris")[0][
-    "correlation_protection_rate"
+knowledge_protection_rate = runner_privacy.privacy_metrics("iris")[0]["knowledge_protection_rate"]
+linkability_protection_rate = runner_privacy.privacy_metrics("iris")[0][
+    "linkability_protection_rate"
 ]
-inference_rate = runner_privacy.privacy_metrics("iris")[0]["inference_categorical"]
+inference_accuracy_ratio = runner_privacy.privacy_metrics("iris")[0]["inference_accuracy_ratio"]
 closest_rate_tunned = runner_privacy.privacy_metrics("iris")[0]["closest_rate"]
 
 print(
-    f"the correlation_protection_rate metric measuring linkability is : {correlation_protection_rate}"
+    f"the knowledge_protection_rate metric measuring correlation is : {knowledge_protection_rate}"
 )
-print(f"the inference_rate metric measuring inference is : {inference_rate}")
+print(
+    f"the linkability_protection_rate metric measuring linkability is : {linkability_protection_rate}"
+)
+print(f"the inference_accuracy_ratio metric measuring inference is : {inference_accuracy_ratio}")
 print(f"the closest_rate_tunned metric measuring singling out is : {closest_rate_tunned}")
 
 # %% [markdown]

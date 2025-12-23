@@ -1,6 +1,13 @@
 import warnings
 from uuid import UUID
 
+from avatar_yaml.models.avatar_metadata import (
+    DataRecipient,
+    DataSubject,
+    DataType,
+    SensitivityLevel,
+)
+
 from avatars import __version__
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
@@ -189,9 +196,27 @@ class Manager:
             token = UUID(token)
         self.auth_client.reset_password(email, new_password, new_password_repeated, token)
 
-    def create_runner(self, set_name: str, seed: int | None = None) -> Runner:
+    def create_runner(
+        self,
+        set_name: str,
+        seed: int | None = None,
+        max_distribution_plots: int | None = None,
+        pia_data_recipient: DataRecipient = DataRecipient.UNKNOWN,
+        pia_data_type: DataType = DataType.UNKNOWN,
+        pia_data_subject: DataSubject = DataSubject.UNKNOWN,
+        pia_sensitivity_level: SensitivityLevel = SensitivityLevel.UNDEFINED,
+    ) -> Runner:
         """Create a new runner."""
-        return Runner(api_client=self.auth_client, display_name=set_name, seed=seed)
+        return Runner(
+            api_client=self.auth_client,
+            display_name=set_name,
+            seed=seed,
+            max_distribution_plots=max_distribution_plots,
+            pia_data_recipient=pia_data_recipient,
+            pia_data_type=pia_data_type,
+            pia_data_subject=pia_data_subject,
+            pia_sensitivity_level=pia_sensitivity_level,
+        )
 
     def get_last_results(self, count: int = 1) -> list[dict[str, str]]:
         """Get the last n results."""

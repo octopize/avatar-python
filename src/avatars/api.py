@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.31.0
+# API Version : 2.39.0
 
 
 import logging
@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
 from avatars.models import (
     ApiKey,  # noqa: F401
     CompatibilityResponse,  # noqa: F401
+    CreateApiKeyRequest,  # noqa: F401
     CreateUser,  # noqa: F401
     CreditsInfo,  # noqa: F401
     FeaturesInfo,  # noqa: F401
@@ -31,7 +32,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-DEFAULT_RETRY_TIMEOUT = 60
 DEFAULT_TIMEOUT = 60
 
 
@@ -62,6 +62,7 @@ class ApiKeys:
 
     def create_api_key(
         self,
+        request: CreateApiKeyRequest,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
@@ -74,6 +75,7 @@ class ApiKeys:
             "method": "post",
             "url": f"/api-keys",  # noqa: F541
             "timeout": timeout,
+            "json_data": request,
         }
 
         return self.client.request(**kwargs)

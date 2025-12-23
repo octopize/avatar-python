@@ -3,6 +3,7 @@ import re
 from enum import StrEnum
 from typing import (
     IO,
+    TYPE_CHECKING,
     Any,
     BinaryIO,
     Union,
@@ -10,7 +11,9 @@ from typing import (
 
 import pandas as pd
 from avatar_yaml.models.schema import ColumnType
-from IPython.display import HTML
+
+if TYPE_CHECKING:
+    from IPython.display import HTML  # noqa: F401
 
 from avatars.models import JobKind
 
@@ -31,7 +34,17 @@ ERROR_STATUSES = ["parent_error", "error"]
 
 READY_STATUSES = ["finished", *ERROR_STATUSES]
 
-DEFAULT_RETRY_INTERVAL = 5
+# For network retries
+DEFAULT_NETWORK_RETRY_COUNT = 20
+DEFAULT_NETWORK_RETRY_INTERVAL = 5
+
+# For rate limit retries
+DEFAULT_RATE_LIMIT_MAX_RETRIES = 3
+DEFAULT_RATE_LIMIT_MIN_WAIT_SECONDS = 1.0
+
+# For creating and polling jobs
+DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS = 0.5
+DEFAULT_POLL_INTERVAL = 5
 
 
 class Results(StrEnum):
@@ -82,6 +95,11 @@ class PlotKind(StrEnum):
     NORMALIZED_SERIES = "normalized_series"
     """A line plot of the normalized original and avatar time series over time."""
 
+    CLASS_PROJECTION_2D = "class_projection_2d"
+    """A 2D projection colored by the target class
+    (only available with class balancing augmentation).
+    """
+
 
 RESULTS_TO_STORE = [
     Results.SHUFFLED,
@@ -94,7 +112,7 @@ RESULTS_TO_STORE = [
     Results.FIGURES,
 ]
 
-TypeResults = dict | pd.DataFrame | str | list[dict[str, Any]] | None | HTML
+type TypeResults = dict | pd.DataFrame | str | list[dict[str, Any]] | None | HTML
 
 MATCHERS: dict[re.Pattern[str], ColumnType] = {
     re.compile(r"float"): ColumnType.NUMERIC,

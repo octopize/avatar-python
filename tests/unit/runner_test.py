@@ -88,7 +88,10 @@ class TestRunner:
         self.runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
         self.runner.set_parameters("test_table", ncp=2)
         self.runner.run(jobs_to_run=[JobKind.privacy_metrics, JobKind.signal_metrics])
-        assert self.runner.jobs.keys() == {JobKind.privacy_metrics, JobKind.signal_metrics}
+        assert self.runner.jobs.get_launched_jobs() == [
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
+        ]
 
     def test_add_link(self):
         runner = self.manager.create_runner("test")
@@ -159,11 +162,12 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table", k=3)
         runner.run()
-        assert list(runner.jobs.keys()) == [
-            JobKind.standard,
-            JobKind.signal_metrics,
-            JobKind.privacy_metrics,
-            JobKind.report,
+        assert list(runner.jobs.get_launched_jobs()) == [
+            JobKind.standard.value,
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
+            JobKind.report.value,
+            JobKind.report.value + "_pia",
         ]
 
     def test_run_order(self):
@@ -172,10 +176,10 @@ class TestRunner:
         runner.set_parameters("test_table", k=3)
         runner.run([JobKind.signal_metrics, JobKind.privacy_metrics, JobKind.standard])
         # test the order of job creation
-        assert list(runner.jobs.keys()) == [
-            JobKind.standard,
-            JobKind.signal_metrics,
-            JobKind.privacy_metrics,
+        assert list(runner.jobs.get_launched_jobs()) == [
+            JobKind.standard.value,
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
         ]
 
     def test_multitable(self):
@@ -188,11 +192,12 @@ class TestRunner:
         runner.run()
         assert list(runner.config.tables.keys()) == ["parent", "child"]
         assert len(runner.config.tables["parent"].links) == 1
-        assert list(runner.jobs.keys()) == [
-            JobKind.standard,
-            JobKind.signal_metrics,
-            JobKind.privacy_metrics,
-            JobKind.report,
+        assert list(runner.jobs.get_launched_jobs()) == [
+            JobKind.standard.value,
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
+            JobKind.report.value,
+            JobKind.report.value + "_pia",
         ]
 
     def test_get_all_results(self):
@@ -203,12 +208,13 @@ class TestRunner:
         runner.run()
         runner.get_all_results()
 
-        assert len(runner.jobs.keys()) == 4
-        assert list(runner.jobs.keys()) == [
-            JobKind.standard,
-            JobKind.signal_metrics,
-            JobKind.privacy_metrics,
-            JobKind.report,
+        assert len(runner.jobs.get_launched_jobs()) == 5
+        assert list(runner.jobs.get_launched_jobs()) == [
+            JobKind.standard.value,
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
+            JobKind.report.value,
+            JobKind.report.value + "_pia",
         ]
 
         assert runner.results.shuffled != {}
@@ -229,12 +235,13 @@ class TestRunner:
         runner.run()
         runner.get_all_results()
 
-        assert list(runner.jobs.keys()) == [
-            JobKind.advice,
-            JobKind.standard,
-            JobKind.signal_metrics,
-            JobKind.privacy_metrics,
-            JobKind.report,
+        assert list(runner.jobs.get_launched_jobs()) == [
+            JobKind.advice.value + "_parameters",
+            JobKind.standard.value,
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
+            JobKind.report.value,
+            JobKind.report.value + "_pia",
         ]
 
         assert runner.results.shuffled.keys() == {"parent", "child"}
@@ -267,7 +274,8 @@ class TestRunner:
         runner.add_table("test", data=self.df1)
         runner.set_parameters("test", k=3)
         with pytest.raises(
-            ValueError, match="Expected Privacy and Signal to be created to run report got"
+            ValueError,
+            match="Expected Privacy and Signal jobs to be created before running report",
         ):
             runner.run(jobs_to_run=[JobKind.report])
 
@@ -370,7 +378,7 @@ class TestRunner:
         runner.update_parameters(
             "test_table",
             exclude_variable_names=exclude_vars,
-            exclude_replacement_strategy=ExcludeVariablesMethod.ROW_ORDER,
+            exclude_variable_method=ExcludeVariablesMethod.ROW_ORDER,
         )
 
         # Verify exclude variables were added
@@ -383,6 +391,22 @@ class TestRunner:
             == "row_order"
         )
         assert runner.config.avatarization["test_table"].k == 3  # Original parameter preserved
+        assert (
+            runner.config.privacy_metrics["test_table"].exclude_variables["variable_names"]
+            == exclude_vars
+        )
+        assert (
+            runner.config.privacy_metrics["test_table"].exclude_variables["replacement_strategy"]
+            == "row_order"
+        )
+        assert (
+            runner.config.signal_metrics["test_table"].exclude_variables["variable_names"]
+            == exclude_vars
+        )
+        assert (
+            runner.config.signal_metrics["test_table"].exclude_variables["replacement_strategy"]
+            == "row_order"
+        )
 
     def test_update_parameters_with_imputation(self):
         """Test updating imputation parameters."""
@@ -457,7 +481,7 @@ class TestRunner:
         assert runner.config.privacy_metrics["test_table"].ncp == 5
         assert runner.config.signal_metrics["test_table"].ncp == 5
 
-    def test_extract_current_parameters_standard_avatarization(self):
+    def test_extract_current_parameters_standard_avatarization_pipeline(self):
         """Test extracting parameters with standard avatarization."""
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
@@ -468,7 +492,7 @@ class TestRunner:
             use_categorical_reduction=True,
             column_weights={"col1": 0.7, "col2": 0.3},
             exclude_variable_names=["col2"],
-            exclude_replacement_strategy=ExcludeVariablesMethod.COORDINATE_SIMILARITY,
+            exclude_variable_method=ExcludeVariablesMethod.COORDINATE_SIMILARITY,
             imputation_method=ImputeMethod.KNN,
             imputation_k=5,
             imputation_training_fraction=0.8,
@@ -496,6 +520,27 @@ class TestRunner:
         assert current_params["imputation_return_data_imputed"] is True
         assert current_params["known_variables"] == ["col1"]
         assert current_params["target"] == "col2"
+
+        privacy_params = runner.config.privacy_metrics["test_table"]
+        signal_params = runner.config.signal_metrics["test_table"]
+
+        assert privacy_params.ncp == 2
+        assert privacy_params.use_categorical_reduction is True
+        assert privacy_params.column_weights == {"col1": 0.7, "col2": 0.3}
+        assert privacy_params.known_variables == ["col1"]
+        assert privacy_params.exclude_variables["variable_names"] == ["col2"]
+        assert (
+            privacy_params.exclude_variables["replacement_strategy"]
+            == ExcludeVariablesMethod.COORDINATE_SIMILARITY
+        )
+        assert signal_params.ncp == 2
+        assert signal_params.use_categorical_reduction is True
+        assert signal_params.column_weights == {"col1": 0.7, "col2": 0.3}
+        assert signal_params.exclude_variables["variable_names"] == ["col2"]
+        assert (
+            signal_params.exclude_variables["replacement_strategy"]
+            == ExcludeVariablesMethod.COORDINATE_SIMILARITY
+        )
 
     def test_extract_current_parameters_dp_avatarization(self):
         """Test extracting parameters with DP avatarization."""
@@ -548,7 +593,7 @@ class TestRunner:
         runner.set_parameters("test_table", k=3)
         runner.run(jobs_to_run=[JobKind.standard])
         with pytest.raises(
-            ValueError, match=f"Expected job '{JobKind.privacy_metrics}' to be created"
+            ValueError, match=f"Expected job '{JobKind.privacy_metrics.value}' to be created"
         ):
             runner.get_status(JobKind.privacy_metrics)
 
@@ -570,7 +615,10 @@ class TestRunner:
             done=True,
             progress=1.0,
         )
-        with pytest.raises(ValueError, match=f"Job {JobKind.standard} failed with exception:"):
+        with pytest.raises(
+            ValueError,
+            match=f"""Job {JobKind.standard.value} failed with exception:""",
+        ):
             runner.get_all_results()
 
     def test_get_results_on_invalid_table(self):
@@ -591,7 +639,7 @@ class TestRunner:
         runner.set_parameters("test_table", ncp=15)
         with pytest.raises(
             ValueError,
-            match="Expected Avatarization parameters to be set to run standard job,",
+            match="Expected k or epsilon to be set to run an avatarization job,",
         ):
             runner.run()
 
@@ -601,7 +649,7 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1)
         with pytest.raises(
             ValueError,
-            match="Expected Avatarization parameters to be set to run standard job,",
+            match="Expected k or epsilon to be set to run an avatarization job,",
         ):
             runner.run()
 
@@ -613,7 +661,7 @@ class TestRunner:
         runner.run(jobs_to_run=[JobKind.standard])
         with pytest.raises(
             ValueError,
-            match=f"Expected job '{JobKind.privacy_metrics}' to be created. Try running it first.",
+            match=f"""Expected job '{JobKind.privacy_metrics}' to be created. Try running it""",
         ):
             runner.get_specific_result(
                 table_name="test_table",
@@ -635,3 +683,24 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table", k=3, ncp=2, use_categorical_reduction=True)
         runner.print_parameters()
+
+    @pytest.mark.parametrize(
+        "max_distribution_plots",
+        [
+            pytest.param(50, id="custom"),
+            pytest.param(-1, id="no_limit"),
+            pytest.param(0, id="zero"),
+        ],
+    )
+    def test_runner_init_max_distribution_plots(self, max_distribution_plots: int):
+        """Test configuring max_distribution_plots when creating the runner."""
+        runner = self.manager.create_runner("test", max_distribution_plots=max_distribution_plots)
+        assert runner.config.max_distribution_plots == max_distribution_plots
+
+    def test_max_distribution_plots_in_yaml(self):
+        """Test that max_distribution_plots appears in generated YAML."""
+        runner = self.manager.create_runner("test", max_distribution_plots=50)
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        yaml = runner.get_yaml()
+        assert "max_distribution_plots: 50" in yaml

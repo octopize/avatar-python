@@ -207,8 +207,8 @@ class TestClientRequest:
         )
 
         with (
-            unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_COUNT", 1),
-            unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0.1),
+            unittest.mock.patch("avatars.base_client.DEFAULT_NETWORK_RETRY_COUNT", 1),
+            unittest.mock.patch("avatars.base_client.DEFAULT_NETWORK_RETRY_INTERVAL", 0.1),
         ):
             response = api_client.send_request(method="GET", url="/health")
 
@@ -275,8 +275,8 @@ class TestClientRequest:
             verify_auth=False,
         )
         with (
-            unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_COUNT", 1),
-            unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0.1),
+            unittest.mock.patch("avatars.base_client.DEFAULT_NETWORK_RETRY_COUNT", 1),
+            unittest.mock.patch("avatars.base_client.DEFAULT_NETWORK_RETRY_INTERVAL", 0.1),
             pytest.raises(TimeoutError, match="Timeout waiting for GET on /health"),
         ):
             api_client.send_request(method="GET", url="/health")
@@ -298,8 +298,8 @@ class TestClientRequest:
             verify_auth=False,
         )
         with (
-            unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_COUNT", 1),
-            unittest.mock.patch("avatars.base_client.DEFAULT_RETRY_INTERVAL", 0.1),
+            unittest.mock.patch("avatars.base_client.DEFAULT_NETWORK_RETRY_COUNT", 1),
+            unittest.mock.patch("avatars.base_client.DEFAULT_NETWORK_RETRY_INTERVAL", 0.1),
             pytest.raises(httpx.RequestError, match="whatever"),
         ):
             api_client.send_request(method="GET", url="/health")

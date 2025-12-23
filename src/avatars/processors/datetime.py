@@ -38,24 +38,27 @@ class DatetimeProcessor:
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
         """Turn datetime variables into int64 (seconds since epoch)."""
         df = df.copy()
+        self.datetime_variables = [
+            col for col in df.columns if str(df[col].dtype).startswith("datetime")
+        ]
+
         for col in df.columns:
-            if not str(df[col].dtype).startswith("datetime"):
+            if col not in self.datetime_variables:
                 continue
             epoch = np.datetime64(0, "Y")  # 0 years since epoch ==> epoch itself
-            df[col] = (df[col] - epoch) / np.timedelta64(1, "s")
+            df[col] = (df[col].to_numpy() - epoch) / np.timedelta64(10**9, "ns")
             df[col] = df[col].astype(float)  # Necessary, else its float64
-
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
         """Transform datetime columns from seconds since epoch back to datetime[ns] type."""
-        datetime_variables = filter(
-            lambda col: source[col].dtype == "datetime64[ns]", source.columns
-        )
+        default_value = 0
 
-        epoch = np.datetime64(0, "Y")  # 0 years since epoch ==> epoch itself
-
-        for name in datetime_variables:
-            dest[name] = (dest[name] * np.timedelta64(1, "s")) + epoch
-            dest[name] = pd.to_datetime(dest[name])
+        for name in self.datetime_variables:
+            # Replace NaN values with default_value, convert to datetime[ns] and replace with NaT
+            # afterwards
+            is_nan = dest[name].isna()
+            dest[name] = dest[name].fillna(default_value)
+            dest[name] = pd.to_datetime(dest[name].astype("int64") * 10**9, unit="ns")
+            dest[name] = dest[name].where(~is_nan, pd.NaT)
         return dest

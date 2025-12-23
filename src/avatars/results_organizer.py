@@ -13,7 +13,6 @@ from avatars.constants import (
     TypeResults,
     mapping_result_to_file_name,
 )
-from avatars.models import JobKind
 
 
 class ResultsOrganizer(BaseModel):
@@ -27,9 +26,9 @@ class ResultsOrganizer(BaseModel):
     avatars_projections: dict[str, pd.DataFrame] = {}
     figures: dict[str, dict[str, list[HTML]]] = {}
     advice: dict[str, dict[str, Any]] = {}
-    run_metadata: dict[JobKind, Any] = {}
+    run_metadata: dict[str, Any] = {}
 
-    def get_results(self, table_name: str, result_name: Results, job_name: JobKind) -> TypeResults:
+    def get_results(self, table_name: str, result_name: Results, job_name: str) -> TypeResults:
         table_name = self.unescape_table_name(table_name)
         match result_name:
             case Results.SHUFFLED:

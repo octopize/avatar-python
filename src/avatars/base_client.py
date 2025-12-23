@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import itertools
 import os
-import time
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -33,7 +31,14 @@ import tenacity
 from httpx import Request, Response
 from pydantic import BaseModel
 
-from avatars.constants import FileLike, FileLikes
+from avatars.constants import (
+    DEFAULT_NETWORK_RETRY_COUNT,
+    DEFAULT_NETWORK_RETRY_INTERVAL,
+    DEFAULT_RATE_LIMIT_MAX_RETRIES,
+    DEFAULT_RATE_LIMIT_MIN_WAIT_SECONDS,
+    FileLike,
+    FileLikes,
+)
 from avatars.utils import (
     ContentType,
     ensure_valid,
@@ -45,11 +50,7 @@ from avatars.utils import (
 
 logger = structlog.getLogger(__name__)
 
-DEFAULT_RETRY_TIMEOUT = 60
-DEFAULT_RETRY_INTERVAL = 5
-DEFAULT_RETRY_COUNT = 20
 DEFAULT_TIMEOUT = 60 * 4
-DEFAULT_PER_CALL_TIMEOUT = 15
 
 DEFAULT_BINARY_CONTENT_TYPES = (
     ContentType.PDF,
@@ -98,6 +99,22 @@ def _log_before_retry_attempt(retry_state: tenacity.RetryCallState) -> None:
     logger.info(f"Retrying in {next_retry_seconds}s...")
 
 
+def _log_rate_limit_retry(retry_state: tenacity.RetryCallState) -> None:
+    """Log rate limit retry attempts with relevant details."""
+    if retry_state.outcome and retry_state.outcome.failed:
+        e = retry_state.outcome.exception()
+        if isinstance(e, RateLimitError):
+            retry_after = e.retry_after
+            sleep_duration = max(DEFAULT_RATE_LIMIT_MIN_WAIT_SECONDS, retry_after)
+            logger.debug(
+                "rate limit exceeded, retrying after delay",
+                retry_after=retry_after,
+                sleep_duration=sleep_duration,
+                retry_attempt=retry_state.attempt_number,
+                max_retries=DEFAULT_RATE_LIMIT_MAX_RETRIES,
+            )
+
+
 def _log_after_failure(retry_state: tenacity.RetryCallState, *, data: ContextData) -> None:
     if not retry_state.outcome:
         return
@@ -125,52 +142,13 @@ class TimeoutError(Exception):
     pass
 
 
-class ClientTimeout:
-    def __init__(self, *, timeout: float, max_seconds: float = 10):
-        self.retry_seconds: float = timeout
-        self.max_seconds: float = max_seconds
-        self.is_active: bool = False
-        self.last_time: float = 0
-        self.elapsed_seconds: float = 0
-        self.interval: Optional[Iterator[float]] = None
+class RateLimitError(Exception):
+    """Raised when a request is rate limited (HTTP 429)."""
 
-    def start(self) -> None:
-        self.is_active = True
-        self.last_time = time.time()
-        self.elapsed_seconds = 0
-
-        # Exponential interval, capped at max_interval
-        self.sleep_interval = iter(min(2**i, self.max_seconds) for i in itertools.count())
-
-    def stop(self) -> None:
-        self.is_active = False
-
-    def update(self) -> None:
-        now = time.time()
-        self.elapsed_seconds += now - self.last_time
-        self.last_time = now
-
-    def is_expired(self) -> bool:
-        return self.elapsed_seconds > self.retry_seconds
-
-    def next_interval(self) -> float:
-        interval = next(self.sleep_interval)
-
-        if self.elapsed_seconds > self.retry_seconds:
-            interval = min(interval, self.retry_seconds - self.elapsed_seconds)
-
-        return float(interval)
-
-    def intervals(self, label: str) -> Iterator[float]:
-        self.start()
-
-        # Iterate while we are < retry_timeout
-        while not self.is_expired() and self.is_active:
-            yield self.next_interval()
-            self.update()
-
-        if self.is_active and self.is_expired():
-            raise TimeoutError(f"{label} expired")
+    def __init__(self, message: str, retry_after: int, response: Response) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after
+        self.response = response
 
 
 @dataclass
@@ -410,7 +388,6 @@ class ClientContext:
     ) -> None:
         self.http_client: httpx.Client = http_client
         self.data: ContextData = data
-        self.timeout: Optional[ClientTimeout] = None
         self.on_auth_refresh = on_auth_refresh
 
     def build_request(self) -> Request:
@@ -430,75 +407,112 @@ class ClientContext:
 
     def retry(
         self,
-        retry_count: int = DEFAULT_RETRY_COUNT + 1,  # stop is inclusive
-        retry_inverval: int = DEFAULT_RETRY_INTERVAL,
+        retry_count: int,  # Note: stop is inclusive
+        retry_interval: Optional[int],
     ) -> Iterator[tenacity.AttemptManager]:
+        """
+        Unified retry mechanism for both network and rate limit errors.
+
+        Parameters
+        ----------
+        retry_count
+            Maximum number of retry attempts
+        retry_interval
+            If provided, uses exponential backoff with this max interval.
+            If None, uses rate limit retry strategy with retry_after from server.
+        """
+
+        if retry_interval is None:
+            # Rate limit mode: custom wait based on server's retry_after
+            def wait_for_rate_limit(retry_state: tenacity.RetryCallState) -> float:
+                """Custom wait strategy that respects retry_after for rate limits."""
+                if retry_state.outcome and retry_state.outcome.failed:
+                    e = retry_state.outcome.exception()
+                    if isinstance(e, RateLimitError):
+                        return max(DEFAULT_RATE_LIMIT_MIN_WAIT_SECONDS, e.retry_after)
+                return 0
+
+            wait_strategy = wait_for_rate_limit
+            before_sleep_func = _log_rate_limit_retry
+            retry_condition = tenacity.retry_if_exception_type(RateLimitError)
+            # Don't log after failure for rate limits - only specific rate limit log
+            after_func = None
+            retry_error_callback_func = None
+        else:
+            # Network retry mode: exponential backoff
+            wait_strategy = tenacity.wait_exponential(max=retry_interval)
+            before_sleep_func = _log_before_retry_attempt
+            retry_condition = tenacity.retry_if_exception_type(Exception)
+
+            def after_func(call_state):
+                _log_after_failure(call_state, data=self.data)
+
+            def retry_error_callback_func(call_state):
+                _reraise_on_timeout(call_state, data=self.data)
+
         for attempt in tenacity.Retrying(
             stop=tenacity.stop_after_attempt(retry_count),
-            wait=tenacity.wait_exponential(max=retry_inverval),
-            before_sleep=_log_before_retry_attempt,
-            retry_error_callback=lambda call_state: _reraise_on_timeout(
-                call_state, data=self.data
-            ),
-            after=lambda call_state: _log_after_failure(call_state, data=self.data),
+            wait=wait_strategy,
+            retry=retry_condition,
+            before_sleep=before_sleep_func,
+            retry_error_callback=retry_error_callback_func,
+            after=after_func,
             reraise=True,
         ):
             yield attempt
 
-    def send_request(self) -> Response:
-        first_or_retry_all = True
+    def send_request(self) -> None:
+        needs_retry_with_auth = True
 
-        while first_or_retry_all:
-            first_or_retry_all = False
+        while needs_retry_with_auth:
+            needs_retry_with_auth = False
+            # Capture the request once per auth retry - reuse for all retries
             request = ensure_valid(self.data.http_request)
 
-            for attempt in self.retry(DEFAULT_RETRY_COUNT + 1, DEFAULT_RETRY_INTERVAL):
-                with attempt:
-                    self.data.http_response = self.http_client.send(
-                        request=request,
-                        stream=self.data.should_stream,
-                    )
+            # Application-level retries (rate limits)
+            for rate_limit_attempt in self.retry(
+                DEFAULT_RATE_LIMIT_MAX_RETRIES + 1, retry_interval=None
+            ):
+                with rate_limit_attempt:
+                    # Network-level retries (timeouts, connection errors, ...)
+                    for attempt in self.retry(
+                        DEFAULT_NETWORK_RETRY_COUNT + 1, DEFAULT_NETWORK_RETRY_INTERVAL
+                    ):
+                        with attempt:
+                            self.data.http_response = self.http_client.send(
+                                request=request,
+                                stream=self.data.should_stream,
+                            )
 
-                    if self.check_auth_refreshed():
-                        # Reset/rebuild current request
-                        first_or_retry_all = True
-                        self.build_request()
+                            if self.check_auth_refreshed():
+                                # Reset/rebuild current request
+                                needs_retry_with_auth = True
+                                self.build_request()
+                                break
+
+                    if needs_retry_with_auth:
                         break
 
-        self.check_success()
-
-        return ensure_valid(self.data.http_response)
+                    # Check for rate limiting (will raise RateLimitError if 429)
+                    # Tenacity will catch this and retry with the same request
+                    self.check_success()
 
     def send_request_and_build_response(self, response_cls: type[ResponseClass]) -> ResponseClass:
         self.send_request()
 
         return self.build_response(response_cls)
 
-    def build_and_send_request(self) -> Any:
+    def build_and_send_request(self) -> None:
         self.build_request()
 
-        return self.send_request()
+        self.send_request()
 
     def build_response(self, response_cls: type[ResponseClass]) -> ResponseClass:
         return response_cls(**self.data.response_to_json())
 
-    def cancel_timeout(self) -> None:
-        if self.timeout:
-            self.timeout.stop()
-
-    def wait_intervals(self, label: str) -> Iterator[float]:
-        self.timeout = ClientTimeout(timeout=DEFAULT_RETRY_TIMEOUT)
-        self.timeout.start()
-
-        for interval in self.timeout.intervals(label):
-            yield interval
-
-        self.timeout = None
-
     def loop_until(
         self,
         *,
-        label: str,
         update_func: Callable[..., bool],
         response_cls: Optional[Type[ResponseClass]] = None,
     ) -> OperationInfo:
@@ -525,8 +539,9 @@ class ClientContext:
             if stop or not info.in_progress:
                 break
 
-            logger.info(f"waiting {what_label}(loop {loops}, sleeping {DEFAULT_RETRY_INTERVAL}s)")
-            time.sleep(DEFAULT_RETRY_INTERVAL)
+            logger.info(
+                f"waiting {what_label}(loop {loops}, sleeping {DEFAULT_NETWORK_RETRY_INTERVAL}s)"
+            )
 
             loops += 1
 
@@ -573,26 +588,65 @@ class ClientContext:
         ):
             raise Exception("You are not authenticated.")
 
+    def _check_rate_limit(self, resp: Response, content: UserContent, error_msg: str) -> None:
+        if resp.status_code == 429:
+            retry_after = 0
+            if isinstance(content, dict):
+                retry_after = content.get("retry_after", 0)
+
+            # Also check the Retry-After header as fallback
+            if "retry-after" in resp.headers:
+                try:
+                    retry_after = int(resp.headers["retry-after"])
+                except (ValueError, TypeError):
+                    pass
+
+            logger.debug(
+                "rate limit response received",
+                url=self.data.url,
+                method=self.data.method,
+                retry_after=retry_after,
+                detail=error_msg,
+            )
+
+            raise RateLimitError(
+                f"Rate limit exceeded for {self.data.method} {self.data.url}: {error_msg}",
+                retry_after=retry_after,
+                response=resp,
+            )
+
+    def _extract_error_message(self, content: UserContent) -> str:
+        """Extract error message from response content."""
+        if not isinstance(content, dict):
+            return str(content)
+
+        # Try standard error field
+        if standard_error := _get_nested_value(content, "message"):
+            return standard_error
+
+        # Try validation error
+        if validation_error := _get_nested_value(content, "msg"):
+            if detailed_message := _get_nested_value(content, "loc"):
+                field = detailed_message[-1]
+                return f"{validation_error}: {field}"
+            return f"Bad Request: {validation_error}"
+
+        # Default to detail or full content
+        if detail := content.get("detail"):
+            return str(detail)
+
+        return f"Internal error: {content}"
+
     def raise_on_status(self, resp: Response) -> None:
-        content = self.data.get_user_content() or "no message available"
+        content = self.data.get_user_content()
+        error_msg = self._extract_error_message(content or "no message available")
+
+        # Raise RateLimitError if applicable
+        self._check_rate_limit(resp, content, error_msg)
 
         if isinstance(content, dict):
+            # Raise "Not authenticated" error if applicable
             self.check_authenticated(resp, content)
-
-            standard_error = _get_nested_value(content, "message")
-
-            if standard_error:
-                error_msg = standard_error
-            elif validation_error := _get_nested_value(content, "msg"):
-                if detailed_message := _get_nested_value(content, "loc"):
-                    field = detailed_message[-1]
-                    error_msg = f"{validation_error}: {field}"
-                else:
-                    error_msg = f"Bad Request: {validation_error}"
-            else:
-                error_msg = "Internal error: " + str(content)
-        else:
-            error_msg = content
 
         raise Exception(
             f"Got error in HTTP request: {self.data.method} {self.data.url}."
@@ -760,7 +814,6 @@ class BaseClient:
         url: str,
         request: RequestClass,
         response_cls: Type[ResponseClass],
-        timeout: Optional[int] = None,
     ) -> ResponseClass:
         with self.context(method="post", url=url) as ctx:
             ctx.data.json_data = request
@@ -799,7 +852,6 @@ class BaseClient:
     def wait_created(self, *, ctx: ClientContext, url: str, **kwargs: Any) -> OperationInfo:
         with self.context(method="get", url=url, ctx=ctx) as ctx:
             return ctx.loop_until(
-                label=f"created resource is ready at {url}",
                 **kwargs,
             )
 

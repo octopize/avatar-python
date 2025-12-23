@@ -1,12 +1,13 @@
 import os
 import time
+import warnings
 import webbrowser
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Optional, Union
-from uuid import UUID
 
 import pandas as pd
+import tenacity
 import yaml
 from avatar_yaml import (
     AvatarizationDPParameters,
@@ -15,11 +16,19 @@ from avatar_yaml import (
 )
 from avatar_yaml import Config as Config
 from avatar_yaml.models.advice import AdviceType
+from avatar_yaml.models.avatar_metadata import (
+    DataRecipient,
+    DataSubject,
+    DataType,
+    SensitivityLevel,
+)
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
+    AugmentationStrategy,
     ExcludeVariablesMethod,
     ImputeMethod,
     ProjectionType,
+    ReportType,
 )
 from avatar_yaml.models.schema import ColumnType, LinkMethod
 from IPython.display import HTML, display
@@ -27,7 +36,8 @@ from IPython.display import HTML, display
 from avatars import __version__
 from avatars.client import ApiClient
 from avatars.constants import (
-    DEFAULT_RETRY_INTERVAL,
+    DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS,
+    DEFAULT_POLL_INTERVAL,
     DEFAULT_TYPE,
     ERROR_STATUSES,
     JOB_EXECUTION_ORDER,
@@ -38,36 +48,65 @@ from avatars.constants import (
     Results,
     TypeResults,
 )
+from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
-from avatars.models import JobCreateRequest, JobCreateResponse, JobKind, JobResponse
+from avatars.job_launcher import JobLauncher
+from avatars.models import JobKind, JobResponse
 from avatars.results_organizer import ResultsOrganizer
 
 
 class Runner:
-    def __init__(self, api_client: ApiClient, display_name: str, seed: int | None = None) -> None:
+    def __init__(
+        self,
+        api_client: ApiClient,
+        display_name: str,
+        seed: int | None = None,
+        max_distribution_plots: int | None = None,
+        pia_data_recipient: DataRecipient = DataRecipient.UNKNOWN,
+        pia_data_type: DataType = DataType.UNKNOWN,
+        pia_data_subject: DataSubject = DataSubject.UNKNOWN,
+        pia_sensitivity_level: SensitivityLevel = SensitivityLevel.UNDEFINED,
+    ) -> None:
         self.client = api_client
         self.display_name = display_name
         self.set_name: str | None = None
-        self.config = Config(set_name=self.display_name, seed=seed)
-        self.jobs: dict[JobKind | str, JobCreateResponse] = {}
-        self.results_urls: dict[JobKind, dict[str, list[str]]] = {}
+        self.config = Config(
+            set_name=self.display_name, seed=seed, max_distribution_plots=max_distribution_plots
+        )
         self.file_downloader = FileDownloader(api_client)
         self.results: ResultsOrganizer = ResultsOrganizer()
+        self.jobs = JobLauncher(api_client, self.config)
+        self.results_urls: dict[str, dict[str, list[str]]] = {}
 
         annotations = {
             "client_type": "python",
             "client_version": __version__,
         }
-        self.config.create_metadata(annotations)
+        self.config.create_metadata(
+            annotations,
+            pia_datarecipient=pia_data_recipient,
+            pia_datatype=pia_data_type,
+            pia_datasubject=pia_data_subject,
+            pia_sensitivitylevel=pia_sensitivity_level,
+        )
+
+        # Register this Runner instance for crash reporting
+        register_runner(self)
 
     def add_annotations(self, annotations: dict[str, str]) -> None:
+        """Add metadata annotations to the config.
+
+        Parameters
+        ----------
+        annotations
+            A dictionary of annotations to add to the metadata.
+        """
         if self.config.avatar_metadata is None:
             self.config.create_metadata(annotations)
-            return
-
-        previous_annotations = self.config.avatar_metadata.annotations
-        previous_annotations.update(annotations)
-        self.config.create_metadata(previous_annotations)
+        else:
+            current_annotations = self.config.avatar_metadata.annotations or {}
+            current_annotations.update(annotations)
+            self.config.create_metadata(current_annotations)
 
     def add_table(
         self,
@@ -150,19 +189,19 @@ class Runner:
         """Download advice results for the specified tables."""
         for table_name in tables:
             if self.results.advice.get(table_name) is None:
-                name = self.config.get_parameters_advice_name(
-                    name="advice", advisor_type=[AdviceType.PARAMETERS]
-                )
-                created_job = self._create_job(parameters_name=name)
-                self.jobs[JobKind.advice] = created_job
-                self._download_specific_result(JobKind.advice, Results.ADVICE)
+                # Only launch the advice job once, not per table
+                # but relaunch it if a table didn't get advice yet
+                if self.set_name is None:
+                    raise ValueError("Set name is not set. Cannot launch advice job.")
+                self.jobs.launch_job(JobKind.advice, self.set_name)
+                job_name = self.jobs.get_parameters_name(JobKind.advice)
+                self._download_specific_result(job_name, Results.ADVICE)
 
     def _apply_advice_parameters(self, tables: list[str]) -> None:
         """Apply the downloaded advice parameters to each table."""
+        job_name = self.jobs.get_parameters_name(JobKind.advice)
         for table_name in tables:
-            advise_parameters = self.results.get_results(
-                table_name, Results.ADVICE, JobKind.advice
-            )
+            advise_parameters = self.results.get_results(table_name, Results.ADVICE, job_name)
             if not isinstance(advise_parameters, dict):
                 raise ValueError("Expected advice parameters to be a dictionary")
 
@@ -183,7 +222,7 @@ class Runner:
                 imputation_method=imputation_method,
                 imputation_k=imputation_data.get("k"),
                 imputation_training_fraction=imputation_data.get("training_fraction"),
-                imputation_return_data_imputed=imputation_data.get("return_data_imputed"),
+                imputation_return_data_imputed=imputation_data.get("return_data_imputed", False),
                 table_name=table_name,
             )
 
@@ -265,7 +304,8 @@ class Runner:
         use_categorical_reduction: bool | None = None,
         column_weights: dict[str, float] | None = None,
         exclude_variable_names: list[str] | None = None,
-        exclude_replacement_strategy: ExcludeVariablesMethod | None = None,
+        exclude_replacement_strategy: ExcludeVariablesMethod | None = None,  # DEPRECATED
+        exclude_variable_method: ExcludeVariablesMethod | None = None,
         imputation_method: ImputeMethod | None = None,
         imputation_k: int | None = None,
         imputation_training_fraction: float | None = None,
@@ -279,7 +319,8 @@ class Runner:
         known_variables: list[str] | None = None,
         target: str | None = None,
         quantile_threshold: int | None = None,
-        categorical_hidden_rate_variables: list[str] | None = None,
+        data_augmentation_strategy: float | AugmentationStrategy | dict[str, float] | None = None,
+        data_augmentation_target_column: str | None = None,
     ):
         """Set the parameters for a given table.
 
@@ -302,7 +343,9 @@ class Runner:
             indicating the importance of each variable during the projection process.
         exclude_variable_names
             List of variable names to exclude from the projection.
-        exclude_replacement_strategy : ExcludeVariablesMethod, optional
+        exclude_replacement_strategy:
+            DEPRECATED: use exclude_variable_method instead.
+        exclude_variable_method:
             Strategy for replacing excluded variables. Options: ROW_ORDER, COORDINATE_SIMILARITY.
         imputation_method
             Method for imputing missing values. Options: ``ImputeMethod.KNN``,
@@ -336,11 +379,27 @@ class Runner:
             These are variables that could be easily known by an attacker.
         target
             Target variable to predict, used for signal metrics.
+        quantile_threshold
+            Quantile threshold for privacy metrics calculations.
+        data_augmentation_strategy
+            Strategy for data augmentation. Can be a float representing the
+            augmentation ratio, an AugmentationStrategy enum, or a dictionary
+            mapping modality to their respective augmentation ratios.
+        data_augmentation_target_column
+            Target column for data augmentation when using a dictionary strategy or
+            AugmentationStrategy.
         """
         imputation = imputation_method.value if imputation_method else None
-        replacement_strategy = (
-            exclude_replacement_strategy.value if exclude_replacement_strategy else None
-        )
+        if exclude_variable_method:
+            replacement_strategy = exclude_variable_method.value
+        elif exclude_replacement_strategy:
+            warnings.warn(
+                "The 'exclude_replacement_strategy' parameter is deprecated and will be removed "
+                "in a future release. Please use 'exclude_variable_method' instead."
+            )
+            replacement_strategy = exclude_replacement_strategy.value
+        else:
+            replacement_strategy = None
         if k and dp_epsilon:
             raise ValueError(
                 "Expected either k or dp_epsilon to be set, not both. "
@@ -370,7 +429,9 @@ class Runner:
                 imputation_return_data_imputed=imputation_return_data_imputed,
                 column_weights=column_weights,
                 exclude_variable_names=exclude_variable_names,
-                exclude_replacement_strategy=replacement_strategy,
+                exclude_variable_method=replacement_strategy,
+                data_augmentation_strategy=data_augmentation_strategy,
+                data_augmentation_target_column=data_augmentation_target_column,
             )
 
         elif dp_epsilon:
@@ -386,7 +447,9 @@ class Runner:
                 imputation_training_fraction=imputation_training_fraction,
                 column_weights=column_weights,
                 exclude_variable_names=exclude_variable_names,
-                exclude_replacement_strategy=replacement_strategy,
+                exclude_variable_method=replacement_strategy,
+                data_augmentation_strategy=data_augmentation_strategy,
+                data_augmentation_target_column=data_augmentation_target_column,
             )
 
         if (
@@ -414,11 +477,12 @@ class Runner:
             imputation_method=imputation,
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
+            exclude_variable_names=exclude_variable_names,
+            exclude_variable_method=replacement_strategy,
             known_variables=known_variables,
             target=target,
             quantile_threshold=quantile_threshold,
-            categorical_hidden_rate_variables=categorical_hidden_rate_variables,
-            imputation_return_data_imputed=imputation_return_data_imputed,
+            column_weights=column_weights,
         )
 
         self.config.create_signal_metrics_parameters(
@@ -428,7 +492,9 @@ class Runner:
             imputation_method=imputation,
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
-            imputation_return_data_imputed=imputation_return_data_imputed,
+            exclude_variable_names=exclude_variable_names,
+            exclude_variable_method=replacement_strategy,
+            column_weights=column_weights,
         )
 
     def update_parameters(self, table_name: str, **kwargs) -> None:
@@ -582,7 +648,6 @@ class Runner:
                 "known_variables": pm_params.known_variables,
                 "target": pm_params.target,
                 "quantile_threshold": pm_params.quantile_threshold,
-                "categorical_hidden_rate_variables": pm_params.categorical_hidden_rate_variables,
             }
             current_params.update(to_update)
 
@@ -659,8 +724,11 @@ class Runner:
         return self.config.get_yaml(path)
 
     def run(self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER):
+        # Create report configurations if report job is requested
         if JobKind.report in jobs_to_run:
             self.config.create_report()
+            self.config.create_report(ReportType.PIA)
+
         yaml = self.get_yaml()
 
         resource_response = self.client.resources.put_resources(
@@ -669,87 +737,28 @@ class Runner:
         )
         # Update set_name with the actual UUID returned by the backend
         self.set_name = str(resource_response.set_name)
+        self.jobs.set_name = self.set_name
+
+        # Execute jobs in order
         jobs_to_run = sorted(jobs_to_run, key=lambda job: JOB_EXECUTION_ORDER.index(job))
-        for parameters_name in jobs_to_run:
-            depends_on = []
-            if parameters_name == JobKind.standard:
-                if not self.config.avatarization and not self.config.avatarization_dp:
-                    raise ValueError(
-                        "Expected Avatarization parameters to be set to run standard job, "
-                        "you have to set a k or epsilon parameter using `runner.set_parameter()."
-                    )
-            if (
-                parameters_name == JobKind.signal_metrics
-                or parameters_name == JobKind.privacy_metrics
-            ):
-                if JobKind.standard in self.jobs.keys():
-                    depends_on = [self.jobs[JobKind.standard].Location]
-                else:
-                    for avatar_table in self.config.avatar_tables.values():
-                        if (
-                            avatar_table.avatars_data is None
-                            or avatar_table.avatars_data.file is None
-                        ):
-                            raise ValueError(
-                                "Expected Avatar tables to be set to run signal/privacy metrics "
-                                "job, you have to set avatar_data using `runner.add_table()`."
-                            )
 
-            elif parameters_name == JobKind.report:
-                if not self.jobs.get(JobKind.privacy_metrics) or not self.jobs.get(
-                    JobKind.signal_metrics
-                ):
-                    raise ValueError(
-                        "Expected Privacy and Signal to be created to run report got {jobs_to_run}"
-                    )
-                depends_on = [
-                    self.jobs[JobKind.privacy_metrics].Location,
-                    self.jobs[JobKind.signal_metrics].Location,
-                ]
+        for i, job_kind in enumerate(jobs_to_run):
+            # Add small delay between job creations to avoid bursts in api calls
+            # Skip delay for first job
+            if i > 0:
+                time.sleep(DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS)
+            self.jobs.launch_job(job_kind, self.set_name)
 
-            created_job = self._create_job(
-                parameters_name=parameters_name.value,
-                depends_on=depends_on,
-            )
-            self.jobs[parameters_name] = created_job
-        return self.jobs
-
-    def _create_job(
-        self,
-        parameters_name: str,
-        depends_on: list[str] = [],
-    ):
-        # FIXME: use the create_job method from the client instead of creating the request manually
-        # the create_job method doesn't return the right object for now.
-        print(f"Creating {parameters_name} job")  # noqa: T201
-        request = JobCreateRequest(
-            set_name=UUID(self.set_name), parameters_name=parameters_name, depends_on=depends_on
-        )
-        kwargs: dict[str, Any] = {
-            "method": "post",
-            "url": f"/jobs",  # noqa: F541
-            "json_data": request,
-        }
-        created_job = JobCreateResponse(**self.client.send_request(**kwargs))
-        return created_job
-
-    def get_job(self, job_name: JobKind) -> JobResponse:
+    def get_job(self, job_name: JobKind | str) -> JobResponse:
         """
-        Get a job by name.
+        Get the job by name.
 
         Parameters
         ----------
         job_name
             The name of the job to get.
-
-        Returns
-        -------
-        JobCreateResponse
-            The job object.
         """
-        if job_name not in self.jobs.keys():
-            raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
-        return self.client.jobs.get_job_status(self.jobs[job_name].name)
+        return self.jobs.get_job_status(job_name)
 
     def get_status(self, job_name: JobKind):
         """
@@ -761,7 +770,7 @@ class Runner:
         """
         return self.get_job(job_name).status
 
-    def _retrieve_job_result_urls(self, job_name: JobKind):
+    def _retrieve_job_result_urls(self, job_name: str) -> None:
         """
         Get the result of a job by name.
 
@@ -770,37 +779,52 @@ class Runner:
         job_name
             The name of the job to get.
         """
-        job = self.get_job(job_name)
-        if job.status in ERROR_STATUSES:
-            if job.exception:
-                raise ValueError(f"Job {job_name} failed with exception: {job.exception}")
-            raise ValueError("internal error")
 
-        while not job.done:
-            time.sleep(DEFAULT_RETRY_INTERVAL)
+        def check_job_status() -> JobResponse:
+            """Check job status and raise if in error state, otherwise return if not done."""
             job = self.get_job(job_name)
+
             if job.status in ERROR_STATUSES:
                 if job.exception:
                     raise ValueError(f"Job {job_name} failed with exception: {job.exception}")
                 raise ValueError("internal error")
-            if job.status == "finished":
-                break
 
-        self.results_urls[job_name] = self.client.results.get_results(self.jobs[job_name].name)
+            if not job.done:
+                # Raise to trigger retry
+                raise tenacity.TryAgain
+
+            return job
+
+        # Use tenacity to poll with exponential backoff capped at 20s
+        # Starts at 5s, 20% longer every time, maxes out at 20s
+        for attempt in tenacity.Retrying(
+            wait=tenacity.wait_exponential(
+                min=DEFAULT_POLL_INTERVAL,
+                max=4 * DEFAULT_POLL_INTERVAL,
+                exp_base=1.2,
+            ),
+            retry=tenacity.retry_if_exception_type(tenacity.TryAgain),
+            reraise=True,
+        ):
+            with attempt:
+                check_job_status()
+
+        job_id = self.jobs.get_job_id(job_name)
+        self.results_urls[job_name] = self.client.results.get_results(job_id)
 
     def get_specific_result_urls(
         self,
-        job_name: JobKind,
+        job_name: str,
         result: Results = Results.SHUFFLED,
     ) -> list[str]:
-        if job_name not in self.jobs.keys():
+        if not self.jobs.has_job(job_name):
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
         if job_name not in self.results_urls:
             self._retrieve_job_result_urls(job_name)
         return self.results_urls[job_name][result]
 
     def _download_all_files(self):
-        for job_name in self.jobs.keys():
+        for job_name in self.jobs.get_launched_jobs():
             if not self.results_urls or job_name not in self.results_urls.keys():
                 self._retrieve_job_result_urls(job_name)
             for result in self.results_urls[job_name].keys():
@@ -811,7 +835,7 @@ class Runner:
 
     def _download_specific_result(
         self,
-        job_name: JobKind,
+        job_name: str,
         result_name: Results,
     ) -> None:
         urls = self.get_specific_result_urls(job_name=job_name, result=result_name)
@@ -829,7 +853,7 @@ class Runner:
                 )
 
     def _get_metadata(
-        self, url: str, result_name: Results, job_name: JobKind
+        self, url: str, result_name: Results, job_name: str
     ) -> dict[str, Any] | None:
         match result_name:
             case Results.FIGURES:
@@ -840,8 +864,9 @@ class Runner:
                 return None
 
     def _get_figure_metadata(self, url: str) -> dict[str, Any] | None:
+        standard_key = self.jobs.get_parameters_name(JobKind.standard)
         figures_metadatas = self.file_downloader.download_file(
-            self.results_urls[JobKind.standard][Results.FIGURES_METADATA][0]
+            self.results_urls[standard_key][Results.FIGURES_METADATA][0]
         )
         if isinstance(figures_metadatas, list):
             return self.results.find_figure_metadata(figures_metadatas, url)
@@ -856,13 +881,14 @@ class Runner:
         job_name: JobKind,
         result: Results = Results.SHUFFLED,
     ) -> TypeResults:
+        job_name_str = self.jobs.get_parameters_name(job_name)
         if table_name not in self.config.tables.keys():
             raise ValueError(f"Expected table '{table_name}' to be created.")
-        if job_name not in self.jobs.keys():
+        if not self.jobs.has_job(job_name_str):
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
-        if self.results.get_results(table_name, result, job_name) is None:
-            self._download_specific_result(job_name, result)
-        return self.results.get_results(table_name, result, job_name)
+        if self.results.get_results(table_name, result, job_name_str) is None:
+            self._download_specific_result(job_name_str, result)
+        return self.results.get_results(table_name, result, job_name_str)
 
     def get_all_results(self):
         """
@@ -879,7 +905,7 @@ class Runner:
         self._download_all_files()
         return self.results
 
-    def download_report(self, path: str | None = None):
+    def download_report(self, path: str | None = None, report_type: ReportType = ReportType.BASIC):
         """
         Download the report.
 
@@ -888,9 +914,11 @@ class Runner:
         path
             The path to save the report.
         """
-        if self.results_urls.get(JobKind.report) is None:
-            self._retrieve_job_result_urls(JobKind.report)
-        report = self.results_urls[JobKind.report][Results.REPORT][0]
+        is_pia = report_type == ReportType.PIA
+        job_name = self.jobs.get_parameters_name(JobKind.report, pia_report=is_pia)
+        if self.results_urls.get(job_name) is None:
+            self._retrieve_job_result_urls(job_name)
+        report = self.results_urls[job_name][Results.REPORT][0]
         self.file_downloader.download_file(report, path=path)
 
     def print_parameters(self, table_name: str | None = None) -> None:
@@ -909,15 +937,34 @@ class Runner:
         if table_name not in self.config.tables.keys():
             raise ValueError(f"Expected table '{table_name}' to be created. Try running it first.")
 
-        print(f"--- Avatarization parameters for {table_name}: ---")  # noqa: T201
+        # Print avatarization parameters
+        if self.config.avatarization and table_name in self.config.avatarization:
+            print(f"--- Avatarization parameters for {table_name}: ---")  # noqa: T201
+            print(asdict(self.config.avatarization[table_name]))  # noqa: T201
+            print("\n")  # noqa: T201
+        elif self.config.avatarization_dp and table_name in self.config.avatarization_dp:
+            print(f"--- Avatarization DP parameters for {table_name}: ---")  # noqa: T201
+            print(asdict(self.config.avatarization_dp[table_name]))  # noqa: T201
+            print("\n")  # noqa: T201
+        else:
+            print(f"--- No avatarization parameters set for {table_name} ---")  # noqa: T201
+            print("\n")  # noqa: T201
 
-        print(asdict(self.config.avatarization[table_name]))  # noqa: T201
-        print("\n")  # noqa: T201
-        print(f"--- Privacy metrics for {table_name}: ---")  # noqa: T201
-        print(asdict(self.config.privacy_metrics[table_name]))  # noqa: T201
-        print("\n")  # noqa: T201
-        print(f"--- Signal metrics for {table_name}: ---")  # noqa: T201
-        print(asdict(self.config.signal_metrics[table_name]))  # noqa: T201
+        # Print privacy metrics parameters
+        if self.config.privacy_metrics and table_name in self.config.privacy_metrics:
+            print(f"--- Privacy metrics for {table_name}: ---")  # noqa: T201
+            print(asdict(self.config.privacy_metrics[table_name]))  # noqa: T201
+            print("\n")  # noqa: T201
+        else:
+            print(f"--- No privacy metrics parameters set for {table_name} ---")  # noqa: T201
+            print("\n")  # noqa: T201
+
+        # Print signal metrics parameters
+        if self.config.signal_metrics and table_name in self.config.signal_metrics:
+            print(f"--- Signal metrics for {table_name}: ---")  # noqa: T201
+            print(asdict(self.config.signal_metrics[table_name]))  # noqa: T201
+        else:
+            print(f"--- No signal metrics parameters set for {table_name} ---")  # noqa: T201
 
     def kill(self):
         """Method not implemented yet."""
@@ -1219,7 +1266,7 @@ class Runner:
             time_series = params.get("time_series", {})
             privacy_metrics = params.get("privacy_metrics", {})
 
-            exclude_replacement_strategy, exclude_variable_names = self._process_exclude_variables(
+            exclude_variable_method, exclude_variable_names = self._process_exclude_variables(
                 avatarization
             )
             (
@@ -1242,7 +1289,7 @@ class Runner:
                 use_categorical_reduction=avatarization.get("use_categorical_reduction"),
                 column_weights=avatarization.get("column_weights"),
                 exclude_variable_names=exclude_variable_names,
-                exclude_replacement_strategy=exclude_replacement_strategy,
+                exclude_variable_method=exclude_variable_method,
                 imputation_method=imputation_method,
                 imputation_k=imputation_k,
                 imputation_training_fraction=imputation_training_fraction,
@@ -1257,14 +1304,14 @@ class Runner:
 
     def _process_exclude_variables(self, avatarization: dict):
         """Process exclude variables from avatarization parameters."""
-        exclude_replacement_strategy = None
+        exclude_variable_method = None
         exclude_variable_names = None
         if exclude_vars := avatarization.get("exclude_variables", {}):
-            exclude_replacement_strategy = self._get_enum_value(
+            exclude_variable_method = self._get_enum_value(
                 ExcludeVariablesMethod, exclude_vars.get("replacement_strategy")
             )
             exclude_variable_names = exclude_vars.get("variable_names")
-        return exclude_replacement_strategy, exclude_variable_names
+        return exclude_variable_method, exclude_variable_names
 
     def _process_imputation(self, avatarization: dict):
         """Process imputation parameters."""

@@ -2,6 +2,20 @@
 
 ## NEXT RELEASE
 
+## 1.12.0 - 2025/12/22
+
+- feat: add PIA report customization options
+
+## 1.11.0 - 2025/12/17
+
+- feat: add data_augmentation parameters to avatarization job
+
+## 1.10.0 - 2025/12/16
+
+## 1.9.0 - 2025/12/10
+
+## 1.8.0 - 2025/12/02
+
 ## 1.7.0 - 2025/11/14
 
 ## 1.6.0 - 2025/11/05
