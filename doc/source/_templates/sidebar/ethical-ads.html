@@ -1,0 +1,20 @@
+<!-- We are overriding the ethical-ads.html file form the furo theme to display versions.
+  This file is only used on ReadTheDocs. -->
+{% if versions %}
+<div class="sidebar-tree">
+  {%- if versions.tags %}
+  <p class="caption" role="heading">
+    <span class="caption-text">{{ _('Versions') }}</span>
+  </p>
+  <ul>
+    {%- for item in versions.tags| sort(reverse = True) %}
+    <li class="toctree-l1">
+      <a class="reference internal" href="{{ item.url }}"
+        >{{ item.name | replace("avatars-python-v", "") }}</a
+      >
+    </li>
+    {%- endfor %}
+  </ul>
+  {%- endif %}
+</div>
+{% endif %}
