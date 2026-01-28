@@ -2,6 +2,12 @@
 
 ## NEXT RELEASE
 
+## 1.15.0 - 2026/01/20
+
+## 1.14.0 - 2026/01/19
+
+## 1.13.0 - 2026/01/07
+
 ## 1.12.0 - 2025/12/22
 
 - feat: add PIA report customization options

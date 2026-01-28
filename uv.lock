@@ -1580,7 +1580,7 @@ wheels = [
 
 [[package]]
 name = "octopize-avatar"
-version = "1.12.0"
+version = "1.15.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiobotocore" },
@@ -1636,7 +1636,7 @@ requires-dist = [
     { name = "fsspec", specifier = ">=2024.12.0" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "ipython", specifier = ">=9.2.0" },
-    { name = "octopize-avatar-yaml", specifier = "==0.1.28" },
+    { name = "octopize-avatar-yaml", specifier = "==0.1.29" },
     { name = "pandas", specifier = ">=2.3.1" },
     { name = "pydantic", specifier = ">=2.10.4" },
     { name = "pydantic-settings", specifier = ">=2.7.0" },
@@ -1679,15 +1679,15 @@ notebook = [
 
 [[package]]
 name = "octopize-avatar-yaml"
-version = "0.1.28"
+version = "0.1.29"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fb/19/1897bed396090c9f29dbe645553e548215666e3c669a8019d7480be4d773/octopize_avatar_yaml-0.1.28.tar.gz", hash = "sha256:071fa7f6c68983aeca7cf5b3451c34d298240282dba7e5166ca83ee7b1dc2762", size = 36661, upload-time = "2025-12-22T15:24:28.855Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/36/b5f4a4c93ea326520763f4222931123d235893fe2928f97c545df34666ae/octopize_avatar_yaml-0.1.29.tar.gz", hash = "sha256:4c81828dc3eabc15f82223213d50d14d5187de69d6fb69af9356aa3621f8609d", size = 36719, upload-time = "2026-01-08T09:32:40.927Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/19/4960595837f908064fb068a0d87758cf34fa51456f0dd101aa39cd97e774/octopize_avatar_yaml-0.1.28-py3-none-any.whl", hash = "sha256:b88c54aa6ed00f00ff9daf9d8d4413959c9db652082681ca44a8bc031c7f7bed", size = 23889, upload-time = "2025-12-22T15:24:29.884Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/53/c33a889ea241235b6504306915499356dc3d1dcb9e0e95bc65939dce99d4/octopize_avatar_yaml-0.1.29-py3-none-any.whl", hash = "sha256:15e29f278aec63118bd165aba751c400e55e05f6a6c330a5814f41455ce754e5", size = 23949, upload-time = "2026-01-08T09:32:41.908Z" },
 ]
 
 [[package]]

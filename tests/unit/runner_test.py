@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
+    AugmentationStrategy,
     ExcludeVariablesMethod,
     ImputeMethod,
     ProjectionType,
@@ -138,6 +139,33 @@ class TestRunner:
         assert runner.config.avatarization_dp["test_table"].ncp == 2
         assert runner.config.privacy_metrics["test_table"].ncp == 2
         assert runner.config.signal_metrics["test_table"].ncp == 2
+
+    def test_set_parameters_data_augmentation(self):
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            ncp=2,
+            data_augmentation_strategy=AugmentationStrategy.minority,
+            data_augmentation_target_column="col2",
+            data_augmentation_should_anonymize_original_table=False,
+        )
+        assert len(runner.config.avatarization.keys()) == 1
+        augmentation_params = runner.config.avatarization["test_table"].data_augmentation
+        assert augmentation_params is not None
+        assert augmentation_params.augmentation_strategy == AugmentationStrategy.minority
+        assert augmentation_params.target_column == "col2"
+        assert augmentation_params.should_anonymize_original_table is False
+
+    def test_set_parameters_empty(self):
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table")
+        assert len(runner.config.avatarization.keys()) == 0
+        assert len(runner.config.avatarization_dp.keys()) == 0
+        assert len(runner.config.privacy_metrics.keys()) == 0
+        assert len(runner.config.signal_metrics.keys()) == 0
 
     def test_advise_parameters(self):
         manager = Manager(api_client=FakeApiClient(tables=["test"]))
@@ -348,6 +376,18 @@ class TestRunner:
         assert runner.config.avatarization["test_table"].ncp == 2
         assert not runner.config.avatarization["test_table"].use_categorical_reduction
 
+    def test_update_parameters_without_set(self):
+        """Test that updating parameters without setting them first raises an error."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+
+        with pytest.raises(ValueError) as excinfo:
+            runner.update_parameters("test_table", k=5)
+            assert (
+                str(excinfo.value) == "No existing parameters found for table 'test_table'. "
+                "Use set_parameters to create new parameters."
+            )
+
     def test_update_parameters_from_standard_to_dp(self):
         """Test updating from standard avatarization to DP avatarization."""
         runner = self.manager.create_runner("test")
@@ -471,15 +511,6 @@ class TestRunner:
         assert runner.config.privacy_metrics["test_table"].target == "col1"
         assert runner.config.privacy_metrics["test_table"].quantile_threshold == 80
         assert runner.config.avatarization["test_table"].k == 3  # Original k preserved
-
-    def test_update_parameters_when_nothing_was_set(self):
-        runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data=self.df1)
-        runner.set_parameters("test_table")
-        runner.update_parameters("test_table", ncp=5)
-
-        assert runner.config.privacy_metrics["test_table"].ncp == 5
-        assert runner.config.signal_metrics["test_table"].ncp == 5
 
     def test_extract_current_parameters_standard_avatarization_pipeline(self):
         """Test extracting parameters with standard avatarization."""

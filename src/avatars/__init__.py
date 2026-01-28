@@ -1,4 +1,4 @@
-__version__ = "1.12.0"
+__version__ = "1.15.0"
 
 # Re-export main public entry points for convenience so users can do for example:
 # from avatars import Manager, Runner, ApiClient

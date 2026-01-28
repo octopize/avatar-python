@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.39.0
+# API Version : 2.44.0
 
 
 import logging
@@ -189,12 +189,21 @@ class Auth:
 
     def refresh(
         self,
-        token: str,
+        token: Optional[str] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> LoginResponse:
+        """Refresh access token using the refresh token.
+
+        This endpoint supports two authentication flows:
+        1. Internal refresh tokens (password-based auth) - token from query/body parameter
+        2. Authentik SSO refresh tokens (SSO-based auth) - token from cookies
+
+        The flows are mutually exclusive based on the token source.
+        """
+
         kwargs: Dict[str, Any] = {
-            "method": "get",
+            "method": "post",
             "url": f"/refresh",  # noqa: F541
             "timeout": timeout,
             "params": dict(
@@ -232,6 +241,66 @@ class Auth:
             "timeout": timeout,
             "json_data": request,
             "should_verify_auth": False,
+        }
+
+        return self.client.request(**kwargs)
+
+    def get_authorization_code(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """OAuth2 flow, step1: redirect user to Authentik to obtain an authorization code grant."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/login/sso",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)
+
+    def auth(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """OAuth2 flow, step2: exchange the authorization code for Authentik tokens.
+
+        Returns Authentik's JWT tokens directly. These tokens are verified by
+        get_user_from_valid_auth using Authentik's JWKS endpoint.
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "get",
+            "url": f"/login/sso/auth",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)
+
+    def logout(
+        self,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Two-step logout: revoke tokens, then redirect to OIDC logout.
+
+        Step 1: Revoke refresh and access tokens at Authentik's revocation endpoint
+        Step 2: Redirect browser to Authentik's end_session_endpoint for full logout
+
+        Args:
+            request: FastAPI request object
+            post_logout_redirect_uri: Where to redirect after logout (defaults to app homepage)
+
+        Returns:
+            JSONResponse with URL to Authentik's logout page
+        """
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/logout",  # noqa: F541
+            "timeout": timeout,
         }
 
         return self.client.request(**kwargs)

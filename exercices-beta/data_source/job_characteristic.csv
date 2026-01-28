@@ -1,0 +1,48 @@
+
+field_name**,description**,data_type**,personally_identifiable_variable,required,max_allowed_value,min_allowed_value,variable_unit,allowed_values,allowed_values_description,is_authentic_source
+reference_period,Year and month,String,false,false,,,,,,false
+job_IDnumber,Identification number of the job,String,true,false,,,,,,false
+individual_IDnumber,Pseudonymised individual identification number,String,true,false,,,,,,false
+employer_IDnumber,Pseudonymised employer identification number. The variable is not applicable if the employer is self-employed or a private person.,String,true,false,,,,,[-9=Not applicable],false
+temporary_jobs_employer_IDnumber,Pseudonymised employer identification number for temporary jobs,String,true,false,,,,,"[-9=Not applicable, -8=Not available]",false
+j_job_start_date,Year and month of the job start date,String,true,false,,,,,,false
+j_job_end_effective_date,Year and month of the job end date. Not applicable concerns current jobs,String,true,false,,,,,,false
+j_contract_type,Job contract type is unavailable before 2005. Not applicable for self-employed,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 0=Permanent contract, 1=Fixed-term contract, 2=Temporary contract, 3=Apprenticeship contract, 4=Summer or student job]",false
+j_job_end_planned_date,Year and month of the job end planned date. Not applicable for permanent contracts and self-employed,String,true,false,,,,,[999909=Not applicable],false
+j_contract_planned_duration,Duration of the fixed-term contract as planned when hiring. Not applicable for permanent contracts and self-employed,String,true,false,,,,,"[-9=Not applicable, 0=< 2 weeks, 1=[2 weeks - 1 month[, 2=[1 - 2 months[, 3=[2 - 6 months[, 4=[6 - 12 months[, 5=[12 - 24 months[, 6=≥ 24 months]",false
+j_job_status,Job status,String,true,false,,,,,"[-8=Not available, 0=Private sector worker, 1=Civil servant, 2=Self-employed]",false
+j_blue_collar,Whether the worker performs manual tasks. Not available for self-employed and civil servants,String,true,false,,,,,"[-8=Not available, 0=No, 1=Yes]",false
+j_posted_worker,Whether the worker is posted abroad during the month. Not applicable for self-employed,String,true,false,,,,,"[-9=Not applicable, 0=No, 1=Yes]",false
+j_assisting_family_member,"Family assistant is a person who works for an employer without being paid. Frequently, spouses of farmers",String,true,false,,,,,"[0=No, 1=Yes]",false
+j_maternity_leave,Whether the worker is in maternity leave,String,true,false,,,,,"[-8=Not available, 0=No, 1=Yes]",false
+j_activation_measure,Whether the worker is registered in an active labour market policy at the public employment service (ADEM). Only activation measures assimilated to jobs are registered in the file.,String,true,false,,,,,"[0=No, 1=Yes]",false
+j_activation_measure_type,Name of the activation measure. Only activation measures assimilated to jobs are registered in the file.,String,true,false,,,,,https://adem.public.lu/fr/demandeurs-demploi/aides-financieres-mesures/mesures-emploi.html,false
+j_trial_period,"Whether the contract has a trial period, available since 2008. Not applicable for self-employed",String,true,false,,,,,"[-9=Not applicable, -8=Not available, 0=No, 1=Yes]",false
+j_trial_period_end_date,Year and month of the trial period end date,String,true,false,,,,,,false
+j_trial_period_length,"Number of weeks (rounded to the nearest integer) of the trial period, available since 2008. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_short_time_working,Whether the worker is concerned by short-time working during the month. Not applicable for self-employed,String,true,false,,,,,"[-9=Not applicable, 0=No, 1=Yes]",false
+j_short_time_working_benefit,"Monthly amount of short-time working, included in j_month_base_wage. Not applicable for self-employed",Float,true,false,,,,,,false
+j_short_time_working_hours,"Monthly hours concerned by short-time working, included in j_nb_base_worked_hours. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_month_base_wage,"Whether receiving a base wage during the month, available since January 2009. Before January 2009, only the total wage was declared. Not applicable for self-employed",String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_month_base_wage,"Monthly gross base wage, available since January 2009. Before January 2009, only the total wage was declared. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_month_additionnal_wage,"Whether receiving an additionnal wage during the month, available since January 2009. Not applicable for self-employed",String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_month_additionnal_wage,"Monthly gross additionnal wage, excluding overtime wage, available since January 2009. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_month_overtime_wage,"Whether receiving an overtime wage during the month, available since January 2009. Not applicable for self-employed",String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_month_overtime_wage,"Monthly gross overtime wage, available since January 2009. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_month_total_wage,Whether receiving a wage during the month. Not applicable for self-employed,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_month_total_wage,"Monthly gross total wage. Before 2009, only the total wage was declared. After 2009, the three components are declared separately (j_month_total_wage = j_month_base_wage + j_month_additionnal_wage + j_month_overtime_wage). Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_nb_base_worked_hours,"Whether the base worked hours during the month are declared, available since January 2009. Before January 2009, only the total number of worked hours was declared. Not applicable for self-employed",String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_nb_base_worked_hours,"Related to the number of working days in the month. Depending on the month and the number of days off, the base worked hours can vary from 144 hours to 184 hours. Before January 2009, only the total number of worked hours was declared. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_nb_overtime_paid_hours,"Whether the overtime paid hours during the month are declared, available since January 2009. Before January 2009, only the total worked hours were declared. Not applicable for self-employed",String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_nb_overtime_paid_hours,"Number of overtime paid hours during the month, available since January 2009. Before January 2009, only the total worked hours were declared. Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_nb_total_worked_hours,Whether the total worked hours during the month are declared. Not applicable for self-employed,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_nb_total_worked_hours,"Monthly total worked hours. Before 2009, only the total worked hours were declared. After 2009, the two components are declared separately (j_nb_total_worked_hours = j_nb_base_worked_hours + j_nb_overtime_paid_hours). Not applicable for self-employed",Float,true,false,,,,,,false
+j_F_nb_base_worked_hours_ADJ,Whether the base worked hours during the month have been adjusted for the calendar effect. The adjustment is based on a IGSS methodology which neutralizes the calendar effect (i.e. number of business days varying by month). Must be used for hourly wage computation. Not applicable before January 2009 and for self-employed,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_nb_base_worked_hours_ADJ,Adjusted number of base worked hours,Float,true,false,,,,,,false
+j_F_nb_total_worked_hours_ADJ,Whether the total worked hours during the month have been adjusted for the calendar effect,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_nb_total_worked_hours_ADJ,Adjusted number of total worked hours. j_nb_total_worked_hours_ADJ = j_nb_base_worked_hours_ADJ +j_nb_overtime_paid_hours,Float,true,false,,,,,,false
+j_F_hourly_base_wage,Whether the hourly base wage during the month is available. Not applicable before January 2009 and for self-employed,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_hourly_base_wage,"Monthly hourly base wage, calculated using adjusted based hours",Float,true,false,,,,,,false
+j_F_hourly_total_wage,Whether the hourly total wage during the month is available. Not applicable for self-employed,String,true,false,,,,,"[-9=Not applicable, -8=Not available, 1=Yes]",false
+j_hourly_total_wage,"Monthly hourly total wage, calculated using adjusted total hours",Float,true,false,,,,,,false
+j_F_official_stat,Whether the job is included in monthly official employment statistics,String,true,false,,,,,"[0=No, 1=Yes]",false

@@ -26,9 +26,8 @@ from avatars.constants import ColumnType, PlotKind
 from avatars.manager import Manager
 from avatars.models import JobKind
 
-base_url = os.environ.get("AVATAR_BASE_URL", "http://localhost:8080/api")
-username = os.environ.get("AVATAR_USERNAME", "user_integration")
-password = os.environ.get("AVATAR_PASSWORD", "password_integration")
+username = os.environ.get("AVATAR_USERNAME", "")
+password = os.environ.get("AVATAR_PASSWORD", "")
 
 # %%
 manager = Manager()  # or manager = Manager(base_url=https://your-server.com)

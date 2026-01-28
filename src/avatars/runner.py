@@ -137,13 +137,17 @@ class Runner:
             A dictionary of column types with the column name as the key and the type as the value.
         individual_level
             A boolean as true if the table is at individual level or not. An individual level table
-            is a table where each row corresponds to an individual (ex: patient, customer, etc.)
+            is a table where each row corresponds to an individual (ex: patient, customer, etc.).
+            Default behavior is True.
         avatar_data
             The avatar table if there is one. Can be a path to a file or a pandas DataFrame.
         """
         file, avatar_file = self.upload_file(table_name, data, avatar_data)
         if isinstance(data, pd.DataFrame):
             types = self._get_types(data, types)
+
+        if foreign_keys == [None]:
+            foreign_keys = None
 
         self.config.create_table(
             table_name=table_name,
@@ -321,6 +325,7 @@ class Runner:
         quantile_threshold: int | None = None,
         data_augmentation_strategy: float | AugmentationStrategy | dict[str, float] | None = None,
         data_augmentation_target_column: str | None = None,
+        data_augmentation_should_anonymize_original_table: bool | None = None,
     ):
         """Set the parameters for a given table.
 
@@ -388,6 +393,9 @@ class Runner:
         data_augmentation_target_column
             Target column for data augmentation when using a dictionary strategy or
             AugmentationStrategy.
+        data_augmentation_should_anonymize_original_table
+            SENSITIVE: Whether to anonymize the original table during data augmentation.
+            Default is True.
         """
         imputation = imputation_method.value if imputation_method else None
         if exclude_variable_method:
@@ -432,6 +440,7 @@ class Runner:
                 exclude_variable_method=replacement_strategy,
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
+                data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
             )
 
         elif dp_epsilon:
@@ -450,6 +459,7 @@ class Runner:
                 exclude_variable_method=replacement_strategy,
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
+                data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
             )
 
         if (
@@ -510,6 +520,14 @@ class Runner:
             The parameters to update. Only parameters that are provided will be updated.
             See set_parameters for the full list of available parameters.
         """
+        if (
+            self.config.avatarization.get(table_name) is None
+            and self.config.avatarization_dp.get(table_name) is None
+        ):
+            raise ValueError(
+                f"No existing parameters found for table '{table_name}'. "
+                "Use set_parameters to create new parameters."
+            )
         # Get current parameters for this table
         current_params = self._extract_current_parameters(table_name)
 

@@ -1,0 +1,54 @@
+field_name**,description**,data_type**,personally_identifiable_variable,required,max_allowed_value,min_allowed_value,variable_unit,allowed_values,allowed_values_description,is_authentic_source
+Matricule,Matricule du demandeur d'emploi (13 chiffres),Integer,true,true,,,,numéro à 13 chiffres,,false
+Nom,Nom de famille du demandeur d'emploi,String,true,true,,,,,,false
+Prenom,Prénom du demandeur d'emploi,String,true,true,,,,,,false
+Genre,Genre du demandeur d'emploi,String,true,true,,,,"[Masculin, Féminin]",,false
+Date_Naissance,Date de naissance du demandeur d'emploi,String,true,true,,,,,,false
+Pays_Naissance,Pays de naissance du demandeur d'emploi,String,true,,,,,,,false
+Lieu_Naissance,Commune de naissance du demandeur d'emploi,String,true,,,,,,,false
+Nationalite,Nationalité du demandeur d'emploi,String,true,true,,,,liste de nationalités,,false
+Type_Residence,Catégorie de résidence du demandeur d'emploi,String,true,true,,,,"résident, non-résident, inconnu",,false
+Residence_Num_Rue,Numéro de rue de la résidence du demandeur d'emploi,String,true,true,,,,,,false
+Residence_Rue,Rue de la résidence du demandeur d'emploi,String,true,true,,,,,,false
+Residence_Code_Postal,Code postal de la résidence du demandeur d'emploi,String,true,true,,,,,,false
+Residence_Localite,Code & Libellé de la localite de la résidence du demandeur d'emploi,String,true,true,,,,exemple: 110502,exemple: Echternach,false
+Residence_Commune,Commune de la résidence du demandeur d'emploi,String,true,true,,,,exemple: Echternach,,false
+Residence_Pays,Pays de résidence du demandeur d'emploi,String,true,true,,,,liste de pays,,false
+Etat_Civil,Etat civil du demandeur d'emploi,String,true,false,,,,"[Célibataire, Divorcé, Inconnu, Marié, PA, Séparé, Veuf]",,false
+Enfants,Indicateur si le demandeur d'emploi a des enfants à charge,String,true,false,,,,"[Oui, Non, Inconnu]",,false
+Statut_SH,Indicateur si le demandeur d'emploi a un statut de salarié handicapé,Boolean,true,true,,,,,,false
+Orientation_SH,"Orientation du salarié handicapé (marché ordinaire, atelier protégé)",String,true,,,,,"[Atelier protégé, Marché ordinaire, Inconnu]",,false
+Statut_CTR,Indicateur si le demandeur d'emploi a un statut de capacité de travail réduite / reclassement externe,Boolean,true,true,,,,,,false
+REVIS,Indicateur si le demandeur d'emploi touche au REVIS (revenu d'inclusion sociale),Boolean,true,true,,,,,,false
+Titre_Sejour,"Code et libellé du titre de séjour du demandeur d'emploi, s'il y a un titre en cours",String,true,,,,,"[065, 100, 109, …]","[065=Membre de famille (UE avec hors UE), 100=Protection internationale (BPI), 109=Protection temporaire (BPT), …]",false
+Debut_Titre_Sejour,"Date de début du titre de séjour du demandeur d'emploi, s'il y a un titre en cours",String,true,,,,,,,false
+Fin_Titre_Sejour,"Date de fin du titre de séjour du demandeur d'emploi, s'il y a un titre en cours",String,true,,,,,,,false
+Autorisation_Travail_Debut,"Date de début de l'autorisation de travail, s'il y a une autorisation en cours (si le demandeur d'emploi n'a pas besoin d'autorisation spécifique pour travailler au Luxembourg, ce champ reste vide)",String,true,,,,,,,false
+Autorisation_Travail_Fin,"Date de fin de l'autorisation de travail, s'il y a une autorisation en cours",String,true,,,,,,,false
+Autorisation_Travail_ISCO,"Métier(s) (selon classification ISCO/CITP) de l'autorisation de travail, qui définit dans quel métier le demandeur peut travailler",String,true,false,,,,exemple: 2411,Code lié aux métiers de la classification ISCO,false
+Metier_ROME_1,"Code & libellé du 1er métier ciblé par le demandeur d'emploi, selon la classification ROME",String,true,,,,,exemple: M1607,Code lié aux métiers du référentiel ROME,false
+Metier_ROME_1_Appellation,"Libellé de le la 1ère appellation (niveau plus granulaire que le métier) ciblée par le demandeur d'emploi, selon la classification ROME",String,true,,,,,exemple: Secrétaire juridique,Libellé lié aux métiers du référentiel ROME,false
+Metier_ROME_1_Experience,Expérience liée au 1er métier ciblé,String,true,false,,,en mois ou années,,,false
+Metier_ROME_2,"Code & libellé du 2e métier ciblé par le demandeur d'emploi, selon la classification ROME",String,true,false,,,,exemple: M1607,Code lié aux métiers du référentiel ROME,false
+Metier_ROME_2_Appellation,"Libellé de le la 2e appellation (niveau plus granulaire que le métier) ciblée par le demandeur d'emploi, selon la classification ROME",String,true,false,,,,exemple: Secrétaire juridique,Libellé lié aux métiers du référentiel ROME,false
+Metier_ROME_2_Experience,Expérience liée au 2e métier ciblé,String,true,false,,,en mois ou années,,,false
+Metier_ROME_3,"Code & libellé du 3e métier ciblé par le demandeur d'emploi, selon la classification ROME",String,true,false,,,,exemple: M1607,Code lié aux métiers du référentiel ROME,false
+Metier_ROME_3_Appellation,"Libellé de le la 3e appellation (niveau plus granulaire que le métier) ciblée par le demandeur d'emploi, selon la classification ROME",String,true,false,,,,exemple: Secrétaire juridique,Libellé lié aux métiers du référentiel ROME,false
+Metier_ROME_3_Experience,Expérience liée au 3e métier ciblé,String,true,false,,,en mois ou années,,,false
+Formation_Reussie_ISCED,"Le niveau d'éducation le plus élevé réussi du demandeur d'emploi, selon le référentiel ISCED",String,true,true,,,,"[0, 1, 2, 3, 4, 5, 6, 7, 8]","[0=Inconnu, 1=Enseignement primaire, 2=Enseignement secondaire (premier cycle), 3=Enseignement secondaire (deuxième cycle) (BAC, DAP, DT...), 4=Enseignement post secondaire non-supérieur (Brevet de maîtrise, Diplôme, d'éducateur...), 5=Enseignement supérieur de cycle court (BTS, BAC+2,...), 6=Baccalauréat universitaire ou équivalent (Bachelor), 7=Maîtrise universitaire ou équivalent (Master), 8=Doctorat ou équivalent)",false
+Formation_Reussie_Diplome,Le dernier diplôme réussi lié au niveau d'éducation (ISCED) le plus élevé du demandeur d'emploi,String,true,,,,,"[DAP, DT, Secondaire technique, Secondaire classique, DT, Brevet de maîtrise, Diplôme d'éducateur, BTS, Bachelor, Master, PhD, …]","CATP (DAP), SECON (secondaire classique), SETEC (secondaire technique), TECH (13e technicien)  Le diplôme n'est pas toujours saisi! Regarder alternativement Education_classe_DE",false
+Formation_Reussie_Classe,"La dernière classe réussie, en cas d'une qualification inférieure au BAC",String,true,,,,,"[9ème EST, 12ème EST, 2ème ESC, 5ème primaire, …]",,false
+Formation_Reussie_Specialite,Spécialité du diplôme de la dernière formation réussie par le demandeur d'emploi,String,true,,,,,"[Comptabilité, Economie, Division administrative et commerciale, …]",,false
+Formation_Toutes_Specialites,Spécialités de tous les diplômes poursuivis par le demandeur d'emploi,String,true,,,,,"[Comptabilité, Economie, Division administrative et commerciale, …]",,false
+Formation_Reussie_Pays,Le pays lié au dernier diplôme réussi lié au niveau d'éducation (ISCED) le plus élevé du demandeur d'emploi,String,true,,,,,liste de pays,,false
+Formation_Reussie_Preuve,Preuve du dernier diplôme réussi lié au niveau d'éducation (ISCED) le plus élevé du demandeur d'emploi,String,true,,,,,"[A valider, Déclaré, Homologué, Reconnu, Vérifié]",,false
+Langue_FR,"Niveau de connaissance de la langue francaise (A / B / C) déclaré par le demandeur d'emploi, selon le cadre européen pour les langues (CECR)",String,true,false,,,,"[A,B,C]","[A=élémentaire,B=indépendant,C=expérimenté]",false
+Langue_LB,"Niveau de connaissance de la langue luxembourgeoise (A / B / C) déclaré par le demandeur d'emploi, selon le cadre européen pour les langues (CECR)",String,true,false,,,,"[A,B,C]","[A=élémentaire,B=indépendant,C=expérimenté]",false
+Langue_DE,"Niveau de connaissance de la langue allemande (A / B / C) déclaré par le demandeur d'emploi, selon le cadre européen pour les langues (CECR)",String,true,false,,,,"[A,B,C]","[A=élémentaire,B=indépendant,C=expérimenté]",false
+Langue_EN,"Niveau de connaissance de la langue anglaise (A / B / C) déclaré par le demandeur d'emploi, selon le cadre européen pour les langues (CECR)",String,true,false,,,,"[A,B,C]","[A=élémentaire,B=indépendant,C=expérimenté]",false
+Langues_Autres,Consolidation des autres connaissances de langues déclarées par le demandeur d'emploi,String,true,false,,,,,,false
+Mobilite,Situation de mobilité déclarée du demandeur d'emploi,String,true,true,,,,"[Excellente (permis A, B et véhicule personnel), Moyenne (permis B mais pas de voiture disponible ou utilisation de transports en communs), Limitée (pas de voiture et pas de transports en commun disponible), Limitée pour des raisons psychiques et/ou physiques (durée de trajet restreinte)]",,false
+Permis,Consolidation de tous les permis de conduire du demandeur d'emploi,String,true,false,,,,"[A, A1, A2, ADR, AM, B, BE, C, CE, C1, C1E, D, DE, D1, D1E, E, F]","[A=Motocycle et tricycle, A1=Motocycle léger et tricycle, A2=Motocycle, ADR=Transport dangereux, AM=Cyclomoteur et quadricycle léger, B=Auto, BE=Auto avec remorque, C=Camion (>3,5t), CE=Camion avec remorque, C1= Petit camion (<7,5t), C1E=Petit camion avec remoque, D=Autobus, DE=Autobus avec remoque, D1=Minibus (max 16p), D1E=Minibus avec remoque, E=Remorque ou semi-remorque, F=Tracteur]",false
+Temps_De_Travail,"Temps de travail souhaité par le demandeur d'emploi (complet, partiel…)",String,true,true,,,,"[Temps complet, Temps partiel, Sans préférence]",,false
+Horaire_Journalier,"Horaires de travail souhaitées par le demandeur d'emploi (matin, après-midi, etc.)",String,true,true,,,,"[Après-midi,Après-midi et Soir,Flexible,Matin,Matin et Après-midi, Matin et Soir,Soir]",,false
+Nbr_Heure_Semaine,Nombre d'heures de travail par semaine souhaitées par le demandeur d'emploi,Integer,true,true,40.0,0.0,heures,,,false
