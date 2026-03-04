@@ -1,11 +1,27 @@
 """Unit tests for API key authentication."""
 
+from typing import Any
+
 import pytest
 
 from avatars.base_client import ContextData
 from avatars.client import ApiClient
 from avatars.manager import Manager
 from tests.unit.conftest import FakeApiClient
+
+
+def make_manager(**kwargs: Any) -> Manager:
+    """Create a Manager with default test settings.
+
+    By default, disables compatibility verification for testing.
+    All parameters can be overridden via kwargs.
+    """
+    defaults = {
+        "should_verify_compatibility": False,
+    }
+    # Merge kwargs with defaults, kwargs take precedence
+    params = {**defaults, **kwargs}
+    return Manager(**params)
 
 
 class TestApiClientApiKeyAuth:
@@ -92,7 +108,7 @@ class TestManagerApiKeyAuth:
     def test_manager_with_api_key_creates_client(self) -> None:
         """Verify that Manager with api_key creates ApiClient with api_key."""
         api_key = "manager-api-key-123"
-        manager = Manager(
+        manager = make_manager(
             base_url="http://localhost:8000/api",
             api_key=api_key,
         )
@@ -105,7 +121,7 @@ class TestManagerApiKeyAuth:
     def test_manager_authenticate_raises_error_with_api_key(self) -> None:
         """Verify that calling authenticate() with api_key raises ValueError."""
         api_key = "manager-api-key-auth-error"
-        manager = Manager(
+        manager = make_manager(
             base_url="http://localhost:8000/api",
             api_key=api_key,
         )
@@ -137,13 +153,29 @@ class TestManagerApiKeyAuth:
         fake_client._api_key = api_key
         fake_client.set_header("Authorization", f"api-key-v1 {api_key}")
 
-        manager = Manager(
+        manager = make_manager(
             api_client=fake_client,  # type: ignore[arg-type]
         )
 
         # Should be able to create runner without calling authenticate()
         runner = manager.create_runner("test-set")
         assert runner is not None
+
+    def test_manager_with_api_key_checks_compatibility_by_default(self) -> None:
+        """Verify that Manager with api_key checks compatibility in __init__."""
+        api_key = "manager-runner-api-key"
+        fake_client = FakeApiClient()
+        fake_client._api_key = api_key
+        fake_client.set_header("Authorization", f"api-key-v1 {api_key}")
+
+        # FakeCompatibility returns incompatible, so this should raise
+        with pytest.raises(
+            DeprecationWarning,
+            match="Client is not compatible with the server.",
+        ):
+            Manager(
+                api_client=fake_client,  # type: ignore[arg-type]
+            )
 
 
 class TestApiKeyFormatting:
@@ -187,12 +219,11 @@ class TestApiKeyBackwardCompatibility:
     def test_manager_authenticate_without_api_key(self) -> None:
         """Verify Manager.authenticate() works when no api_key is provided."""
         fake_client = FakeApiClient()
-        manager = Manager(
+        manager = make_manager(
             api_client=fake_client,  # type: ignore[arg-type]
         )
 
         # Should be able to call authenticate without errors
-        # (FakeCompatibility returns incompatible, so we disable verification)
         try:
             manager.authenticate(
                 "username",

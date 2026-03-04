@@ -69,7 +69,7 @@ class TestJobLauncher:
 
     def test_launch_standard_job_with_dp_parameters(self, launcher):
         """Test launching standard job with differential privacy parameters."""
-        launcher.config.create_avatarization_dp_parameters("test_table", epsilon=1.0, ncp=30)
+        launcher.config.create_avatarization_open_dp_parameters("test_table", epsilon=1.0, ncp=30)
         set_name = str(uuid4())
 
         launcher.launch_job(JobKind.standard, set_name)

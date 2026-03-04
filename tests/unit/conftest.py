@@ -1,22 +1,30 @@
 import json
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Callable, Optional
+from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import httpx
 import numpy as np
+import pytest
 from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
 
 from avatars.client import ApiClient
 from avatars.log import setup_logging
 from avatars.models import (
+    BulkDeleteRequest,
+    BulkDeleteResponse,
     CompatibilityResponse,
     CompatibilityStatus,
     FileAccess,
     FileCredentials,
+    JobCreateRequest,
+    JobCreateResponse,
     JobKind,
-    JobWithDisplayNameResponse,
+    JobResponse,
+    JobResponseList,
     Login,
     LoginResponse,
     ResourceSetResponse,
@@ -25,6 +33,90 @@ from avatars.models import (
 RequestHandle = Callable[[httpx.Request], httpx.Response]
 
 setup_logging()
+
+
+def create_fake_job(
+    name: str = "test_job",
+    set_name: UUID | None = None,
+    display_name: str = "test_dataset",
+    kind: JobKind = JobKind.standard,
+    status: str = "finished",
+    parameters_name: str | None = None,
+    created_at: datetime | None = None,
+    done: bool = True,
+    progress: float = 1.0,
+    exception: str = "",
+) -> JobResponse:
+    """Create a fake JobResponse for testing.
+
+    Parameters
+    ----------
+    name : str
+        Job name (default: "test_job")
+    set_name : UUID | None
+        Set UUID (default: random UUID)
+    display_name : str
+        Display name for the dataset (default: "test_dataset")
+    kind : JobKind
+        Job type (default: JobKind.standard)
+    status : str
+        Job status (default: "finished")
+    parameters_name : str | None
+        Parameters name (default: matches job kind value)
+    created_at : datetime | None
+        Creation timestamp (default: now)
+    done : bool
+        Whether job is complete (default: True)
+    progress : float
+        Job progress 0-1 (default: 1.0)
+    exception : str
+        Exception message if any (default: "")
+
+    Returns
+    -------
+    JobResponse
+        A fully populated job object ready for testing
+
+    Examples
+    --------
+    >>> # Simple usage - all defaults
+    >>> job = create_fake_job()
+
+    >>> # Custom set_name and display_name
+    >>> job = create_fake_job(set_name=my_uuid, display_name="customers")
+
+    >>> # Job from 5 days ago
+    >>> job = create_fake_job(created_at=datetime.now(UTC) - timedelta(days=5))
+
+    >>> # Privacy metrics job
+    >>> job = create_fake_job(kind=JobKind.privacy_metrics, name="privacy_job")
+    """
+    if set_name is None:
+        set_name = uuid4()
+    if parameters_name is None:
+        parameters_name = kind.value
+    if created_at is None:
+        created_at = datetime.now(UTC)
+
+    return JobResponse(
+        name=name,
+        set_name=set_name,
+        parameters_name=parameters_name,
+        created_at=created_at,
+        kind=kind,
+        status=status,
+        exception=exception,
+        done=done,
+        progress=progress,
+        display_name=display_name,
+    )
+
+
+@pytest.fixture(autouse=True)
+def no_sleep():
+    """Patch time.sleep in avatars.runner to avoid real delays in unit tests."""
+    with patch("avatars.runner.time.sleep"):
+        yield
 
 
 def mock_httpx_client(handler: Optional[RequestHandle] = None) -> httpx.Client:
@@ -51,29 +143,72 @@ def api_client_factory(handler: Optional[RequestHandle] = None) -> ApiClient:
     )
 
 
-EXPECTED_KWARGS = ["get_jobs_returned_value"]
+EXPECTED_KWARGS = ["jobs"]
 
 
 class FakeJobs:
     def __init__(self, *args, **kwargs):
         kwargs = kwargs or {}
-        self.get_jobs_returned_value = kwargs.get("get_jobs_returned_value", None)
+        self._get_jobs_returned_value: JobResponseList | None = kwargs.get(
+            "get_jobs_returned_value", None
+        )
+        self._jobs: dict[str, JobResponse] = {}
+        self.bulk_delete_calls: list[BulkDeleteRequest] = []
 
-    def get_jobs(self):
-        return self.get_jobs_returned_value
+    def add_job(self, job: JobResponse) -> None:
+        """Pre-populate a job into the fake store (for test setup)."""
+        self._jobs[job.name] = job
 
-    def get_job_status(self, name):
+    def create_job(self, request: JobCreateRequest) -> JobCreateResponse:
+        name = str(uuid4())
+        self._jobs[name] = JobResponse(
+            name=name,
+            set_name=request.set_name,
+            parameters_name=request.parameters_name,
+            display_name=request.parameters_name,
+            created_at=datetime.now(timezone.utc),
+            kind=JobKind.standard,
+            status="pending",
+            exception="",
+            done=False,
+        )
+        return JobCreateResponse(name=name, Location=f"/jobs/{name}")
+
+    def get_jobs(self) -> JobResponseList:
+        if self._get_jobs_returned_value is not None:
+            return self._get_jobs_returned_value
+        return JobResponseList(jobs=list(self._jobs.values()))
+
+    def get_job_status(self, name: str) -> JobResponse:
+        if name in self._jobs:
+            return self._jobs[name]
         return JobResponseFactory().build(
-            name="name",
+            name=name,
             set_name=uuid4(),
-            parameters_name="parameters_name",
+            parameters_name=name,
+            display_name=name,
             created_at="2023-10-01T00:00:00Z",
             kind=JobKind.standard,
             status="finished",
-            exception="",
             done=True,
             progress=1.0,
         )
+
+    def delete_job(self, job_name: str) -> JobResponse:
+        if job_name not in self._jobs:
+            raise ValueError(f"Job '{job_name}' not found")
+        return self._jobs.pop(job_name)
+
+    def bulk_delete_jobs(self, request: BulkDeleteRequest) -> BulkDeleteResponse:
+        self.bulk_delete_calls.append(request)
+        deleted: list[JobResponse] = []
+        failed: list[str] = []
+        for job_name in request.job_names:
+            if job_name in self._jobs:
+                deleted.append(self._jobs.pop(job_name))
+            else:
+                failed.append(job_name)
+        return BulkDeleteResponse(deleted_jobs=deleted, failed_jobs=failed)
 
 
 def privacy_metrics_factory(table_name: str) -> str:
@@ -159,8 +294,7 @@ def advice_factory(table_name: str) -> str:
 
 
 class FakeResults:
-    def __init__(self, tables: list[str] | None = None, *args, **kwargs):
-        kwargs = kwargs or {}
+    def __init__(self, tables: list[str] | None = None):
         self.tables = tables or []
 
     def get_permission_to_download(self, url):
@@ -239,11 +373,36 @@ class FakeResults:
 
 
 class FakeResources:
-    def __init__(self, *args, **kwargs):
-        kwargs = kwargs or {}
+    def __init__(self):
+        self._stored_resources: dict[str, str] = {}
 
     def put_resources(self, display_name, yaml_string):
-        return ResourceSetResponse(set_name=uuid4(), display_name=display_name)
+        set_name = uuid4()
+        self._stored_resources[str(set_name)] = yaml_string
+        return ResourceSetResponse(set_name=set_name, display_name=display_name)
+
+    def get_resources(self, set_name: str) -> str:
+        """Return mock YAML for a resource set."""
+        if set_name in self._stored_resources:
+            return self._stored_resources[set_name]
+        # Return a minimal valid YAML if not found
+        return """---
+kind: AvatarMetadata
+metadata:
+  name: avatar-metadata-test
+spec:
+  display_name: test_dataset
+---
+kind: AvatarSchema
+metadata:
+  name: schema
+spec:
+  tables:
+    - name: table1
+      data:
+        volume: input
+        file: table1.csv
+"""
 
 
 class FakeUser(BaseModel):
@@ -251,24 +410,24 @@ class FakeUser(BaseModel):
 
 
 class FakeUsers:
-    def __init__(self, *args, **kwargs):
-        kwargs = kwargs or {}
+    def __init__(self):
+        pass
 
     def get_me(self):
         return FakeUser(id=uuid4())
 
 
 class FakeAuth:
-    def __init__(self, *args, **kwargs):
-        kwargs = kwargs or {}
+    def __init__(self):
+        pass
 
     def login(self, login: Login, timeout: Optional[int] = None):
         return
 
 
 class FakeCompatibility:
-    def __init__(self, *args, **kwargs):
-        kwargs = kwargs or {}
+    def __init__(self):
+        pass
 
     def is_client_compatible(self):
         return CompatibilityResponse(
@@ -279,16 +438,47 @@ class FakeCompatibility:
 
 
 class FakeApiClient(ApiClient):
-    def __init__(self, tables: list[str] | None = None, *args, **kwargs):
-        kwargs = kwargs or {}
-        for key in kwargs:
-            if key not in EXPECTED_KWARGS:
-                raise ValueError(f"Unexpected keyword argument {key}")
+    """Fake API client for unit testing.
+
+    Provides mock implementations of all API endpoints without requiring
+    a real server connection.
+
+    Examples
+    --------
+    >>> # Simple usage with defaults
+    >>> client = FakeApiClient()
+
+    >>> # With pre-configured jobs
+    >>> jobs = [create_fake_job(display_name="dataset1")]
+    >>> for job in jobs:
+    ...     client.jobs.add_job(job)
+
+    >>> # With builder pattern via jobs attribute
+    >>> client = FakeApiClient()
+    >>> client.jobs.with_job(name="job1").with_job(name="job2")
+    """
+
+    jobs: FakeJobs  # type: ignore[assignment]
+
+    def __init__(
+        self,
+        tables: list[str] | None = None,
+    ):
+        """Initialize FakeApiClient.
+
+        Parameters
+        ----------
+        tables : list[str] | None
+            List of table names to simulate in results.
+        jobs : list[JobWithDisplayNameResponse] | None
+            Pre-configured list of jobs for the jobs API.
+            Can also be built using client.jobs.with_job().
+        """
         self.tables = tables or []
-        self.jobs = FakeJobs(*args, **kwargs)  # type: ignore
+        self.jobs = FakeJobs()  # type: ignore
         self.results = FakeResults(tables=self.tables)  # type: ignore
-        self.resources = FakeResources(*args, **kwargs)  # type: ignore
-        self.users = FakeUsers(*args, **kwargs)  # type: ignore
+        self.resources = FakeResources()  # type: ignore
+        self.users = FakeUsers()  # type: ignore
         self.base_url = "http://localhost:8000"
         self.auth = FakeAuth()  # type: ignore
         self.compatibility = FakeCompatibility()  # type: ignore
@@ -338,9 +528,21 @@ class FakeApiClient(ApiClient):
             return figures_metadata_factory(self.tables[0])
 
     def send_request(self, method, url, **kwargs):
-        return {"name": kwargs["json_data"].parameters_name, "Location": ""}
+        name = kwargs["json_data"].parameters_name
+        self.jobs._jobs[name] = JobResponse(
+            name=name,
+            set_name=kwargs["json_data"].set_name,
+            parameters_name=name,
+            display_name=name,
+            created_at=datetime.now(timezone.utc),
+            kind=JobKind.standard,
+            status="finished",
+            exception="",
+            done=True,
+        )
+        return {"name": name, "Location": ""}
 
 
-class JobResponseFactory(ModelFactory[JobWithDisplayNameResponse]):
-    __model__ = JobWithDisplayNameResponse
+class JobResponseFactory(ModelFactory[JobResponse]):
+    __model__ = JobResponse
     __check_model__ = False

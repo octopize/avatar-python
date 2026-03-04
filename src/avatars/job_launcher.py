@@ -28,6 +28,28 @@ class JobLauncher:
         self.set_name: str = ""
         self.jobs: dict[str, JobCreateResponse] = {}
 
+    def register_existing_job(
+        self, parameters_name: str, job_name: str, job_location: str = ""
+    ) -> None:
+        """Register a job that was created previously (for reconstructed runners).
+
+        This allows reconstructed runners to access results from jobs that were
+        launched in a previous session.
+
+        Parameters
+        ----------
+        parameters_name
+            The name of the parameters associated with the job.
+        job_name
+            The name/parameters_name of the job to register.
+        job_location
+            Optional location URL for the job. Defaults to /jobs/{job_name}.
+        """
+        self.jobs[parameters_name] = JobCreateResponse(
+            name=job_name,
+            Location=job_location or f"/jobs/{job_name}",
+        )
+
     def launch_job(
         self,
         job_kind: JobKind,
@@ -110,7 +132,13 @@ class JobLauncher:
         """
         match job_kind:
             case JobKind.standard:
-                if not self.config.avatarization and not self.config.avatarization_dp:
+                avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
+                avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
+                if (
+                    not self.config.avatarization
+                    and not avatarization_open_dp
+                    and not avatarization_fast_dp
+                ):
                     raise ValueError(
                         "Expected k or epsilon to be set to run an avatarization job, "
                         "You have to set a k or epsilon parameter using `runner.set_parameter()`."
@@ -196,6 +224,7 @@ class JobLauncher:
         request = JobCreateRequest(
             set_name=UUID(self.set_name), parameters_name=parameters_name, depends_on=depends_on
         )
+
         kwargs: dict[str, Any] = {
             "method": "post",
             "url": "/jobs",

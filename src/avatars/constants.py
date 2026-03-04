@@ -99,6 +99,8 @@ class PlotKind(StrEnum):
     """A 2D projection colored by the target class
     (only available with class balancing augmentation).
     """
+    METRICS_SUMMARY = "metrics_summary"
+    """A summary table of privacy metrics."""
 
 
 RESULTS_TO_STORE = [

@@ -3,14 +3,15 @@ import time
 import warnings
 import webbrowser
 from dataclasses import asdict
+from logging import getLogger
 from pathlib import Path
 from typing import Any, Optional, Union
 
 import pandas as pd
 import tenacity
-import yaml
 from avatar_yaml import (
-    AvatarizationDPParameters,
+    AvatarizationFastDPParameters,
+    AvatarizationOpenDPParameters,
     AvatarizationParameters,
     PrivacyMetricsParameters,
 )
@@ -27,6 +28,7 @@ from avatar_yaml.models.parameters import (
     AugmentationStrategy,
     ExcludeVariablesMethod,
     ImputeMethod,
+    InterRecordRangeDifferenceParameters,
     ProjectionType,
     ReportType,
 )
@@ -51,8 +53,10 @@ from avatars.constants import (
 from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
 from avatars.job_launcher import JobLauncher
-from avatars.models import JobKind, JobResponse
+from avatars.models import BulkDeleteRequest, BulkDeleteResponse, JobKind, JobResponse
 from avatars.results_organizer import ResultsOrganizer
+
+logger = getLogger(__name__)
 
 
 class Runner:
@@ -77,6 +81,7 @@ class Runner:
         self.results: ResultsOrganizer = ResultsOrganizer()
         self.jobs = JobLauncher(api_client, self.config)
         self.results_urls: dict[str, dict[str, list[str]]] = {}
+        self._has_results_missing_warning_issued: bool = False
 
         annotations = {
             "client_type": "python",
@@ -314,8 +319,8 @@ class Runner:
         imputation_k: int | None = None,
         imputation_training_fraction: float | None = None,
         imputation_return_data_imputed: bool | None = None,
-        dp_epsilon: float | None = None,
-        dp_preprocess_budget_ratio: float | None = None,
+        open_dp_epsilon: float | None = None,
+        fast_dp_epsilon: float | None = None,
         time_series_nf: int | None = None,
         time_series_projection_type: ProjectionType | None = None,
         time_series_nb_points: int | None = None,
@@ -326,6 +331,7 @@ class Runner:
         data_augmentation_strategy: float | AugmentationStrategy | dict[str, float] | None = None,
         data_augmentation_target_column: str | None = None,
         data_augmentation_should_anonymize_original_table: bool | None = None,
+        inter_record_processors: list[InterRecordRangeDifferenceParameters] | None = None,
     ):
         """Set the parameters for a given table.
 
@@ -363,10 +369,10 @@ class Runner:
             when using KNN or FAST_KNN.
         imputation_return_data_imputed:
             Whether to return the data with imputed values.
-        dp_epsilon
-            Epsilon value for differential privacy.
-        dp_preprocess_budget_ratio
-            Budget ration to allocate when using differential privacy avatarization.
+        open_dp_epsilon
+            Epsilon value for differential privacy using OpenDP implementation.
+        fast_dp_epsilon
+            Epsilon value for fastDP avatarization.
         time_series_nf
             In time series context, number of degrees of freedom to
             retain in time series projections.
@@ -396,6 +402,16 @@ class Runner:
         data_augmentation_should_anonymize_original_table
             SENSITIVE: Whether to anonymize the original table during data augmentation.
             Default is True.
+        inter_record_processors
+            List of InterRecordRangeDifferenceParameters objects. Each processor transforms
+            a pair of start/end columns.
+
+            The processor transforms start/end column pairs into internal representation.
+            This can lead to better semantic avatarization.The transformation
+            is transparent to the user - input and output have the same column structure
+            at the end.
+
+            Records are automatically sorted by target_start_variable for processing.
         """
         imputation = imputation_method.value if imputation_method else None
         if exclude_variable_method:
@@ -408,16 +424,33 @@ class Runner:
             replacement_strategy = exclude_replacement_strategy.value
         else:
             replacement_strategy = None
-        if k and dp_epsilon:
+        if k and open_dp_epsilon:
             raise ValueError(
-                "Expected either k or dp_epsilon to be set, not both. "
-                "If you want to use differential privacy, set dp_epsilon and remove k."
+                "Expected either k or open_dp_epsilon to be set, not both. "
+                "If you want to use OpenDP avatarization, set open_dp_epsilon and remove k."
             )
+        if k and fast_dp_epsilon:
+            raise ValueError(
+                "Expected either k or fast_dp_epsilon to be set, not both. "
+                "If you want to use fastDP avatarization, set fast_dp_epsilon and remove k."
+            )
+        if open_dp_epsilon and fast_dp_epsilon:
+            raise ValueError(
+                "Expected either open_dp_epsilon or fast_dp_epsilon to be set, not both. "
+                "Choose either OpenDP (open_dp_epsilon) or FastDP (fast_dp_epsilon)."
+            )
+
+        inter_record_processor_params_list = inter_record_processors
+
         # reset the parameters if they were already set
         if self.config.avatarization and self.config.avatarization.get(table_name):
             del self.config.avatarization[table_name]
-        if self.config.avatarization_dp and self.config.avatarization_dp.get(table_name):
-            del self.config.avatarization_dp[table_name]
+        avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
+        if avatarization_open_dp and avatarization_open_dp.get(table_name):
+            del avatarization_open_dp[table_name]
+        avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
+        if avatarization_fast_dp and avatarization_fast_dp.get(table_name):
+            del avatarization_fast_dp[table_name]
         if self.config.privacy_metrics and self.config.privacy_metrics.get(table_name):
             del self.config.privacy_metrics[table_name]
         if self.config.signal_metrics and self.config.signal_metrics.get(table_name):
@@ -441,25 +474,46 @@ class Runner:
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
+                avatarization_processors_parameters=inter_record_processor_params_list,
             )
 
-        elif dp_epsilon:
-            # use dp in avatarization
-            self.config.create_avatarization_dp_parameters(
+        elif open_dp_epsilon:
+            # OpenDP avatarization (MST method)
+            self.config.create_avatarization_open_dp_parameters(
                 table_name=table_name,
-                epsilon=dp_epsilon,
+                epsilon=open_dp_epsilon,
                 ncp=ncp,
-                preprocess_budget_ratio=dp_preprocess_budget_ratio,
                 use_categorical_reduction=use_categorical_reduction,
                 imputation_method=imputation,
                 imputation_k=imputation_k,
                 imputation_training_fraction=imputation_training_fraction,
+                imputation_return_data_imputed=imputation_return_data_imputed,
                 column_weights=column_weights,
                 exclude_variable_names=exclude_variable_names,
                 exclude_variable_method=replacement_strategy,
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
+            )
+
+        elif fast_dp_epsilon:
+            # FastDP avatarization (DP mechanisms in latent space)
+            self.config.create_avatarization_fast_dp_parameters(
+                table_name=table_name,
+                epsilon=fast_dp_epsilon,
+                ncp=ncp,
+                use_categorical_reduction=use_categorical_reduction,
+                imputation_method=imputation,
+                imputation_k=imputation_k,
+                imputation_training_fraction=imputation_training_fraction,
+                imputation_return_data_imputed=imputation_return_data_imputed,
+                column_weights=column_weights,
+                exclude_variable_names=exclude_variable_names,
+                exclude_variable_method=replacement_strategy,
+                data_augmentation_strategy=data_augmentation_strategy,
+                data_augmentation_target_column=data_augmentation_target_column,
+                data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
+                avatarization_processors_parameters=inter_record_processor_params_list,
             )
 
         if (
@@ -487,6 +541,7 @@ class Runner:
             imputation_method=imputation,
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
+            imputation_return_data_imputed=imputation_return_data_imputed,
             exclude_variable_names=exclude_variable_names,
             exclude_variable_method=replacement_strategy,
             known_variables=known_variables,
@@ -502,6 +557,7 @@ class Runner:
             imputation_method=imputation,
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
+            imputation_return_data_imputed=imputation_return_data_imputed,
             exclude_variable_names=exclude_variable_names,
             exclude_variable_method=replacement_strategy,
             column_weights=column_weights,
@@ -520,9 +576,13 @@ class Runner:
             The parameters to update. Only parameters that are provided will be updated.
             See set_parameters for the full list of available parameters.
         """
+        avatarization = getattr(self.config, "avatarization", None)
+        avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
+        avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
         if (
-            self.config.avatarization.get(table_name) is None
-            and self.config.avatarization_dp.get(table_name) is None
+            (avatarization.get(table_name) if avatarization else None) is None
+            and (avatarization_open_dp.get(table_name) if avatarization_open_dp else None) is None
+            and (avatarization_fast_dp.get(table_name) if avatarization_fast_dp else None) is None
         ):
             raise ValueError(
                 f"No existing parameters found for table '{table_name}'. "
@@ -561,7 +621,12 @@ class Runner:
         ):
             # Standard avatarization parameters
             params: Optional[
-                Union[AvatarizationParameters, AvatarizationDPParameters, PrivacyMetricsParameters]
+                Union[
+                    AvatarizationParameters,
+                    AvatarizationOpenDPParameters,
+                    AvatarizationFastDPParameters,
+                    PrivacyMetricsParameters,
+                ]
             ] = self.config.avatarization[table_name]
             if isinstance(params, AvatarizationParameters):
                 current_params.update(
@@ -574,26 +639,44 @@ class Runner:
                 )
                 current_params.update(self._extract_exclude_parameters(params))
         elif (
-            self.config.avatarization_dp is not None
-            and table_name in self.config.avatarization_dp.keys()
+            hasattr(self.config, "avatarization_open_dp")
+            and self.config.avatarization_open_dp is not None
+            and table_name in self.config.avatarization_open_dp.keys()
         ):
-            # DP avatarization parameters
-            params = self.config.avatarization_dp[table_name]
-            if isinstance(params, AvatarizationDPParameters):
+            # OpenDP avatarization parameters (end-to-end DP)
+            params = self.config.avatarization_open_dp[table_name]
+            if isinstance(params, AvatarizationOpenDPParameters):
                 current_params.update(
                     {
-                        "dp_epsilon": params.epsilon if params.epsilon else None,
-                        "dp_preprocess_budget_ratio": params.preprocess_budget_ratio
-                        if params.preprocess_budget_ratio
-                        else None,
+                        "open_dp_epsilon": params.epsilon if params.epsilon else None,
                         "column_weights": params.column_weights,
                         "use_categorical_reduction": params.use_categorical_reduction,
                         "ncp": params.ncp,
                     }
                 )
                 current_params.update(self._extract_exclude_parameters(params))
-
         elif (
+            hasattr(self.config, "avatarization_fast_dp")
+            and self.config.avatarization_fast_dp is not None
+            and table_name in self.config.avatarization_fast_dp.keys()
+        ):
+            # FastDP avatarization parameters
+            # Only epsilon is exposed; mechanism-specific params use defaults
+            params = self.config.avatarization_fast_dp[table_name]
+            if isinstance(params, AvatarizationFastDPParameters):
+                current_params.update(
+                    {
+                        "fast_dp_epsilon": params.epsilon if params.epsilon else None,
+                        "column_weights": params.column_weights,
+                        "use_categorical_reduction": params.use_categorical_reduction,
+                        "ncp": params.ncp,
+                    }
+                )
+                current_params.update(self._extract_exclude_parameters(params))
+        else:
+            params = None  # No parameters has been preset
+
+        if (
             self.config.privacy_metrics is not None
             and self.config.privacy_metrics.get(table_name) is not None
         ):
@@ -618,9 +701,7 @@ class Runner:
                     "imputation_training_fraction": params.imputation["training_fraction"]
                     if params.imputation["training_fraction"]
                     else None,
-                    "imputation_return_data_imputed": params.imputation["return_data_imputed"]
-                    if params.imputation["return_data_imputed"]
-                    else None,
+                    "imputation_return_data_imputed": params.imputation["return_data_imputed"],
                 }
             )
 
@@ -741,7 +822,58 @@ class Runner:
         """
         return self.config.get_yaml(path)
 
-    def run(self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER):
+    def _handle_existing_results(self, ignore_warnings: bool = False) -> None:
+        """Warn and clean up local state when re-running a runner that already has results."""
+        advice_job_name = self.jobs.get_parameters_name(JobKind.advice)
+        has_run_before = (
+            not self.results.is_results_empty()
+            or any(key != advice_job_name for key in self.results_urls)
+            or any(job != advice_job_name for job in self.jobs.get_launched_jobs())
+        )
+
+        if has_run_before:
+            if not ignore_warnings:
+                set_name = self.set_name
+                warnings.warn(
+                    f"\nThis runner already has results for set_name '{set_name}'.\n"
+                    "Re-running will create a new set_name — previous results will no longer "
+                    "be accessible from this runner.\n"
+                    f"To access previous results later:\n"
+                    f"regenerated_runner = manager.create_runner_from_id('{set_name}')\n"
+                    "regenerated_runner.shuffled(...)",
+                    UserWarning,
+                )
+            self.results_urls.clear()
+            self.results = ResultsOrganizer()
+            self.jobs.jobs.clear()
+
+    def run(self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER, ignore_warnings: bool = False):
+        """Run avatarization jobs.
+
+        This method creates resources and launches the specified jobs in the correct order.
+        If this runner has existing results from a previous run, a ``UserWarning`` is emitted
+        with the old ``set_name`` so you can recover previous results if needed. Local state
+        is then cleared and a new run starts.
+
+        Parameters
+        ----------
+        jobs_to_run : list[JobKind]
+            List of job types to run. Defaults to all jobs in execution order.
+        ignore_warnings: bool
+            Whether to ignore warnings about existing results when re-running a runner.
+            Defaults to False.
+
+        Examples
+        --------
+        >>> runner = manager.create_runner("my_dataset")
+        >>> runner.add_table("customers", data=df)
+        >>> runner.run()
+        >>>
+        >>> # Running again emits a UserWarning with the old set_name, then proceeds
+        >>> runner.run()
+        """
+        self._handle_existing_results(ignore_warnings=ignore_warnings)
+
         # Create report configurations if report job is requested
         if JobKind.report in jobs_to_run:
             self.config.create_report()
@@ -788,6 +920,39 @@ class Runner:
         """
         return self.get_job(job_name).status
 
+    def delete(
+        self, job_names: JobKind | str | list[JobKind | str] | None = None
+    ) -> BulkDeleteResponse:
+        """Delete one or more jobs launched by this runner.
+
+        When called without arguments, every job launched by this runner is deleted.
+
+        Parameters
+        ----------
+        job_names
+            A single job kind/name, a list of job kinds/names, or ``None`` to
+            delete all launched jobs.
+
+        Returns
+        -------
+        BulkDeleteResponse
+            Response containing deleted and failed jobs.
+
+        Examples
+        --------
+        >>> runner.delete()                                              # all jobs
+        >>> runner.delete(JobKind.standard)                             # single job
+        >>> runner.delete([JobKind.standard, JobKind.privacy_metrics])  # multiple jobs
+        """
+        if job_names is None:
+            names: list[JobKind | str] = list(self.jobs.get_launched_jobs())
+        elif not isinstance(job_names, list):
+            names = [job_names]
+        else:
+            names = job_names
+        job_ids = [self.jobs.get_job_id(name) for name in names]
+        return self.client.jobs.bulk_delete_jobs(BulkDeleteRequest(job_names=job_ids))
+
     def _retrieve_job_result_urls(self, job_name: str) -> None:
         """
         Get the result of a job by name.
@@ -830,6 +995,57 @@ class Runner:
         job_id = self.jobs.get_job_id(job_name)
         self.results_urls[job_name] = self.client.results.get_results(job_id)
 
+    def _populate_results_from_existing_jobs(self) -> None:
+        """Fetch and populate results URLs from all completed jobs for this set_name.
+
+        This method is used when reconstructing a Runner from an existing set_name.
+        It fetches all jobs associated with the set_name and populates the results_urls
+        dictionary for completed jobs only. It also registers these jobs with the
+        JobLauncher so they can be accessed via normal result methods.
+
+        If a job's results are no longer available on the server (404 error), a warning
+        is issued but the method continues to process other jobs.
+        """
+        if not self.set_name:
+            return
+
+        all_jobs = self.client.jobs.get_jobs()
+
+        # Filter jobs by set_name and only include completed jobs
+        for job in all_jobs.jobs:
+            if str(job.set_name) == self.set_name and job.done and not job.exception:
+                job_name = job.name
+                parameters_name = job.parameters_name
+                try:
+                    self.results_urls[parameters_name] = self.client.results.get_results(job_name)
+
+                    self.jobs.register_existing_job(parameters_name, job_name, f"/jobs/{job_name}")
+
+                except Exception as e:
+                    # Keep backward-compatible behavior only for missing-results 404s.
+                    error_message = str(e).lower()
+                    is_missing_results_404 = (
+                        "error status 404" in error_message
+                        and "results file for job" in error_message
+                    )
+                    if is_missing_results_404:
+                        if not self._has_results_missing_warning_issued:
+                            tables_list = list(self.config.tables.keys())
+                            warnings.warn(
+                                f"Results for job '{job_name}' are no longer "
+                                "available on the server. "
+                                "Input data has also been cleaned up. "
+                                f"You need to reupload the following tables: {tables_list}. "
+                                "You can relaunch the job with the same configuration by calling "
+                                "runner.run() after re-uploading your data with "
+                                "runner.upload_file().",
+                            )
+                            # raise only once if multiple jobs are missing results
+                            self._has_results_missing_warning_issued = True
+                        continue
+
+                    raise
+
     def get_specific_result_urls(
         self,
         job_name: str,
@@ -839,6 +1055,8 @@ class Runner:
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
         if job_name not in self.results_urls:
             self._retrieve_job_result_urls(job_name)
+        if result not in self.results_urls[job_name]:
+            return []
         return self.results_urls[job_name][result]
 
     def _download_all_files(self):
@@ -875,16 +1093,15 @@ class Runner:
     ) -> dict[str, Any] | None:
         match result_name:
             case Results.FIGURES:
-                return self._get_figure_metadata(url)
+                return self._get_figure_metadata(url, job_name)
             case Results.METADATA:
                 return {"kind": job_name}
             case _:
                 return None
 
-    def _get_figure_metadata(self, url: str) -> dict[str, Any] | None:
-        standard_key = self.jobs.get_parameters_name(JobKind.standard)
+    def _get_figure_metadata(self, url: str, job_name: str) -> dict[str, Any] | None:
         figures_metadatas = self.file_downloader.download_file(
-            self.results_urls[standard_key][Results.FIGURES_METADATA][0]
+            self.results_urls[job_name][Results.FIGURES_METADATA][0]
         )
         if isinstance(figures_metadatas, list):
             return self.results.find_figure_metadata(figures_metadatas, url)
@@ -956,13 +1173,19 @@ class Runner:
             raise ValueError(f"Expected table '{table_name}' to be created. Try running it first.")
 
         # Print avatarization parameters
+        avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
+        avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
         if self.config.avatarization and table_name in self.config.avatarization:
             print(f"--- Avatarization parameters for {table_name}: ---")  # noqa: T201
             print(asdict(self.config.avatarization[table_name]))  # noqa: T201
             print("\n")  # noqa: T201
-        elif self.config.avatarization_dp and table_name in self.config.avatarization_dp:
-            print(f"--- Avatarization DP parameters for {table_name}: ---")  # noqa: T201
-            print(asdict(self.config.avatarization_dp[table_name]))  # noqa: T201
+        elif avatarization_open_dp and table_name in avatarization_open_dp:
+            print(f"--- Avatarization OpenDP parameters for {table_name}: ---")  # noqa: T201
+            print(asdict(avatarization_open_dp[table_name]))  # noqa: T201
+            print("\n")  # noqa: T201
+        elif avatarization_fast_dp and table_name in avatarization_fast_dp:
+            print(f"--- Avatarization FastDP parameters for {table_name}: ---")  # noqa: T201
+            print(asdict(avatarization_fast_dp[table_name]))  # noqa: T201
             print("\n")  # noqa: T201
         else:
             print(f"--- No avatarization parameters set for {table_name} ---")  # noqa: T201
@@ -1096,6 +1319,23 @@ class Runner:
                 self._save_file(plot, filename=filename)
             self._open_plot(plot, filename=filename)
 
+    def render_privacy_metrics_summary(self, open_in_browser: bool = False):
+        """Render the privacy metrics summary table, this table is only generated
+        when there is multiple tables."""
+        if self.results.get_results("summary", Results.FIGURES, "privacy_metrics") is None:
+            self._download_specific_result("privacy_metrics", Results.FIGURES)
+        plots = self.results.get_results("summary", Results.FIGURES, "privacy_metrics")
+        if not isinstance(plots, dict):
+            raise TypeError(f"Expected a dict, got {type(plots)} instead.")
+        if PlotKind.METRICS_SUMMARY not in plots:
+            raise ValueError(f"No {PlotKind.METRICS_SUMMARY} found.")
+        plot = plots[PlotKind.METRICS_SUMMARY][0]
+        filename = None
+        if open_in_browser:
+            filename = f"{PlotKind.METRICS_SUMMARY.value}.html"
+            self._save_file(plot, filename=filename)
+        self._open_plot(plot, filename=filename)
+
     def projections(self, table_name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         """
         Get the projections.
@@ -1150,231 +1390,23 @@ class Runner:
         return pd.DataFrame(summary_data["stats"])
 
     def from_yaml(self, yaml_path: str) -> None:
-        """Create a Runner object from a YAML configuration.
+        """Load configuration from a YAML file.
+
+        This replaces the current runner's configuration with the one from the file.
+
+        **Note**: Table data files are not automatically loaded. Use ``upload_file()``
+        to provide data before running jobs.
 
         Parameters
         ----------
-        yaml
-            The path to the yaml to transform.
-
-        Returns
-        -------
-        Runner
-            A Runner object configured based on the YAML content.
+        yaml_path : str
+            The path to the YAML configuration file.
         """
-        list_config = self._load_yaml_config(yaml_path)
-        self._process_yaml_config(list_config)
-
-    def _load_yaml_config(self, yaml_path: str) -> list[dict]:
-        """Load the YAML configuration from a file."""
         with open(yaml_path, "r") as file:
-            config = yaml.safe_load_all(file)
-            return list(config)  # Convert generator to list
+            yaml_string = file.read()
 
-    def _process_yaml_config(self, list_config: list[dict]) -> None:
-        """Process the YAML configuration into parameters and links."""
-        parameters: dict[str, dict] = {}
-        links: dict[str, dict] = {}
-
-        for item in list_config:
-            kind = item.get("kind")
-            metadata = item.get("metadata", {})
-            spec = item.get("spec", {})
-
-            if kind == "AvatarSchema":
-                self._process_avatar_schema(spec, metadata, links)
-
-            elif kind in {
-                "AvatarParameters",
-                "AvatarSignalMetricsParameters",
-                "AvatarPrivacyMetricsParameters",
-            }:
-                self._process_parameters(spec, parameters)
-
-        self._apply_links(links)
-
-        self._apply_parameters(parameters)
-
-    def _process_avatar_schema(self, spec: dict, metadata: dict, links: dict):
-        """Process AvatarSchema kind from the YAML configuration."""
-        if metadata["name"].endswith("_avatarized"):
-            return
-        for table in spec.get("tables", []):
-            self._process_table(table, links)
-
-    def _process_table(self, table: dict, links: dict):
-        """Process a single table from the AvatarSchema."""
-        try:
-            base = self.client.results.get_upload_url()
-            user_specific_path = base + f"/{table['name']}"
-            access_url = f"{self.client.base_url}/access?url=" + user_specific_path
-            self.file_downloader.download_file(url=access_url)
-            original_volume = table["data"]["volume"]
-        except FileNotFoundError:
-            print(f"Error downloading file {table['data']['file']}")  # noqa: T201
-            print(  # noqa: T201
-                f"File is not available in the server, upload it with runner.upload_file(table_name='{table['name']}', data='{table['data']['file']}')"  # noqa: E501
-            )
-            original_volume = VOLUME_NAME
-
-        primary_key = None
-        foreign_keys = []
-        time_series_time = None
-        types: dict[str, ColumnType] = {}
-        if table.get("columns"):
-            primary_key = next(
-                (col["field"] for col in table["columns"] if col.get("primary_key")),
-                None,
-            )
-            foreign_keys = [
-                column["field"]
-                for column in table["columns"]
-                if column.get("identifier") and not column.get("primary_key")
-            ]
-            time_series_time = next(
-                (col["field"] for col in table["columns"] if col.get("time_series_time")),
-                None,
-            )
-            types = {
-                col["field"]: ColumnType(col["type"]) for col in table["columns"] if col["type"]
-            }
-
-        self.config.create_table(
-            table_name=table["name"],
-            original_volume=original_volume,
-            original_file=table["data"]["file"],
-            avatar_volume=table["avatars_data"]["volume"] if "avatars_data" in table else None,
-            avatar_file=table["avatars_data"]["volume"] if "avatars_data" in table else None,
-            primary_key=primary_key,
-            foreign_keys=foreign_keys,
-            time_series_time=time_series_time,
-            types=types,
-            individual_level=table.get("individual_level"),
-        )
-
-        if table.get("links", []):
-            for link in table["links"]:
-                links[table["name"]] = link
-
-    def _process_parameters(self, spec: dict, parameters: dict):
-        """Process parameters from the YAML configuration."""
-        for param_type in [
-            "avatarization",
-            "time_series",
-            "privacy_metrics",
-            "signal_metrics",
-        ]:
-            for table_name, params in spec.get(param_type, {}).items():
-                parameters.setdefault(table_name, {}).update({param_type: params})
-
-    def _apply_links(self, links: dict):
-        """Apply links to the configuration."""
-        for table_name, link in links.items():
-            self.add_link(
-                parent_table_name=table_name,
-                parent_field=link["field"],
-                child_table_name=link["to"]["table"],
-                child_field=link["to"]["field"],
-            )
-
-    def _apply_parameters(self, parameters: dict):
-        """Apply parameters to the configuration."""
-        for table_name, params in parameters.items():
-            avatarization = params.get("avatarization", {})
-            time_series = params.get("time_series", {})
-            privacy_metrics = params.get("privacy_metrics", {})
-
-            exclude_variable_method, exclude_variable_names = self._process_exclude_variables(
-                avatarization
-            )
-            (
-                imputation_method,
-                imputation_k,
-                imputation_training_fraction,
-                imputation_return_data_imputed,
-            ) = self._process_imputation(avatarization)
-            time_series_projection_type, time_series_nf = self._process_time_series_projection(
-                time_series
-            )
-            time_series_method, time_series_nb_points = self._process_time_series_alignment(
-                time_series
-            )
-
-            self.set_parameters(
-                table_name=table_name,
-                k=avatarization.get("k"),
-                ncp=avatarization.get("ncp"),
-                use_categorical_reduction=avatarization.get("use_categorical_reduction"),
-                column_weights=avatarization.get("column_weights"),
-                exclude_variable_names=exclude_variable_names,
-                exclude_variable_method=exclude_variable_method,
-                imputation_method=imputation_method,
-                imputation_k=imputation_k,
-                imputation_training_fraction=imputation_training_fraction,
-                imputation_return_data_imputed=imputation_return_data_imputed,
-                time_series_nf=time_series_nf,
-                time_series_projection_type=time_series_projection_type,
-                time_series_nb_points=time_series_nb_points,
-                time_series_method=time_series_method,
-                known_variables=privacy_metrics.get("known_variables"),
-                target=privacy_metrics.get("target"),
-            )
-
-    def _process_exclude_variables(self, avatarization: dict):
-        """Process exclude variables from avatarization parameters."""
-        exclude_variable_method = None
-        exclude_variable_names = None
-        if exclude_vars := avatarization.get("exclude_variables", {}):
-            exclude_variable_method = self._get_enum_value(
-                ExcludeVariablesMethod, exclude_vars.get("replacement_strategy")
-            )
-            exclude_variable_names = exclude_vars.get("variable_names")
-        return exclude_variable_method, exclude_variable_names
-
-    def _process_imputation(self, avatarization: dict):
-        """Process imputation parameters."""
-        imputation_method = None
-        imputation_k = None
-        imputation_training_fraction = None
-        if imputation := avatarization.get("imputation"):
-            imputation_method = self._get_enum_value(ImputeMethod, imputation.get("method"))
-            imputation_k = imputation.get("k")
-            imputation_training_fraction = imputation.get("training_fraction")
-            imputation_return_data_imputed = imputation.get("return_data_imputed", False)
-        return (
-            imputation_method,
-            imputation_k,
-            imputation_training_fraction,
-            imputation_return_data_imputed,
-        )
-
-    def _process_time_series_projection(self, time_series: dict):
-        """Process time series projection parameters."""
-        time_series_projection_type = None
-        time_series_nf = None
-        if projection := time_series.get("projection"):
-            time_series_projection_type = self._get_enum_value(
-                ProjectionType, projection.get("type")
-            )
-            time_series_nf = projection.get("nf")
-        return time_series_projection_type, time_series_nf
-
-    def _process_time_series_alignment(self, time_series: dict):
-        """Process time series alignment parameters."""
-        time_series_method = None
-        time_series_nb_points = None
-        if alignment := time_series.get("alignment"):
-            time_series_method = self._get_enum_value(AlignmentMethod, alignment.get("method"))
-            time_series_nb_points = alignment.get("nb_points")
-        return time_series_method, time_series_nb_points
-
-    def _get_enum_value(self, enum_class, value: str | None):
-        if value is None:
-            return None
-        try:
-            return enum_class(value)
-        except ValueError:
-            return None
+        # Parse YAML using ConfigParser
+        self.config = Config.from_yaml(yaml_string)
 
     def _open_plot(self, plot_html: HTML, filename: str | None = None):
         """Render a plot, optionally saving it and opening it in a browser."""

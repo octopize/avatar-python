@@ -729,6 +729,10 @@ class BaseClient:
     def on_auth_refresh(self, on_auth_refresh: Optional[AuthRefreshFunc] = None) -> None:
         self._on_auth_refresh = on_auth_refresh
 
+    def is_using_api_key(self) -> bool:
+        """Check if the client is configured to use API key authentication."""
+        return self._api_key is not None
+
     def prepare_files(
         self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
     ) -> Optional[FileLikes]:

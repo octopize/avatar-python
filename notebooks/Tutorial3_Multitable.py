@@ -106,6 +106,7 @@ runner.add_table(
     visit,
     primary_key="visit_id",
     foreign_keys=["patient_id", "doctor_id"],
+    individual_level=False,
 )
 
 # %% [markdown]
@@ -228,24 +229,13 @@ for method in runner.privacy_metrics("doctor"):
 # - **Standalone**: Indicates that the doctor table, when considered independently, is protected.
 # - **To_top_enriched**: Suggests that combining information from the visit table reduces the level of protection.
 
-# %%
-print("*** Privacy metrics on the visit table***")
-for method in runner.privacy_metrics("visit"):
-    print(
-        f"Computation type : {method['metadata']['computation_type']} with table {method['metadata']['reference']}"
-    )
-    print(f"   Hidden rate : {method['hidden_rate']}")
-
 # %% [markdown]
-# Key insights:
-# As the visit table is not at the individual level, metrics are calculated using individual ID variables from parent tables (patient, doctor).
+# This summary helps to quickly identify potential privacy risks associated with the multi-table dataset after avatarization. Here patients and doctors tables are well protected even when enriched with visit data.
 #
-# - **to_bottom_id_propagated with table doctor**: looking at the hidden_rate, the visit table does not expose information about doctors.
-# - **full_enriched with table doctor**: Combining the visit table with patient-broadcasted data does not expose doctor information.
-#
-# - **to_bottom_id_propagated with table patient**: looking at the hidden_rate, the visit table does not expose information about patient.
-# - **full_enriched with table patient**: Combining the visit table with doctor-broadcasted data does not expose patient information.
-#
+# If you observe a drop between standalone and enriched results, you might consider adjusting the anonymization parameters or assignment methods used during the avatarization process to enhance privacy protection across linked tables.
+
+# %%
+runner.render_privacy_metrics_summary()
 
 # %% [markdown]
 # # Utility evaluation
@@ -423,5 +413,7 @@ sns.kdeplot(
     color=AVATAR_COLOR,
     alpha=0.8,
 )
+
+# %%
 
 # %%

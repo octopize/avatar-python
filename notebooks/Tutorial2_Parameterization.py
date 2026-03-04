@@ -240,9 +240,6 @@ runner.print_parameters()
 # you can see the table summary read by the server
 runner.table_summary("iris")
 
-# %%
-runner.run()
-
 # %% [markdown]
 # You can also update the suggested parameters:
 
@@ -300,4 +297,10 @@ print(f"the closest_rate_tunned metric measuring singling out is : {closest_rate
 
 # %% [markdown]
 # *In the next tutorial, we will show how to run an avatarization with multiple tables.*
+#
+
+# %% [markdown]
+#
+
+# %% [markdown]
 #

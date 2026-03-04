@@ -1,12 +1,12 @@
 [project]
 name = "octopize.avatar"
-version = "1.15.0"
+version = "1.17.0"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
 packages = [{ include = "avatars" }]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12, <3.14"
 
 dependencies = [
     "fsspec>=2024.12.0",
@@ -27,7 +27,7 @@ dependencies = [
     "aiobotocore <=2.22.0",
     "botocore <=1.40.17",
     "pandas>=2.3.1",
-    "octopize-avatar-yaml==0.1.29",
+    "octopize-avatar-yaml==0.1.33",
 ]
 
 [dependency-groups]
@@ -35,7 +35,6 @@ dev = [
     "mypy>=1.14.0",
     "jupytext>=1.17.0",
     "pytest>=8.3.5",
-    "ruff>=0.8.4",
     "pandas-stubs>=2.2.2.240807",
     "types-pyyaml>=6.0.12.20240917",
     "types-jmespath>=1.0.2.20240106",
@@ -96,8 +95,6 @@ filterwarnings = [
     "ignore:vert.* bool will be deprecated in a future version:PendingDeprecationWarning:seaborn",
 
 ]
-
-
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/avatars"]

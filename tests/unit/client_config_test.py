@@ -55,6 +55,7 @@ class TestClientConfigValidator:
         # Don't use BASE_URL with Config because it reads from env and may conflict
         env_config = Config(
             _env_file=None,  # Don't load from .env
+            BASE_URL=None,  # Don't set BASE_URL to avoid conflicts
             BASE_API_URL=HttpUrl("https://api.example.com"),
             STORAGE_ENDPOINT_URL=HttpUrl("https://storage.example.com"),
             TIMEOUT=90,

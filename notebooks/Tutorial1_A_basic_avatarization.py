@@ -129,3 +129,11 @@ runner.run(jobs_to_run=[JobKind.standard])
 error_job = runner.get_job(JobKind.standard)
 print(error_job.status)
 print(error_job.exception)
+
+# %% [markdown]
+# # How to reload a runner to access previous results
+#
+
+# %%
+reloaded_runner = manager.create_runner_from_name("iris_k5")
+reloaded_runner.shuffled("iris").head()

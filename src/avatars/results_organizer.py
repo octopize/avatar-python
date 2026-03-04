@@ -172,3 +172,18 @@ class ResultsOrganizer(BaseModel):
                 figure_metadata = metadata
                 return figure_metadata
         return None
+
+    def is_results_empty(self) -> bool:
+        """Check if all results are empty."""
+        return not any(
+            [
+                self.shuffled,
+                self.sensitive_unshuffled,
+                self.privacy_metrics,
+                self.signal_metrics,
+                self.original_projections,
+                self.avatars_projections,
+                self.figures,
+                self.run_metadata,
+            ]
+        )

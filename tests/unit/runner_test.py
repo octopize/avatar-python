@@ -15,8 +15,8 @@ from avatar_yaml.models.schema import ColumnType
 
 from avatars.constants import Results
 from avatars.manager import Manager
-from avatars.models import JobKind
-from tests.unit.conftest import FakeApiClient, JobResponseFactory
+from avatars.models import BulkDeleteResponse, JobKind
+from tests.unit.conftest import FakeApiClient, JobResponseFactory, create_fake_job
 
 FIXTURES_PATH = Path(__file__).parent.parent.parent / "fixtures"
 
@@ -122,9 +122,11 @@ class TestRunner:
     def test_set_parameters_with_dp(self):
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
-        runner.set_parameters("test_table", dp_epsilon=3, ncp=2)
+        runner.set_parameters("test_table", open_dp_epsilon=3, ncp=2)
         assert len(runner.config.avatarization.keys()) == 0
-        assert len(runner.config.avatarization_dp.keys()) == 1
+        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
+        assert avatarization_open_dp is not None
+        assert len(avatarization_open_dp.keys()) == 1
         assert len(runner.config.privacy_metrics.keys()) == 1
         assert len(runner.config.signal_metrics.keys()) == 1
 
@@ -132,11 +134,13 @@ class TestRunner:
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table", k=3, ncp=2)
-        runner.set_parameters("test_table", dp_epsilon=3, ncp=2)
+        runner.set_parameters("test_table", open_dp_epsilon=3, ncp=2)
         assert runner.config.avatarization.get("test_table") is None
-        assert runner.config.avatarization_dp["test_table"] is not None
-        assert runner.config.avatarization_dp["test_table"].epsilon == 3
-        assert runner.config.avatarization_dp["test_table"].ncp == 2
+        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
+        assert avatarization_open_dp is not None
+        assert avatarization_open_dp["test_table"] is not None
+        assert avatarization_open_dp["test_table"].epsilon == 3
+        assert avatarization_open_dp["test_table"].ncp == 2
         assert runner.config.privacy_metrics["test_table"].ncp == 2
         assert runner.config.signal_metrics["test_table"].ncp == 2
 
@@ -163,7 +167,12 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table")
         assert len(runner.config.avatarization.keys()) == 0
-        assert len(runner.config.avatarization_dp.keys()) == 0
+        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
+        if avatarization_open_dp is not None:
+            assert len(avatarization_open_dp.keys()) == 0
+        avatarization_fast_dp = getattr(runner.config, "avatarization_fast_dp", None)
+        if avatarization_fast_dp is not None:
+            assert len(avatarization_fast_dp.keys()) == 0
         assert len(runner.config.privacy_metrics.keys()) == 0
         assert len(runner.config.signal_metrics.keys()) == 0
 
@@ -396,15 +405,15 @@ class TestRunner:
         runner.set_parameters("test_table", k=3, ncp=2)
 
         # Update to use DP instead of k
-        runner.update_parameters("test_table", dp_epsilon=0.5, k=None)
+        runner.update_parameters("test_table", open_dp_epsilon=0.5, k=None)
 
         # Verify that we switched from standard to DP avatarization
         assert "test_table" not in runner.config.avatarization
-        assert "test_table" in runner.config.avatarization_dp
-        assert runner.config.avatarization_dp["test_table"].epsilon == 0.5
-        assert (
-            runner.config.avatarization_dp["test_table"].ncp == 2
-        )  # Should preserve other params
+        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
+        assert avatarization_open_dp is not None
+        assert "test_table" in avatarization_open_dp
+        assert avatarization_open_dp["test_table"].epsilon == 0.5
+        assert avatarization_open_dp["test_table"].ncp == 2  # Should preserve other params
 
     def test_update_parameters_add_exclude_variables(self):
         """Test adding exclude variables to existing parameters."""
@@ -573,14 +582,13 @@ class TestRunner:
             == ExcludeVariablesMethod.COORDINATE_SIMILARITY
         )
 
-    def test_extract_current_parameters_dp_avatarization(self):
-        """Test extracting parameters with DP avatarization."""
+    def test_extract_current_parameters_open_dp_avatarization(self):
+        """Test extracting parameters with OpenDP avatarization."""
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters(
             "test_table",
-            dp_epsilon=0.5,
-            dp_preprocess_budget_ratio=0.3,
+            open_dp_epsilon=0.5,
             ncp=2,
             use_categorical_reduction=True,
         )
@@ -589,8 +597,7 @@ class TestRunner:
         current_params = runner._extract_current_parameters("test_table")
 
         # Verify extracted parameters match what was set
-        assert current_params["dp_epsilon"] == 0.5
-        assert current_params["dp_preprocess_budget_ratio"] == 0.3
+        assert current_params["open_dp_epsilon"] == 0.5
         assert current_params["ncp"] == 2
         assert current_params["use_categorical_reduction"]
         assert "k" not in current_params
@@ -684,21 +691,51 @@ class TestRunner:
         ):
             runner.run()
 
-    def test_get_results_on_invalid_job(self):
-        """Test getting results that do not exist."""
+    def test_run_twice_emits_warning_with_and_clears_jobs(self):
+        """Re-running a runner that already has results emits a UserWarning with the set_name."""
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table", k=3)
-        runner.run(jobs_to_run=[JobKind.standard])
-        with pytest.raises(
-            ValueError,
-            match=f"""Expected job '{JobKind.privacy_metrics}' to be created. Try running it""",
-        ):
-            runner.get_specific_result(
-                table_name="test_table",
-                job_name=JobKind.privacy_metrics,
-                result=Results.PRIVACY_METRICS,
+        runner.run()
+        old_set_name = runner.set_name
+
+        with pytest.warns(UserWarning, match=old_set_name):
+            runner.run()
+
+        assert runner.set_name != old_set_name
+        assert len(runner.results_urls) == 0 or all(
+            runner.set_name in str(v) for v in runner.results_urls.values()
+        )
+
+    def test_populate_existing_jobs_reraises_non_results_404(self):
+        """A 404 that is not the results-file-missing error must be re-raised."""
+        set_name = uuid4()
+        fake_client = FakeApiClient()
+        fake_client.jobs.add_job(
+            create_fake_job(
+                name="job-standard",
+                set_name=set_name,
+                kind=JobKind.standard,
+                parameters_name=JobKind.standard.value,
+                done=True,
+                exception="",
             )
+        )
+
+        manager = Manager(api_client=fake_client)
+        runner = manager.create_runner("test")
+        runner.set_name = str(set_name)
+
+        fake_client.results.get_results = lambda _: (_ for _ in ()).throw(
+            Exception(
+                "Got error in HTTP request: get /results/job-standard. "
+                "Error status 404 - Job 'job-standard' either does not exist or you do not "
+                "have access to it"
+            )
+        )
+
+        with pytest.raises(Exception, match="Error status 404"):
+            runner._populate_results_from_existing_jobs()
 
     def test_print_parameters_invalid_table(self):
         """Test printing parameters."""
@@ -735,3 +772,144 @@ class TestRunner:
         runner.set_parameters("test_table", k=3)
         yaml = runner.get_yaml()
         assert "max_distribution_plots: 50" in yaml
+
+    def test_set_parameters_with_fast_dp_epsilon(self):
+        """Test setting FastDP parameters via Runner.set_parameters()."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            fast_dp_epsilon=1.5,
+        )
+
+        # Should create avatarization_fast_dp, not standard avatarization
+        assert len(runner.config.avatarization.keys()) == 0
+        assert len(runner.config.avatarization_open_dp.keys()) == 0
+        assert "test_table" in runner.config.avatarization_fast_dp
+
+        # Verify parameter values (only epsilon is exposed)
+        params = runner.config.avatarization_fast_dp["test_table"]
+        assert params.epsilon == 1.5
+        # Mechanism defaults to "gaussian" when not specified
+        assert params.mechanism == "gaussian"
+
+    def test_extract_current_parameters_fast_dp(self):
+        """Test Runner._extract_current_parameters for FastDP."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            fast_dp_epsilon=1.5,
+            ncp=2,
+            use_categorical_reduction=True,
+        )
+
+        current_params = runner._extract_current_parameters("test_table")
+
+        # Only epsilon and common params are exposed/extracted
+        assert current_params["fast_dp_epsilon"] == 1.5
+        assert current_params["ncp"] == 2
+        assert current_params["use_categorical_reduction"]
+
+        # Mechanism-specific parameters are not exposed
+        assert "fast_dp_mechanism" not in current_params
+        assert "fast_dp_gmm_n_components" not in current_params
+
+    def test_update_parameters_with_fast_dp(self):
+        """Test Runner.update_parameters() with FastDP parameters."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            fast_dp_epsilon=1.0,
+            ncp=2,
+        )
+
+        # Update only epsilon
+        runner.update_parameters("test_table", fast_dp_epsilon=2.0)
+
+        params = runner.config.avatarization_fast_dp["test_table"]
+        assert params.epsilon == 2.0  # Updated
+        assert params.ncp == 2  # Preserved
+
+    def test_cannot_mix_k_and_fast_dp_epsilon(self):
+        """Test that setting both k and fast_dp_epsilon raises an error."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+
+        with pytest.raises(ValueError, match="Expected either k or fast_dp_epsilon"):
+            runner.set_parameters(
+                "test_table",
+                k=5,
+                fast_dp_epsilon=1.5,
+            )
+
+    def test_fast_dp_overwrites_standard_avatarization(self):
+        """Test that FastDP parameters overwrite standard avatarization."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+
+        # Set standard parameters first
+        runner.set_parameters("test_table", k=5, ncp=2)
+        assert "test_table" in runner.config.avatarization
+
+        # Switch to FastDP
+        runner.set_parameters("test_table", fast_dp_epsilon=1.5)
+
+        # Standard avatarization should be cleared
+        assert runner.config.avatarization.get("test_table") is None
+        assert "test_table" in runner.config.avatarization_fast_dp
+        assert runner.config.avatarization_fast_dp["test_table"].epsilon == 1.5
+
+    def test_delete_single_job(self):
+        """Test that delete with a single JobKind returns a BulkDeleteResponse."""
+        self.runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        self.runner.set_parameters("test_table", k=5)
+        self.runner.run(jobs_to_run=[JobKind.standard])
+
+        result = self.runner.delete(JobKind.standard)
+
+        assert isinstance(result, BulkDeleteResponse)
+        assert len(result.deleted_jobs) == 1
+        assert result.failed_jobs == []
+
+    def test_delete_list_of_jobs(self):
+        """Test that delete with a list of JobKinds returns a BulkDeleteResponse."""
+        self.runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        self.runner.set_parameters("test_table", k=5)
+        self.runner.run(
+            jobs_to_run=[JobKind.standard, JobKind.privacy_metrics, JobKind.signal_metrics]
+        )
+
+        result = self.runner.delete([JobKind.standard, JobKind.privacy_metrics])
+
+        assert isinstance(result, BulkDeleteResponse)
+        assert len(result.deleted_jobs) == 2
+        assert result.failed_jobs == []
+
+    def test_delete_raises_when_job_not_launched(self):
+        """Test that delete raises ValueError when the job was never launched."""
+        with pytest.raises(ValueError, match="Expected job 'standard' to be created"):
+            self.runner.delete(JobKind.standard)
+
+    def test_delete_all_jobs_no_args(self):
+        """Test that delete() with no arguments deletes all launched jobs."""
+        self.runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        self.runner.set_parameters("test_table", k=5)
+        self.runner.run(
+            jobs_to_run=[JobKind.standard, JobKind.privacy_metrics, JobKind.signal_metrics]
+        )
+
+        result = self.runner.delete()
+
+        assert isinstance(result, BulkDeleteResponse)
+        assert len(result.deleted_jobs) == 3
+        assert result.failed_jobs == []
+
+    def test_delete_no_args_when_no_jobs_launched(self):
+        """Test that delete() returns empty response when no jobs were launched."""
+        result = self.runner.delete()
+
+        assert isinstance(result, BulkDeleteResponse)
+        assert result.deleted_jobs == []
+        assert result.failed_jobs == []

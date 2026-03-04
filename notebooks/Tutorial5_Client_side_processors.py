@@ -171,7 +171,7 @@ runner_with_processor.add_table(
     "game",
     preprocessed,
 )
-runner_with_processor.set_parameters("game", k=5)
+runner_with_processor.set_parameters("game", k=5, use_categorical_reduction=True)
 runner_with_processor.run()
 runner_with_processor.get_all_results()
 
@@ -203,7 +203,7 @@ runner_no_processor.add_table(
     "game",
     df,
 )
-runner_no_processor.set_parameters("game", k=5)
+runner_no_processor.set_parameters("game", k=5, use_categorical_reduction=True)
 runner_no_processor.run(jobs_to_run=[JobKind.standard])
 runner_no_processor.get_all_results()
 
@@ -292,7 +292,7 @@ runner.add_table(
     "game",
     preprocessed,
 )
-runner.set_parameters("game", k=5)
+runner.set_parameters("game", k=5, use_categorical_reduction=True)
 runner.run(jobs_to_run=[JobKind.standard])
 runner.get_all_results()
 
@@ -338,7 +338,7 @@ runner.add_table(
     "game",
     preprocessed,
 )
-runner.set_parameters("game", k=5)
+runner.set_parameters("game", k=5, use_categorical_reduction=True)
 runner.run(jobs_to_run=[JobKind.standard])
 runner.get_all_results()
 avatars_perturbation = runner.shuffled("game")

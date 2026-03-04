@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.44.0
+# API Version : 2.54.0
 
 
 import logging
@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
 
 from avatars.models import (
     ApiKey,  # noqa: F401
+    BulkDeleteRequest,  # noqa: F401
+    BulkDeleteResponse,  # noqa: F401
     CompatibilityResponse,  # noqa: F401
     CreateApiKeyRequest,  # noqa: F401
     CreateUser,  # noqa: F401
@@ -384,6 +386,7 @@ class Jobs:
     def get_jobs(
         self,
         kind: Optional[JobKind] = None,
+        include_deleted: Optional[bool] = None,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> JobResponseList:
@@ -393,6 +396,7 @@ class Jobs:
             "timeout": timeout,
             "params": dict(
                 kind=kind,
+                include_deleted=include_deleted,
             ),
         }
 
@@ -426,6 +430,39 @@ class Jobs:
         }
 
         return JobResponse(**self.client.request(**kwargs))
+
+    def delete_job(
+        self,
+        job_name: str,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> JobResponse:
+        """Delete a single job by name."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "delete",
+            "url": f"/jobs/{job_name}",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return JobResponse(**self.client.request(**kwargs))
+
+    def bulk_delete_jobs(
+        self,
+        request: BulkDeleteRequest,
+        *,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+    ) -> BulkDeleteResponse:
+        """Delete multiple jobs in a single request. Maximum 100 jobs at once."""
+
+        kwargs: Dict[str, Any] = {
+            "method": "post",
+            "url": f"/jobs/bulk-delete",  # noqa: F541
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return BulkDeleteResponse(**self.client.request(**kwargs))
 
 
 class Openapi:
