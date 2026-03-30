@@ -170,6 +170,7 @@ class FakeJobs:
             kind=JobKind.standard,
             status="pending",
             exception="",
+            progress=50,
             done=False,
         )
         return JobCreateResponse(name=name, Location=f"/jobs/{name}")
@@ -365,7 +366,9 @@ class FakeResults:
             results["figures_metadata"] = ["fakeurl/figures_metadata.json"]
             results["run_metadata"] = ["fakeurl/run_metadata.avatarize.json"]
         elif job_name == JobKind.report.value:
-            results["report"] = ["fakeurl/report.pdf"]
+            results["report"] = ["report.pdf"]
+        elif job_name == "report_pia":
+            results["report"] = [f"{t}.report.pia.pdf" for t in self.tables]
         return results
 
     def get_upload_url(self):
@@ -470,9 +473,6 @@ class FakeApiClient(ApiClient):
         ----------
         tables : list[str] | None
             List of table names to simulate in results.
-        jobs : list[JobWithDisplayNameResponse] | None
-            Pre-configured list of jobs for the jobs API.
-            Can also be built using client.jobs.with_job().
         """
         self.tables = tables or []
         self.jobs = FakeJobs()  # type: ignore
@@ -518,6 +518,9 @@ class FakeApiClient(ApiClient):
             return advice_factory(table_name)
         elif Path(file_access.url).name == "report.pdf":
             return b"report content"
+        elif Path(file_access.url).name.endswith(".report.pia.pdf"):
+            table_name = Path(file_access.url).name.split(".report.pia.")[0]
+            return f"pia report content for {table_name}".encode()
         elif Path(file_access.url).name.endswith(".csv"):
             return string_table_factory()
         elif Path(file_access.url).name.endswith(".privacy.json"):
@@ -538,6 +541,7 @@ class FakeApiClient(ApiClient):
             kind=JobKind.standard,
             status="finished",
             exception="",
+            progress=0,
             done=True,
         )
         return {"name": name, "Location": ""}

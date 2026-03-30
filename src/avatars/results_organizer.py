@@ -27,6 +27,8 @@ class ResultsOrganizer(BaseModel):
     figures: dict[str, dict[str, list[HTML]]] = {}
     advice: dict[str, dict[str, Any]] = {}
     run_metadata: dict[str, Any] = {}
+    privacy_metrics_summary: dict[str, Any] = {}
+    signal_metrics_summary: dict[str, Any] = {}
 
     def get_results(self, table_name: str, result_name: Results, job_name: str) -> TypeResults:
         table_name = self.unescape_table_name(table_name)
@@ -49,6 +51,10 @@ class ResultsOrganizer(BaseModel):
                 return self.advice.get(table_name, {})
             case Results.METADATA:
                 return self.run_metadata.get(job_name, {})
+            case Results.PRIVACY_METRICS_SUMMARY:
+                return self.privacy_metrics_summary if self.privacy_metrics_summary else None
+            case Results.SIGNAL_METRICS_SUMMARY:
+                return self.signal_metrics_summary if self.signal_metrics_summary else None
             case _:
                 raise ValueError(f"Expected result_name to be one of {RESULTS_TO_STORE}")
 
@@ -97,6 +103,12 @@ class ResultsOrganizer(BaseModel):
             case Results.METADATA:
                 if isinstance(result, dict) and metadata is not None:
                     self.run_metadata[metadata["kind"]] = result
+            case Results.PRIVACY_METRICS_SUMMARY:
+                if self._is_list_of_dict(result):
+                    self.privacy_metrics_summary = result[0]
+            case Results.SIGNAL_METRICS_SUMMARY:
+                if self._is_list_of_dict(result):
+                    self.signal_metrics_summary = result[0]
             case _:
                 raise ValueError(f"Expected result_name to be one of {RESULTS_TO_STORE}")
 
@@ -108,7 +120,7 @@ class ResultsOrganizer(BaseModel):
 
     def _is_list_of_dict(self, result: TypeResults) -> TypeGuard[list[dict[str, Any]]]:
         """Validate that the result is a list of dict."""
-        if not isinstance(result, list) or not all(isinstance(r, dict) for r in result):
+        if not isinstance(result, list) or not all(isinstance(r, dict) for r in result) and result:
             raise ValueError("Expected result to be a list of dicts")
         return True
 
@@ -148,6 +160,8 @@ class ResultsOrganizer(BaseModel):
             case Results.FIGURES:
                 if metadata and isinstance(metadata, dict):
                     table_name = metadata.get("table_name", "")
+            case Results.PRIVACY_METRICS_SUMMARY | Results.SIGNAL_METRICS_SUMMARY:
+                table_name = "summary"
             case Results.ADVICE:
                 if isinstance(result, list) and result:
                     table_name = result[0].get("table_name", "")
@@ -185,5 +199,7 @@ class ResultsOrganizer(BaseModel):
                 self.avatars_projections,
                 self.figures,
                 self.run_metadata,
+                self.privacy_metrics_summary,
+                self.signal_metrics_summary,
             ]
         )

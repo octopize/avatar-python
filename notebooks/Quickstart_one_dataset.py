@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.2
+#       jupytext_version: 1.19.1
 # ---
 
 # %% [markdown]
@@ -22,13 +22,10 @@ from avatars.manager import Manager
 
 # The following are not necessary to run avatar but are used in this tutorial
 
-username = os.environ.get("AVATAR_USERNAME", "")
-password = os.environ.get("AVATAR_PASSWORD", "")
-
 # %%
-manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
-# Authenticate with the server
-manager.authenticate(username, password)
+manager = Manager(
+    api_key=os.environ.get("AVATAR_API_KEY")
+)  # or Manager(api_key="...", base_url="https://your-server.com")
 
 # %% [markdown]
 # ## Launching an avatarization

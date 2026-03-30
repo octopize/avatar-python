@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.54.0
+# API Version : 2.62.0
 
 
 import logging
@@ -23,6 +23,7 @@ from avatars.models import (
     JobResponseList,  # noqa: F401
     Login,  # noqa: F401
     LoginResponse,  # noqa: F401
+    MeUser,  # noqa: F401
     ResetPasswordRequest,  # noqa: F401
     ResourceSetResponse,  # noqa: F401
     User,  # noqa: F401
@@ -221,6 +222,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/login/forgotten_password",  # noqa: F541
@@ -237,6 +239,7 @@ class Auth:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/login/reset_password",  # noqa: F541
@@ -390,6 +393,7 @@ class Jobs:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> JobResponseList:
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/jobs",  # noqa: F541
@@ -408,6 +412,7 @@ class Jobs:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> JobCreateResponse:
+
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/jobs",  # noqa: F541
@@ -423,6 +428,7 @@ class Jobs:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> JobResponse:
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/jobs/{job_name}",  # noqa: F541
@@ -474,6 +480,7 @@ class Openapi:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/openapi.json",  # noqa: F541
@@ -635,6 +642,7 @@ class Results:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/results/{job_name}",  # noqa: F541
@@ -649,6 +657,7 @@ class Results:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> FileAccess:
+
         kwargs: Dict[str, Any] = {
             "method": "get",
             "url": f"/access",  # noqa: F541
@@ -702,6 +711,7 @@ class Results:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> Any:
+
         kwargs: Dict[str, Any] = {
             "method": "post",
             "url": f"/download",  # noqa: F541
@@ -764,7 +774,7 @@ class Users:
         self,
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> User:
+    ) -> MeUser:
         """Get my own user."""
 
         kwargs: Dict[str, Any] = {
@@ -773,7 +783,7 @@ class Users:
             "timeout": timeout,
         }
 
-        return User(**self.client.request(**kwargs))
+        return MeUser(**self.client.request(**kwargs))
 
     def get_credits_info(
         self,
@@ -836,6 +846,7 @@ class Users:
         *,
         timeout: Optional[int] = DEFAULT_TIMEOUT,
     ) -> User:
+
         kwargs: Dict[str, Any] = {
             "method": "delete",
             "url": f"/users/{id}",  # noqa: F541

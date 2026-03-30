@@ -55,6 +55,11 @@ class FileDownloader:
                 if isinstance(str_data, bytes):
                     self._str_to_file(str_data, path)
                     data = f"Report saved successfully {path}"
+            case ".md":
+                if path is not None:
+                    content = str_data if isinstance(str_data, bytes) else str_data.encode()
+                    self._str_to_file(content, path)
+                    data = f"Report saved successfully {path}"
             case ".html":
                 if isinstance(str_data, str):
                     data = self._str_to_html(str_data)

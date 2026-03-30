@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.2
+#       jupytext_version: 1.19.1
 # ---
 
 # %% [markdown]
@@ -23,13 +23,10 @@ from avatar_yaml.models.parameters import ReportType
 from avatars.manager import Manager
 from avatars.models import JobKind
 
-username = os.environ.get("AVATAR_USERNAME", "")
-password = os.environ.get("AVATAR_PASSWORD", "")
-
 # %%
-manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
-# Authenticate with the server
-manager.authenticate(username, password, should_verify_compatibility=False)
+manager = Manager(
+    api_key=os.environ.get("AVATAR_API_KEY")
+)  # or Manager(api_key="...", base_url="https://your-server.com")
 
 # %%
 # Verify that we can connect to the API server

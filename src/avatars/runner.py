@@ -26,10 +26,11 @@ from avatar_yaml.models.avatar_metadata import (
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
     AugmentationStrategy,
+    AvatarizationProcessorParameters,
     ExcludeVariablesMethod,
     ImputeMethod,
-    InterRecordRangeDifferenceParameters,
     ProjectionType,
+    ReportLanguage,
     ReportType,
 )
 from avatar_yaml.models.schema import ColumnType, LinkMethod
@@ -53,6 +54,7 @@ from avatars.constants import (
 from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
 from avatars.job_launcher import JobLauncher
+from avatars.metrics_summary import build_metrics_summary_df
 from avatars.models import BulkDeleteRequest, BulkDeleteResponse, JobKind, JobResponse
 from avatars.results_organizer import ResultsOrganizer
 
@@ -70,6 +72,7 @@ class Runner:
         pia_data_type: DataType = DataType.UNKNOWN,
         pia_data_subject: DataSubject = DataSubject.UNKNOWN,
         pia_sensitivity_level: SensitivityLevel = SensitivityLevel.UNDEFINED,
+        report_language: ReportLanguage = ReportLanguage.EN,
     ) -> None:
         self.client = api_client
         self.display_name = display_name
@@ -80,8 +83,9 @@ class Runner:
         self.file_downloader = FileDownloader(api_client)
         self.results: ResultsOrganizer = ResultsOrganizer()
         self.jobs = JobLauncher(api_client, self.config)
-        self.results_urls: dict[str, dict[str, list[str]]] = {}
+        self.results_urls: dict[str, dict[str, Any]] = {}
         self._has_results_missing_warning_issued: bool = False
+        self.report_language = report_language
 
         annotations = {
             "client_type": "python",
@@ -331,7 +335,7 @@ class Runner:
         data_augmentation_strategy: float | AugmentationStrategy | dict[str, float] | None = None,
         data_augmentation_target_column: str | None = None,
         data_augmentation_should_anonymize_original_table: bool | None = None,
-        inter_record_processors: list[InterRecordRangeDifferenceParameters] | None = None,
+        processors: list[AvatarizationProcessorParameters] | None = None,
     ):
         """Set the parameters for a given table.
 
@@ -402,16 +406,14 @@ class Runner:
         data_augmentation_should_anonymize_original_table
             SENSITIVE: Whether to anonymize the original table during data augmentation.
             Default is True.
-        inter_record_processors
-            List of InterRecordRangeDifferenceParameters objects. Each processor transforms
-            a pair of start/end columns.
+        processors
+            List of processor parameter objects (subclasses of AvatarizationProcessorParameters).
+            Supports InterRecordRangeDifferenceParameters and RelativeDifferenceParameters.
+            The order of the list determines the order in which processors are applied
+            during preprocessing (and reversed during postprocessing).
 
-            The processor transforms start/end column pairs into internal representation.
-            This can lead to better semantic avatarization.The transformation
-            is transparent to the user - input and output have the same column structure
-            at the end.
-
-            Records are automatically sorted by target_start_variable for processing.
+            The transformations are transparent to the user - input and output have the same
+            column structure at the end.
         """
         imputation = imputation_method.value if imputation_method else None
         if exclude_variable_method:
@@ -439,8 +441,6 @@ class Runner:
                 "Expected either open_dp_epsilon or fast_dp_epsilon to be set, not both. "
                 "Choose either OpenDP (open_dp_epsilon) or FastDP (fast_dp_epsilon)."
             )
-
-        inter_record_processor_params_list = inter_record_processors
 
         # reset the parameters if they were already set
         if self.config.avatarization and self.config.avatarization.get(table_name):
@@ -474,7 +474,7 @@ class Runner:
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
-                avatarization_processors_parameters=inter_record_processor_params_list,
+                avatarization_processors_parameters=processors,
             )
 
         elif open_dp_epsilon:
@@ -494,6 +494,7 @@ class Runner:
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
+                avatarization_processors_parameters=processors,
             )
 
         elif fast_dp_epsilon:
@@ -513,7 +514,7 @@ class Runner:
                 data_augmentation_strategy=data_augmentation_strategy,
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
-                avatarization_processors_parameters=inter_record_processor_params_list,
+                avatarization_processors_parameters=processors,
             )
 
         if (
@@ -874,10 +875,13 @@ class Runner:
         """
         self._handle_existing_results(ignore_warnings=ignore_warnings)
 
-        # Create report configurations if report job is requested
+        # Create report configurations if report job is requested and report configurations
+        # are not already set (could happen when creating a runner from an existing config)
         if JobKind.report in jobs_to_run:
-            self.config.create_report()
-            self.config.create_report(ReportType.PIA)
+            if self.config.report is None or ReportType.BASIC not in self.config.report:
+                self.config.create_report(language=self.report_language)
+            if self.config.report is None or ReportType.PIA not in self.config.report:
+                self.config.create_report(ReportType.PIA, language=self.report_language)
 
         yaml = self.get_yaml()
 
@@ -1147,14 +1151,22 @@ class Runner:
         Parameters
         ----------
         path
-            The path to save the report.
+            The path to save the report. For a single report this is used as-is.
+            When multiple PIA reports are returned (one per table), an index
+            prefix is added: ``0_report.pdf``, ``1_report.pdf``, etc.
         """
         is_pia = report_type == ReportType.PIA
         job_name = self.jobs.get_parameters_name(JobKind.report, pia_report=is_pia)
         if self.results_urls.get(job_name) is None:
             self._retrieve_job_result_urls(job_name)
-        report = self.results_urls[job_name][Results.REPORT][0]
-        self.file_downloader.download_file(report, path=path)
+        urls = self.results_urls[job_name][Results.REPORT]
+        is_multi = len(urls) > 1
+        for i, url in enumerate(urls):
+            if path is not None:
+                output_path = f"{i}_{path}" if is_multi else path
+            else:
+                output_path = Path(url).name
+            self.file_downloader.download_file(url, path=output_path)
 
     def print_parameters(self, table_name: str | None = None) -> None:
         """Print the parameters for a table.
@@ -1292,6 +1304,78 @@ class Runner:
             raise TypeError(f"Expected a list, got {type(results)} instead.")
         return results
 
+    def render_privacy_metrics_summary(
+        self,
+        open_in_browser: bool = False,  # DEPRECATED
+    ) -> dict:
+        """Get the aggregated privacy metrics summary across tables.
+
+        Only available for multi-table jobs.
+        Parameters
+        ----------
+        open_in_browser
+            Whether to save the summary to a file and open it in a browser. deprecated and will be
+            removed in the future, as the summary is now returned as a dict instead of an HTML file
+
+        Returns
+        -------
+        dict
+            A nested dict ``{table_name: {reference: meta_metric}}``.
+        """
+        if len(self.config.tables) <= 1:
+            raise ValueError(
+                "render_privacy_metrics_summary is only available for multi-table jobs."
+            )
+        if (
+            self.results.get_results("summary", Results.PRIVACY_METRICS_SUMMARY, "privacy_metrics")
+            is None
+        ):
+            self._download_specific_result("privacy_metrics", Results.PRIVACY_METRICS_SUMMARY)
+        results = self.results.get_results(
+            "summary", Results.PRIVACY_METRICS_SUMMARY, "privacy_metrics"
+        )
+        if not isinstance(results, dict):
+            raise TypeError(f"Expected a dict, got {type(results)} instead.")
+        return results
+
+    def render_signal_metrics_summary(self) -> dict:
+        """Get the aggregated signal metrics summary across tables.
+
+        Only available for multi-table jobs.
+
+        Returns
+        -------
+        dict
+            A nested dict ``{table_name: {reference: meta_metric}}``.
+        """
+        if len(self.config.tables) <= 1:
+            raise ValueError(
+                "render_signal_metrics_summary is only available for multi-table jobs."
+            )
+        if self.results.get_results("summary", Results.SIGNAL_METRICS_SUMMARY, "") is None:
+            self._download_specific_result("signal_metrics", Results.SIGNAL_METRICS_SUMMARY)
+        results = self.results.get_results("summary", Results.SIGNAL_METRICS_SUMMARY, "")
+        if not isinstance(results, dict):
+            raise TypeError(f"Expected a dict, got {type(results)} instead.")
+        return results
+
+    def metrics_summary(self) -> pd.DataFrame:
+        """Get the combined privacy and signal metrics summary across tables as a DataFrame.
+
+        Only available for multi-table jobs.
+
+        Returns
+        -------
+        pd.DataFrame
+            A DataFrame indexed by ``table_name`` with MultiIndex columns ``(reference, metric)``
+            where ``reference`` is the top level and ``metric`` is ``privacy`` or ``signal``,
+            combining both meta-metrics for each table/reference pair.
+        """
+        return build_metrics_summary_df(
+            privacy=self.render_privacy_metrics_summary(),
+            signal=self.render_signal_metrics_summary(),
+        )
+
     def render_plot(self, table_name: str, plot_kind: PlotKind, open_in_browser: bool = False):
         """
         Render a plot for a given table.
@@ -1318,23 +1402,6 @@ class Runner:
                 filename = f"{table_name}_{plot_kind.value}_{idx}.html"
                 self._save_file(plot, filename=filename)
             self._open_plot(plot, filename=filename)
-
-    def render_privacy_metrics_summary(self, open_in_browser: bool = False):
-        """Render the privacy metrics summary table, this table is only generated
-        when there is multiple tables."""
-        if self.results.get_results("summary", Results.FIGURES, "privacy_metrics") is None:
-            self._download_specific_result("privacy_metrics", Results.FIGURES)
-        plots = self.results.get_results("summary", Results.FIGURES, "privacy_metrics")
-        if not isinstance(plots, dict):
-            raise TypeError(f"Expected a dict, got {type(plots)} instead.")
-        if PlotKind.METRICS_SUMMARY not in plots:
-            raise ValueError(f"No {PlotKind.METRICS_SUMMARY} found.")
-        plot = plots[PlotKind.METRICS_SUMMARY][0]
-        filename = None
-        if open_in_browser:
-            filename = f"{PlotKind.METRICS_SUMMARY.value}.html"
-            self._save_file(plot, filename=filename)
-        self._open_plot(plot, filename=filename)
 
     def projections(self, table_name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         """

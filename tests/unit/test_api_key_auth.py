@@ -223,13 +223,15 @@ class TestApiKeyBackwardCompatibility:
             api_client=fake_client,  # type: ignore[arg-type]
         )
 
-        # Should be able to call authenticate without errors
+        # Should be able to call authenticate without errors.
+        # A DeprecationWarning about password auth is expected on success.
         try:
-            manager.authenticate(
-                "username",
-                "password",
-                should_verify_compatibility=False,
-            )
+            with pytest.warns(DeprecationWarning, match="Username/password authentication"):
+                manager.authenticate(
+                    "username",
+                    "password",
+                    should_verify_compatibility=False,
+                )
         except ValueError as e:
             if "api_key" in str(e):
                 pytest.fail(f"authenticate() raised api_key error: {e}")

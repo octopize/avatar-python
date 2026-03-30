@@ -15,7 +15,6 @@ from avatars.processors.inter_record_cumulated_difference import (
 )
 from avatars.processors.perturbation import PerturbationProcessor
 from avatars.processors.proportions import ProportionProcessor
-from avatars.processors.relative_difference import RelativeDifferenceProcessor
 from avatars.processors.to_categorical import ToCategoricalProcessor
 
 __all__ = [
@@ -25,7 +24,6 @@ __all__ = [
     "GroupModalitiesProcessor",
     "PerturbationProcessor",
     "ProportionProcessor",
-    "RelativeDifferenceProcessor",
     "ToCategoricalProcessor",
     "InterRecordCumulatedDifferenceProcessor",
     "InterRecordBoundedRangeDifferenceProcessor",

@@ -9,6 +9,7 @@ from avatar_yaml.models.avatar_metadata import (
     DataType,
     SensitivityLevel,
 )
+from avatar_yaml.models.parameters import ReportLanguage
 
 from avatars import __version__
 from avatars.client import ApiClient
@@ -22,6 +23,31 @@ from avatars.models import (
     JobResponse,
 )
 from avatars.runner import Runner
+
+DEPRECATED_API_KEY_WARNING = (
+    "\nUsername/password authentication is deprecated and will be removed in a future "
+    "release. Please migrate to API key authentication.\n"
+    "\n"
+    "To create an API key while you are still logged in, run:\n"
+    "\n"
+    "    from avatars.models import CreateApiKeyRequest, ExpirationDays\n"
+    "\n"
+    "    api_key_response = manager.auth_client.api_keys.create_api_key(\n"
+    "        CreateApiKeyRequest(\n"
+    "            name='my-key', expiration_days=ExpirationDays.integer_365\n"
+    "        )\n"
+    "    )\n"
+    "    print(api_key_response.get('api_key').get('plaintext'))  # Save this — shown only once!\n"
+    "\n"
+    "Then store the key securely (e.g., in a .env file or your environment):\n"
+    "    AVATAR_API_KEY=<your-api-key>\n"
+    "\n"
+    "And use it for all future sessions (no more username/password needed):\n"
+    "    import os\n"
+    "    manager = Manager(api_key=os.environ['AVATAR_API_KEY'])\n"
+    "\n"
+    "For more information, see: https://python.docs.octopize.io/latest/user_guide.html"
+)
 
 
 def _increment_display_name_version(name: str) -> str:
@@ -216,6 +242,12 @@ class Manager:
     ) -> None:
         """Authenticate the user with the given username and password.
 
+        .. deprecated::
+            Username/password authentication is deprecated. After logging in, create an API key
+            and use it for future sessions. See the warning emitted on successful login for the
+            exact migration steps, or visit
+            https://python.docs.octopize.io/latest/user_guide.html
+
         Note: This method should not be called if the Manager was initialized with an api_key.
         API key authentication is already active and doesn't require calling authenticate().
         """
@@ -231,6 +263,12 @@ class Manager:
         self._verify_compatibility_if_needed(should_verify_compatibility)
 
         self.auth_client.authenticate(username, password)
+
+        warnings.warn(
+            DEPRECATED_API_KEY_WARNING,
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
     def forgotten_password(self, email: str) -> None:
         """Send a forgotten password email to the user."""
@@ -253,6 +291,7 @@ class Manager:
         pia_data_type: DataType = DataType.UNKNOWN,
         pia_data_subject: DataSubject = DataSubject.UNKNOWN,
         pia_sensitivity_level: SensitivityLevel = SensitivityLevel.UNDEFINED,
+        report_language: ReportLanguage = ReportLanguage.EN,
     ) -> Runner:
         """Create a new runner."""
         return Runner(
@@ -264,6 +303,7 @@ class Manager:
             pia_data_type=pia_data_type,
             pia_data_subject=pia_data_subject,
             pia_sensitivity_level=pia_sensitivity_level,
+            report_language=report_language,
         )
 
     def create_runner_from_id(

@@ -65,15 +65,15 @@ class TestManager:
                 )
 
     def test_should_not_verify_compatibility(self) -> None:
-        """Verify that the client does not raise when should_verify_compatibility is False"""
-        try:
+        """Verify no compatibility error is raised when the check is disabled."""
+        with pytest.warns(
+            DeprecationWarning, match="Username/password authentication is deprecated"
+        ):
             self.manager.authenticate(
                 username="username",
                 password="password",
                 should_verify_compatibility=False,
             )
-        except DeprecationWarning:
-            pytest.fail("DeprecationWarning was raised unexpectedly.")
 
     def test_verify_compatibility_uses_config_default(
         self, monkeypatch: pytest.MonkeyPatch
@@ -100,15 +100,13 @@ class TestManager:
         monkeypatch.setattr("avatars.manager.config", test_config)
 
         # When should_verify_compatibility is not provided and config is False, should not raise
-        try:
+        # a compatibility error — but should still warn about password auth deprecation.
+        with pytest.warns(
+            DeprecationWarning, match="Username/password authentication is deprecated"
+        ):
             self.manager.authenticate(
                 username="username",
                 password="password",
-            )
-        except DeprecationWarning:
-            pytest.fail(
-                "DeprecationWarning was raised unexpectedly"
-                " when config.VERIFY_COMPATIBILITY is False"
             )
 
     def test_verify_compatibility_parameter_overrides_config(
@@ -120,17 +118,32 @@ class TestManager:
         test_config = Config(VERIFY_COMPATIBILITY=True)
         monkeypatch.setattr("avatars.manager.config", test_config)
 
-        # Even though config is True, explicit False parameter should override
-        try:
+        # Even though config is True, explicit False parameter should override compatibility check.
+        # The deprecation warning about username/password should still be emitted.
+        with pytest.warns(
+            DeprecationWarning, match="Username/password authentication is deprecated"
+        ):
             self.manager.authenticate(
                 username="username",
                 password="password",
                 should_verify_compatibility=False,
             )
-        except DeprecationWarning:
-            pytest.fail(
-                "DeprecationWarning was raised unexpectedly when should_verify_compatibility=False"
+
+    def test_authenticate_emits_deprecation_warning(self) -> None:
+        """Successful authenticate() must emit a DeprecationWarning with migration instructions."""
+        with pytest.warns(DeprecationWarning) as record:
+            self.manager.authenticate(
+                username="username",
+                password="password",
+                should_verify_compatibility=False,
             )
+
+        messages = [str(w.message) for w in record]
+        combined = "\n".join(messages)
+        assert "Username/password authentication is deprecated" in combined
+        assert "create_api_key" in combined
+        assert "AVATAR_API_KEY" in combined
+        assert "python.docs.octopize.io" in combined
 
 
 class TestManagerInitialization:

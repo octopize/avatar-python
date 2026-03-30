@@ -62,6 +62,8 @@ class Results(StrEnum):
     META_SIGNAL_METRIC = "meta_signal_metric"
     FIGURES = "figures"
     FIGURES_METADATA = "figures_metadata"
+    PRIVACY_METRICS_SUMMARY = "privacy_metrics_summary"
+    SIGNAL_METRICS_SUMMARY = "signal_metrics_summary"
 
 
 class PlotKind(StrEnum):
@@ -112,6 +114,8 @@ RESULTS_TO_STORE = [
     Results.PROJECTIONS_AVATARS,
     Results.METADATA,
     Results.FIGURES,
+    Results.PRIVACY_METRICS_SUMMARY,
+    Results.SIGNAL_METRICS_SUMMARY,
 ]
 
 type TypeResults = dict | pd.DataFrame | str | list[dict[str, Any]] | None | HTML
@@ -137,4 +141,6 @@ mapping_result_to_file_name = {
     Results.PROJECTIONS_AVATARS: "projections.avatars",
     Results.METADATA: "run_metadata.json",
     Results.REPORT: "report.md",
+    Results.PRIVACY_METRICS_SUMMARY: "privacy_metrics_summary.json",
+    Results.SIGNAL_METRICS_SUMMARY: "signal_metrics_summary.json",
 }

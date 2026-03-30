@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.17.2
+#       jupytext_version: 1.19.1
 # ---
 
 # %% [markdown]
@@ -31,13 +31,10 @@ from avatar_yaml.models.schema import LinkMethod
 from avatars.manager import Manager
 from avatars.models import JobKind
 
-username = os.environ.get("AVATAR_USERNAME", "")
-password = os.environ.get("AVATAR_PASSWORD", "")
-
 # %%
-manager = Manager()  # or manager = Manager(base_url=https://your-server.com)
-# Authenticate with the server
-manager.authenticate(username, password)
+manager = Manager(
+    api_key=os.environ.get("AVATAR_API_KEY")
+)  # or Manager(api_key="...", base_url="https://your-server.com")
 
 # %% [markdown]
 # ## Loading data
@@ -287,6 +284,29 @@ for method in runner.signal_metrics("visit"):
 # - **Standalone**: The avatarization of the visit table preserves the original distribution well.
 # - **to_bottom_information_propagated with table doctor**: The correlation between the doctor and visit table is well preserved.
 # - **to_bottom_information_propagated with table patient**: The correlation between the patient and visit table is well preserved.
+
+# %%
+runner.render_signal_metrics_summary()
+
+# %% [markdown]
+# ## Overall metrics summary
+
+# %% [markdown]
+# The metrics summary provides a combined view of privacy and signal metrics for every tables pair in multi-table context.
+#
+# **How to read the table:**
+#
+# - A cell where `table_name == reference` (e.g. *doctor × doctor*, *patient × patient*, *visit × visit*) reflects the **standalone** quality of that table — how well the avatarization performed on the table itself.
+# - A cell where `table_name ≠ reference` (e.g. *doctor × visit*, *patient × visit*) reflects the **cross-table** quality — how well the link between those two tables was preserved after reassignment.
+#
+# **What to do if a score is too low:**
+#
+# - A low score on a **diagonal cell** (e.g. *patient × patient*) → consider adjusting the avatarization parameters for that table (e.g. increase `k`).
+# - A low score on an **off-diagonal cell** (e.g. *doctor × visit*) → consider changing the assignment method for the corresponding link (e.g. switch from `SENSITIVE_ORIGINAL_ORDER_ASSIGNMENT` to `LINEAR_SUM_ASSIGNMENT`).
+#
+
+# %%
+runner.metrics_summary()
 
 # %% [markdown]
 # ## Download Report

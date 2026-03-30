@@ -10,6 +10,8 @@ from avatar_yaml.models.parameters import (
     ExcludeVariablesMethod,
     ImputeMethod,
     ProjectionType,
+    ReportLanguage,
+    ReportType,
 )
 from avatar_yaml.models.schema import ColumnType
 
@@ -206,6 +208,66 @@ class TestRunner:
             JobKind.report.value,
             JobKind.report.value + "_pia",
         ]
+
+    def test_run_uses_default_report_language_for_reports(self):
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        runner.run()
+
+        yaml = runner.get_yaml()
+        assert yaml.count("language: en") == 2
+        assert runner.report_language == ReportLanguage.EN
+
+    def test_run_uses_custom_report_language_for_reports(self):
+        runner = self.manager.create_runner("test", report_language=ReportLanguage.FR)
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        runner.run()
+
+        yaml = runner.get_yaml()
+        assert yaml.count("language: fr") == 2
+        assert runner.report_language == ReportLanguage.FR
+
+    def test_run_does_not_recreate_report_configs_when_already_set(self):
+        """When a runner is loaded from an existing config (e.g. from_yaml) with
+        both report types already set, run() must not overwrite them."""
+        runner = self.manager.create_runner("test", report_language=ReportLanguage.EN)
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        # Pre-populate both report configs with FR, simulating a from_yaml scenario
+        runner.config.create_report(language=ReportLanguage.FR)
+        runner.config.create_report(ReportType.PIA, language=ReportLanguage.FR)
+        runner.run()
+
+        assert runner.config.report[ReportType.BASIC][1] == ReportLanguage.FR
+        assert runner.config.report[ReportType.PIA][1] == ReportLanguage.FR
+
+    def test_run_creates_missing_pia_when_basic_already_set(self):
+        """When BASIC report is pre-set but PIA is missing, run() creates only PIA."""
+        runner = self.manager.create_runner("test", report_language=ReportLanguage.EN)
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        # Pre-populate only BASIC with FR
+        runner.config.create_report(language=ReportLanguage.FR)
+        runner.run()
+
+        assert runner.config.report[ReportType.BASIC][1] == ReportLanguage.FR
+        assert ReportType.PIA in runner.config.report
+        assert runner.config.report[ReportType.PIA][1] == ReportLanguage.EN
+
+    def test_run_creates_missing_basic_when_pia_already_set(self):
+        """When PIA report is pre-set but BASIC is missing, run() creates only BASIC."""
+        runner = self.manager.create_runner("test", report_language=ReportLanguage.EN)
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        # Pre-populate only PIA with FR
+        runner.config.create_report(ReportType.PIA, language=ReportLanguage.FR)
+        runner.run()
+
+        assert ReportType.BASIC in runner.config.report
+        assert runner.config.report[ReportType.BASIC][1] == ReportLanguage.EN
+        assert runner.config.report[ReportType.PIA][1] == ReportLanguage.FR
 
     def test_run_order(self):
         runner = self.manager.create_runner("test")
