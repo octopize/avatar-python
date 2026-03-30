@@ -17,6 +17,7 @@
   - [How to generate the report](#how-to-generate-the-report)
     - [Create report from jobs](#create-report-from-jobs)
     - [Create report from data](#create-report-from-data)
+    - [How to set the report language](#how-to-set-the-report-language)
   - [How to launch a whole pipeline](#how-to-launch-a-whole-pipeline)
   - [How to have advice on parameters and processors](#how-to-have-advice-on-parameters-and-processors)
   - [How to download an avatar dataset](#how-to-download-an-avatar-dataset)
@@ -339,6 +340,30 @@ report = client.reports.create_report_from_data(
 result = client.reports.download_report(id=report.id)
 with open("./tmp/my_avatarization_report.pdf", "wb") as f:
     f.write(result)
+```
+
+### How to set the report language
+
+You can configure the language of the generated report. Two languages are available:
+
+- `ReportLanguage.EN` → English (default)
+- `ReportLanguage.FR` → French
+
+There are three ways to set the report language:
+
+#### Using the SDK Client (Manager)
+
+When creating a runner, you can specify the `report_language` parameter:
+
+```python
+from avatars import Manager
+from avatar_yaml.models.parameters import ReportLanguage
+
+manager = Manager(...)
+runner = manager.create_runner(
+    name="my_job",
+    report_language=ReportLanguage.FR  # or ReportLanguage.EN
+)
 ```
 
 ## How to launch a whole pipeline
