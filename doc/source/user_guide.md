@@ -349,10 +349,6 @@ You can configure the language of the generated report. Two languages are availa
 - `ReportLanguage.EN` → English (default)
 - `ReportLanguage.FR` → French
 
-There are three ways to set the report language:
-
-#### Using the SDK Client (Manager)
-
 When creating a runner, you can specify the `report_language` parameter:
 
 ```python
