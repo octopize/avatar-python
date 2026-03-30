@@ -29,6 +29,8 @@ User guide
 
     - `Create report from jobs <#create-report-from-jobs>`__
     - `Create report from data <#create-report-from-data>`__
+    - `How to set the report
+      language <#how-to-set-the-report-language>`__
 
   - `How to launch a whole pipeline <#how-to-launch-a-whole-pipeline>`__
   - `How to have advice on parameters and
@@ -399,6 +401,29 @@ You can create an avatarization report from datasets and metric jobs.
    result = client.reports.download_report(id=report.id)
    with open("./tmp/my_avatarization_report.pdf", "wb") as f:
        f.write(result)
+
+How to set the report language
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can configure the language of the generated report. Two languages
+are available:
+
+- ``ReportLanguage.EN`` → English (default)
+- ``ReportLanguage.FR`` → French
+
+When creating a runner, you can specify the ``report_language``
+parameter:
+
+.. code:: python
+
+   from avatars import Manager
+   from avatar_yaml.models.parameters import ReportLanguage
+
+   manager = Manager(...)
+   runner = manager.create_runner(
+       name="my_job",
+       report_language=ReportLanguage.FR  # or ReportLanguage.EN
+   )
 
 How to launch a whole pipeline
 ------------------------------
