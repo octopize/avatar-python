@@ -97,8 +97,12 @@ class GroupModalitiesProcessor:
             categories = df.columns[category_index]
             # Select columns to reduce
             count_category = df[categories].nunique()
+            if self.min_unique is None:
+                raise ValueError(
+                    "min_unique must be set when variable_thresholds is not provided."
+                )
             columns_to_reduce = count_category[count_category >= self.min_unique].index.tolist()
-            if self.global_threshold:
+            if self.global_threshold is not None:
                 self.variable_thresholds = {x: self.global_threshold for x in columns_to_reduce}
 
         # Apply the modality transformation

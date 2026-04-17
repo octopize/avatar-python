@@ -33,7 +33,7 @@ from avatar_yaml.models.parameters import (
     ReportLanguage,
     ReportType,
 )
-from avatar_yaml.models.schema import ColumnType, LinkMethod
+from avatar_yaml.models.schema import ColumnType, LinkMethod, PseudonymizationColumnConfig
 from IPython.display import HTML, display
 
 from avatars import __version__
@@ -336,6 +336,8 @@ class Runner:
         data_augmentation_target_column: str | None = None,
         data_augmentation_should_anonymize_original_table: bool | None = None,
         processors: list[AvatarizationProcessorParameters] | None = None,
+        pseudonymized_columns: dict[str, PseudonymizationColumnConfig] | None = None,
+        use_excluded_variables_in_metrics: bool = False,
     ):
         """Set the parameters for a given table.
 
@@ -414,6 +416,16 @@ class Runner:
 
             The transformations are transparent to the user - input and output have the same
             column structure at the end.
+        pseudonymized_columns
+            A mapping of column name to ``PseudonymizationColumnConfig`` describing the PII type
+            and pseudonymization strategy to apply to each column. Only columns that should be
+            pseudonymized need to be listed. Foreign key columns in child tables automatically
+            inherit the pseudonymization mapping of the referenced parent primary key — no explicit
+            configuration is needed on child FK columns.
+        use_excluded_variables_in_metrics
+            When True, excluded variables are NOT passed to metrics parameters,
+            allowing privacy and signal metrics to include them in calculations.
+            When False (default), excluded variables are also excluded from metrics calculations.
         """
         imputation = imputation_method.value if imputation_method else None
         if exclude_variable_method:
@@ -440,6 +452,12 @@ class Runner:
             raise ValueError(
                 "Expected either open_dp_epsilon or fast_dp_epsilon to be set, not both. "
                 "Choose either OpenDP (open_dp_epsilon) or FastDP (fast_dp_epsilon)."
+            )
+        if k == 2:
+            warnings.warn(
+                "You have set k = 2, which is the minimum allowed value. With such a low k, "
+                "each synthesized record closely mirrors only 2 original records, "
+                "significantly reducing privacy protection."
             )
 
         # reset the parameters if they were already set
@@ -475,6 +493,7 @@ class Runner:
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
                 avatarization_processors_parameters=processors,
+                pseudonymized_columns=pseudonymized_columns,
             )
 
         elif open_dp_epsilon:
@@ -495,6 +514,7 @@ class Runner:
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
                 avatarization_processors_parameters=processors,
+                pseudonymized_columns=pseudonymized_columns,
             )
 
         elif fast_dp_epsilon:
@@ -515,6 +535,7 @@ class Runner:
                 data_augmentation_target_column=data_augmentation_target_column,
                 data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
                 avatarization_processors_parameters=processors,
+                pseudonymized_columns=pseudonymized_columns,
             )
 
         if (
@@ -535,6 +556,13 @@ class Runner:
                 method=method,
             )
 
+        metrics_exclude_variable_names = (
+            None if use_excluded_variables_in_metrics else exclude_variable_names
+        )
+        metrics_replacement_strategy = (
+            None if use_excluded_variables_in_metrics else replacement_strategy
+        )
+
         self.config.create_privacy_metrics_parameters(
             table_name=table_name,
             ncp=ncp,
@@ -543,8 +571,8 @@ class Runner:
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
             imputation_return_data_imputed=imputation_return_data_imputed,
-            exclude_variable_names=exclude_variable_names,
-            exclude_variable_method=replacement_strategy,
+            exclude_variable_names=metrics_exclude_variable_names,
+            exclude_variable_method=metrics_replacement_strategy,
             known_variables=known_variables,
             target=target,
             quantile_threshold=quantile_threshold,
@@ -559,8 +587,8 @@ class Runner:
             imputation_k=imputation_k,
             imputation_training_fraction=imputation_training_fraction,
             imputation_return_data_imputed=imputation_return_data_imputed,
-            exclude_variable_names=exclude_variable_names,
-            exclude_variable_method=replacement_strategy,
+            exclude_variable_names=metrics_exclude_variable_names,
+            exclude_variable_method=metrics_replacement_strategy,
             column_weights=column_weights,
         )
 
@@ -751,6 +779,15 @@ class Runner:
             }
             current_params.update(to_update)
 
+            # Detect use_excluded_variables_in_metrics: True when avatarization has
+            # exclude_variables but privacy metrics does not.
+            avatarization_has_excluded = bool(current_params.get("exclude_variable_names"))
+            metrics_has_excluded = bool(
+                pm_params.exclude_variables and pm_params.exclude_variables.get("variable_names")
+            )
+            if avatarization_has_excluded and not metrics_has_excluded:
+                current_params["use_excluded_variables_in_metrics"] = True
+
         return current_params
 
     def _extract_exclude_parameters(self, params) -> dict:
@@ -763,7 +800,7 @@ class Runner:
 
         Returns
         -------
-        A dictionary containing exclude_variable_names and exclude_replacement_strategy parameters.
+        A dictionary containing exclude_variable_names and exclude_variable_method parameters.
         """
         result = {}
         if params.exclude_variables:
@@ -772,7 +809,7 @@ class Runner:
                 if params.exclude_variables["variable_names"]
                 else None
             )
-            result["exclude_replacement_strategy"] = (
+            result["exclude_variable_method"] = (
                 ExcludeVariablesMethod(params.exclude_variables["replacement_strategy"])
                 if params.exclude_variables["replacement_strategy"]
                 else None
@@ -1153,7 +1190,8 @@ class Runner:
         path
             The path to save the report. For a single report this is used as-is.
             When multiple PIA reports are returned (one per table), an index
-            prefix is added: ``0_report.pdf``, ``1_report.pdf``, etc.
+            prefix is added to the filename only: ``dir/0_report.pdf``,
+            ``dir/1_report.pdf``, etc.
         """
         is_pia = report_type == ReportType.PIA
         job_name = self.jobs.get_parameters_name(JobKind.report, pia_report=is_pia)
@@ -1163,7 +1201,11 @@ class Runner:
         is_multi = len(urls) > 1
         for i, url in enumerate(urls):
             if path is not None:
-                output_path = f"{i}_{path}" if is_multi else path
+                if is_multi:
+                    p = Path(path)
+                    output_path = str(p.parent / f"{i}_{p.name}")
+                else:
+                    output_path = path
             else:
                 output_path = Path(url).name
             self.file_downloader.download_file(url, path=output_path)

@@ -242,6 +242,10 @@ def _get_distribution_data(
     stats_df = df.groupby(groupby_variables, dropna=False).agg(["mean", "std"]).reset_index()
 
     # Flatten and set new aggregate variable names
-    stats_df.columns = pd.Index(["".join(a) for a in stats_df.columns.to_flat_index()])
+    flattened_columns = [
+        "".join(column) if isinstance(column, tuple) else str(column)
+        for column in stats_df.columns
+    ]
+    stats_df.columns = pd.Index(flattened_columns)
 
     return stats_df

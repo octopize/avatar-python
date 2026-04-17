@@ -59,6 +59,10 @@ class DatetimeProcessor:
             # afterwards
             is_nan = dest[name].isna()
             dest[name] = dest[name].fillna(default_value)
-            dest[name] = pd.to_datetime(dest[name].astype("int64") * 10**9, unit="ns")
-            dest[name] = dest[name].where(~is_nan, pd.NaT)
+            converted = pd.Series(
+                pd.to_datetime(dest[name].astype("int64") * 10**9, unit="ns"),
+                index=dest.index,
+            )
+            converted.loc[is_nan] = None
+            dest[name] = converted
         return dest

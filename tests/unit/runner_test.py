@@ -1,9 +1,11 @@
 import re
 from pathlib import Path
+from unittest.mock import MagicMock, call
 from uuid import uuid4
 
 import pandas as pd
 import pytest
+from avatar_yaml import PseudonymizationColumnConfig, PseudonymizationStrategy
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
     AugmentationStrategy,
@@ -378,6 +380,61 @@ class TestRunner:
         ):
             runner.run(jobs_to_run=[JobKind.report])
 
+    def test_download_report_single_uses_path_as_is(self):
+        """Single report: path is used as-is."""
+        runner = self.manager.create_runner("test")
+        job_name = runner.jobs.get_parameters_name(JobKind.report, pia_report=True)
+        runner.results_urls[job_name] = {Results.REPORT: ["fakeurl/table1.report.pia.pdf"]}
+
+        runner.file_downloader.download_file = MagicMock()
+        runner.download_report(path="../../report.docx", report_type=ReportType.PIA)
+
+        runner.file_downloader.download_file.assert_called_once_with(
+            "fakeurl/table1.report.pia.pdf", path="../../report.docx"
+        )
+
+    def test_download_report_multi_preserves_directory(self):
+        """Multiple reports: index prefix is added to filename only, directory is preserved."""
+        runner = self.manager.create_runner("test")
+        job_name = runner.jobs.get_parameters_name(JobKind.report, pia_report=True)
+        runner.results_urls[job_name] = {
+            Results.REPORT: [
+                "fakeurl/table1.report.pia.pdf",
+                "fakeurl/table2.report.pia.pdf",
+            ]
+        }
+
+        runner.file_downloader.download_file = MagicMock()
+        runner.download_report(path="../../report.docx", report_type=ReportType.PIA)
+
+        runner.file_downloader.download_file.assert_has_calls(
+            [
+                call("fakeurl/table1.report.pia.pdf", path="../../0_report.docx"),
+                call("fakeurl/table2.report.pia.pdf", path="../../1_report.docx"),
+            ]
+        )
+
+    def test_download_report_multi_simple_filename(self):
+        """Multiple reports with a simple filename (no directory): index prefix added."""
+        runner = self.manager.create_runner("test")
+        job_name = runner.jobs.get_parameters_name(JobKind.report, pia_report=True)
+        runner.results_urls[job_name] = {
+            Results.REPORT: [
+                "fakeurl/table1.report.pia.pdf",
+                "fakeurl/table2.report.pia.pdf",
+            ]
+        }
+
+        runner.file_downloader.download_file = MagicMock()
+        runner.download_report(path="report.docx", report_type=ReportType.PIA)
+
+        runner.file_downloader.download_file.assert_has_calls(
+            [
+                call("fakeurl/table1.report.pia.pdf", path="0_report.docx"),
+                call("fakeurl/table2.report.pia.pdf", path="1_report.docx"),
+            ]
+        )
+
     def test_delete_table(self):
         runner = self.manager.create_runner("test")
         runner.add_table("test", data=self.df1)
@@ -519,6 +576,109 @@ class TestRunner:
             == "row_order"
         )
 
+    def test_set_parameters_use_excluded_variables_in_metrics_true(self):
+        """Test excluded vars not in metrics when use_excluded_variables_in_metrics=True."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        exclude_vars = ["col1"]
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            ncp=2,
+            exclude_variable_names=exclude_vars,
+            exclude_variable_method=ExcludeVariablesMethod.ROW_ORDER,
+            use_excluded_variables_in_metrics=True,
+        )
+
+        # Avatarization still has exclude_variables
+        assert (
+            runner.config.avatarization["test_table"].exclude_variables["variable_names"]
+            == exclude_vars
+        )
+        # Metrics do NOT have exclude_variables
+        assert runner.config.privacy_metrics["test_table"].exclude_variables is None
+        assert runner.config.signal_metrics["test_table"].exclude_variables is None
+
+    def test_set_parameters_use_excluded_variables_in_metrics_false(self):
+        """Test excluded vars in metrics when use_excluded_variables_in_metrics=False (default)."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        exclude_vars = ["col1"]
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            ncp=2,
+            exclude_variable_names=exclude_vars,
+            exclude_variable_method=ExcludeVariablesMethod.ROW_ORDER,
+            use_excluded_variables_in_metrics=False,
+        )
+
+        # Both avatarization and metrics have exclude_variables
+        assert (
+            runner.config.avatarization["test_table"].exclude_variables["variable_names"]
+            == exclude_vars
+        )
+        assert (
+            runner.config.privacy_metrics["test_table"].exclude_variables["variable_names"]
+            == exclude_vars
+        )
+        assert (
+            runner.config.signal_metrics["test_table"].exclude_variables["variable_names"]
+            == exclude_vars
+        )
+
+    def test_extract_current_parameters_with_use_excluded_variables_in_metrics(self):
+        """Test use_excluded_variables_in_metrics=True detected in _extract_current_parameters."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            ncp=2,
+            exclude_variable_names=["col1"],
+            exclude_variable_method=ExcludeVariablesMethod.ROW_ORDER,
+            use_excluded_variables_in_metrics=True,
+        )
+
+        current_params = runner._extract_current_parameters("test_table")
+        assert current_params.get("use_excluded_variables_in_metrics") is True
+
+    def test_extract_current_parameters_use_excluded_variables_in_metrics_false_not_set(self):
+        """Test that use_excluded_variables_in_metrics is not set when False (default)."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            ncp=2,
+            exclude_variable_names=["col1"],
+            exclude_variable_method=ExcludeVariablesMethod.ROW_ORDER,
+        )
+
+        current_params = runner._extract_current_parameters("test_table")
+        assert current_params.get("use_excluded_variables_in_metrics") is None
+
+    def test_update_parameters_preserves_use_excluded_variables_in_metrics(self):
+        """Test that update_parameters preserves use_excluded_variables_in_metrics=True."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            ncp=2,
+            exclude_variable_names=["col1"],
+            exclude_variable_method=ExcludeVariablesMethod.ROW_ORDER,
+            use_excluded_variables_in_metrics=True,
+        )
+
+        # Update a different parameter
+        runner.update_parameters("test_table", k=5)
+
+        # Metrics should still not have exclude_variables
+        assert runner.config.privacy_metrics["test_table"].exclude_variables is None
+        assert runner.config.signal_metrics["test_table"].exclude_variables is None
+        assert runner.config.avatarization["test_table"].k == 5
+
     def test_update_parameters_with_imputation(self):
         """Test updating imputation parameters."""
         runner = self.manager.create_runner("test")
@@ -613,7 +773,7 @@ class TestRunner:
         assert current_params["column_weights"] == {"col1": 0.7, "col2": 0.3}
         assert current_params["exclude_variable_names"] == ["col2"]
         assert (
-            current_params["exclude_replacement_strategy"]
+            current_params["exclude_variable_method"]
             == ExcludeVariablesMethod.COORDINATE_SIMILARITY
         )
         assert current_params["imputation_method"] == ImputeMethod.KNN
@@ -975,3 +1135,40 @@ class TestRunner:
         assert isinstance(result, BulkDeleteResponse)
         assert result.deleted_jobs == []
         assert result.failed_jobs == []
+
+    def test_set_parameters_with_pseudonymized_columns(self):
+        df = pd.DataFrame({"email": ["a@b.com", "c@d.com"], "age": [30, 40]})
+        self.runner.add_table("t", data=df)
+        self.runner.set_parameters(
+            "t",
+            k=3,
+            pseudonymized_columns={
+                "email": PseudonymizationColumnConfig(
+                    strategy=PseudonymizationStrategy.HASH_SHA256
+                )
+            },
+        )
+        table_info = self.runner.config.tables["t"]
+        assert table_info.columns is not None
+        email_col = next((c for c in table_info.columns if c.field == "email"), None)
+        assert email_col is not None
+        assert email_col.pseudonymization_strategy == PseudonymizationStrategy.HASH_SHA256
+
+    def test_set_parameters_without_pseudonymized_columns_no_regression(self):
+        df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
+        self.runner.add_table("t2", data=df)
+        self.runner.set_parameters("t2", k=3)
+        assert "t2" in self.runner.config.tables
+        table_info = self.runner.config.tables["t2"]
+        for col in table_info.columns or []:
+            assert col.pseudonymization_strategy is None
+            assert col.pii_type is None
+
+    def test_avatars_package_exports_pii_types(self):
+        from avatars import PiiType, PseudonymizationColumnConfig, PseudonymizationStrategy
+
+        assert PseudonymizationStrategy.FAKER == "FAKER"
+        assert issubclass(PseudonymizationStrategy, str)
+        assert issubclass(PiiType, str)
+        cfg = PseudonymizationColumnConfig(strategy=PseudonymizationStrategy.HASH_SHA256)
+        assert cfg.strategy == PseudonymizationStrategy.HASH_SHA256

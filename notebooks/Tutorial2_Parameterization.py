@@ -50,10 +50,10 @@ df.head()
 
 # %%
 # The runner is the object that will be used to upload data to the server and run the avatarization
-runner_k2 = manager.create_runner("iris_k2")
+runner_k3 = manager.create_runner("iris_k3")
 
 # Then upload the data, you can either use a pandas dataframe or a file
-runner_k2.add_table("iris", df)
+runner_k3.add_table("iris", df)
 
 # %% [markdown]
 # ## Varying k
@@ -65,15 +65,15 @@ runner_k2.add_table("iris", df)
 
 # %%
 # Set k
-k = 2
-runner_k2.set_parameters("iris", k=k)
+k = 3
+runner_k3.set_parameters("iris", k=k)
 
-runner_k2.run()
+runner_k3.run()
 
 # Retrieve selected metric
-hidden_rate = runner_k2.privacy_metrics("iris")[0]["hidden_rate"]
-local_cloaking = runner_k2.privacy_metrics("iris")[0]["local_cloaking"]
-hellinger_distance = runner_k2.signal_metrics("iris")[0]["hellinger_mean"]
+hidden_rate = runner_k3.privacy_metrics("iris")[0]["hidden_rate"]
+local_cloaking = runner_k3.privacy_metrics("iris")[0]["local_cloaking"]
+hellinger_distance = runner_k3.signal_metrics("iris")[0]["hellinger_mean"]
 
 print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
@@ -113,8 +113,8 @@ original_coord_k_30, avatars_coord_k_30 = runner_k30.projections("iris")
 
 # %%
 # if you are having issues rendering the plot in your notebook, you can use the following line to open the plot in your browser
-# runner_k2.render_plot("iris", PlotKind.PROJECTION_3D, open_in_browser=True)
-runner_k2.render_plot("iris", PlotKind.PROJECTION_3D)
+# runner_k3.render_plot("iris", PlotKind.PROJECTION_3D, open_in_browser=True)
+runner_k3.render_plot("iris", PlotKind.PROJECTION_3D)
 
 # %%
 runner_k30.render_plot("iris", PlotKind.PROJECTION_3D)
@@ -241,7 +241,7 @@ runner.table_summary("iris")
 # You can also update the suggested parameters:
 
 # %%
-runner.update_parameters("iris", k=2)
+runner.update_parameters("iris", k=3)
 runner.print_parameters()
 runner.run()
 
