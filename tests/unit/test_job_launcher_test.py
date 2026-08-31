@@ -6,14 +6,14 @@ import pytest
 from avatar_yaml import Config
 
 from avatars.job_launcher import JobLauncher
-from avatars.models import JobKind
+from avatars.models import JobKind, JobStatus
 from tests.unit.conftest import FakeApiClient
 
 
 class TestJobLauncher:
     """Test suite for JobLauncher class."""
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def config(self):
         """Create a fresh config with a table for each test."""
         config = Config(set_name="test_set")
@@ -24,14 +24,14 @@ class TestJobLauncher:
         )
         return config
 
-    @pytest.fixture(scope="function")
+    @pytest.fixture
     def launcher(self, config) -> JobLauncher:
         """Create a fresh JobLauncher instance with fake API client for each test."""
         client = FakeApiClient(tables=["test_table"])
         return JobLauncher(client=client, config=config)
 
     @pytest.mark.parametrize(
-        "job_kind,pia_report,expected",
+        ("job_kind", "pia_report", "expected"),
         [
             (JobKind.standard, False, "standard"),
             (JobKind.standard, True, "standard"),
@@ -270,7 +270,7 @@ class TestJobLauncher:
         launcher.launch_job(JobKind.standard, set_name)
         status = launcher.get_job_status(JobKind.standard)
 
-        assert status.status == "finished"
+        assert status.status == JobStatus.finished
         assert status.done is True
 
     def test_get_job_status_by_string(self, launcher):
@@ -289,7 +289,7 @@ class TestJobLauncher:
 
         pia_status = launcher.get_job_status("report_pia")
 
-        assert pia_status.status == "finished"
+        assert pia_status.status == JobStatus.finished
         assert pia_status.done is True
 
     def test_has_job_with_job_kind_enum(self, launcher):

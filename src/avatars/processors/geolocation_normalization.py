@@ -1,5 +1,3 @@
-from typing import Dict, List, Tuple
-
 import numpy as np
 import pandas as pd
 
@@ -12,8 +10,7 @@ class GeolocationNormalizationProcessor:
     or non-squared bounds (e.g. country borders) and it is required to retain this lack of points
     in the anonymized data.
 
-    Keyword Arguments
-    -----------------
+    Keyword Arguments:
         latitude_variable:
             latitude variable name
         longitude_variable:
@@ -25,46 +22,45 @@ class GeolocationNormalizationProcessor:
             number of discretized longitude bins at each reference latitude.  A high number of
             bins will yield a higher fidelity in the longitude dimension.
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> df = pd.DataFrame(
-    ...    {
-    ...        'lat': [49.1, 49.2, 49.3, 49.3],
-    ...        'lon': [3.21, 3.19, 3.11, 3.18]
-    ...    }
-    ... )
-    >>> df
-        lat   lon
-    0  49.1  3.21
-    1  49.2  3.19
-    2  49.3  3.11
-    3  49.3  3.18
-    >>> processor = GeolocationNormalizationProcessor(
-    ...    latitude_variable='lat',
-    ...    longitude_variable='lon',
-    ...    n_reference_lat=3,
-    ...    n_bins=5
-    ... )
-    >>> processed = processor.preprocess(df)
-    >>> processed
-        lat  lon
-    0  49.1  0.5
-    1  49.2  0.5
-    2  49.3  0.0
-    3  49.3  1.0
+    Examples:
+        >>> import numpy as np
+        >>> df = pd.DataFrame(
+        ...    {
+        ...        'lat': [49.1, 49.2, 49.3, 49.3],
+        ...        'lon': [3.21, 3.19, 3.11, 3.18]
+        ...    }
+        ... )
+        >>> df
+            lat   lon
+        0  49.1  3.21
+        1  49.2  3.19
+        2  49.3  3.11
+        3  49.3  3.18
+        >>> processor = GeolocationNormalizationProcessor(
+        ...    latitude_variable='lat',
+        ...    longitude_variable='lon',
+        ...    n_reference_lat=3,
+        ...    n_bins=5
+        ... )
+        >>> processed = processor.preprocess(df)
+        >>> processed
+            lat  lon
+        0  49.1  0.5
+        1  49.2  0.5
+        2  49.3  0.0
+        3  49.3  1.0
 
-    The pre process expresses one of the coordinate dimension (i.e. lon) between 0 and 1.
-    The range of values is different for different lat.
+        The pre process expresses one of the coordinate dimension (i.e. lon) between 0 and 1.
+        The range of values is different for different lat.
 
-    >>> processor.postprocess(source=df, dest=processed)
-        lat   lon
-    0  49.1  3.21
-    1  49.2  3.19
-    2  49.3  3.11
-    3  49.3  3.18
+        >>> processor.postprocess(source=df, dest=processed)
+            lat   lon
+        0  49.1  3.21
+        1  49.2  3.19
+        2  49.3  3.11
+        3  49.3  3.18
 
-    The post process re-express the coordinates in the same original ranges.
+        The post process re-express the coordinates in the same original ranges.
 
     """
 
@@ -75,11 +71,10 @@ class GeolocationNormalizationProcessor:
         self.longitude_variable = longitude_variable
         self.n_reference_lat = n_reference_lat
         self.n_bins = n_bins
-        self.model: Dict[float, Dict[str, List[Tuple[float, float]]]] = {}
+        self.model: dict[float, dict[str, list[tuple[float, float]]]] = {}
 
     def _compute_references(self, df: pd.DataFrame) -> pd.DataFrame:
         """Define reference latitudes and associate original points to each."""
-
         # Pick n lats along the lat range
         reference_lats = np.linspace(min(df["lat"]), max(df["lat"]), self.n_reference_lat)
 
@@ -102,13 +97,12 @@ class GeolocationNormalizationProcessor:
             ].copy()
             tmp_df["lat"] = ref_lat  # set lat as ref_lat
             ref_dfs.append(tmp_df)
-        ref_df = pd.concat(ref_dfs).reset_index(drop=True)
+        ref_df: pd.DataFrame = pd.concat(ref_dfs).reset_index(drop=True)
 
         return ref_df
 
     def _compute_ranges(self, ref_df: pd.DataFrame, nbins: int) -> None:
-        """Calculate ranges of lon where there are points for each reference lat"""
-
+        """Calculate ranges of lon where there are points for each reference lat."""
         # "Cut" values of each reference lat in `nbins` bins. A bin represent a portion of the lon
         # covered at that lat
         for ref_lat in ref_df["lat"].unique():

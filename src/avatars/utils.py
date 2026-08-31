@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import io
+from collections.abc import Generator
 from contextlib import contextmanager
 from enum import Enum
-from typing import Any, Generator, Optional, TypeVar
+from typing import Any, TypeVar
 
 from toolz.dicttoolz import valfilter, valmap
 
@@ -26,7 +27,7 @@ class ContentType(Enum):
         return ContentType.UNSUPPORTED
 
 
-def ensure_valid(what: Optional[T], label: str = "") -> T:
+def ensure_valid[T](what: T | None, label: str = "") -> T:
     if what is None:
         msg = f"{label} " if label else ""
         raise RuntimeError(f"Expected valid {msg} argument, got None instead")
@@ -35,12 +36,12 @@ def ensure_valid(what: Optional[T], label: str = "") -> T:
 
 
 @contextmanager
-def validated(what: Optional[T], label: str = "") -> Generator[T, None, None]:
+def validated[T](what: T | None, label: str = "") -> Generator[T, None, None]:
     val = ensure_valid(what, label)
     yield val
 
 
-def pop_or(content: dict[str, Any], key: str, default: T) -> T:
+def pop_or[T](content: dict[str, Any], key: str, default: T) -> T:
     val: T = default
 
     if key in content:
@@ -49,7 +50,7 @@ def pop_or(content: dict[str, Any], key: str, default: T) -> T:
     return val
 
 
-def remove_optionals(params: Optional[dict[str, Any]]) -> Optional[dict[str, Any]]:
+def remove_optionals(params: dict[str, Any] | None) -> dict[str, Any] | None:
     if params:
         # Remove params if they are set to None (allow handling of optionals)
         params = valfilter(lambda x: x is not None, params)

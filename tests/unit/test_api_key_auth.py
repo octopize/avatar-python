@@ -1,27 +1,22 @@
 """Unit tests for API key authentication."""
 
+import os
 from typing import Any
+from unittest import mock
+from unittest.mock import MagicMock
 
+import httpx
 import pytest
 
-from avatars.base_client import ContextData
+from avatars.base_client import ApiConnectionError, ContextData
 from avatars.client import ApiClient
 from avatars.manager import Manager
-from tests.unit.conftest import FakeApiClient
+from tests.unit.conftest import FakeApiClient, FakeIncompatibleCompatibility
 
 
 def make_manager(**kwargs: Any) -> Manager:
-    """Create a Manager with default test settings.
-
-    By default, disables compatibility verification for testing.
-    All parameters can be overridden via kwargs.
-    """
-    defaults = {
-        "should_verify_compatibility": False,
-    }
-    # Merge kwargs with defaults, kwargs take precedence
-    params = {**defaults, **kwargs}
-    return Manager(**params)
+    """Create a Manager with default test settings."""
+    return Manager(**kwargs)
 
 
 class TestApiClientApiKeyAuth:
@@ -40,49 +35,8 @@ class TestApiClientApiKeyAuth:
         assert "Authorization" in client._headers
         assert client._headers["Authorization"] == f"api-key-v1 {api_key}"
 
-    def test_api_key_disables_auth_refresh(self) -> None:
-        """Verify that API key authentication disables auth refresh."""
-        api_key = "test-api-key-789"
-        client = ApiClient(
-            base_url="http://localhost:8000/api",
-            api_key=api_key,
-            verify_auth=False,
-        )
-
-        # Auth refresh should be disabled (None) when API key is used
-        assert client._on_auth_refresh is None
-
-    def test_authenticate_raises_error_with_api_key(self) -> None:
-        """Verify that calling authenticate() with API key raises ValueError."""
-        api_key = "test-api-key-auth-error"
-        client = ApiClient(
-            base_url="http://localhost:8000/api",
-            api_key=api_key,
-            verify_auth=False,
-        )
-
-        with pytest.raises(
-            ValueError,
-            match="Cannot call authenticate\\(\\) when api_key is set",
-        ):
-            client.authenticate("username", "password")
-
-    def test_refresh_auth_skips_with_api_key(self) -> None:
-        """Verify that _refresh_auth returns empty dict when API key is set."""
-        api_key = "test-api-key-refresh"
-        client = ApiClient(
-            base_url="http://localhost:8000/api",
-            api_key=api_key,
-            verify_auth=False,
-        )
-
-        # Should return empty headers dict without attempting refresh
-        new_headers = client._refresh_auth()
-        assert new_headers == {}
-
     def test_api_key_auth_passes_check_auth(self) -> None:
         """Verify that API key authentication passes check_auth."""
-
         api_key = "test-api-key-check-auth"
         client = ApiClient(
             base_url="http://localhost:8000/api",
@@ -108,29 +62,17 @@ class TestManagerApiKeyAuth:
     def test_manager_with_api_key_creates_client(self) -> None:
         """Verify that Manager with api_key creates ApiClient with api_key."""
         api_key = "manager-api-key-123"
+        fake_client = FakeApiClient()
+        fake_client.set_api_key(api_key)
+
         manager = make_manager(
-            base_url="http://localhost:8000/api",
-            api_key=api_key,
+            api_client=fake_client,
         )
 
         assert hasattr(manager.auth_client, "_api_key")
         assert manager.auth_client._api_key == api_key
         assert "Authorization" in manager.auth_client._headers
         assert manager.auth_client._headers["Authorization"] == f"api-key-v1 {api_key}"
-
-    def test_manager_authenticate_raises_error_with_api_key(self) -> None:
-        """Verify that calling authenticate() with api_key raises ValueError."""
-        api_key = "manager-api-key-auth-error"
-        manager = make_manager(
-            base_url="http://localhost:8000/api",
-            api_key=api_key,
-        )
-
-        with pytest.raises(
-            ValueError,
-            match="Cannot call authenticate\\(\\) when Manager was initialized with api_key",
-        ):
-            manager.authenticate("username", "password")
 
     def test_manager_mutual_exclusivity_api_client_and_api_key(self) -> None:
         """Verify that providing both api_client and api_key raises ValueError."""
@@ -142,7 +84,7 @@ class TestManagerApiKeyAuth:
             match="Cannot provide both 'api_client' and other parameters \\(api_key\\)",
         ):
             Manager(
-                api_client=fake_client,  # type: ignore[arg-type]
+                api_client=fake_client,
                 api_key=api_key,
             )
 
@@ -150,32 +92,36 @@ class TestManagerApiKeyAuth:
         """Verify that Manager with api_key can create runners."""
         api_key = "manager-runner-api-key"
         fake_client = FakeApiClient()
-        fake_client._api_key = api_key
-        fake_client.set_header("Authorization", f"api-key-v1 {api_key}")
+        fake_client.set_api_key(api_key)
 
         manager = make_manager(
-            api_client=fake_client,  # type: ignore[arg-type]
+            api_client=fake_client,
         )
 
         # Should be able to create runner without calling authenticate()
         runner = manager.create_runner("test-set")
         assert runner is not None
 
-    def test_manager_with_api_key_checks_compatibility_by_default(self) -> None:
-        """Verify that Manager with api_key checks compatibility in __init__."""
+    def test_manager_with_api_key_checks_compatibility(self) -> None:
+        """Verify that Manager with api_key checks compatibility and raises when incompatible."""
         api_key = "manager-runner-api-key"
         fake_client = FakeApiClient()
-        fake_client._api_key = api_key
-        fake_client.set_header("Authorization", f"api-key-v1 {api_key}")
+        fake_client.set_api_key(api_key)
+        fake_client.compatibility = FakeIncompatibleCompatibility()  # type: ignore
 
-        # FakeCompatibility returns incompatible, so this should raise
         with pytest.raises(
             DeprecationWarning,
             match="Client is not compatible with the server.",
         ):
             Manager(
-                api_client=fake_client,  # type: ignore[arg-type]
+                api_client=fake_client,
             )
+
+    def test_manager_without_api_key_raises(self) -> None:
+        """Verify that Manager raises ValueError when no API key is configured."""
+        with mock.patch.dict(os.environ, clear=True):
+            with pytest.raises(ValueError, match="An API key is required"):
+                Manager()
 
 
 class TestApiKeyFormatting:
@@ -206,33 +152,59 @@ class TestApiKeyFormatting:
         assert client._headers["Authorization"] == expected_header
 
 
-class TestApiKeyBackwardCompatibility:
-    """Test that existing username/password auth still works."""
+class TestManagerConnectionVerification:
+    """Test that Manager verifies connection at creation time for API key auth."""
 
-    def test_username_password_auth_without_api_key(self) -> None:
-        """Verify username/password auth works when no api_key is provided."""
+    def test_wrong_api_key_raises_connection_error_at_init(self) -> None:
+        """Verify that a wrong API key raises ConnectionError at Manager creation."""
         fake_client = FakeApiClient()
-
-        # Should be able to create client without api_key
-        assert not hasattr(fake_client, "_api_key") or fake_client._api_key is None
-
-    def test_manager_authenticate_without_api_key(self) -> None:
-        """Verify Manager.authenticate() works when no api_key is provided."""
-        fake_client = FakeApiClient()
-        manager = make_manager(
-            api_client=fake_client,  # type: ignore[arg-type]
+        fake_client.set_api_key("wrong-api-key")
+        # Make get_me raise an auth error like the real API would
+        fake_client.users = MagicMock()
+        fake_client.users.get_me.side_effect = Exception(
+            "Got error in HTTP request: GET /users/me. Error status 401 - Not authenticated"
         )
 
-        # Should be able to call authenticate without errors.
-        # A DeprecationWarning about password auth is expected on success.
-        try:
-            with pytest.warns(DeprecationWarning, match="Username/password authentication"):
-                manager.authenticate(
-                    "username",
-                    "password",
-                    should_verify_compatibility=False,
-                )
-        except ValueError as e:
-            if "api_key" in str(e):
-                pytest.fail(f"authenticate() raised api_key error: {e}")
-            # Other ValueError types are acceptable (e.g., from FakeAuth)
+        with pytest.raises(ApiConnectionError, match="verify your API key"):
+            Manager(
+                api_client=fake_client,
+                should_verify_compatibility=False,
+            )
+
+    def test_unreachable_server_raises_connection_error_at_init(self) -> None:
+        """Verify that an unreachable server raises ConnectionError at Manager creation."""
+        fake_client = FakeApiClient()
+        fake_client.set_api_key("some-api-key")
+        fake_client.users = MagicMock()
+        fake_client.users.get_me.side_effect = httpx.ConnectError("Connection refused")
+
+        with pytest.raises(ApiConnectionError, match="verify your base URL"):
+            Manager(
+                api_client=fake_client,
+                should_verify_compatibility=False,
+            )
+
+    def test_valid_api_key_does_not_raise(self) -> None:
+        """Verify that a valid API key does not raise any error."""
+        fake_client = FakeApiClient()
+        fake_client.set_api_key("valid-api-key")
+        # FakeUsers.get_me() returns successfully by default
+
+        manager = Manager(
+            api_client=fake_client,
+            should_verify_compatibility=False,
+        )
+        assert manager.auth_client is fake_client
+
+    def test_generic_error_wraps_in_connection_error(self) -> None:
+        """Verify that unexpected errors are wrapped in ConnectionError."""
+        fake_client = FakeApiClient()
+        fake_client.set_api_key("some-api-key")
+        fake_client.users = MagicMock()
+        fake_client.users.get_me.side_effect = Exception("Something unexpected happened")
+
+        with pytest.raises(ApiConnectionError, match="Failed to connect to the Avatar API"):
+            Manager(
+                api_client=fake_client,
+                should_verify_compatibility=False,
+            )

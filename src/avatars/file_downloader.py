@@ -26,13 +26,18 @@ class FileDownloader:
     def _str_to_json(self, str_data: str) -> list[dict[str, Any]]:
         if not str_data.strip().startswith("["):
             str_data = f"[{str_data}]"
-        return json.loads(str_data)
+        parsed: list[dict[str, Any]] = json.loads(str_data)
+        return parsed
 
     def _str_to_csv(self, str_data: str) -> pd.DataFrame:
         return pd.read_csv(io.StringIO(str_data))
 
+    def _bytes_to_parquet(self, bytes_data: bytes) -> pd.DataFrame:
+        return pd.read_parquet(io.BytesIO(bytes_data))
+
     def _str_to_html(self, str_data: str) -> HTML:
-        return HTML(str_data)
+        # IPython.display.HTML ships py.typed but its __init__ is unannotated.
+        return HTML(str_data)  # type: ignore[no-untyped-call]
 
     def _str_to_file(self, str_data: bytes, path: str) -> None:
         with open(path, "wb") as fd:
@@ -49,6 +54,9 @@ class FileDownloader:
             case ".csv":
                 if isinstance(str_data, str):
                     data = self._str_to_csv(str_data)
+            case ".parquet":
+                if isinstance(str_data, bytes):
+                    data = self._bytes_to_parquet(str_data)
             case ".pdf" | ".docx":
                 if path is None:
                     raise ValueError("Expected path to save the PDF file")
@@ -66,17 +74,15 @@ class FileDownloader:
         return data
 
     def download_file(self, url: str, path: str | None = None) -> TypeResults:
-        """
-        Download a file from the given URL and return its content in an appropriate format.
+        """Download a file from the given URL and return its content in an appropriate format.
         If path is provided, save the file to that path.
         """
         str_data = self._download_file_to_str(url)
-        extension = url.split(".")[-1]
+        extension = url.rsplit(".", maxsplit=1)[-1]
         return self._str_to_results(str_data, f".{extension}", path)
 
     def download_files_batch(self, urls: list[str]) -> dict[str, TypeResults]:
-        """
-        Download multiple files from the given URLs using batch credential fetching.
+        """Download multiple files from the given URLs using batch credential fetching.
         Returns a dictionary mapping URLs to their downloaded content.
         """
         if not urls:

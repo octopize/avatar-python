@@ -1,11 +1,12 @@
 import re
 from pathlib import Path
+from typing import get_args
 from unittest.mock import MagicMock, call
 from uuid import uuid4
 
 import pandas as pd
 import pytest
-from avatar_yaml import PseudonymizationColumnConfig, PseudonymizationStrategy
+from avatar_yaml import FakeDataStrategy, HashSha256Strategy, PiiType, PseudonymizationStrategy
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
     AugmentationStrategy,
@@ -19,7 +20,8 @@ from avatar_yaml.models.schema import ColumnType
 
 from avatars.constants import Results
 from avatars.manager import Manager
-from avatars.models import BulkDeleteResponse, JobKind
+from avatars.models import BulkDeleteResponse, JobKind, JobResponse, JobStatus
+from avatars.runner import Runner
 from tests.unit.conftest import FakeApiClient, JobResponseFactory, create_fake_job
 
 FIXTURES_PATH = Path(__file__).parent.parent.parent / "fixtures"
@@ -43,10 +45,14 @@ class TestRunner:
 
     def test_create_runner_add_metadata_and_annotations(self):
         self.runner.add_annotations({"key": "value"})
-        assert self.runner.config.avatar_metadata.spec.display_name == "test"
-        assert self.runner.config.avatar_metadata.annotations["key"] == "value"
+        metadata = self.runner.config.avatar_metadata
+        assert metadata is not None
+        assert metadata.spec is not None
+        assert metadata.spec.display_name == "test"
+        assert metadata.annotations["key"] == "value"
 
     def test_create_runner_add_versions_to_metadata(self):
+        assert self.runner.config.avatar_metadata is not None
         versions = self.runner.config.avatar_metadata.annotations
         assert list(versions.keys()) == ["client_type", "client_version"]
         assert versions["client_type"] == "python"
@@ -56,6 +62,7 @@ class TestRunner:
 
     def test_add_annotation_do_not_overwrite_versions(self):
         self.runner.add_annotations({"key": "value"})
+        assert self.runner.config.avatar_metadata is not None
         versions = self.runner.config.avatar_metadata.annotations
         assert list(versions.keys()) == [
             "client_type",
@@ -69,6 +76,16 @@ class TestRunner:
     def test_add_table_df(self):
         self.runner.add_table("test_table", data=self.df1)
         assert "test_table" in self.runner.config.tables.keys()
+
+    def test_add_table_columns_to_drop(self):
+        self.runner.add_table("test_table", data=self.df1, columns_to_drop=["col2"])
+        columns = self.runner.config.tables["test_table"].columns
+        assert columns is not None
+        assert len(columns) == 2
+        col1 = next(c for c in columns if c.field == "col1")
+        col2 = next(c for c in columns if c.field == "col2")
+        assert not col1.drop
+        assert col2.drop is True
 
     def test_add_table_from_file(self):
         self.runner.add_table("test_table", data="../fixtures/iris.csv")
@@ -104,7 +121,9 @@ class TestRunner:
         runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
         runner.add_link("parent", "id", "child", "id2")
         assert len(runner.config.tables.keys()) == 2
-        assert len(runner.config.tables["parent"].links) == 1
+        parent_links = runner.config.tables["parent"].links
+        assert parent_links is not None
+        assert len(parent_links) == 1
 
     def test_set_parameters(self):
         runner = self.manager.create_runner("test")
@@ -233,7 +252,8 @@ class TestRunner:
 
     def test_run_does_not_recreate_report_configs_when_already_set(self):
         """When a runner is loaded from an existing config (e.g. from_yaml) with
-        both report types already set, run() must not overwrite them."""
+        both report types already set, run() must not overwrite them.
+        """
         runner = self.manager.create_runner("test", report_language=ReportLanguage.EN)
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table", k=3)
@@ -242,6 +262,7 @@ class TestRunner:
         runner.config.create_report(ReportType.PIA, language=ReportLanguage.FR)
         runner.run()
 
+        assert runner.config.report is not None
         assert runner.config.report[ReportType.BASIC][1] == ReportLanguage.FR
         assert runner.config.report[ReportType.PIA][1] == ReportLanguage.FR
 
@@ -254,6 +275,7 @@ class TestRunner:
         runner.config.create_report(language=ReportLanguage.FR)
         runner.run()
 
+        assert runner.config.report is not None
         assert runner.config.report[ReportType.BASIC][1] == ReportLanguage.FR
         assert ReportType.PIA in runner.config.report
         assert runner.config.report[ReportType.PIA][1] == ReportLanguage.EN
@@ -267,6 +289,7 @@ class TestRunner:
         runner.config.create_report(ReportType.PIA, language=ReportLanguage.FR)
         runner.run()
 
+        assert runner.config.report is not None
         assert ReportType.BASIC in runner.config.report
         assert runner.config.report[ReportType.BASIC][1] == ReportLanguage.EN
         assert runner.config.report[ReportType.PIA][1] == ReportLanguage.FR
@@ -292,7 +315,9 @@ class TestRunner:
         runner.add_link("parent", "id", "child", "id2")
         runner.run()
         assert list(runner.config.tables.keys()) == ["parent", "child"]
-        assert len(runner.config.tables["parent"].links) == 1
+        parent_links = runner.config.tables["parent"].links
+        assert parent_links is not None
+        assert len(parent_links) == 1
         assert list(runner.jobs.get_launched_jobs()) == [
             JobKind.standard.value,
             JobKind.signal_metrics.value,
@@ -386,7 +411,7 @@ class TestRunner:
         job_name = runner.jobs.get_parameters_name(JobKind.report, pia_report=True)
         runner.results_urls[job_name] = {Results.REPORT: ["fakeurl/table1.report.pia.pdf"]}
 
-        runner.file_downloader.download_file = MagicMock()
+        runner.file_downloader.download_file = MagicMock()  # type: ignore[method-assign]
         runner.download_report(path="../../report.docx", report_type=ReportType.PIA)
 
         runner.file_downloader.download_file.assert_called_once_with(
@@ -404,7 +429,7 @@ class TestRunner:
             ]
         }
 
-        runner.file_downloader.download_file = MagicMock()
+        runner.file_downloader.download_file = MagicMock()  # type: ignore[method-assign]
         runner.download_report(path="../../report.docx", report_type=ReportType.PIA)
 
         runner.file_downloader.download_file.assert_has_calls(
@@ -425,7 +450,7 @@ class TestRunner:
             ]
         }
 
-        runner.file_downloader.download_file = MagicMock()
+        runner.file_downloader.download_file = MagicMock()  # type: ignore[method-assign]
         runner.download_report(path="report.docx", report_type=ReportType.PIA)
 
         runner.file_downloader.download_file.assert_has_calls(
@@ -446,9 +471,13 @@ class TestRunner:
         runner.add_table("parent", data=self.df_parent, primary_key="id")
         runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
         runner.add_link("parent", "id", "child", "id2")
-        assert len(runner.config.tables["parent"].links) == 1
+        links_before = runner.config.tables["parent"].links
+        assert links_before is not None
+        assert len(links_before) == 1
         runner.delete_link("parent", "child")
-        assert len(runner.config.tables["parent"].links) == 0
+        links_after = runner.config.tables["parent"].links
+        assert links_after is not None
+        assert len(links_after) == 0
 
     def test_delete_parameters(self):
         runner = self.manager.create_runner("test")
@@ -474,8 +503,10 @@ class TestRunner:
             data=self.df1,
             types={"col1": ColumnType.CATEGORY, "col2": ColumnType.CATEGORY},
         )
-        assert runner.config.tables["test_table"].columns[0].type == ColumnType.CATEGORY
-        assert runner.config.tables["test_table"].columns[1].type == ColumnType.CATEGORY
+        columns = runner.config.tables["test_table"].columns
+        assert columns is not None
+        assert columns[0].type == ColumnType.CATEGORY
+        assert columns[1].type == ColumnType.CATEGORY
 
     def test_add_table_change_dtype_with_pandas(self):
         runner = self.manager.create_runner("test")
@@ -486,8 +517,10 @@ class TestRunner:
             "test_table",
             data=self.df1,
         )
-        assert runner.config.tables["test_table"].columns[0].type == ColumnType.CATEGORY
-        assert runner.config.tables["test_table"].columns[1].type == ColumnType.CATEGORY
+        columns = runner.config.tables["test_table"].columns
+        assert columns is not None
+        assert columns[0].type == ColumnType.CATEGORY
+        assert columns[1].type == ColumnType.CATEGORY
 
     def test_update_parameters_basic(self):
         """Test updating basic parameters."""
@@ -550,31 +583,19 @@ class TestRunner:
         )
 
         # Verify exclude variables were added
-        assert (
-            runner.config.avatarization["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
-        assert (
-            runner.config.avatarization["test_table"].exclude_variables["replacement_strategy"]
-            == "row_order"
-        )
+        avat_exclude = runner.config.avatarization["test_table"].exclude_variables
+        assert avat_exclude is not None
+        assert avat_exclude["variable_names"] == exclude_vars
+        assert avat_exclude["replacement_strategy"] == "row_order"
         assert runner.config.avatarization["test_table"].k == 3  # Original parameter preserved
-        assert (
-            runner.config.privacy_metrics["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
-        assert (
-            runner.config.privacy_metrics["test_table"].exclude_variables["replacement_strategy"]
-            == "row_order"
-        )
-        assert (
-            runner.config.signal_metrics["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
-        assert (
-            runner.config.signal_metrics["test_table"].exclude_variables["replacement_strategy"]
-            == "row_order"
-        )
+        priv_exclude = runner.config.privacy_metrics["test_table"].exclude_variables
+        assert priv_exclude is not None
+        assert priv_exclude["variable_names"] == exclude_vars
+        assert priv_exclude["replacement_strategy"] == "row_order"
+        sig_exclude = runner.config.signal_metrics["test_table"].exclude_variables
+        assert sig_exclude is not None
+        assert sig_exclude["variable_names"] == exclude_vars
+        assert sig_exclude["replacement_strategy"] == "row_order"
 
     def test_set_parameters_use_excluded_variables_in_metrics_true(self):
         """Test excluded vars not in metrics when use_excluded_variables_in_metrics=True."""
@@ -591,10 +612,9 @@ class TestRunner:
         )
 
         # Avatarization still has exclude_variables
-        assert (
-            runner.config.avatarization["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
+        avat_exclude = runner.config.avatarization["test_table"].exclude_variables
+        assert avat_exclude is not None
+        assert avat_exclude["variable_names"] == exclude_vars
         # Metrics do NOT have exclude_variables
         assert runner.config.privacy_metrics["test_table"].exclude_variables is None
         assert runner.config.signal_metrics["test_table"].exclude_variables is None
@@ -614,18 +634,15 @@ class TestRunner:
         )
 
         # Both avatarization and metrics have exclude_variables
-        assert (
-            runner.config.avatarization["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
-        assert (
-            runner.config.privacy_metrics["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
-        assert (
-            runner.config.signal_metrics["test_table"].exclude_variables["variable_names"]
-            == exclude_vars
-        )
+        avat_exclude = runner.config.avatarization["test_table"].exclude_variables
+        assert avat_exclude is not None
+        assert avat_exclude["variable_names"] == exclude_vars
+        priv_exclude = runner.config.privacy_metrics["test_table"].exclude_variables
+        assert priv_exclude is not None
+        assert priv_exclude["variable_names"] == exclude_vars
+        sig_exclude = runner.config.signal_metrics["test_table"].exclude_variables
+        assert sig_exclude is not None
+        assert sig_exclude["variable_names"] == exclude_vars
 
     def test_extract_current_parameters_with_use_excluded_variables_in_metrics(self):
         """Test use_excluded_variables_in_metrics=True detected in _extract_current_parameters."""
@@ -695,10 +712,12 @@ class TestRunner:
         )
 
         # Verify imputation parameters were updated
-        assert runner.config.avatarization["test_table"].imputation["method"] == "knn"
-        assert runner.config.avatarization["test_table"].imputation["k"] == 5
+        imputation = runner.config.avatarization["test_table"].imputation
+        assert imputation is not None
+        assert imputation["method"] == "knn"
+        assert imputation["k"] == 5
         assert runner.config.avatarization["test_table"].k == 3  # Original k preserved
-        assert runner.config.avatarization["test_table"].imputation["return_data_imputed"] is True
+        assert imputation["return_data_imputed"] is True
 
     def test_update_parameters_with_time_series(self):
         """Test updating time series parameters."""
@@ -715,12 +734,14 @@ class TestRunner:
         )
 
         # Verify time series parameters were updated
-        assert runner.config.time_series["test_table"].projection["nf"] == 2  # Preserved
-        assert (
-            runner.config.time_series["test_table"].projection["projection_type"] == "fpca"
-        )  # Preserved
-        assert runner.config.time_series["test_table"].alignment["method"] == "mean"  # Updated
-        assert runner.config.time_series["test_table"].alignment["nb_points"] == 10  # Updated
+        projection = runner.config.time_series["test_table"].projection
+        alignment = runner.config.time_series["test_table"].alignment
+        assert projection is not None
+        assert alignment is not None
+        assert projection["nf"] == 2  # Preserved
+        assert projection["projection_type"] == "fpca"  # Preserved
+        assert alignment["method"] == "mean"  # Updated
+        assert alignment["nb_points"] == 10  # Updated
 
     def test_update_parameters_with_privacy_metrics(self):
         """Test updating privacy metrics parameters."""
@@ -790,18 +811,20 @@ class TestRunner:
         assert privacy_params.use_categorical_reduction is True
         assert privacy_params.column_weights == {"col1": 0.7, "col2": 0.3}
         assert privacy_params.known_variables == ["col1"]
-        assert privacy_params.exclude_variables["variable_names"] == ["col2"]
+        privacy_exclude = privacy_params.exclude_variables
+        assert privacy_exclude is not None
+        assert privacy_exclude["variable_names"] == ["col2"]
         assert (
-            privacy_params.exclude_variables["replacement_strategy"]
-            == ExcludeVariablesMethod.COORDINATE_SIMILARITY
+            privacy_exclude["replacement_strategy"] == ExcludeVariablesMethod.COORDINATE_SIMILARITY
         )
         assert signal_params.ncp == 2
         assert signal_params.use_categorical_reduction is True
         assert signal_params.column_weights == {"col1": 0.7, "col2": 0.3}
-        assert signal_params.exclude_variables["variable_names"] == ["col2"]
+        signal_exclude = signal_params.exclude_variables
+        assert signal_exclude is not None
+        assert signal_exclude["variable_names"] == ["col2"]
         assert (
-            signal_params.exclude_variables["replacement_strategy"]
-            == ExcludeVariablesMethod.COORDINATE_SIMILARITY
+            signal_exclude["replacement_strategy"] == ExcludeVariablesMethod.COORDINATE_SIMILARITY
         )
 
     def test_extract_current_parameters_open_dp_avatarization(self):
@@ -864,16 +887,19 @@ class TestRunner:
         runner.set_parameters("test_table", k=3)
         runner.run()
         # Return a failed job response
-        runner.client.jobs.get_job_status = lambda job_id: JobResponseFactory().build(
+        failed_job = JobResponseFactory().build(
             name="name",
             set_name=uuid4(),
             parameters_name="parameters_name",
             created_at="2023-10-01T00:00:00Z",
             kind=JobKind.standard,
-            status="error",
+            status=JobStatus.error,
             exception="Job is not valid",
             done=True,
             progress=1.0,
+        )
+        runner.client.jobs.get_job_status = MagicMock(  # type: ignore[method-assign]
+            return_value=failed_job
         )
         with pytest.raises(
             ValueError,
@@ -925,39 +951,10 @@ class TestRunner:
             runner.run()
 
         assert runner.set_name != old_set_name
+        assert runner.set_name is not None
         assert len(runner.results_urls) == 0 or all(
             runner.set_name in str(v) for v in runner.results_urls.values()
         )
-
-    def test_populate_existing_jobs_reraises_non_results_404(self):
-        """A 404 that is not the results-file-missing error must be re-raised."""
-        set_name = uuid4()
-        fake_client = FakeApiClient()
-        fake_client.jobs.add_job(
-            create_fake_job(
-                name="job-standard",
-                set_name=set_name,
-                kind=JobKind.standard,
-                parameters_name=JobKind.standard.value,
-                done=True,
-                exception="",
-            )
-        )
-
-        manager = Manager(api_client=fake_client)
-        runner = manager.create_runner("test")
-        runner.set_name = str(set_name)
-
-        fake_client.results.get_results = lambda _: (_ for _ in ()).throw(
-            Exception(
-                "Got error in HTTP request: get /results/job-standard. "
-                "Error status 404 - Job 'job-standard' either does not exist or you do not "
-                "have access to it"
-            )
-        )
-
-        with pytest.raises(Exception, match="Error status 404"):
-            runner._populate_results_from_existing_jobs()
 
     def test_print_parameters_invalid_table(self):
         """Test printing parameters."""
@@ -985,7 +982,8 @@ class TestRunner:
     def test_runner_init_max_distribution_plots(self, max_distribution_plots: int):
         """Test configuring max_distribution_plots when creating the runner."""
         runner = self.manager.create_runner("test", max_distribution_plots=max_distribution_plots)
-        assert runner.config.max_distribution_plots == max_distribution_plots
+        assert runner.config.results is not None
+        assert runner.config.results.max_distribution_plots == max_distribution_plots
 
     def test_max_distribution_plots_in_yaml(self):
         """Test that max_distribution_plots appears in generated YAML."""
@@ -1142,17 +1140,13 @@ class TestRunner:
         self.runner.set_parameters(
             "t",
             k=3,
-            pseudonymized_columns={
-                "email": PseudonymizationColumnConfig(
-                    strategy=PseudonymizationStrategy.HASH_SHA256
-                )
-            },
+            pseudonymized_columns={"email": HashSha256Strategy()},
         )
         table_info = self.runner.config.tables["t"]
         assert table_info.columns is not None
         email_col = next((c for c in table_info.columns if c.field == "email"), None)
         assert email_col is not None
-        assert email_col.pseudonymization_strategy == PseudonymizationStrategy.HASH_SHA256
+        assert isinstance(email_col.pseudonymization, HashSha256Strategy)
 
     def test_set_parameters_without_pseudonymized_columns_no_regression(self):
         df = pd.DataFrame({"col1": [1, 2], "col2": [3, 4]})
@@ -1161,14 +1155,104 @@ class TestRunner:
         assert "t2" in self.runner.config.tables
         table_info = self.runner.config.tables["t2"]
         for col in table_info.columns or []:
-            assert col.pseudonymization_strategy is None
-            assert col.pii_type is None
+            assert col.pseudonymization is None
 
     def test_avatars_package_exports_pii_types(self):
-        from avatars import PiiType, PseudonymizationColumnConfig, PseudonymizationStrategy
-
-        assert PseudonymizationStrategy.FAKER == "FAKER"
-        assert issubclass(PseudonymizationStrategy, str)
         assert issubclass(PiiType, str)
-        cfg = PseudonymizationColumnConfig(strategy=PseudonymizationStrategy.HASH_SHA256)
-        assert cfg.strategy == PseudonymizationStrategy.HASH_SHA256
+        assert isinstance(HashSha256Strategy(), get_args(PseudonymizationStrategy))
+        cfg = FakeDataStrategy(pii_type=PiiType.EMAIL)
+        assert cfg.pii_type == PiiType.EMAIL
+
+
+class TestReconstructRunner:
+    """Tests for manager.create_runner_from_id — the public entry point that
+    calls _populate_results_from_existing_jobs internally.
+    """
+
+    def _make_runner(self, jobs: list[JobResponse]) -> tuple[Runner, FakeApiClient]:
+        """Reconstruct a runner via the public API after seeding jobs."""
+        fake_client = FakeApiClient()
+        for job in jobs:
+            fake_client.jobs.add_job(job)
+        manager = Manager(api_client=fake_client)
+        return manager.create_runner_from_id(jobs[0].set_name), fake_client
+
+    def test_get_status_after_reconstruct(self):
+        """Core bug fix: get_status works for any job status after reconstruct."""
+        set_name = uuid4()
+        job = create_fake_job(
+            name="job-standard",
+            set_name=set_name,
+            kind=JobKind.standard,
+            parameters_name=JobKind.standard.value,
+            done=False,
+            status="pending",
+        )
+        runner, _ = self._make_runner([job])
+        assert runner.get_status(JobKind.standard) == "pending"
+
+    def test_get_status_job_name_deprecated(self):
+        """job_name kwarg still works but emits DeprecationWarning."""
+        set_name = uuid4()
+        job = create_fake_job(
+            name="job-standard",
+            set_name=set_name,
+            kind=JobKind.standard,
+            parameters_name=JobKind.standard.value,
+        )
+        runner, _ = self._make_runner([job])
+        with pytest.warns(DeprecationWarning, match="job_name.*deprecated.*job_kind"):
+            result = runner.get_status(job_name=JobKind.standard)
+        assert result == "finished"
+
+    def test_registers_all_jobs_but_fetches_results_only_for_finished(self):
+        """All jobs are queryable; result URLs are only populated for finished ones."""
+        set_name = uuid4()
+        finished_job = create_fake_job(
+            name="job-finished",
+            set_name=set_name,
+            kind=JobKind.standard,
+            parameters_name=JobKind.standard.value,
+            done=True,
+            status="finished",
+        )
+        pending_job = create_fake_job(
+            name="job-pending",
+            set_name=set_name,
+            kind=JobKind.privacy_metrics,
+            parameters_name=JobKind.privacy_metrics.value,
+            done=False,
+            status="pending",
+        )
+        runner, _ = self._make_runner([finished_job, pending_job])
+
+        assert runner.jobs.has_job(JobKind.standard.value)
+        assert runner.jobs.has_job(JobKind.privacy_metrics.value)
+        assert JobKind.standard.value in runner.results_urls
+        assert JobKind.privacy_metrics.value not in runner.results_urls
+
+    def test_reraises_unexpected_404_from_results(self):
+        """An unexpected 404 propagates out of create_runner_from_id."""
+        set_name = uuid4()
+        fake_client = FakeApiClient()
+        fake_client.jobs.add_job(
+            create_fake_job(
+                name="job-standard",
+                set_name=set_name,
+                kind=JobKind.standard,
+                parameters_name=JobKind.standard.value,
+                done=True,
+                exception="",
+            )
+        )
+        fake_client.results.get_results = MagicMock(  # type: ignore[method-assign]
+            side_effect=Exception(
+                "Got error in HTTP request: get /results/job-standard. "
+                "Error status 404 - Job 'job-standard' either does not exist or you do not "
+                "have access to it"
+            )
+        )
+        manager = Manager(api_client=fake_client)
+
+        with pytest.raises(Exception, match="Error status 404"):
+            manager.create_runner_from_id(set_name)

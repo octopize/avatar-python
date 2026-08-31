@@ -1,12 +1,14 @@
+import io
 import json
-from datetime import UTC, datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Optional
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
 import httpx
 import numpy as np
+import pandas as pd
 import pytest
 from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
@@ -25,8 +27,6 @@ from avatars.models import (
     JobKind,
     JobResponse,
     JobResponseList,
-    Login,
-    LoginResponse,
     ResourceSetResponse,
 )
 
@@ -36,6 +36,7 @@ setup_logging()
 
 
 def create_fake_job(
+    *,
     name: str = "test_job",
     set_name: UUID | None = None,
     display_name: str = "test_dataset",
@@ -90,6 +91,7 @@ def create_fake_job(
 
     >>> # Privacy metrics job
     >>> job = create_fake_job(kind=JobKind.privacy_metrics, name="privacy_job")
+
     """
     if set_name is None:
         set_name = uuid4()
@@ -119,9 +121,8 @@ def no_sleep():
         yield
 
 
-def mock_httpx_client(handler: Optional[RequestHandle] = None) -> httpx.Client:
+def mock_httpx_client(handler: RequestHandle | None = None) -> httpx.Client:
     """Generate a HTTPX client with a MockTransport."""
-
     if handler is None:
         handler = lambda request: httpx.Response(200, json={})  # noqa: E731
 
@@ -129,7 +130,7 @@ def mock_httpx_client(handler: Optional[RequestHandle] = None) -> httpx.Client:
     return httpx.Client(base_url="http://localhost:8000", transport=transport)  # nosec
 
 
-def api_client_factory(handler: Optional[RequestHandle] = None) -> ApiClient:
+def api_client_factory(handler: RequestHandle | None = None) -> ApiClient:
     """Generate an API client with a mock transport.
 
     The handler returns an empty 200 response by default.
@@ -166,7 +167,7 @@ class FakeJobs:
             set_name=request.set_name,
             parameters_name=request.parameters_name,
             display_name=request.parameters_name,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             kind=JobKind.standard,
             status="pending",
             exception="",
@@ -175,10 +176,36 @@ class FakeJobs:
         )
         return JobCreateResponse(name=name, Location=f"/jobs/{name}")
 
-    def get_jobs(self) -> JobResponseList:
+    def get_jobs(
+        self,
+        kind: list[JobKind] | None = None,
+        display_name: str | None = None,
+        set_name: str | None = None,
+        limit: int | None = None,
+        include_deleted: bool | None = None,
+    ) -> JobResponseList:
+        if display_name is not None and set_name is not None:
+            raise ValueError("display_name and set_name are mutually exclusive filters.")
         if self._get_jobs_returned_value is not None:
             return self._get_jobs_returned_value
-        return JobResponseList(jobs=list(self._jobs.values()))
+        jobs = list(self._jobs.values())
+        if display_name is not None:
+            jobs = [j for j in jobs if j.display_name == display_name]
+        if set_name is not None:
+            jobs = [j for j in jobs if str(j.set_name) == str(set_name)]
+        if kind is not None:
+            jobs = [j for j in jobs if j.kind in kind]
+        jobs = sorted(jobs, key=lambda j: j.created_at, reverse=True)
+        if limit is not None:
+            jobs = jobs[:limit]
+        return JobResponseList(jobs=jobs)
+
+    def get_last_jobs(self) -> JobResponseList:
+        jobs = list(self._jobs.values())
+        if not jobs:
+            return JobResponseList(jobs=[])
+        latest_set_name = max(jobs, key=lambda j: j.created_at).set_name
+        return JobResponseList(jobs=[j for j in jobs if j.set_name == latest_set_name])
 
     def get_job_status(self, name: str) -> JobResponse:
         if name in self._jobs:
@@ -274,6 +301,14 @@ def string_table_factory() -> str:
     4, 5, 6"""
 
 
+def parquet_table_factory() -> bytes:
+    """Create a parquet-formatted binary table."""
+    df = pd.DataFrame({"col1": [1, 2, 3, 4, 5], "col2": [3, 4, 5, 6, 7]})
+    buffer = io.BytesIO()
+    df.to_parquet(buffer, index=False)
+    return buffer.getvalue()
+
+
 def advice_factory(table_name: str) -> str:
     return json.dumps(
         {
@@ -297,6 +332,7 @@ def advice_factory(table_name: str) -> str:
 class FakeResults:
     def __init__(self, tables: list[str] | None = None):
         self.tables = tables or []
+        self._upload_url_base = "s3://test-bucket/uploads"
 
     def get_permission_to_download(self, url):
         return FileAccess(
@@ -319,7 +355,7 @@ class FakeResults:
         ]
 
     def get_results(self, job_name):
-        results = {}
+        results: dict[str, list[str]] = {}
         for table_name in self.tables:
             if job_name == JobKind.privacy_metrics.value:
                 if "privacy_metrics" not in results:
@@ -372,14 +408,15 @@ class FakeResults:
         return results
 
     def get_upload_url(self):
-        raise FileNotFoundError()
+        # Return the upload URL base configured by tests
+        return self._upload_url_base
 
 
 class FakeResources:
     def __init__(self):
         self._stored_resources: dict[str, str] = {}
 
-    def put_resources(self, display_name, yaml_string):
+    def put_resources(self, display_name, yaml_string) -> ResourceSetResponse:
         set_name = uuid4()
         self._stored_resources[str(set_name)] = yaml_string
         return ResourceSetResponse(set_name=set_name, display_name=display_name)
@@ -416,7 +453,7 @@ class FakeUsers:
     def __init__(self):
         pass
 
-    def get_me(self):
+    def get_me(self) -> FakeUser:
         return FakeUser(id=uuid4())
 
 
@@ -424,20 +461,61 @@ class FakeAuth:
     def __init__(self):
         pass
 
-    def login(self, login: Login, timeout: Optional[int] = None):
-        return
-
 
 class FakeCompatibility:
     def __init__(self):
         pass
 
-    def is_client_compatible(self):
+    def is_client_compatible(self) -> CompatibilityResponse:
+        return CompatibilityResponse(
+            message="Compatible",
+            status=CompatibilityStatus.compatible,
+            most_recent_compatible_client=None,
+        )
+
+
+class FakeIncompatibleCompatibility:
+    def __init__(self):
+        pass
+
+    def is_client_compatible(self) -> CompatibilityResponse:
         return CompatibilityResponse(
             message="Message from the server",
             status=CompatibilityStatus.incompatible,
             most_recent_compatible_client="1.0.0",
         )
+
+
+class FakeHealth:
+    def __init__(self):
+        pass
+
+    def get_health(self):
+        return {"status": "ok"}
+
+    def get_root(self):
+        return {"status": "ok"}
+
+
+class FakeStorage:
+    """Fake storage backend for testing file uploads and downloads."""
+
+    def __init__(self) -> None:
+        self._files: dict[str, bytes] = {}
+
+    def put_file(self, path: str, data: bytes) -> None:
+        """Store a file in fake storage."""
+        self._files[path] = data
+
+    def get_file(self, path: str) -> bytes:
+        """Retrieve a file from fake storage."""
+        if path not in self._files:
+            raise FileNotFoundError(f"File not found: {path}")
+        return self._files[path]
+
+    def exists(self, path: str) -> bool:
+        """Check if a file exists in fake storage."""
+        return path in self._files
 
 
 class FakeApiClient(ApiClient):
@@ -459,6 +537,7 @@ class FakeApiClient(ApiClient):
     >>> # With builder pattern via jobs attribute
     >>> client = FakeApiClient()
     >>> client.jobs.with_job(name="job1").with_job(name="job2")
+
     """
 
     jobs: FakeJobs  # type: ignore[assignment]
@@ -473,28 +552,33 @@ class FakeApiClient(ApiClient):
         ----------
         tables : list[str] | None
             List of table names to simulate in results.
+
         """
         self.tables = tables or []
         self.jobs = FakeJobs()  # type: ignore
         self.results = FakeResults(tables=self.tables)  # type: ignore
         self.resources = FakeResources()  # type: ignore
         self.users = FakeUsers()  # type: ignore
+        self.health = FakeHealth()  # type: ignore
         self.base_url = "http://localhost:8000"
         self.auth = FakeAuth()  # type: ignore
         self.compatibility = FakeCompatibility()  # type: ignore
         self.timeout = 100
         # Initialize attributes needed for API key authentication
-        self._api_key: Optional[str] = None
-        self._headers: dict[str, str] = {}
+        self._api_key: str | None = "test-api-key"
+        self._headers: dict[str, str] = {"Authorization": "api-key-v1 test-api-key"}
+        # Initialize fake storage
+        self.storage = FakeStorage()
+        self.should_verify_ssl = True
 
     def set_header(self, key: str, value: str) -> None:
         """Set a header in the client."""
         self._headers[key] = value
 
-    def _update_auth_tokens(
-        self, resp: LoginResponse, *, headers: Optional[dict[str, str]] = None
-    ):
-        pass
+    def set_api_key(self, api_key: str) -> None:
+        """Configure API key authentication on this fake client."""
+        self._api_key = api_key
+        self._headers["Authorization"] = f"api-key-v1 {api_key}"
 
     def upload_file(self, data, key):
         return "File uploaded successfully"
@@ -502,33 +586,36 @@ class FakeApiClient(ApiClient):
     def download_file(self, file_access):
         if Path(file_access.url).name == "meta_metrics.privacy.json":
             return meta_privacy_metrics_factory()
-        elif Path(file_access.url).name == "meta_metrics.signal.json":
+        if Path(file_access.url).name == "meta_metrics.signal.json":
             return meta_signal_metrics_factory()
-        elif Path(file_access.url).name == "run_metadata.privacy-metrics.json":
-            return run_metadata_factory()
-        elif Path(file_access.url).name == "run_metadata.signal-metrics.json":
-            return run_metadata_factory()
-        elif Path(file_access.url).name == "run_metadata.avatarize.json":
+        if (
+            Path(file_access.url).name == "run_metadata.privacy-metrics.json"
+            or Path(file_access.url).name == "run_metadata.signal-metrics.json"
+            or Path(file_access.url).name == "run_metadata.avatarize.json"
+        ):
             return run_metadata_factory()
 
         table_name = Path(file_access.url).name.split(".")[0]
         if Path(file_access.url).name.endswith(".html"):
             return figures_factory()
-        elif Path(file_access.url).name.endswith("advice.json"):
+        if Path(file_access.url).name.endswith("advice.json"):
             return advice_factory(table_name)
-        elif Path(file_access.url).name == "report.pdf":
+        if Path(file_access.url).name == "report.pdf":
             return b"report content"
-        elif Path(file_access.url).name.endswith(".report.pia.pdf"):
+        if Path(file_access.url).name.endswith(".report.pia.pdf"):
             table_name = Path(file_access.url).name.split(".report.pia.")[0]
             return f"pia report content for {table_name}".encode()
-        elif Path(file_access.url).name.endswith(".csv"):
+        if Path(file_access.url).name.endswith(".csv"):
             return string_table_factory()
-        elif Path(file_access.url).name.endswith(".privacy.json"):
+        if Path(file_access.url).name.endswith(".parquet"):
+            return parquet_table_factory()
+        if Path(file_access.url).name.endswith(".privacy.json"):
             return privacy_metrics_factory(table_name)
-        elif Path(file_access.url).name.endswith(".signal.json"):
+        if Path(file_access.url).name.endswith(".signal.json"):
             return signal_metrics_factory(table_name)
-        elif Path(file_access.url).name == "figures_metadata.json":
+        if Path(file_access.url).name == "figures_metadata.json":
             return figures_metadata_factory(self.tables[0])
+        return None
 
     def send_request(self, method, url, **kwargs):
         name = kwargs["json_data"].parameters_name
@@ -537,7 +624,7 @@ class FakeApiClient(ApiClient):
             set_name=kwargs["json_data"].set_name,
             parameters_name=name,
             display_name=name,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             kind=JobKind.standard,
             status="finished",
             exception="",

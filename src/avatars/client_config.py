@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from typing import Self
+
 from pydantic import BaseModel, HttpUrl, model_validator
-from typing_extensions import Self
 
 from avatars.config import Config, construct_urls
 
@@ -32,8 +33,8 @@ class ClientConfig(BaseModel):
         The storage endpoint URL for file uploads/downloads.
         Default is None (must be provided for ApiClient).
     api_key : str | None
-        Optional API key for authentication. When provided, this will be used
-        instead of username/password authentication.
+        API key for authentication.
+
     """
 
     base_url: HttpUrl | None = None
@@ -55,6 +56,7 @@ class ClientConfig(BaseModel):
         -------
         ClientConfig
             A new ClientConfig instance with values from this Config.
+
         """
         # model_construct because we don't want to apply the validators again
         return ClientConfig.model_construct(
@@ -78,6 +80,7 @@ class ClientConfig(BaseModel):
         -------
         Self
             The validated Config instance with constructed URLs.
+
         """
         api_url, storage_url = construct_urls(
             base_url=self.base_url,

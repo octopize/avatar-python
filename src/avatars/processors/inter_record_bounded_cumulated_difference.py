@@ -19,8 +19,7 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
     This processor is not suitable for data where the target or the id variable contain missing
     values.
 
-    Keyword Arguments
-    -----------------
+    Keyword Arguments:
         id_variable:
             variable indicating which individual each row belongs to
         target_variable:
@@ -31,43 +30,45 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
             name of the variable to be created to contain the difference value
         should_round_output:
             set to `True` to force post-processed values to be integers.
-    Examples
-    --------
-    >>> df = pd.DataFrame({
-    ...    "id": [1, 2, 1, 1, 2, 2],
-    ...    "value": [1025, 20042, 1000, 1130, 20000, 20040],
-    ... })
-    >>> processor = InterRecordBoundedCumulatedDifferenceProcessor(
-    ...    id_variable='id',
-    ...    target_variable='value',
-    ...    new_first_variable_name='first_value',
-    ...    new_difference_variable_name='difference_to_bound',
-    ...    should_round_output=True
-    ...    )
-    >>> processor.preprocess(df)
-       id  first_value  difference_to_bound
-    0   1         1025             0.000000
-    1   2        20042             0.000000
-    2   1         1025            -1.000000
-    3   1         1025             0.006827
-    4   2        20042            -0.002206
-    5   2        20042             0.952381
 
-    The postprocess allows you to transform some preprocessed data back into its original format
+    Examples:
+        >>> df = pd.DataFrame({
+        ...    "id": [1, 2, 1, 1, 2, 2],
+        ...    "value": [1025, 20042, 1000, 1130, 20000, 20040],
+        ... })
+        >>> processor = InterRecordBoundedCumulatedDifferenceProcessor(
+        ...    id_variable='id',
+        ...    target_variable='value',
+        ...    new_first_variable_name='first_value',
+        ...    new_difference_variable_name='difference_to_bound',
+        ...    should_round_output=True
+        ...    )
+        >>> processor.preprocess(df)
+           id  first_value  difference_to_bound
+        0   1         1025             0.000000
+        1   2        20042             0.000000
+        2   1         1025            -1.000000
+        3   1         1025             0.006827
+        4   2        20042            -0.002206
+        5   2        20042             0.952381
 
-    >>> preprocessed_df = pd.DataFrame({
-    ...    "id": [1, 2, 1, 1, 2, 2],
-    ...    "first_value": [1025, 20042, 1025, 1025, 20042, 20042],
-    ...    "difference_to_bound": [0, 0, -1, 0.006827, -0.002206, 0.952381],
-    ... })
-    >>> processor.postprocess(df, preprocessed_df)
-       id  value
-    0   1   1025
-    1   2  20042
-    2   1   1000
-    3   1   1130
-    4   2  20000
-    5   2  20040
+        The postprocess allows you to transform some preprocessed data back into its
+        original format
+
+        >>> preprocessed_df = pd.DataFrame({
+        ...    "id": [1, 2, 1, 1, 2, 2],
+        ...    "first_value": [1025, 20042, 1025, 1025, 20042, 20042],
+        ...    "difference_to_bound": [0, 0, -1, 0.006827, -0.002206, 0.952381],
+        ... })
+        >>> processor.postprocess(df, preprocessed_df)
+           id  value
+        0   1   1025
+        1   2  20042
+        2   1   1000
+        3   1   1130
+        4   2  20000
+        5   2  20040
+
     """
 
     def __init__(
@@ -93,12 +94,12 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
                 f"Expected a valid `target_variable`, got {self.target_variable} instead"
             )
 
-        if df[self.id_variable].isnull().sum() > 0:
+        if df[self.id_variable].isna().sum() > 0:
             raise ValueError(
                 "Expected no missing values for id variable, got column with nulls instead"
             )
 
-        if df[self.target_variable].isnull().sum() > 0:
+        if df[self.target_variable].isna().sum() > 0:
             raise ValueError(
                 "Expected no missing values for target variable, got column with nulls instead"
             )
@@ -117,7 +118,7 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
         # store the difference between current and previous value
         working["previous_val"] = working.groupby(self.id_variable)[self.target_variable].shift()
         working = working.reset_index(drop=True)
-        working.loc[working["previous_val"].isnull(), "previous_val"] = working[
+        working.loc[working["previous_val"].isna(), "previous_val"] = working[
             self.target_variable
         ]  # for first record, set previous value as same value to avoid NaN
 
@@ -177,25 +178,25 @@ class InterRecordBoundedCumulatedDifferenceProcessor:
                 f"got {self.new_difference_variable_name} instead"
             )
 
-        if source[self.id_variable].isnull().sum() > 0:
+        if source[self.id_variable].isna().sum() > 0:
             raise ValueError(
                 "Expected no missing values for id variable in source, "
                 "got column with nulls instead"
             )
 
-        if source[self.target_variable].isnull().sum() > 0:
+        if source[self.target_variable].isna().sum() > 0:
             raise ValueError(
                 "Expected no missing values for target variable in source, "
                 "got column with nulls instead"
             )
 
-        if dest[self.new_difference_variable_name].isnull().sum() > 0:
+        if dest[self.new_difference_variable_name].isna().sum() > 0:
             raise ValueError(
                 "Expected no missing values for `new_difference_variable_name`, "
                 "got column with nulls instead"
             )
 
-        if dest[self.new_first_variable_name].isnull().sum() > 0:
+        if dest[self.new_first_variable_name].isna().sum() > 0:
             raise ValueError(
                 "Expected no missing values for `new_first_variable_name`, "
                 "got column with nulls instead"

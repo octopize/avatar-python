@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Sequence
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -10,18 +11,7 @@ from json import loads as json_loads
 from pathlib import Path
 from typing import (
     Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    Iterator,
-    Mapping,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -65,20 +55,16 @@ ResponseClass = TypeVar("ResponseClass", bound=BaseModel)
 
 JsonLike = dict[str, Any]
 
-Content = Union[Iterable[bytes], bytes]
-ContentBuilderFunc = Optional[Callable[..., Content]]
-UserContent = Union[JsonLike, str, bytes, Optional[BytesIO]]
-StreamedContent = Optional[Union[BytesIO, bytes, str]]
-
-AuthRefreshFunc = Optional[Callable[..., dict[str, str]]]
+Content = Iterable[bytes] | bytes
+ContentBuilderFunc = Callable[..., Content] | None
+UserContent = JsonLike | str | bytes | BytesIO | None
+StreamedContent = BytesIO | bytes | str | None
 
 
 def _get_nested_value(
-    obj: Union[Mapping[Any, Any], Sequence[Any]], key: str, default: Any = None
+    obj: Mapping[Any, Any] | Sequence[Any], key: str, default: Any = None
 ) -> Any:
-    """
-    Return value from (possibly) nested key in JSON dictionary.
-    """
+    """Return value from (possibly) nested key in JSON dictionary."""
     if isinstance(obj, Sequence) and not isinstance(obj, str):
         for item in obj:
             return _get_nested_value(item, key, default=default)
@@ -142,6 +128,10 @@ class TimeoutError(Exception):
     pass
 
 
+class ApiConnectionError(Exception):
+    """Raised when the client cannot connect or authenticate with the Avatar API."""
+
+
 class RateLimitError(Exception):
     """Raised when a request is rate limited (HTTP 429)."""
 
@@ -157,18 +147,18 @@ class ContextData:
     method: str
     url: str
     headers: dict[str, str]
-    http_request: Optional[Request] = None
-    http_response: Optional[Response] = None
+    http_request: Request | None = None
+    http_response: Response | None = None
     timeout: float = 0.0
-    params: Optional[Dict[str, Any]] = None
-    json_data: Optional[Union[BaseModel, Dict[str, Any], list[Any]]] = None
-    form_data: Optional[Union[BaseModel, Dict[str, Any]]] = None
-    data: Optional[str] = None
-    files: Optional[FileLikes] = None
+    params: dict[str, Any] | None = None
+    json_data: BaseModel | dict[str, Any] | list[Any] | None = None
+    form_data: BaseModel | dict[str, Any] | None = None
+    data: str | None = None
+    files: FileLikes | None = None
     content_builder: ContentBuilderFunc = None
     should_verify_auth: bool = True
     should_stream: bool = False
-    destination: Optional[FileLike] = None
+    destination: FileLike | None = None
     want_content: bool = False
 
     def update(self, **kwargs: Any) -> None:
@@ -176,18 +166,18 @@ class ContextData:
             if hasattr(self, k):
                 setattr(self, k, v)
 
-    def build_params_arg(self) -> Optional[Dict[str, Any]]:
+    def build_params_arg(self) -> dict[str, Any] | None:
         return remove_optionals(self.params)
 
-    def build_json_data_arg(self) -> Optional[Union[Dict[str, Any], list[Any]]]:
+    def build_json_data_arg(self) -> dict[str, Any] | list[Any] | None:
         if not self.json_data:
             return None
 
         if isinstance(self.json_data, BaseModel):
-            return json_loads(self.json_data.model_dump_json())
-        else:
-            # Handle plain lists, dicts, etc.
-            return self.json_data
+            parsed: dict[str, Any] | list[Any] = json_loads(self.json_data.model_dump_json())
+            return parsed
+        # Handle plain lists, dicts, etc.
+        return self.json_data
 
     def build_form_data_arg(self) -> Mapping[str, Any] | None:
         arg = (
@@ -198,10 +188,10 @@ class ContextData:
 
         return remove_optionals(arg)
 
-    def build_files_arg(self) -> Optional[list[Tuple[str, Any]]]:
+    def build_files_arg(self) -> list[tuple[str, Any]] | None:
         return [("file", file) for file in self.files] if self.files else None
 
-    def build_content_arg(self) -> Optional[Content]:
+    def build_content_arg(self) -> Content | None:
         return self.content_builder() if self.content_builder else None
 
     def status_is(self, status_code: int) -> bool:
@@ -220,8 +210,7 @@ class ContextData:
                 )
 
             return True
-        else:
-            raise Exception("Expected a HTTP response, got None instead")
+        raise Exception("Expected a HTTP response, got None instead")
 
     def has_header(self, header: str) -> bool:
         if self.http_response and header in self.http_response.headers:
@@ -263,13 +252,11 @@ class ContextData:
         with validated(self.http_response, "response") as resp:
             if self.should_stream:
                 return self.stream_response()
-            else:
-                if self.is_content_json():
-                    return self.response_to_json()
-                elif self.is_content_binary():
-                    return resp.content
-                else:
-                    return resp.text
+            if self.is_content_json():
+                return self.response_to_json()
+            if self.is_content_binary():
+                return resp.content
+            return resp.text
 
     def get_content_message(self) -> str:
         content = self.get_user_content()
@@ -289,7 +276,7 @@ class ContextData:
     def response_to_json(self) -> dict[str, Any]:
         resp = ensure_valid(self.http_response, "response")
 
-        as_json: Dict[str, Any] = {}
+        as_json: dict[str, Any] = {}
 
         if self.is_content_json():
             as_json = resp.json()
@@ -299,8 +286,6 @@ class ContextData:
     def stream_response_content(self, destination: FileLike) -> None:
         with validated(self.http_response, "response") as resp:
             if self.is_content_arrow():
-                # with ArrowStreamReader() as reader:
-                #     reader.write_parquet(destination, resp.iter_bytes())
                 pass
             else:
                 try:
@@ -314,9 +299,8 @@ class ContextData:
                 finally:
                     resp.close()
 
-    def stream_response(self, destination: Optional[FileLike] = None) -> StreamedContent:
-        """
-        Handle the streaming of a response to a destination.
+    def stream_response(self, destination: FileLike | None = None) -> StreamedContent:
+        """Handle the streaming of a response to a destination.
 
         If the destination is not provided, it returns the content as bytes.
 
@@ -334,6 +318,7 @@ class ContextData:
         Returns
         -------
             If no destination was provided, it returns the raw bytes.
+
         """
         content: StreamedContent = None
         buffer = BytesIO()
@@ -376,7 +361,7 @@ class OperationInfo:
     data: ContextData
     in_progress: bool = False
     last_updated_at: datetime = field(default_factory=datetime.now)
-    response: Optional[Any] = None
+    response: Any | None = None
 
 
 class ClientContext:
@@ -384,11 +369,9 @@ class ClientContext:
         self,
         http_client: httpx.Client,
         data: ContextData,
-        on_auth_refresh: AuthRefreshFunc = None,
     ) -> None:
         self.http_client: httpx.Client = http_client
         self.data: ContextData = data
-        self.on_auth_refresh = on_auth_refresh
 
     def build_request(self) -> Request:
         self.data.http_request = self.http_client.build_request(
@@ -408,10 +391,9 @@ class ClientContext:
     def retry(
         self,
         retry_count: int,  # Note: stop is inclusive
-        retry_interval: Optional[int],
+        retry_interval: int | None,
     ) -> Iterator[tenacity.AttemptManager]:
-        """
-        Unified retry mechanism for both network and rate limit errors.
+        """Unified retry mechanism for both network and rate limit errors.
 
         Parameters
         ----------
@@ -420,8 +402,8 @@ class ClientContext:
         retry_interval
             If provided, uses exponential backoff with this max interval.
             If None, uses rate limit retry strategy with retry_after from server.
-        """
 
+        """
         if retry_interval is None:
             # Rate limit mode: custom wait based on server's retry_after
             def wait_for_rate_limit(retry_state: tenacity.RetryCallState) -> float:
@@ -444,13 +426,13 @@ class ClientContext:
             before_sleep_func = _log_before_retry_attempt
             retry_condition = tenacity.retry_if_exception_type(Exception)
 
-            def after_func(call_state):
+            def after_func(call_state: tenacity.RetryCallState) -> None:
                 _log_after_failure(call_state, data=self.data)
 
-            def retry_error_callback_func(call_state):
+            def retry_error_callback_func(call_state: tenacity.RetryCallState) -> None:
                 _reraise_on_timeout(call_state, data=self.data)
 
-        for attempt in tenacity.Retrying(
+        yield from tenacity.Retrying(
             stop=tenacity.stop_after_attempt(retry_count),
             wait=wait_strategy,
             retry=retry_condition,
@@ -458,44 +440,29 @@ class ClientContext:
             retry_error_callback=retry_error_callback_func,
             after=after_func,
             reraise=True,
-        ):
-            yield attempt
+        )
 
     def send_request(self) -> None:
-        needs_retry_with_auth = True
+        # Capture the request once per auth retry - reuse for all retries
+        request = ensure_valid(self.data.http_request)
 
-        while needs_retry_with_auth:
-            needs_retry_with_auth = False
-            # Capture the request once per auth retry - reuse for all retries
-            request = ensure_valid(self.data.http_request)
-
-            # Application-level retries (rate limits)
-            for rate_limit_attempt in self.retry(
-                DEFAULT_RATE_LIMIT_MAX_RETRIES + 1, retry_interval=None
-            ):
-                with rate_limit_attempt:
-                    # Network-level retries (timeouts, connection errors, ...)
-                    for attempt in self.retry(
-                        DEFAULT_NETWORK_RETRY_COUNT + 1, DEFAULT_NETWORK_RETRY_INTERVAL
-                    ):
-                        with attempt:
-                            self.data.http_response = self.http_client.send(
-                                request=request,
-                                stream=self.data.should_stream,
-                            )
-
-                            if self.check_auth_refreshed():
-                                # Reset/rebuild current request
-                                needs_retry_with_auth = True
-                                self.build_request()
-                                break
-
-                    if needs_retry_with_auth:
-                        break
-
-                    # Check for rate limiting (will raise RateLimitError if 429)
-                    # Tenacity will catch this and retry with the same request
-                    self.check_success()
+        # Application-level retries (rate limits)
+        for rate_limit_attempt in self.retry(
+            DEFAULT_RATE_LIMIT_MAX_RETRIES + 1, retry_interval=None
+        ):
+            with rate_limit_attempt:
+                # Network-level retries (timeouts, connection errors, ...)
+                for attempt in self.retry(
+                    DEFAULT_NETWORK_RETRY_COUNT + 1, DEFAULT_NETWORK_RETRY_INTERVAL
+                ):
+                    with attempt:
+                        self.data.http_response = self.http_client.send(
+                            request=request,
+                            stream=self.data.should_stream,
+                        )
+                # Check for rate limiting (will raise RateLimitError if 429)
+                # Tenacity will catch this and retry with the same request
+                self.check_success()
 
     def send_request_and_build_response(self, response_cls: type[ResponseClass]) -> ResponseClass:
         self.send_request()
@@ -514,14 +481,13 @@ class ClientContext:
         self,
         *,
         update_func: Callable[..., bool],
-        response_cls: Optional[Type[ResponseClass]] = None,
+        response_cls: type[ResponseClass] | None = None,
     ) -> OperationInfo:
         def call_update_func(info: OperationInfo) -> bool:
             if response_cls:
                 info.response = self.build_response(response_cls)
                 return update_func(info, info.response)
-            else:
-                return update_func(info)
+            return update_func(info)
 
         info = OperationInfo(data=self.data)
         what = str(response_cls) if response_cls else "request"
@@ -557,26 +523,6 @@ class ClientContext:
             return
 
         self.raise_on_status(resp)
-
-    def check_auth_refreshed(
-        self,
-    ) -> bool:
-        refreshed = False
-
-        if self.data.status_is(httpx.codes.UNAUTHORIZED):
-            msg = self.data.get_content_message()
-
-            if "credentials expired" in msg:
-                if self.on_auth_refresh:
-                    logger.info("trying to refresh authentication token")
-                    new_headers = self.on_auth_refresh()
-                    self.data.update_headers(new_headers)
-                    logger.info("authentication refreshed, retrying previous request")
-                    refreshed = True
-                else:
-                    logger.warning("Authentication refresh needed but not configured")
-
-        return refreshed
 
     def check_authenticated(self, resp: Response, content: dict[str, Any]) -> None:
         value = content.get("detail")
@@ -622,7 +568,7 @@ class ClientContext:
 
         # Try standard error field
         if standard_error := _get_nested_value(content, "message"):
-            return standard_error
+            return str(standard_error)
 
         # Try validation error
         if validation_error := _get_nested_value(content, "msg"):
@@ -659,13 +605,11 @@ def update_request_op(info: OperationInfo) -> bool:
     return False
 
 
-def update_response_op(info: OperationInfo, response: ResponseClass) -> bool:
+def update_response_op[ResponseClass: BaseModel](
+    info: OperationInfo, response: ResponseClass
+) -> bool:
     ret: bool = False
 
-    # if hasattr(response, "status"):
-    #     info.in_progress = response.status in IN_PROGRESS_STATUSES
-    # else:
-    # ret = update_request_op(info)
     ret = update_request_op(info)
 
     if hasattr(response, "last_updated_at"):
@@ -682,16 +626,15 @@ class BaseClient:
         should_verify_ssl: bool = True,
         *,
         verify_auth: bool = True,
-        on_auth_refresh: Optional[AuthRefreshFunc] = None,
-        http_client: Optional[httpx.Client] = None,
-        headers: Dict[str, str] = {},
-        api_key: Optional[str] = None,
+        http_client: httpx.Client | None = None,
+        headers: dict[str, str] | None = None,
+        api_key: str | None = None,
     ) -> None:
         """Client to communicate with the Avatar API.
 
         Parameters
         ----------
-        base_url
+        base_urlapi_key
             url of the API
         timeout:
             timeout in seconds, by default DEFAULT_TIMEOUT
@@ -702,9 +645,11 @@ class BaseClient:
         verify_auth :, optional
             Bypass client-side authentication verification, by default True
         api_key :, optional
-            API key for authentication. If provided, uses api-key-v1 scheme
-            instead of Bearer tokens. By default None
+            API key for authentication. By default None
+
         """
+        if headers is None:
+            headers = {}
         if '"' in base_url:
             raise ValueError(f"Expected base_url not to contain quotes. Got {base_url} instead")
 
@@ -712,22 +657,16 @@ class BaseClient:
         self.timeout = timeout
         self.should_verify_ssl = should_verify_ssl
         self.verify_auth = verify_auth
-        self._on_auth_refresh = on_auth_refresh
         self._http_client = http_client
         self._headers = {"Avatars-Accept-Created": "yes"} | headers
-        self._api_key: Optional[str] = api_key
+        self._api_key: str | None = api_key
 
         # Set API key auth header if provided
         if self._api_key:
             self.set_header("Authorization", f"api-key-v1 {self._api_key}")
-            # Disable auth refresh for API keys since they don't expire
-            self._on_auth_refresh = None
 
     def set_header(self, key: str, value: str) -> None:
         self._headers[key] = value
-
-    def on_auth_refresh(self, on_auth_refresh: Optional[AuthRefreshFunc] = None) -> None:
-        self._on_auth_refresh = on_auth_refresh
 
     def is_using_api_key(self) -> bool:
         """Check if the client is configured to use API key authentication."""
@@ -735,14 +674,14 @@ class BaseClient:
 
     def prepare_files(
         self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
-    ) -> Optional[FileLikes]:
+    ) -> FileLikes | None:
         files: Any = pop_or(keyword_args, "files", [])
         files = files if isinstance(files, list) else [files]
 
         if f := pop_or(keyword_args, "file", None):
             files.append(f)
 
-        prepared_files: Optional[FileLikes] = None
+        prepared_files: FileLikes | None = None
 
         if files:
             prepared_files = []
@@ -760,17 +699,13 @@ class BaseClient:
 
         if "content" in keyword_args:
             content = keyword_args.pop("content")
-            content_builder = lambda: content  # noqa
-        # elif "dataset" in keyword_args:
-        #     ds = keyword_args.pop("dataset")
-        #     headers["Content-Type"] = ContentType.ARROW_STREAM.value
-        #     content_builder = lambda: ArrowStreamWriter(ds)  # noqa
+            content_builder = lambda: content  # noqa: E731
 
         return content_builder
 
     @contextmanager
     def context(
-        self, *, ctx: Optional[ClientContext] = None, **kwargs: Any
+        self, *, ctx: ClientContext | None = None, **kwargs: Any
     ) -> Generator[ClientContext, None, None]:
         with ExitStack() as stack:
             if not self._http_client:
@@ -797,7 +732,6 @@ class BaseClient:
                     data=ContextData(
                         base_url=self.base_url, headers=self._headers.copy(), **kwargs
                     ),
-                    on_auth_refresh=self._on_auth_refresh,
                 )
 
             ctx.data.update(**kwargs)
@@ -817,7 +751,7 @@ class BaseClient:
         *,
         url: str,
         request: RequestClass,
-        response_cls: Type[ResponseClass],
+        response_cls: type[ResponseClass],
     ) -> ResponseClass:
         with self.context(method="post", url=url) as ctx:
             ctx.data.json_data = request
@@ -838,7 +772,7 @@ class BaseClient:
 
         with self.context(method=method, url=url, **kwargs) as ctx:
             ctx.build_and_send_request()
-            destination = kwargs.get("destination", None)
+            destination = kwargs.get("destination")
 
             if destination:
                 response = ctx.data.stream_response(destination=destination)
@@ -854,7 +788,7 @@ class BaseClient:
         return response
 
     def wait_created(self, *, ctx: ClientContext, url: str, **kwargs: Any) -> OperationInfo:
-        with self.context(method="get", url=url, ctx=ctx) as ctx:
+        with self.context(method="get", url=url, ctx=ctx) as ctx:  # noqa: PLR1704 - re-bind to entered context
             return ctx.loop_until(
                 **kwargs,
             )

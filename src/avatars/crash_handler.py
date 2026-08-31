@@ -1,5 +1,4 @@
-"""
-Global custom exception hook for crash reporting.
+"""Global custom exception hook for crash reporting.
 
 This module implements a sys.excepthook handler that:
 1. Executes pre-crash cleanup commands
@@ -23,7 +22,7 @@ import platform
 import sys
 import traceback
 import weakref
-from datetime import datetime
+from datetime import UTC, datetime
 from difflib import SequenceMatcher
 from pathlib import Path
 from types import TracebackType
@@ -55,31 +54,31 @@ _runner_registry: weakref.WeakSet[Runner] = weakref.WeakSet()
 
 
 def register_runner(runner: Runner) -> None:
-    """
-    Register a Runner instance for crash reporting.
+    """Register a Runner instance for crash reporting.
 
     Args:
         runner: The Runner instance to register.
+
     """
     _runner_registry.add(runner)
 
 
 def unregister_runner(runner: Runner) -> None:
-    """
-    Unregister a Runner instance.
+    """Unregister a Runner instance.
 
     Args:
         runner: The Runner instance to unregister.
+
     """
     _runner_registry.discard(runner)
 
 
 def _get_runner_yaml_dumps() -> list[tuple[str, str]]:
-    """
-    Get YAML dumps from all registered Runner instances.
+    """Get YAML dumps from all registered Runner instances.
 
     Returns:
         List of (display_name, yaml_content) tuples.
+
     """
     results = []
     for runner in list(_runner_registry):
@@ -93,8 +92,7 @@ def _get_runner_yaml_dumps() -> list[tuple[str, str]]:
 
 
 def pre_crash_command() -> None:
-    """
-    Command to run before showing the exception.
+    """Command to run before showing the exception.
 
     This function silently captures Runner YAML configs for the crash report.
     """
@@ -103,8 +101,7 @@ def pre_crash_command() -> None:
 
 
 def get_file_context(filename: str, lineno: int, context_lines: int = CONTEXT_LINES) -> str:
-    """
-    Read the file and return lines of code around the error.
+    """Read the file and return lines of code around the error.
 
     Args:
         filename: Path to the source file.
@@ -113,6 +110,7 @@ def get_file_context(filename: str, lineno: int, context_lines: int = CONTEXT_LI
 
     Returns:
         A formatted string with the code context, with the error line marked.
+
     """
     start = max(1, lineno - context_lines)
     end = lineno + context_lines
@@ -138,18 +136,19 @@ def get_file_context(filename: str, lineno: int, context_lines: int = CONTEXT_LI
 
 
 def _find_sensitive_lines(filename: str) -> set[int]:
-    """
-    Parse a Python file and find lines that contain sensitive information.
+    """Parse a Python file and find lines that contain sensitive information.
 
     This uses AST parsing to find:
-    1. Lines containing .authenticate(...) calls
-    2. Lines that assign values to variables used as the password argument
+    1. Lines containing `Manager(api_key=...)` calls
+    2. Lines that assign values to variables used as that api_key argument
+    3. Lines that assign values to sensitive-looking variables (password, secret, api_key, ...)
 
     Args:
         filename: Path to the Python source file.
 
     Returns:
         A set of 1-indexed line numbers that should be redacted.
+
     """
     try:
         with open(filename, encoding="utf-8") as f:
@@ -167,14 +166,14 @@ _FUZZY_MATCH_THRESHOLD = 0.8
 
 
 def _is_sensitive_variable_name(name: str) -> bool:
-    """
-    Check if a variable name is sensitive using fuzzy string matching.
+    """Check if a variable name is sensitive using fuzzy string matching.
 
     Args:
         name: The variable name to check.
 
     Returns:
         True if the name fuzzy-matches a sensitive pattern.
+
     """
     # Normalize: lowercase and remove underscores for comparison
     normalized = name.lower().replace("_", "")
@@ -185,15 +184,41 @@ def _is_sensitive_variable_name(name: str) -> bool:
     return False
 
 
-def _find_sensitive_lines_from_source(source: str) -> set[int]:
+def _is_manager_call(func: ast.expr) -> bool:
+    """Check if a call expression targets the Manager constructor.
+
+    Matches both `Manager(...)` and attribute access forms like
+    `avatars.manager.Manager(...)`.
+
+    Args:
+        func: The `func` node of an `ast.Call`.
+
+    Returns:
+        True if the call targets something named `Manager`.
+
     """
-    Parse Python source code and find lines containing sensitive information.
+    if isinstance(func, ast.Name):
+        return func.id == "Manager"
+    if isinstance(func, ast.Attribute):
+        return func.attr == "Manager"
+    return False
+
+
+def _find_sensitive_lines_from_source(source: str) -> set[int]:
+    """Parse Python source code and find lines containing sensitive information.
+
+    This uses AST parsing to find:
+    1. `Manager(...)` calls that pass an `api_key=` argument
+    2. Lines that assign values to variables used as that api_key argument
+    3. Lines that assign values to variables whose name looks sensitive
+       (e.g. password, secret, api_key)
 
     Args:
         source: Python source code as a string.
 
     Returns:
         A set of 1-indexed line numbers that should be redacted.
+
     """
     try:
         tree = ast.parse(source)
@@ -201,51 +226,40 @@ def _find_sensitive_lines_from_source(source: str) -> set[int]:
         return set()
 
     sensitive_lines: set[int] = set()
-    password_variables: set[str] = set()
+    sensitive_variables: set[str] = set()
 
-    # First pass: find all .authenticate() calls and collect password variable names
+    # First pass: find Manager(...) calls passing an api_key= argument, and
+    # collect the variable name if the argument is a variable reference.
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call):
-            # Check if this is a .authenticate(...) method call
-            if isinstance(node.func, ast.Attribute) and node.func.attr == "authenticate":
-                # Mark the line(s) of the authenticate call as sensitive
+        if isinstance(node, ast.Call) and _is_manager_call(node.func):
+            api_key_arg = next(
+                (keyword.value for keyword in node.keywords if keyword.arg == "api_key"), None
+            )
+
+            if api_key_arg is not None:
                 sensitive_lines.add(node.lineno)
                 if hasattr(node, "end_lineno") and node.end_lineno:
                     for line in range(node.lineno, node.end_lineno + 1):
                         sensitive_lines.add(line)
 
-                # Find the password argument (2nd positional or password= keyword)
-                password_arg = None
+                if isinstance(api_key_arg, ast.Name):
+                    sensitive_variables.add(api_key_arg.id)
 
-                # Check positional arguments (password is typically 2nd arg)
-                if len(node.args) >= 2:
-                    password_arg = node.args[1]
-
-                # Check keyword arguments
-                for keyword in node.keywords:
-                    if keyword.arg == "password":
-                        password_arg = keyword.value
-                        break
-
-                # If password arg is a variable name, track it for redaction
-                if password_arg is not None and isinstance(password_arg, ast.Name):
-                    password_variables.add(password_arg.id)
-
-    # Second pass: find all assignments to password variables or sensitive variable names
+    # Second pass: find all assignments to tracked variables or sensitive variable names
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name):
-                    # Redact if it's a tracked password variable OR has a sensitive name
-                    if target.id in password_variables or _is_sensitive_variable_name(target.id):
+                    # Redact if it's a tracked variable OR has a sensitive name
+                    if target.id in sensitive_variables or _is_sensitive_variable_name(target.id):
                         sensitive_lines.add(node.lineno)
                         if hasattr(node, "end_lineno") and node.end_lineno:
                             for line in range(node.lineno, node.end_lineno + 1):
                                 sensitive_lines.add(line)
         elif isinstance(node, ast.AnnAssign):
-            # Handle annotated assignments like `password: str = "secret"`
+            # Handle annotated assignments like `api_key: str = "secret"`
             if isinstance(node.target, ast.Name) and node.value is not None:
-                if node.target.id in password_variables or _is_sensitive_variable_name(
+                if node.target.id in sensitive_variables or _is_sensitive_variable_name(
                     node.target.id
                 ):
                     sensitive_lines.add(node.lineno)
@@ -257,16 +271,16 @@ def _find_sensitive_lines_from_source(source: str) -> set[int]:
 
 
 def get_full_file_content(filename: str) -> str:
-    """
-    Read and return the entire content of a file with line numbers.
+    """Read and return the entire content of a file with line numbers.
 
-    Sensitive lines (containing passwords or authenticate calls) are redacted.
+    Sensitive lines (containing passwords, secrets, or api keys passed to Manager) are redacted.
 
     Args:
         filename: Path to the source file.
 
     Returns:
         The full file content with line numbers, with sensitive lines redacted.
+
     """
     try:
         with open(filename, encoding="utf-8") as f:
@@ -287,14 +301,14 @@ def get_full_file_content(filename: str) -> str:
 
 
 def _find_user_main_file(exc_tb: TracebackType | None) -> str | None:
-    """
-    Find the main user file from the traceback (first user code frame).
+    """Find the main user file from the traceback (first user code frame).
 
     Args:
         exc_tb: The traceback object.
 
     Returns:
         The path to the main user file, or None if not found.
+
     """
     if exc_tb is None:
         return None
@@ -307,8 +321,7 @@ def _find_user_main_file(exc_tb: TracebackType | None) -> str | None:
 
 
 def is_user_code(filename: str) -> bool:
-    """
-    Heuristic to determine if a file is user code or library code.
+    """Heuristic to determine if a file is user code or library code.
 
     Args:
         filename: The file path to check.
@@ -317,6 +330,7 @@ def is_user_code(filename: str) -> bool:
         True if the file appears to be user code, False for library code.
         Note: Our own library (avatars) is treated as user code so its
         context is shown in crash reports.
+
     """
     # First check if this is our own library - always show context for it
     for own_pattern in OWN_LIBRARY_PATTERNS:
@@ -324,10 +338,7 @@ def is_user_code(filename: str) -> bool:
             return True
 
     # If the file path contains typical library indicators, it's not user code
-    for path_pattern in LIBRARY_PATHS:
-        if path_pattern in filename:
-            return False
-    return True
+    return all(path_pattern not in filename for path_pattern in LIBRARY_PATHS)
 
 
 def generate_crash_report(
@@ -335,8 +346,7 @@ def generate_crash_report(
     exc_value: BaseException,
     exc_tb: TracebackType | None,
 ) -> str:
-    """
-    Generate a detailed crash report.
+    """Generate a detailed crash report.
 
     Args:
         exc_type: The exception type.
@@ -345,10 +355,11 @@ def generate_crash_report(
 
     Returns:
         A formatted crash report string.
+
     """
     report = []
     report.append("=" * 60)
-    report.append(f"CRASH REPORT - {datetime.now().isoformat()}")
+    report.append(f"CRASH REPORT - {datetime.now(UTC).isoformat()}")
     report.append("=" * 60)
 
     # System/Environment information
@@ -424,8 +435,7 @@ def custom_excepthook(
     exc_value: BaseException,
     exc_tb: TracebackType | None,
 ) -> None:
-    """
-    Custom exception hook that generates crash reports.
+    """Custom exception hook that generates crash reports.
 
     This replaces the default sys.excepthook to provide enhanced
     crash reporting with source context for user code.
@@ -434,6 +444,7 @@ def custom_excepthook(
         exc_type: The exception type.
         exc_value: The exception instance.
         exc_tb: The traceback object.
+
     """
     # 1. Run pre-crash command
     try:
@@ -475,8 +486,7 @@ _hook_installed = False
 
 
 def install_hook() -> None:
-    """
-    Install the custom exception hook.
+    """Install the custom exception hook.
 
     This replaces sys.excepthook with our custom handler.
     Safe to call multiple times - will only install once.
@@ -488,8 +498,7 @@ def install_hook() -> None:
 
 
 def uninstall_hook() -> None:
-    """
-    Restore the original exception hook.
+    """Restore the original exception hook.
 
     This restores the original sys.excepthook behavior.
     """

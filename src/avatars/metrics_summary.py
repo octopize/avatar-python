@@ -20,8 +20,8 @@ def build_metrics_summary_df(
         A DataFrame indexed by ``table_name`` with MultiIndex columns ``(reference, metric)``
         where the top level is the reference name and the second level is
         ``privacy`` or ``signal``.
-    """
 
+    """
     all_refs = sorted({ref for d in (privacy, signal) for refs in d.values() for ref in refs})
     all_tables = sorted({table for d in (privacy, signal) for table in d})
 

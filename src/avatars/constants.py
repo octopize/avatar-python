@@ -6,20 +6,19 @@ from typing import (
     TYPE_CHECKING,
     Any,
     BinaryIO,
-    Union,
 )
 
 import pandas as pd
 from avatar_yaml.models.schema import ColumnType
 
 if TYPE_CHECKING:
-    from IPython.display import HTML  # noqa: F401
+    from IPython.display import HTML
 
-from avatars.models import JobKind
+from avatars.models import JobKind, JobStatus
 
 DEFAULT_TIMEOUT = 5
 
-FileLike = Union[BinaryIO, IO[Any], io.IOBase]
+FileLike = BinaryIO | IO[Any] | io.IOBase
 FileLikes = list[FileLike]
 VOLUME_NAME = "input"
 
@@ -30,9 +29,43 @@ JOB_EXECUTION_ORDER = [
     JobKind.report,
 ]
 
-ERROR_STATUSES = ["parent_error", "error"]
+ERROR_STATUSES = [JobStatus.parent_error, JobStatus.error, JobStatus.lost, JobStatus.orphaned]
 
-READY_STATUSES = ["finished", *ERROR_STATUSES]
+READY_STATUSES = [JobStatus.finished, *ERROR_STATUSES]
+
+_FAILURE_STATUSES: frozenset[JobStatus] = frozenset(
+    {JobStatus.error, JobStatus.parent_error, JobStatus.lost, JobStatus.orphaned}
+)
+_PENDING_STATUSES: frozenset[JobStatus] = frozenset({JobStatus.pending, JobStatus.created})
+_QUEUED_STATUSES: frozenset[JobStatus] = frozenset({JobStatus.queued, JobStatus.field_})
+
+
+def aggregate_job_status(statuses: list[JobStatus]) -> JobStatus:
+    """Return the 'worst' status from a list — failure > pending > queued > finished.
+
+    Parameters
+    ----------
+    statuses
+        List of job statuses to aggregate. Returns ``JobStatus.finished`` for an
+        empty list (vacuously "all done").
+
+    Returns
+    -------
+    JobStatus
+        The highest-priority (worst) status present in ``statuses``.
+
+    """
+    for s in statuses:
+        if s in _FAILURE_STATUSES:
+            return s
+    for s in statuses:
+        if s in _PENDING_STATUSES:
+            return s
+    for s in statuses:
+        if s in _QUEUED_STATUSES:
+            return s
+    return JobStatus.finished
+
 
 # For network retries
 DEFAULT_NETWORK_RETRY_COUNT = 20
@@ -118,7 +151,7 @@ RESULTS_TO_STORE = [
     Results.SIGNAL_METRICS_SUMMARY,
 ]
 
-type TypeResults = dict | pd.DataFrame | str | list[dict[str, Any]] | None | HTML
+type TypeResults = dict[str, Any] | pd.DataFrame | str | list[dict[str, Any]] | HTML | None
 
 MATCHERS: dict[re.Pattern[str], ColumnType] = {
     re.compile(r"float"): ColumnType.NUMERIC,

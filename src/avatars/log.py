@@ -6,7 +6,7 @@ import structlog
 LOG_LEVEL = str(os.getenv("LOG_LEVEL", "WARNING")).upper()
 
 
-def setup_logging(log_level=LOG_LEVEL):
+def setup_logging(log_level: str = LOG_LEVEL) -> None:
     timestamper = structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S")
     structlog.configure(
         processors=[

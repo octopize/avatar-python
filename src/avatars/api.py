@@ -1,32 +1,28 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 2.64.0
+# API Version : 3.6.0
 
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from avatars.models import (
-    ApiKey,  # noqa: F401
-    BulkDeleteRequest,  # noqa: F401
-    BulkDeleteResponse,  # noqa: F401
-    CompatibilityResponse,  # noqa: F401
-    CreateApiKeyRequest,  # noqa: F401
-    CreateUser,  # noqa: F401
-    CreditsInfo,  # noqa: F401
-    FeaturesInfo,  # noqa: F401
-    FileAccess,  # noqa: F401
-    ForgottenPasswordRequest,  # noqa: F401
-    JobCreateRequest,  # noqa: F401
-    JobCreateResponse,  # noqa: F401
+    ApiKey,
+    BulkDeleteRequest,
+    BulkDeleteResponse,
+    CompatibilityResponse,
+    CreateApiKeyRequest,
+    CreditsInfo,
+    EventLogResponse,
+    FeaturesInfo,
+    FileAccess,
+    JobCreateRequest,
+    JobCreateResponse,
     JobKind,
-    JobResponse,  # noqa: F401
-    JobResponseList,  # noqa: F401
-    Login,  # noqa: F401
-    LoginResponse,  # noqa: F401
-    MeUser,  # noqa: F401
-    ResetPasswordRequest,  # noqa: F401
-    ResourceSetResponse,  # noqa: F401
-    User,  # noqa: F401
+    JobResponse,
+    JobResponseList,
+    MeUser,
+    ResourceSetResponse,
+    User,
 )
 
 if TYPE_CHECKING:
@@ -48,14 +44,13 @@ class ApiKeys:
     def list_api_keys(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> List[ApiKey]:
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> list[ApiKey]:
         """List all API keys for the authenticated user.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/api-keys",  # noqa: F541
             "timeout": timeout,
@@ -67,14 +62,13 @@ class ApiKeys:
         self,
         request: CreateApiKeyRequest,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Create a new API key for the authenticated user.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "post",
             "url": f"/api-keys",  # noqa: F541
             "timeout": timeout,
@@ -86,14 +80,13 @@ class ApiKeys:
     def revoke_all_api_keys(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Revoke all API keys for the authenticated user.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "delete",
             "url": f"/api-keys",  # noqa: F541
             "timeout": timeout,
@@ -105,16 +98,15 @@ class ApiKeys:
         self,
         api_key_id: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> ApiKey:
         """Get details of a specific API key.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
-            "url": f"/api-keys/{api_key_id}",  # noqa: F541
+            "url": f"/api-keys/{api_key_id}",
             "timeout": timeout,
         }
 
@@ -124,16 +116,15 @@ class ApiKeys:
         self,
         api_key_id: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Revoke a specific API key.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "delete",
-            "url": f"/api-keys/{api_key_id}",  # noqa: F541
+            "url": f"/api-keys/{api_key_id}",
             "timeout": timeout,
         }
 
@@ -141,10 +132,10 @@ class ApiKeys:
 
     def revoke_api_key_admin(
         self,
-        user_id: Optional[str] = None,
-        api_key_id: Optional[str] = None,
+        user_id: str | None = None,
+        api_key_id: str | None = None,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Revoke API key(s) for another user (admin only).
 
@@ -154,8 +145,7 @@ class ApiKeys:
 
         This endpoint requires admin permissions and is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "delete",
             "url": f"/api-keys/admin",  # noqa: F541
             "timeout": timeout,
@@ -168,149 +158,6 @@ class ApiKeys:
         return self.client.request(**kwargs)
 
 
-class Auth:
-    def __init__(self, client: "ApiClient") -> None:
-        self.client = client
-
-    def login(
-        self,
-        request: Login,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> LoginResponse:
-        """Login the user."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/login",  # noqa: F541
-            "timeout": timeout,
-            "form_data": request,
-            "should_verify_auth": False,
-        }
-
-        return LoginResponse(**self.client.request(**kwargs))
-
-    def refresh(
-        self,
-        token: Optional[str] = None,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> LoginResponse:
-        """Refresh access token using the refresh token.
-
-        This endpoint supports two authentication flows:
-        1. Internal refresh tokens (password-based auth) - token from query/body parameter
-        2. Authentik SSO refresh tokens (SSO-based auth) - token from cookies
-
-        The flows are mutually exclusive based on the token source.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/refresh",  # noqa: F541
-            "timeout": timeout,
-            "params": dict(
-                token=token,
-            ),
-        }
-
-        return LoginResponse(**self.client.request(**kwargs))
-
-    def forgotten_password(
-        self,
-        request: ForgottenPasswordRequest,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/login/forgotten_password",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-            "should_verify_auth": False,
-        }
-
-        return self.client.request(**kwargs)
-
-    def reset_password(
-        self,
-        request: ResetPasswordRequest,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/login/reset_password",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-            "should_verify_auth": False,
-        }
-
-        return self.client.request(**kwargs)
-
-    def get_authorization_code(
-        self,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        """OAuth2 flow, step1: redirect user to Authentik to obtain an authorization code grant."""
-
-        kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/login/sso",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return self.client.request(**kwargs)
-
-    def auth(
-        self,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        """OAuth2 flow, step2: exchange the authorization code for Authentik tokens.
-
-        Returns Authentik's JWT tokens directly. These tokens are verified by
-        get_user_from_valid_auth using Authentik's JWKS endpoint.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/login/sso/auth",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return self.client.request(**kwargs)
-
-    def logout(
-        self,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-        """Two-step logout: revoke tokens, then redirect to OIDC logout.
-
-        Step 1: Revoke refresh and access tokens at Authentik's revocation endpoint
-        Step 2: Redirect browser to Authentik's end_session_endpoint for full logout
-
-        Args:
-            request: FastAPI request object
-            post_logout_redirect_uri: Where to redirect after logout (defaults to app homepage)
-
-        Returns:
-            JSONResponse with URL to Authentik's logout page
-        """
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/logout",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return self.client.request(**kwargs)
-
-
 class Compatibility:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
@@ -318,11 +165,10 @@ class Compatibility:
     def is_client_compatible(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> CompatibilityResponse:
         """Verify if the client is compatible with the API."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/check_client",  # noqa: F541
             "timeout": timeout,
@@ -332,6 +178,25 @@ class Compatibility:
         return CompatibilityResponse(**self.client.request(**kwargs))
 
 
+class EventLogs:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def list_my_event_logs(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> list[EventLogResponse]:
+        """Return the audit trail for the authenticated user, most recent first."""
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/event-logs",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return [EventLogResponse(**item) for item in self.client.request(**kwargs)]
+
+
 class Health:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
@@ -339,11 +204,10 @@ class Health:
     def get_root(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Verify server health."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/",  # noqa: F541
             "timeout": timeout,
@@ -354,11 +218,10 @@ class Health:
     def get_health(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Verify server health."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/health",  # noqa: F541
             "timeout": timeout,
@@ -369,11 +232,10 @@ class Health:
     def get_health_db(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Verify connection to the db health."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/health/db",  # noqa: F541
             "timeout": timeout,
@@ -388,18 +250,24 @@ class Jobs:
 
     def get_jobs(
         self,
-        kind: Optional[JobKind] = None,
-        include_deleted: Optional[bool] = None,
+        kind: list[JobKind] | None = None,
+        display_name: str | None = None,
+        set_name: str | None = None,
+        limit: int | None = None,
+        include_deleted: bool | None = None,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> JobResponseList:
 
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/jobs",  # noqa: F541
             "timeout": timeout,
             "params": dict(
                 kind=kind,
+                display_name=display_name,
+                set_name=set_name,
+                limit=limit,
                 include_deleted=include_deleted,
             ),
         }
@@ -410,10 +278,10 @@ class Jobs:
         self,
         request: JobCreateRequest,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> JobCreateResponse:
 
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "post",
             "url": f"/jobs",  # noqa: F541
             "timeout": timeout,
@@ -422,16 +290,30 @@ class Jobs:
 
         return JobCreateResponse(**self.client.request(**kwargs))
 
+    def get_last_jobs(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> JobResponseList:
+        """Return all jobs belonging to the set_name that was most recently created."""
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/jobs/last_set",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return JobResponseList(**self.client.request(**kwargs))
+
     def get_job_status(
         self,
         job_name: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> JobResponse:
 
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
-            "url": f"/jobs/{job_name}",  # noqa: F541
+            "url": f"/jobs/{job_name}",
             "timeout": timeout,
         }
 
@@ -441,13 +323,12 @@ class Jobs:
         self,
         job_name: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> JobResponse:
         """Delete a single job by name."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "delete",
-            "url": f"/jobs/{job_name}",  # noqa: F541
+            "url": f"/jobs/{job_name}",
             "timeout": timeout,
         }
 
@@ -457,11 +338,10 @@ class Jobs:
         self,
         request: BulkDeleteRequest,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> BulkDeleteResponse:
         """Delete multiple jobs in a single request. Maximum 100 jobs at once."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "post",
             "url": f"/jobs/bulk-delete",  # noqa: F541
             "timeout": timeout,
@@ -478,10 +358,10 @@ class Openapi:
     def get_openapi_schema(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
 
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/openapi.json",  # noqa: F541
             "timeout": timeout,
@@ -498,10 +378,10 @@ class Resources:
         self,
         volume_name: str,
         purpose: str,
-        set_name: Optional[str] = None,
-        display_name: Optional[str] = None,
+        set_name: str | None = None,
+        display_name: str | None = None,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Generate a user volume configuration for a resource set.
 
@@ -518,9 +398,9 @@ class Resources:
 
         Returns:
             Plain text response containing the volume configuration YAML
-        """
 
-        kwargs: Dict[str, Any] = {
+        """
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/resources/volume",  # noqa: F541
             "timeout": timeout,
@@ -538,7 +418,7 @@ class Resources:
         self,
         set_name: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Retrieve all resources from a resource set.
 
@@ -554,11 +434,11 @@ class Resources:
 
         Raises:
             HTTPException: 404 if the resource set does not exist
-        """
 
-        kwargs: Dict[str, Any] = {
+        """
+        kwargs: dict[str, Any] = {
             "method": "get",
-            "url": f"/resources/{set_name}",  # noqa: F541
+            "url": f"/resources/{set_name}",
             "timeout": timeout,
         }
 
@@ -569,7 +449,7 @@ class Resources:
         set_name: str,
         yaml_string: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> ResourceSetResponse:
         """Add new resources to an existing resource set.
 
@@ -587,11 +467,11 @@ class Resources:
 
         Raises:
             HTTPException: 404 if the resource set does not exist
-        """
 
-        kwargs: Dict[str, Any] = {
+        """
+        kwargs: dict[str, Any] = {
             "method": "post",
-            "url": f"/resources/{set_name}",  # noqa: F541
+            "url": f"/resources/{set_name}",
             "timeout": timeout,
             "content": yaml_string,
             "headers": {"Content-Type": "application/yaml"},
@@ -604,7 +484,7 @@ class Resources:
         display_name: str,
         yaml_string: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> ResourceSetResponse:
         """Create a new version of a resource set with complete replacement.
 
@@ -619,11 +499,11 @@ class Resources:
 
         Returns:
             ResourceSetResponse with the new UUID and the same display name
-        """
 
-        kwargs: Dict[str, Any] = {
+        """
+        kwargs: dict[str, Any] = {
             "method": "put",
-            "url": f"/resources/{display_name}",  # noqa: F541
+            "url": f"/resources/{display_name}",
             "timeout": timeout,
             "content": yaml_string,
             "headers": {"Content-Type": "application/yaml"},
@@ -640,12 +520,12 @@ class Results:
         self,
         job_name: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
 
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
-            "url": f"/results/{job_name}",  # noqa: F541
+            "url": f"/results/{job_name}",
             "timeout": timeout,
         }
 
@@ -655,10 +535,10 @@ class Results:
         self,
         url: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> FileAccess:
 
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/access",  # noqa: F541
             "timeout": timeout,
@@ -671,17 +551,16 @@ class Results:
 
     def get_permissions_to_download_batch(
         self,
-        urls: List[str],
+        urls: list[str],
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> List[FileAccess]:
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> list[FileAccess]:
         """Get permissions for multiple files at once.
 
         Files that fail permission checks are silently skipped rather than
         causing the entire batch to fail.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "post",
             "url": f"/access/batch",  # noqa: F541
             "timeout": timeout,
@@ -693,30 +572,13 @@ class Results:
     def get_upload_url(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> Any:
         """Get a URL to upload a dataset."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/upload_url",  # noqa: F541
             "timeout": timeout,
-        }
-
-        return self.client.request(**kwargs)
-
-    def get_file(
-        self,
-        request: FileAccess,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> Any:
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/download",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
         }
 
         return self.client.request(**kwargs)
@@ -726,58 +588,13 @@ class Users:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
-    def find_users(
-        self,
-        email: Optional[str] = None,
-        username: Optional[str] = None,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> List[User]:
-        """Get users, optionally filtering them by username or email.
-
-        This endpoint is protected with rate limiting.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "method": "get",
-            "url": f"/users",  # noqa: F541
-            "timeout": timeout,
-            "params": dict(
-                email=email,
-                username=username,
-            ),
-        }
-
-        return [User(**item) for item in self.client.request(**kwargs)]
-
-    def create_user(
-        self,
-        request: CreateUser,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> User:
-        """Create a user.
-
-        This endpoint is protected with rate limiting.
-        """
-
-        kwargs: Dict[str, Any] = {
-            "method": "post",
-            "url": f"/users",  # noqa: F541
-            "timeout": timeout,
-            "json_data": request,
-        }
-
-        return User(**self.client.request(**kwargs))
-
     def get_me(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> MeUser:
         """Get my own user."""
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/users/me",  # noqa: F541
             "timeout": timeout,
@@ -785,17 +602,37 @@ class Users:
 
         return MeUser(**self.client.request(**kwargs))
 
+    def find_users(
+        self,
+        email: str | None = None,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> list[User]:
+        """Get users, optionally filtering them by email.
+
+        This endpoint is protected with rate limiting.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/users",  # noqa: F541
+            "timeout": timeout,
+            "params": dict(
+                email=email,
+            ),
+        }
+
+        return [User(**item) for item in self.client.request(**kwargs)]
+
     def get_credits_info(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> CreditsInfo:
         """Get the credits info for a user by id.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/users/credits_info",  # noqa: F541
             "timeout": timeout,
@@ -806,14 +643,13 @@ class Users:
     def get_features_info(
         self,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> FeaturesInfo:
         """Get the list of features for a user.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/users/features_info",  # noqa: F541
             "timeout": timeout,
@@ -825,31 +661,15 @@ class Users:
         self,
         id: str,
         *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        timeout: int | None = DEFAULT_TIMEOUT,
     ) -> User:
         """Get a user by id.
 
         This endpoint is protected with rate limiting.
         """
-
-        kwargs: Dict[str, Any] = {
+        kwargs: dict[str, Any] = {
             "method": "get",
-            "url": f"/users/{id}",  # noqa: F541
-            "timeout": timeout,
-        }
-
-        return User(**self.client.request(**kwargs))
-
-    def delete_user(
-        self,
-        id: str,
-        *,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-    ) -> User:
-
-        kwargs: Dict[str, Any] = {
-            "method": "delete",
-            "url": f"/users/{id}",  # noqa: F541
+            "url": f"/users/{id}",
             "timeout": timeout,
         }
 

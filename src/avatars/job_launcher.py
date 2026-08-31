@@ -22,6 +22,7 @@ class JobLauncher:
             The API client to interact with the backend.
         config
             The avatarization configuration.
+
         """
         self.client = client
         self.config = config
@@ -44,6 +45,7 @@ class JobLauncher:
             The name/parameters_name of the job to register.
         job_location
             Optional location URL for the job. Defaults to /jobs/{job_name}.
+
         """
         self.jobs[parameters_name] = JobCreateResponse(
             name=job_name,
@@ -63,6 +65,7 @@ class JobLauncher:
             The kind of job to launch.
         set_name
             The set name (UUID) for the job.
+
         Returns
         -------
         JobCreateResponse
@@ -72,13 +75,14 @@ class JobLauncher:
         ------
         ValueError
             If required prerequisites are not met for the job.
+
         """
         self.set_name = set_name
         self._validate_job_prerequisites(job_kind)
         depends_on = self._get_job_dependencies(job_kind)
         self._create_jobs(job_kind=job_kind, depends_on=depends_on)
 
-    def _create_jobs(self, job_kind: JobKind, depends_on) -> None:
+    def _create_jobs(self, job_kind: JobKind, depends_on: list[str]) -> None:
         """Create all jobs based on the configuration and dependencies."""
         parameters_name = self.get_parameters_name(job_kind)
         created_job = self._create_job(parameters_name=parameters_name, depends_on=depends_on)
@@ -90,7 +94,7 @@ class JobLauncher:
             pia_job = self._create_job(parameters_name=pia_parameters_name, depends_on=depends_on)
             self.jobs[pia_parameters_name] = pia_job
 
-    def get_parameters_name(self, job_kind: JobKind, pia_report: bool = False) -> str:
+    def get_parameters_name(self, job_kind: JobKind | str, pia_report: bool = False) -> str:
         """Get the parameters name for a given job kind.
 
         Parameters
@@ -102,6 +106,7 @@ class JobLauncher:
         -------
         str
             The parameters name.
+
         """
         match job_kind:
             case JobKind.report:
@@ -129,6 +134,7 @@ class JobLauncher:
         ------
         ValueError
             If required prerequisites are not met.
+
         """
         match job_kind:
             case JobKind.standard:
@@ -180,6 +186,7 @@ class JobLauncher:
         -------
         list[str]
             List of job locations that this job depends on.
+
         """
         match job_kind:
             case JobKind.signal_metrics | JobKind.privacy_metrics:
@@ -217,6 +224,7 @@ class JobLauncher:
         -------
         JobCreateResponse
             The created job response from the API.
+
         """
         if depends_on is None:
             depends_on = []
@@ -250,6 +258,7 @@ class JobLauncher:
         ------
         ValueError
             If the job has not been created yet.
+
         """
         if isinstance(job_name, JobKind):
             job_name = self.get_parameters_name(job_name)
@@ -274,6 +283,7 @@ class JobLauncher:
         ------
         ValueError
             If the job has not been created yet.
+
         """
         job_create_response = self.get_job_response(job_name)
         return job_create_response.name
@@ -290,6 +300,7 @@ class JobLauncher:
         -------
         bool
             True if the job exists, False otherwise.
+
         """
         if isinstance(job_name, JobKind):
             job_name = self.get_parameters_name(job_name)
@@ -302,6 +313,7 @@ class JobLauncher:
         -------
         list[str]
             List of job kinds that have been launched.
+
         """
         return list(self.jobs.keys())
 
@@ -322,6 +334,7 @@ class JobLauncher:
         ------
         ValueError
             If the job has not been created yet.
+
         """
         job_id = self.get_job_id(job_name)
         return self.client.jobs.get_job_status(job_id)

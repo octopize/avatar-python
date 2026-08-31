@@ -1,11 +1,9 @@
-from typing import List
-
 import pandas as pd
 
 CATEGORICAL_DTYPES = ["object", "category", "boolean"]
 
 
-def get_continuous_under_threshold(df: pd.DataFrame, *, threshold: int = 10) -> List[str]:
+def get_continuous_under_threshold(df: pd.DataFrame, *, threshold: int = 10) -> list[str]:
     """Get continuous variable names with number of unique values under a threshold."""
     columns_to_check = df.select_dtypes(
         exclude=CATEGORICAL_DTYPES  # type: ignore[arg-type]

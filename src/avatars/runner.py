@@ -5,7 +5,7 @@ import webbrowser
 from dataclasses import asdict
 from logging import getLogger
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Literal
 
 import pandas as pd
 import tenacity
@@ -13,9 +13,9 @@ from avatar_yaml import (
     AvatarizationFastDPParameters,
     AvatarizationOpenDPParameters,
     AvatarizationParameters,
+    Config,
     PrivacyMetricsParameters,
 )
-from avatar_yaml import Config as Config
 from avatar_yaml.models.advice import AdviceType
 from avatar_yaml.models.avatar_metadata import (
     DataRecipient,
@@ -33,7 +33,7 @@ from avatar_yaml.models.parameters import (
     ReportLanguage,
     ReportType,
 )
-from avatar_yaml.models.schema import ColumnType, LinkMethod, PseudonymizationColumnConfig
+from avatar_yaml.models.schema import ColumnType, LinkMethod, PseudonymizationStrategy
 from IPython.display import HTML, display
 
 from avatars import __version__
@@ -55,7 +55,7 @@ from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
 from avatars.job_launcher import JobLauncher
 from avatars.metrics_summary import build_metrics_summary_df
-from avatars.models import BulkDeleteRequest, BulkDeleteResponse, JobKind, JobResponse
+from avatars.models import BulkDeleteRequest, BulkDeleteResponse, JobKind, JobResponse, JobStatus
 from avatars.results_organizer import ResultsOrganizer
 
 logger = getLogger(__name__)
@@ -66,24 +66,61 @@ class Runner:
         self,
         api_client: ApiClient,
         display_name: str,
+        *,
         seed: int | None = None,
         max_distribution_plots: int | None = None,
+        output_format: Literal["csv", "parquet"] | None = None,
+        compute_figures: bool | None = None,
         pia_data_recipient: DataRecipient = DataRecipient.UNKNOWN,
         pia_data_type: DataType = DataType.UNKNOWN,
         pia_data_subject: DataSubject = DataSubject.UNKNOWN,
         pia_sensitivity_level: SensitivityLevel = SensitivityLevel.UNDEFINED,
         report_language: ReportLanguage = ReportLanguage.EN,
     ) -> None:
+        """Initialize a Runner for avatarization workflows.
+
+        Parameters
+        ----------
+        api_client
+            The API client for communicating with the Avatar service.
+        display_name
+            Display name for this runner and its results set.
+        seed
+            Random seed for reproducible avatarization. If None, a random seed is generated.
+        max_distribution_plots
+            Maximum number of distribution plots to generate in reports.
+            If None, uses server default.
+        output_format
+            Output format for results (e.g., "csv", "parquet").
+            If None, the output format matches the input format.
+        compute_figures
+            Whether to compute figures/plots during avatarization.
+            If None, uses server default (typically True). Set to False for faster runs
+            when plots are not needed.
+        pia_data_recipient
+            Data recipient category for PIA reports.
+        pia_data_type
+            Data type category for PIA reports.
+        pia_data_subject
+            Data subject category for PIA reports.
+        pia_sensitivity_level
+            Sensitivity level category for PIA reports.
+        report_language
+            Language for generated reports (EN or FR).
+
+        """
         self.client = api_client
         self.display_name = display_name
         self.set_name: str | None = None
         self.config = Config(
-            set_name=self.display_name, seed=seed, max_distribution_plots=max_distribution_plots
+            set_name=self.display_name,
+            seed=seed,
+            compute_figures=compute_figures,
         )
         self.file_downloader = FileDownloader(api_client)
         self.results: ResultsOrganizer = ResultsOrganizer()
         self.jobs = JobLauncher(api_client, self.config)
-        self.results_urls: dict[str, dict[str, Any]] = {}
+        self.results_urls: dict[str, dict[str, list[str]]] = {}
         self._has_results_missing_warning_issued: bool = False
         self.report_language = report_language
 
@@ -99,6 +136,12 @@ class Runner:
             pia_sensitivitylevel=pia_sensitivity_level,
         )
 
+        if max_distribution_plots is not None or output_format is not None:
+            self.config.create_results(
+                max_distribution_plots=max_distribution_plots,
+                format=output_format,
+            )
+
         # Register this Runner instance for crash reporting
         register_runner(self)
 
@@ -109,6 +152,7 @@ class Runner:
         ----------
         annotations
             A dictionary of annotations to add to the metadata.
+
         """
         if self.config.avatar_metadata is None:
             self.config.create_metadata(annotations)
@@ -121,13 +165,15 @@ class Runner:
         self,
         table_name: str,
         data: str | pd.DataFrame,
+        *,
         primary_key: str | None = None,
-        foreign_keys: list | None = None,
+        foreign_keys: list[str] | None = None,
         time_series_time: str | None = None,
-        types: dict[str, ColumnType] = {},
+        types: dict[str, ColumnType] | None = None,
+        columns_to_drop: list[str] | None = None,
         individual_level: bool | None = None,
         avatar_data: str | pd.DataFrame | None = None,
-    ):
+    ) -> None:
         """Add a table to the config and upload the data in the server.
 
         Parameters
@@ -144,19 +190,23 @@ class Runner:
             name of the time column in the table (time series case).
         types
             A dictionary of column types with the column name as the key and the type as the value.
+        columns_to_drop
+            A list of column names to drop from the table before avatarization. These columns will
+            not be included in the avatarization process and will be removed from the output avatar
+            table.
         individual_level
             A boolean as true if the table is at individual level or not. An individual level table
             is a table where each row corresponds to an individual (ex: patient, customer, etc.).
             Default behavior is True.
         avatar_data
             The avatar table if there is one. Can be a path to a file or a pandas DataFrame.
+
         """
+        if types is None:
+            types = {}
         file, avatar_file = self.upload_file(table_name, data, avatar_data)
         if isinstance(data, pd.DataFrame):
             types = self._get_types(data, types)
-
-        if foreign_keys == [None]:
-            foreign_keys = None
 
         self.config.create_table(
             table_name=table_name,
@@ -169,6 +219,7 @@ class Runner:
             time_series_time=time_series_time,
             types=types,
             individual_level=individual_level,
+            columns_to_drop=columns_to_drop,
         )
 
     def advise_parameters(self, table_name: str | None = None) -> None:
@@ -178,6 +229,7 @@ class Runner:
         ----------
         table_name
             The name of the table. If None, all tables will be used.
+
         """
         self._setup_advice_config()
         if table_name:
@@ -244,7 +296,7 @@ class Runner:
         table_name: str,
         data: str | pd.DataFrame,
         avatar_data: str | pd.DataFrame | None = None,
-    ):
+    ) -> tuple[str, str | None]:
         """Upload a file to the server.
 
         Parameters
@@ -253,8 +305,9 @@ class Runner:
             The data to upload. Can be a path to a file or a pandas DataFrame.
         file_name
             The name of the file.
+
         """
-        extension = ".csv" if isinstance(data, pd.DataFrame) else Path(data).suffix
+        extension = ".parquet" if isinstance(data, pd.DataFrame) else Path(data).suffix
         file = table_name + extension
         self.client.upload_file(data=data, key=file)
         avatar_file = None
@@ -264,8 +317,10 @@ class Runner:
         return file, avatar_file
 
     def _get_types(
-        self, data: pd.DataFrame, types: dict[str, ColumnType] = {}
+        self, data: pd.DataFrame, types: dict[str, ColumnType] | None = None
     ) -> dict[str, ColumnType]:
+        if types is None:
+            types = {}
         dtypes = {}
         for column_name, _type in data.dtypes.items():
             column_name_str = str(column_name)
@@ -289,7 +344,7 @@ class Runner:
         child_table_name: str,
         child_field: str,
         method: LinkMethod = LinkMethod.LINEAR_SUM_ASSIGNMENT,
-    ):
+    ) -> None:
         """Add a table link to the config.
 
         Parameters
@@ -304,14 +359,16 @@ class Runner:
             The child link key field (foreign key)in the child table.
         method
             The method to use for linking the tables. Defaults to "linear_sum_assignment".
+
         """
         self.config.create_link(
-            parent_table_name, child_table_name, parent_field, child_field, method.value
+            parent_table_name, child_table_name, parent_field, child_field, method
         )
 
     def set_parameters(
         self,
         table_name: str,
+        *,
         k: int | None = None,
         ncp: int | None = None,
         use_categorical_reduction: bool | None = None,
@@ -336,9 +393,9 @@ class Runner:
         data_augmentation_target_column: str | None = None,
         data_augmentation_should_anonymize_original_table: bool | None = None,
         processors: list[AvatarizationProcessorParameters] | None = None,
-        pseudonymized_columns: dict[str, PseudonymizationColumnConfig] | None = None,
+        pseudonymized_columns: dict[str, PseudonymizationStrategy] | None = None,
         use_excluded_variables_in_metrics: bool = False,
-    ):
+    ) -> None:
         """Set the parameters for a given table.
 
         This will overwrite any existing parameters for the table, including parameters set using
@@ -417,15 +474,37 @@ class Runner:
             The transformations are transparent to the user - input and output have the same
             column structure at the end.
         pseudonymized_columns
-            A mapping of column name to ``PseudonymizationColumnConfig`` describing the PII type
-            and pseudonymization strategy to apply to each column. Only columns that should be
-            pseudonymized need to be listed. Foreign key columns in child tables automatically
-            inherit the pseudonymization mapping of the referenced parent primary key — no explicit
-            configuration is needed on child FK columns.
+            A mapping of column name to a pseudonymization strategy object describing how to
+            replace PII values in each column.  Available strategy classes (importable from
+            ``avatar_yaml``):
+
+            * ``FakeDataStrategy(pii_type=PiiType.EMAIL)`` — replace with realistic fake data
+              of the specified :class:`PiiType` (EMAIL, FIRST_NAME, LAST_NAME, FULL_NAME,
+              PHONE, SSN, ADDRESS, FREE_TEXT).  Pass ``consistent=False`` to generate a fresh
+              value per row instead of mapping the same source value to the same fake value.
+              Leave ``high_variability=False`` (default) to sample from a pre-generated pool
+              for faster processing, or set ``high_variability=True`` to generate a unique
+              value per row (slower but collision-free).
+            * ``HashSha256Strategy()`` — replace with the SHA-256 hex digest (deterministic,
+              irreversible).
+            * ``Uuid4Strategy()`` — replace each unique value with a UUID v4.  Pass
+              ``consistent=False`` to generate a new UUID per row.
+            * ``ConstantStrategy(value="REDACTED")`` — replace every value with a fixed string.
+            * ``IntegerStrategy()`` — map each unique value to a unique pseudonymous integer.
+              Pass ``consistent=False`` for an independent integer per row.
+            * ``SpecificIdStrategy(pattern="EMP-####")`` — generate structured IDs from a
+              pattern.  Placeholders: ``#`` (digit), ``?`` (letter), ``^`` (alphanumeric),
+              ``{{col}}`` (value of another column).  Control letter case with
+              ``letter_case=SpecificIdLetterCase.UPPER/LOWER/BOTH``.
+
+            Only columns that should be pseudonymized need to be listed.  Foreign key columns
+            in child tables automatically inherit the pseudonymization mapping of the referenced
+            parent primary key — no explicit configuration is needed on child FK columns.
         use_excluded_variables_in_metrics
             When True, excluded variables are NOT passed to metrics parameters,
             allowing privacy and signal metrics to include them in calculations.
             When False (default), excluded variables are also excluded from metrics calculations.
+
         """
         imputation = imputation_method.value if imputation_method else None
         if exclude_variable_method:
@@ -433,7 +512,8 @@ class Runner:
         elif exclude_replacement_strategy:
             warnings.warn(
                 "The 'exclude_replacement_strategy' parameter is deprecated and will be removed "
-                "in a future release. Please use 'exclude_variable_method' instead."
+                "in a future release. Please use 'exclude_variable_method' instead.",
+                stacklevel=2,
             )
             replacement_strategy = exclude_replacement_strategy.value
         else:
@@ -457,7 +537,8 @@ class Runner:
             warnings.warn(
                 "You have set k = 2, which is the minimum allowed value. With such a low k, "
                 "each synthesized record closely mirrors only 2 original records, "
-                "significantly reducing privacy protection."
+                "significantly reducing privacy protection.",
+                stacklevel=2,
             )
 
         # reset the parameters if they were already set
@@ -592,9 +673,8 @@ class Runner:
             column_weights=column_weights,
         )
 
-    def update_parameters(self, table_name: str, **kwargs) -> None:
-        """
-        Update specific parameters for the table while preserving other existing parameters.
+    def update_parameters(self, table_name: str, **kwargs: Any) -> None:
+        """Update specific parameters for the table while preserving other existing parameters.
         Only updates the parameters that are provided, keeping existing values for others.
 
         Parameters
@@ -604,6 +684,7 @@ class Runner:
         **kwargs
             The parameters to update. Only parameters that are provided will be updated.
             See set_parameters for the full list of available parameters.
+
         """
         avatarization = getattr(self.config, "avatarization", None)
         avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
@@ -626,7 +707,7 @@ class Runner:
         # Apply all parameters back using set_parameters
         self.set_parameters(table_name=table_name, **current_params)
 
-    def _extract_current_parameters(self, table_name: str) -> dict:
+    def _extract_current_parameters(self, table_name: str) -> dict[str, Any]:
         """Extract the current parameters for a given table.
 
         Parameters
@@ -639,8 +720,8 @@ class Runner:
         dict
             A dictionary containing the current parameters for
             the table as it is used in set_parameters.
-        """
 
+        """
         current_params: dict[str, Any] = {}
 
         # Extract avatarization parameters
@@ -649,14 +730,13 @@ class Runner:
             and table_name in self.config.avatarization.keys()
         ):
             # Standard avatarization parameters
-            params: Optional[
-                Union[
-                    AvatarizationParameters,
-                    AvatarizationOpenDPParameters,
-                    AvatarizationFastDPParameters,
-                    PrivacyMetricsParameters,
-                ]
-            ] = self.config.avatarization[table_name]
+            params: (
+                AvatarizationParameters
+                | AvatarizationOpenDPParameters
+                | AvatarizationFastDPParameters
+                | PrivacyMetricsParameters
+                | None
+            ) = self.config.avatarization[table_name]
             if isinstance(params, AvatarizationParameters):
                 current_params.update(
                     {
@@ -677,7 +757,7 @@ class Runner:
             if isinstance(params, AvatarizationOpenDPParameters):
                 current_params.update(
                     {
-                        "open_dp_epsilon": params.epsilon if params.epsilon else None,
+                        "open_dp_epsilon": params.epsilon or None,
                         "column_weights": params.column_weights,
                         "use_categorical_reduction": params.use_categorical_reduction,
                         "ncp": params.ncp,
@@ -695,7 +775,7 @@ class Runner:
             if isinstance(params, AvatarizationFastDPParameters):
                 current_params.update(
                     {
-                        "fast_dp_epsilon": params.epsilon if params.epsilon else None,
+                        "fast_dp_epsilon": params.epsilon or None,
                         "column_weights": params.column_weights,
                         "use_categorical_reduction": params.use_categorical_reduction,
                         "ncp": params.ncp,
@@ -726,10 +806,8 @@ class Runner:
                     "imputation_method": ImputeMethod(params.imputation["method"])
                     if params.imputation["method"]
                     else None,
-                    "imputation_k": params.imputation["k"] if params.imputation["k"] else None,
-                    "imputation_training_fraction": params.imputation["training_fraction"]
-                    if params.imputation["training_fraction"]
-                    else None,
+                    "imputation_k": params.imputation["k"] or None,
+                    "imputation_training_fraction": params.imputation["training_fraction"] or None,
                     "imputation_return_data_imputed": params.imputation["return_data_imputed"],
                 }
             )
@@ -742,9 +820,7 @@ class Runner:
             if ts_params.projection:
                 current_params.update(
                     {
-                        "time_series_nf": ts_params.projection["nf"]
-                        if ts_params.projection["nf"]
-                        else None,
+                        "time_series_nf": ts_params.projection["nf"] or None,
                         "time_series_projection_type": ProjectionType(
                             ts_params.projection["projection_type"]
                         )
@@ -757,9 +833,7 @@ class Runner:
             if ts_params.alignment:
                 current_params.update(
                     {
-                        "time_series_nb_points": ts_params.alignment["nb_points"]
-                        if ts_params.alignment["nb_points"]
-                        else None,
+                        "time_series_nb_points": ts_params.alignment["nb_points"] or None,
                         "time_series_method": AlignmentMethod(ts_params.alignment["method"])
                         if ts_params.alignment["method"]
                         else None,
@@ -790,7 +864,12 @@ class Runner:
 
         return current_params
 
-    def _extract_exclude_parameters(self, params) -> dict:
+    def _extract_exclude_parameters(
+        self,
+        params: AvatarizationParameters
+        | AvatarizationOpenDPParameters
+        | AvatarizationFastDPParameters,
+    ) -> dict[str, Any]:
         """Extract exclude variables parameters from parameter object.
 
         Parameters
@@ -801,14 +880,11 @@ class Runner:
         Returns
         -------
         A dictionary containing exclude_variable_names and exclude_variable_method parameters.
+
         """
         result = {}
         if params.exclude_variables:
-            result["exclude_variable_names"] = (
-                params.exclude_variables["variable_names"]
-                if params.exclude_variables["variable_names"]
-                else None
-            )
+            result["exclude_variable_names"] = params.exclude_variables["variable_names"] or None
             result["exclude_variable_method"] = (
                 ExcludeVariablesMethod(params.exclude_variables["replacement_strategy"])
                 if params.exclude_variables["replacement_strategy"]
@@ -816,7 +892,9 @@ class Runner:
             )
         return result
 
-    def delete_parameters(self, table_name: str, parameters_names: list[str] | None = None):
+    def delete_parameters(
+        self, table_name: str, parameters_names: list[str] | None = None
+    ) -> None:
         """Delete parameters from the config.
 
         Parameters
@@ -825,10 +903,11 @@ class Runner:
             The name of the table.
         parameters_names
             The names of the parameters to delete. If None, all parameters will be deleted.
+
         """
         self.config.delete_parameters(table_name, parameters_names)
 
-    def delete_link(self, parent_table_name: str, child_table_name: str):
+    def delete_link(self, parent_table_name: str, child_table_name: str) -> None:
         """Delete a link from the config.
 
         Parameters
@@ -837,26 +916,29 @@ class Runner:
             The name of the parent table.
         child_table_name
             The name of the child table.
+
         """
         self.config.delete_link(parent_table_name, child_table_name)
 
-    def delete_table(self, table_name: str):
+    def delete_table(self, table_name: str) -> None:
         """Delete a table from the config.
 
         Parameters
         ----------
         table_name
             The name of the table.
+
         """
         self.config.delete_table(table_name)
 
-    def get_yaml(self, path: str | None = None):
+    def get_yaml(self, path: str | None = None) -> str:
         """Get the yaml config.
 
         Parameters
         ----------
         path
             The path to the yaml file. If None, the default config will be returned.
+
         """
         return self.config.get_yaml(path)
 
@@ -880,12 +962,15 @@ class Runner:
                     f"regenerated_runner = manager.create_runner_from_id('{set_name}')\n"
                     "regenerated_runner.shuffled(...)",
                     UserWarning,
+                    stacklevel=2,
                 )
             self.results_urls.clear()
             self.results = ResultsOrganizer()
             self.jobs.jobs.clear()
 
-    def run(self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER, ignore_warnings: bool = False):
+    def run(
+        self, jobs_to_run: list[JobKind] = JOB_EXECUTION_ORDER, ignore_warnings: bool = False
+    ) -> None:
         """Run avatarization jobs.
 
         This method creates resources and launches the specified jobs in the correct order.
@@ -909,6 +994,7 @@ class Runner:
         >>>
         >>> # Running again emits a UserWarning with the old set_name, then proceeds
         >>> runner.run()
+
         """
         self._handle_existing_results(ignore_warnings=ignore_warnings)
 
@@ -931,7 +1017,7 @@ class Runner:
         self.jobs.set_name = self.set_name
 
         # Execute jobs in order
-        jobs_to_run = sorted(jobs_to_run, key=lambda job: JOB_EXECUTION_ORDER.index(job))
+        jobs_to_run = sorted(jobs_to_run, key=JOB_EXECUTION_ORDER.index)
 
         for i, job_kind in enumerate(jobs_to_run):
             # Add small delay between job creations to avoid bursts in api calls
@@ -941,25 +1027,56 @@ class Runner:
             self.jobs.launch_job(job_kind, self.set_name)
 
     def get_job(self, job_name: JobKind | str) -> JobResponse:
-        """
-        Get the job by name.
+        """Get the job by name.
 
         Parameters
         ----------
         job_name
             The name of the job to get.
+
         """
         return self.jobs.get_job_status(job_name)
 
-    def get_status(self, job_name: JobKind):
-        """
-        Get the status of a job by name.
+    def get_status(
+        self,
+        job_kind: JobKind | str | None = None,
+        *,
+        job_name: JobKind | str | None = None,
+    ) -> str:
+        """Get the status of a job.
+
         Parameters
         ----------
+        job_kind
+            The job to query. Accepts a :class:`~avatars.models.JobKind` enum value
+            (e.g. ``JobKind.standard``) or the equivalent string (e.g. ``"standard"``).
         job_name
-            The name of the job to get.
+            Deprecated. Use ``job_kind`` instead.
+
+        Returns
+        -------
+        str
+            The job status string as returned by the server (e.g. ``"finished"``,
+            ``"pending"``, ``"error"``).
+
+        Examples
+        --------
+        >>> runner.get_status(JobKind.standard)
+        'finished'
+        >>> runner.get_status("privacy_metrics")
+        'finished'
+
         """
-        return self.get_job(job_name).status
+        if job_name is not None:
+            warnings.warn(
+                "The 'job_name' parameter is deprecated, use 'job_kind' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            job_kind = job_name
+        if job_kind is None:
+            raise ValueError("job_kind is required.")
+        return self.get_job(job_kind).status
 
     def delete(
         self, job_names: JobKind | str | list[JobKind | str] | None = None
@@ -984,6 +1101,7 @@ class Runner:
         >>> runner.delete()                                              # all jobs
         >>> runner.delete(JobKind.standard)                             # single job
         >>> runner.delete([JobKind.standard, JobKind.privacy_metrics])  # multiple jobs
+
         """
         if job_names is None:
             names: list[JobKind | str] = list(self.jobs.get_launched_jobs())
@@ -995,13 +1113,13 @@ class Runner:
         return self.client.jobs.bulk_delete_jobs(BulkDeleteRequest(job_names=job_ids))
 
     def _retrieve_job_result_urls(self, job_name: str) -> None:
-        """
-        Get the result of a job by name.
+        """Get the result of a job by name.
 
         Parameters
         ----------
         job_name
             The name of the job to get.
+
         """
 
         def check_job_status() -> JobResponse:
@@ -1037,12 +1155,15 @@ class Runner:
         self.results_urls[job_name] = self.client.results.get_results(job_id)
 
     def _populate_results_from_existing_jobs(self) -> None:
-        """Fetch and populate results URLs from all completed jobs for this set_name.
+        """Register all jobs and fetch result URLs from completed jobs for this set_name.
 
         This method is used when reconstructing a Runner from an existing set_name.
-        It fetches all jobs associated with the set_name and populates the results_urls
-        dictionary for completed jobs only. It also registers these jobs with the
-        JobLauncher so they can be accessed via normal result methods.
+        It fetches all jobs associated with the set_name, registers every job with the
+        JobLauncher (regardless of completion status), and then populates the results_urls
+        dictionary for successfully completed jobs only.
+
+        Registering all jobs (not just done ones) ensures that methods like
+        ``get_status()`` work correctly even for in-progress or errored jobs.
 
         If a job's results are no longer available on the server (404 error), a warning
         is issued but the method continues to process other jobs.
@@ -1050,42 +1171,48 @@ class Runner:
         if not self.set_name:
             return
 
-        all_jobs = self.client.jobs.get_jobs()
+        set_name_jobs = self.client.jobs.get_jobs(set_name=self.set_name)
+        set_jobs = list(set_name_jobs.jobs)
 
-        # Filter jobs by set_name and only include completed jobs
-        for job in all_jobs.jobs:
-            if str(job.set_name) == self.set_name and job.done and not job.exception:
-                job_name = job.name
-                parameters_name = job.parameters_name
-                try:
-                    self.results_urls[parameters_name] = self.client.results.get_results(job_name)
+        # Pass 1: Register ALL jobs for this set_name so that get_status() works
+        # regardless of whether the job has finished.
+        # The client-side set_name guard is a safety net for older API versions that
+        # do not support server-side set_name filtering (they return all user jobs).
+        for job in set_jobs:
+            self.jobs.register_existing_job(job.parameters_name, job.name, f"/jobs/{job.name}")
 
-                    self.jobs.register_existing_job(parameters_name, job_name, f"/jobs/{job_name}")
+        # Pass 2: Fetch result URLs only for successfully completed jobs.
+        jobs_done = [job for job in set_jobs if job.status == JobStatus.finished]
+        for job in jobs_done:
+            job_name = job.name
+            parameters_name = job.parameters_name
+            try:
+                self.results_urls[parameters_name] = self.client.results.get_results(job_name)
 
-                except Exception as e:
-                    # Keep backward-compatible behavior only for missing-results 404s.
-                    error_message = str(e).lower()
-                    is_missing_results_404 = (
-                        "error status 404" in error_message
-                        and "results file for job" in error_message
-                    )
-                    if is_missing_results_404:
-                        if not self._has_results_missing_warning_issued:
-                            tables_list = list(self.config.tables.keys())
-                            warnings.warn(
-                                f"Results for job '{job_name}' are no longer "
-                                "available on the server. "
-                                "Input data has also been cleaned up. "
-                                f"You need to reupload the following tables: {tables_list}. "
-                                "You can relaunch the job with the same configuration by calling "
-                                "runner.run() after re-uploading your data with "
-                                "runner.upload_file().",
-                            )
-                            # raise only once if multiple jobs are missing results
-                            self._has_results_missing_warning_issued = True
-                        continue
+            except Exception as e:
+                # Keep backward-compatible behavior only for missing-results 404s.
+                error_message = str(e).lower()
+                is_missing_results_404 = (
+                    "error status 404" in error_message and "results file for job" in error_message
+                )
+                if is_missing_results_404:
+                    if not self._has_results_missing_warning_issued:
+                        tables_list = list(self.config.tables.keys())
+                        warnings.warn(
+                            f"Results for job '{job_name}' are no longer "
+                            "available on the server. "
+                            "Input data has also been cleaned up. "
+                            f"You need to reupload the following tables: {tables_list}. "
+                            "You can relaunch the job with the same configuration by calling "
+                            "runner.run() after re-uploading your data with "
+                            "runner.upload_file().",
+                            stacklevel=2,
+                        )
+                        # raise only once if multiple jobs are missing results
+                        self._has_results_missing_warning_issued = True
+                    continue
 
-                    raise
+                raise
 
     def get_specific_result_urls(
         self,
@@ -1100,7 +1227,7 @@ class Runner:
             return []
         return self.results_urls[job_name][result]
 
-    def _download_all_files(self):
+    def _download_all_files(self) -> None:
         for job_name in self.jobs.get_launched_jobs():
             if not self.results_urls or job_name not in self.results_urls.keys():
                 self._retrieve_job_result_urls(job_name)
@@ -1146,15 +1273,14 @@ class Runner:
         )
         if isinstance(figures_metadatas, list):
             return self.results.find_figure_metadata(figures_metadatas, url)
-        else:
-            raise TypeError(
-                f"Expected a list, got {type(figures_metadatas)} instead for {url} metadata."
-            )
+        raise TypeError(
+            f"Expected a list, got {type(figures_metadatas)} instead for {url} metadata."
+        )
 
     def get_specific_result(
         self,
         table_name: str,
-        job_name: JobKind,
+        job_name: JobKind | str,
         result: Results = Results.SHUFFLED,
     ) -> TypeResults:
         job_name_str = self.jobs.get_parameters_name(job_name)
@@ -1166,9 +1292,8 @@ class Runner:
             self._download_specific_result(job_name_str, result)
         return self.results.get_results(table_name, result, job_name_str)
 
-    def get_all_results(self):
-        """
-        Get all results.
+    def get_all_results(self) -> ResultsOrganizer:
+        """Get all results.
 
         Returns
         -------
@@ -1177,13 +1302,15 @@ class Runner:
         Each job is a dictionary with the table name as key and the results as value.
         The results are a dictionary with the result name as key and the data as value.
         The data can be a pandas DataFrame or a dictionary depending on the result type.
+
         """
         self._download_all_files()
         return self.results
 
-    def download_report(self, path: str | None = None, report_type: ReportType = ReportType.BASIC):
-        """
-        Download the report.
+    def download_report(
+        self, path: str | None = None, report_type: ReportType = ReportType.BASIC
+    ) -> None:
+        """Download the report.
 
         Parameters
         ----------
@@ -1192,6 +1319,7 @@ class Runner:
             When multiple PIA reports are returned (one per table), an index
             prefix is added to the filename only: ``dir/0_report.pdf``,
             ``dir/1_report.pdf``, etc.
+
         """
         is_pia = report_type == ReportType.PIA
         job_name = self.jobs.get_parameters_name(JobKind.report, pia_report=is_pia)
@@ -1218,9 +1346,10 @@ class Runner:
         table_name
             The name of the table.
             If None, all parameters will be printed.
+
         """
         if table_name is None:
-            for table_name in self.config.tables.keys():
+            for table_name in self.config.tables.keys():  # noqa: PLR1704 - reuse param as loop var
                 self.print_parameters(table_name)
             return
         if table_name not in self.config.tables.keys():
@@ -1261,13 +1390,11 @@ class Runner:
         else:
             print(f"--- No signal metrics parameters set for {table_name} ---")  # noqa: T201
 
-    def kill(self):
+    def kill(self) -> None:
         """Method not implemented yet."""
-        pass
 
     def shuffled(self, table_name: str) -> pd.DataFrame:
-        """
-        Get the shuffled data.
+        """Get the shuffled data.
 
         Parameters
         ----------
@@ -1278,6 +1405,7 @@ class Runner:
         -------
         pd.DataFrame
             The shuffled data as a pandas DataFrame.
+
         """
         shuffled = self.get_specific_result(table_name, JobKind.standard, Results.SHUFFLED)
         if not isinstance(shuffled, pd.DataFrame):
@@ -1285,8 +1413,7 @@ class Runner:
         return shuffled
 
     def sensitive_unshuffled(self, table_name: str) -> pd.DataFrame:
-        """
-        Get the unshuffled data.
+        """Get the unshuffled data.
         This is sensitive data and should be used with caution.
 
         Parameters
@@ -1298,15 +1425,15 @@ class Runner:
         -------
         pd.DataFrame
             The unshuffled data as a pandas DataFrame.
+
         """
         unshuffled = self.get_specific_result(table_name, JobKind.standard, Results.UNSHUFFLED)
         if not isinstance(unshuffled, pd.DataFrame):
             raise TypeError(f"Expected a pd.DataFrame, got {type(unshuffled)} instead.")
         return unshuffled
 
-    def privacy_metrics(self, table_name: str) -> list[dict]:
-        """
-        Get the privacy metrics.
+    def privacy_metrics(self, table_name: str) -> list[dict[str, Any]]:
+        """Get the privacy metrics.
 
         Parameters
         ----------
@@ -1317,6 +1444,7 @@ class Runner:
         -------
         dict
             The privacy metrics as a list of dictionary.
+
         """
         results = self.get_specific_result(
             table_name, JobKind.privacy_metrics, Results.PRIVACY_METRICS
@@ -1325,9 +1453,8 @@ class Runner:
             raise TypeError(f"Expected a list, got {type(results)} instead.")
         return results
 
-    def signal_metrics(self, table_name: str) -> list[dict]:
-        """
-        Get the signal metrics.
+    def signal_metrics(self, table_name: str) -> list[dict[str, Any]]:
+        """Get the signal metrics.
 
         Parameters
         ----------
@@ -1338,6 +1465,7 @@ class Runner:
         -------
         dict
             The signal metrics as a list of dictionary.
+
         """
         results = self.get_specific_result(
             table_name, JobKind.signal_metrics, Results.SIGNAL_METRICS
@@ -1349,10 +1477,11 @@ class Runner:
     def render_privacy_metrics_summary(
         self,
         open_in_browser: bool = False,  # DEPRECATED
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Get the aggregated privacy metrics summary across tables.
 
         Only available for multi-table jobs.
+
         Parameters
         ----------
         open_in_browser
@@ -1363,6 +1492,7 @@ class Runner:
         -------
         dict
             A nested dict ``{table_name: {reference: meta_metric}}``.
+
         """
         if len(self.config.tables) <= 1:
             raise ValueError(
@@ -1380,7 +1510,7 @@ class Runner:
             raise TypeError(f"Expected a dict, got {type(results)} instead.")
         return results
 
-    def render_signal_metrics_summary(self) -> dict:
+    def render_signal_metrics_summary(self) -> dict[str, Any]:
         """Get the aggregated signal metrics summary across tables.
 
         Only available for multi-table jobs.
@@ -1389,6 +1519,7 @@ class Runner:
         -------
         dict
             A nested dict ``{table_name: {reference: meta_metric}}``.
+
         """
         if len(self.config.tables) <= 1:
             raise ValueError(
@@ -1412,15 +1543,17 @@ class Runner:
             A DataFrame indexed by ``table_name`` with MultiIndex columns ``(reference, metric)``
             where ``reference`` is the top level and ``metric`` is ``privacy`` or ``signal``,
             combining both meta-metrics for each table/reference pair.
+
         """
         return build_metrics_summary_df(
             privacy=self.render_privacy_metrics_summary(),
             signal=self.render_signal_metrics_summary(),
         )
 
-    def render_plot(self, table_name: str, plot_kind: PlotKind, open_in_browser: bool = False):
-        """
-        Render a plot for a given table.
+    def render_plot(
+        self, table_name: str, plot_kind: PlotKind, open_in_browser: bool = False
+    ) -> None:
+        """Render a plot for a given table.
         The different plot kinds are defined in the PlotKind enum.
 
         Parameters
@@ -1431,6 +1564,7 @@ class Runner:
             The kind of plot to render.
         open_in_browser
             Whether to save the plot to a file and open it in a browser.
+
         """
         results = self.get_specific_result(table_name, JobKind.standard, Results.FIGURES)
         if not isinstance(results, dict):
@@ -1446,8 +1580,7 @@ class Runner:
             self._open_plot(plot, filename=filename)
 
     def projections(self, table_name: str) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """
-        Get the projections.
+        """Get the projections.
 
         Parameters
         ----------
@@ -1458,6 +1591,7 @@ class Runner:
         -------
         pd.DataFrame
             The projections as a pandas DataFrame.
+
         """
         original_coordinates = self.get_specific_result(
             table_name, JobKind.standard, Results.PROJECTIONS_ORIGINAL
@@ -1476,8 +1610,7 @@ class Runner:
         return original_coordinates, avatars_coordinates
 
     def table_summary(self, table_name: str) -> pd.DataFrame:
-        """
-        Get the table summary.
+        """Get the table summary.
 
         Parameters
         ----------
@@ -1488,6 +1621,7 @@ class Runner:
         -------
         pd.DataFrame
             The table summary as a dataframe.
+
         """
         results = self.get_specific_result(table_name, JobKind.advice, Results.ADVICE)
         if not isinstance(results, dict) or "summary" not in results.keys():
@@ -1510,24 +1644,26 @@ class Runner:
         ----------
         yaml_path : str
             The path to the YAML configuration file.
+
         """
-        with open(yaml_path, "r") as file:
+        with open(yaml_path) as file:
             yaml_string = file.read()
 
         # Parse YAML using ConfigParser
         self.config = Config.from_yaml(yaml_string)
 
-    def _open_plot(self, plot_html: HTML, filename: str | None = None):
+    def _open_plot(self, plot_html: HTML, filename: str | None = None) -> None:
         """Render a plot, optionally saving it and opening it in a browser."""
         if filename:
             file_path = os.path.abspath(filename)
             webbrowser.open(f"file://{file_path}")
         else:
-            display(plot_html)
+            # IPython.display.display ships py.typed but is unannotated.
+            display(plot_html)  # type: ignore[no-untyped-call]
 
-    def _save_file(self, file_content: HTML, filename: str | None = None):
+    def _save_file(self, file_content: HTML, filename: str | None = None) -> None:
         """Save the HTML file content to a specified path."""
         if filename is None:
-            return None
+            return
         with open(filename, "w", encoding="utf-8") as file:
             file.write(file_content.data)

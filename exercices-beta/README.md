@@ -50,7 +50,10 @@ Each exercise includes:
 
 ### Dataset
 
+<!-- markdown-link-check-disable -->
+
 - **Source**: <https://data.public.lu/fr/datasets/representative-synthetic-dataset-of-luxembourgs-citizens/>
+<!-- markdown-link-check-enable -->
 - **Local file**: [data_source/synthetic-lux-pop-dataset-100000.csv](data_source/synthetic-lux-pop-dataset-100000.csv)
 
 ### User Query
@@ -84,7 +87,10 @@ The goal is to explore plausible correlations.
 
 ### Dataset
 
+<!-- markdown-link-check-disable -->
+
 - **Source**: <https://data.public.lu/fr/datasets/r/95a27476-42a1-4ed4-8ea4-3052d3bbb710>
+<!-- markdown-link-check-enable -->
 - **Local file**: [data_processed/Emploi_ville_processed.csv](data_processed/Emploi_ville_processed.csv)
 
 ### User Query
@@ -212,4 +218,7 @@ A health economist from the Luxembourg Institute of Socio-Economic Research (LIS
 
 ## Resources
 
+<!-- markdown-link-check-disable -->
+
 - <https://data.public.lu/fr/pages/topics/statistics>
+<!-- markdown-link-check-enable -->

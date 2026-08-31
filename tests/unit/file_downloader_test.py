@@ -7,9 +7,10 @@ from tests.unit.conftest import FakeApiClient
 
 
 @pytest.mark.parametrize(
-    "url, expected_type",
+    ("url", "expected_type"),
     [
         ("iris.shuffled-0.csv", pd.DataFrame),
+        ("iris.shuffled-0.parquet", pd.DataFrame),
         ("patient_standalone.privacy.json", list),
         ("figures_contribution.html", HTML),
         ("report.pdf", str),
@@ -90,6 +91,40 @@ def test_download_files_batch_all_csv():
     for url in urls:
         assert url in results
         assert isinstance(results[url], pd.DataFrame)
+
+
+def test_download_files_batch_all_parquet():
+    """Test batch download with multiple parquet files."""
+    api_client = FakeApiClient(tables=["iris", "patient", "sample"])
+    downloader = FileDownloader(api_client)
+
+    urls = [
+        "iris.shuffled-0.parquet",
+        "patient.shuffled-0.parquet",
+        "sample.unshuffled-0.parquet",
+    ]
+    results = downloader.download_files_batch(urls)
+
+    assert len(results) == 3
+    for url in urls:
+        assert url in results
+        assert isinstance(results[url], pd.DataFrame)
+
+
+def test_download_files_batch_mixed_csv_and_parquet():
+    """Test batch download with mixed CSV and parquet files."""
+    api_client = FakeApiClient(tables=["iris", "patient"])
+    downloader = FileDownloader(api_client)
+
+    urls = [
+        "iris.shuffled-0.csv",
+        "patient.shuffled-0.parquet",
+    ]
+    results = downloader.download_files_batch(urls)
+
+    assert len(results) == 2
+    assert isinstance(results["iris.shuffled-0.csv"], pd.DataFrame)
+    assert isinstance(results["patient.shuffled-0.parquet"], pd.DataFrame)
 
 
 def test_download_files_batch_preserves_order():

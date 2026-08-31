@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.20.0"
+version = "1.29.0"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
@@ -26,8 +26,9 @@ dependencies = [
     # https://github.com/aio-libs/aiobotocore/issues/1414
     "aiobotocore <=2.22.0",
     "botocore <=1.40.17",
-    "pandas>=2.3.1,<3.0",
-    "octopize-avatar-yaml==0.1.37",
+    "pandas>=2.3.1",
+    "pyarrow>=18.0.0",
+    "octopize-avatar-yaml==0.1.42",
 ]
 
 [dependency-groups]
@@ -36,26 +37,26 @@ dev = [
     "jupytext>=1.17.0",
     "pytest>=8.3.5",
     "pytest-cov>=6.1.1",
-    "pandas-stubs>=2.2.2.240807,<3.0",
+    "pandas-stubs>=2.2.2.240807",
     "types-pyyaml>=6.0.12.20240917",
     "types-jmespath>=1.0.2.20240106",
     "types-seaborn>=0.13.2.20250516",
     "polyfactory>=2.20.0",
-    "pandas>=2.2.3,<3.0",
+    "pandas>=2.2.3",
     "matplotlib>=3.10.1",
     "furo>=2024.8.6",
     "sphinx>=8,<9",
     "roman-numerals-py<4",
     "sphinx-multiversion>=0.2.4",
     "autodoc-pydantic>=2.2.0",
-    "pandoc>=2.4",
     "nbconvert>=7.16.6",
+    "myst-parser>=4",
 ]
 generator = [
     "typer>=0.15.2",
     "structlog>=24.2.0",
     "Jinja2>=3.1.6",
-    "datamodel-code-generator<=0.55.0",
+    "datamodel-code-generator<=0.71.0",
     "openapi-pydantic>=0.5.1",
 ]
 notebook = [
@@ -63,7 +64,7 @@ notebook = [
     "jupyter>=1.1.1",
     "matplotlib>=3.10.1",
     "numpy>=2.2.4",
-    "pandas>=2.2.3,<3.0",
+    "pandas>=2.2.3",
     "seaborn>=0.13.2",
 ]
 
@@ -76,17 +77,31 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [tool.mypy]
+strict = true
 ignore_missing_imports = true
 plugins = ['pydantic.mypy']
+explicit_package_bases = true
+mypy_path = "src"
+# Tutorial notebooks are exported to .py by jupytext; they are example code,
+# not part of the shipped package, so they are not type-checked.
+exclude = '^notebooks/'
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
 
 [tool.ruff]
 extend = "../../ruff.toml"
+extend-exclude = ["generator/templates/*.jinja2"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 # Allow prints and longer lines in notebooks - START
 "notebooks/*Tutorial*" = ["T20", "E501"]
 "notebooks/*Quickstart*" = ["T20", "E501"]
 # Allow prints in notebooks - END
+# Generator is a dev tool — relax security and naming rules
+"generator/**.py" = ["S", "N"]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -94,15 +109,29 @@ addopts = [
     # https://docs.pytest.org/en/stable/explanation/goodpractices.html#tests-outside-application-code
     "--import-mode=importlib",
 ]
+# Where a bare `pytest` looks. The other suites need something running to talk
+# to — a deployment for e2e, an API for smoke — so whoever has one names the
+# directory explicitly (`pytest tests/smoke`), which takes precedence over this.
+testpaths = ["tests/unit"]
 # Recommended by pytest
 pythonpath = "src"
 filterwarnings = [
     "error",
     "ignore:datetime.datetime.utcnow:DeprecationWarning:botocore",
-    # Remove once https://github.com/mwaskom/seaborn/issues/3804 has been releases (seaborn >0.13.2)
+    # seaborn <=0.13.2 forwards the deprecated vert= to matplotlib>=3.11's bxp;
+    # remove once seaborn >0.13.2 is released (mwaskom/seaborn#3804).
     "ignore:vert.* bool will be deprecated in a future version:PendingDeprecationWarning:seaborn",
+    "ignore:vert:matplotlib._api.deprecation.MatplotlibDeprecationWarning",
 
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/avatars"]
+
+[tool.uv]
+# Rolling 14-day dependency cooldown: ignore releases from the last 14 days.
+# uv records this as an exclude-newer-span, so the lockfile stays reproducible.
+exclude-newer = "14 days ago"
+# octopize-avatar-yaml is our own first-party package pinned to an exact
+# version; exempt it from the cooldown entirely so that pin stays resolvable.
+exclude-newer-package = { octopize-avatar-yaml = "0 days ago" }

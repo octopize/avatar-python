@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 import pandas as pd
 import pandas.testing as pd_testing
 import pytest
@@ -78,7 +76,7 @@ def test_postrocess_with_groupby(original_df: pd.DataFrame, raw_avatars_df: pd.D
 
 
 @pytest.mark.parametrize(
-    "groupby_variables, expected",
+    ("groupby_variables", "expected"),
     [
         (
             ["variable_1"],
@@ -107,7 +105,7 @@ def test_postrocess_with_groupby(original_df: pd.DataFrame, raw_avatars_df: pd.D
 def test_postprocess_same_std(
     original_df: pd.DataFrame,
     raw_avatars_df: pd.DataFrame,
-    groupby_variables: Optional[List[str]],
+    groupby_variables: list[str] | None,
     expected: pd.DataFrame,
 ) -> None:
     # Verify that the postprocessed dataframe is correct when none of the

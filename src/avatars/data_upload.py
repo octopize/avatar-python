@@ -31,19 +31,21 @@ class DataUploader:
 
     def upload_file(self, data: str | pd.DataFrame, key: str) -> None:
         """Upload a file to the storage.
+
         Parameters
         ----------
         data :
             a path to a file or a pandas dataframe to upload
         key :
             name of the file where it should be uploaded
+
         """
         if isinstance(data, str):
             with open(data, "rb") as fd:
                 self.upload_file_descriptor(fd, key)
         elif isinstance(data, pd.DataFrame):
             binary_stream = io.BytesIO()
-            data.reset_index(drop=True).to_csv(binary_stream, index=False)
+            data.reset_index(drop=True).to_parquet(binary_stream, index=False)
             binary_stream.seek(0)
             self.upload_file_descriptor(binary_stream, key)
         else:
@@ -60,6 +62,7 @@ class DataUploader:
             File descriptor to upload
         key :
             Relative filepath where the file should be uploaded
+
         """
         content = fd.read()
         base = self.api_client.results.get_upload_url()
@@ -77,16 +80,18 @@ class DataUploader:
         parent = get_parent(user_specific_path)
         fsspec_fs.makedirs(parent, exist_ok=True)
 
-        return fsspec_fs.write_bytes(user_specific_path, content)  # type: ignore[no-any-return] # noqa: E501
+        return fsspec_fs.write_bytes(user_specific_path, content)  # type: ignore[no-any-return]
 
     def download_file(self, file_access: FileAccess) -> str | bytes:
         """Download content from the storage to a file.
+
         Parameters
         ----------
         file_access :
             File access object containing the url and credentials
         path :
             Relative filepath where the file should be downloaded
+
         """
         download_url = file_access.url
         credentials = file_access.credentials
@@ -99,7 +104,8 @@ class DataUploader:
             should_verify_ssl=self.should_verify_ssl,
         )
 
-        if parsed_download.endswith(".pdf") or parsed_download.endswith(".docx"):
+        output: str | bytes
+        if parsed_download.endswith((".pdf", ".docx", ".parquet")):
             output = fs.read_bytes(parsed_download)
         else:
             output = fs.read_text(parsed_download, encoding="utf-8")

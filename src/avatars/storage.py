@@ -45,6 +45,7 @@ def get_filesystem(
         For cloud providers, it expects a scheme, a bucket name, and a directory.
         The exact syntax is described at
         https://docs.octopize.io/docs/deploying/self-hosted/configuration
+
     """
     os.environ["FSSPEC_S3_ENDPOINT_URL"] = storage_endpoint_url
     # We set anon-Ture to avoid the need for credentials. If not specified, the
@@ -69,7 +70,7 @@ def get_full_path(path: str, *, base: str) -> str:
     # Parse the base URL to remove the scheme
 
     parsed_base = urlparse(base)
-    parsed_base_without_scheme = ("",) + parsed_base[1:]
+    parsed_base_without_scheme = ("", *parsed_base[1:])
     base_no_scheme = urlunparse(parsed_base_without_scheme)
     full_path = urljoin(base_no_scheme, path)
 

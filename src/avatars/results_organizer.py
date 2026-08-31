@@ -26,7 +26,7 @@ class ResultsOrganizer(BaseModel):
     avatars_projections: dict[str, pd.DataFrame] = {}
     figures: dict[str, dict[str, list[HTML]]] = {}
     advice: dict[str, dict[str, Any]] = {}
-    run_metadata: dict[str, Any] = {}
+    run_metadata: dict[str, dict[str, Any]] = {}
     privacy_metrics_summary: dict[str, Any] = {}
     signal_metrics_summary: dict[str, Any] = {}
 
@@ -52,9 +52,9 @@ class ResultsOrganizer(BaseModel):
             case Results.METADATA:
                 return self.run_metadata.get(job_name, {})
             case Results.PRIVACY_METRICS_SUMMARY:
-                return self.privacy_metrics_summary if self.privacy_metrics_summary else None
+                return self.privacy_metrics_summary or None
             case Results.SIGNAL_METRICS_SUMMARY:
-                return self.signal_metrics_summary if self.signal_metrics_summary else None
+                return self.signal_metrics_summary or None
             case _:
                 raise ValueError(f"Expected result_name to be one of {RESULTS_TO_STORE}")
 
@@ -64,7 +64,7 @@ class ResultsOrganizer(BaseModel):
         result: TypeResults,
         table_name: str,
         metadata: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         table_name = self.unescape_table_name(table_name)
         match result_name:
             case Results.SHUFFLED:
@@ -76,11 +76,13 @@ class ResultsOrganizer(BaseModel):
             case Results.PRIVACY_METRICS:
                 if self._is_list_of_dict(result):
                     self.privacy_metrics.setdefault(table_name, [])
-                    self.privacy_metrics[table_name].append(result[0])
+                    if result:
+                        self.privacy_metrics[table_name].append(result[0])
             case Results.SIGNAL_METRICS:
                 if self._is_list_of_dict(result):
                     self.signal_metrics.setdefault(table_name, [])
-                    self.signal_metrics[table_name].append(result[0])
+                    if result:
+                        self.signal_metrics[table_name].append(result[0])
             case Results.PROJECTIONS_ORIGINAL:
                 if self._is_dataframe(result):
                     self.original_projections[table_name] = result
@@ -120,7 +122,9 @@ class ResultsOrganizer(BaseModel):
 
     def _is_list_of_dict(self, result: TypeResults) -> TypeGuard[list[dict[str, Any]]]:
         """Validate that the result is a list of dict."""
-        if not isinstance(result, list) or not all(isinstance(r, dict) for r in result) and result:
+        if not isinstance(result, list) or (
+            not all(isinstance(r, dict) for r in result) and result
+        ):
             raise ValueError("Expected result to be a list of dicts")
         return True
 
@@ -139,7 +143,8 @@ class ResultsOrganizer(BaseModel):
     ) -> str | None:
         """Get the table name from the result based on the result type and URL.
         This method extracts the table name in the URL for tables,
-        or from the metadata for other result types."""
+        or from the metadata for other result types.
+        """
         table_name = None
         match result_name:
             case (

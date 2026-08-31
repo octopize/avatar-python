@@ -1,7 +1,9 @@
 import re
 import warnings
+from typing import Literal
 from uuid import UUID
 
+import httpx
 from avatar_yaml import Config as YAMLConfig
 from avatar_yaml.models.avatar_metadata import (
     DataRecipient,
@@ -12,6 +14,7 @@ from avatar_yaml.models.avatar_metadata import (
 from avatar_yaml.models.parameters import ReportLanguage
 
 from avatars import __version__
+from avatars.base_client import ApiConnectionError
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
 from avatars.config import Config, config, get_config
@@ -23,31 +26,6 @@ from avatars.models import (
     JobResponse,
 )
 from avatars.runner import Runner
-
-DEPRECATED_API_KEY_WARNING = (
-    "\nUsername/password authentication is deprecated and will be removed in a future "
-    "release. Please migrate to API key authentication.\n"
-    "\n"
-    "To create an API key while you are still logged in, run:\n"
-    "\n"
-    "    from avatars.models import CreateApiKeyRequest, ExpirationDays\n"
-    "\n"
-    "    api_key_response = manager.auth_client.api_keys.create_api_key(\n"
-    "        CreateApiKeyRequest(\n"
-    "            name='my-key', expiration_days=ExpirationDays.integer_365\n"
-    "        )\n"
-    "    )\n"
-    "    print(api_key_response.get('api_key').get('plaintext'))  # Save this — shown only once!\n"
-    "\n"
-    "Then store the key securely (e.g., in a .env file or your environment):\n"
-    "    AVATAR_API_KEY=<your-api-key>\n"
-    "\n"
-    "And use it for all future sessions (no more username/password needed):\n"
-    "    import os\n"
-    "    manager = Manager(api_key=os.environ['AVATAR_API_KEY'])\n"
-    "\n"
-    "For more information, see: https://python.docs.octopize.io/latest/user_guide.html"
-)
 
 
 def _increment_display_name_version(name: str) -> str:
@@ -61,6 +39,7 @@ def _increment_display_name_version(name: str) -> str:
     'my_dataset-v2'
     >>> _increment_display_name_version("my_dataset-v9")
     'my_dataset-v10'
+
     """
     match = re.search(r"-v(\d+)$", name)
     if match:
@@ -75,11 +54,10 @@ class Manager:
     The ``Manager`` wraps an authenticated :class:`avatars.client.ApiClient` instance
     and exposes a small, task‑oriented surface area so end users can:
 
-    * authenticate once (``authenticate``) or use API key authentication
+    * authenticate using an API key
     * spin up a :class:`avatars.runner.Runner` (``create_runner`` / ``create_runner_from_yaml``)
     * quickly inspect recent jobs & results (``get_last_jobs`` / ``get_last_results``)
     * perform simple platform health checks (``get_health``)
-    * handle password reset flows (``forgotten_password`` / ``reset_password``)
 
     It deliberately hides the lower-level resource clients (``jobs``, ``results``, ``datasets`` …)
     unless you access the underlying ``auth_client`` directly. This keeps common workflows
@@ -91,6 +69,7 @@ class Manager:
     ----------
     auth_client:
         The underlying :class:`avatars.client.ApiClient` used to perform all HTTP requests.
+
     """
 
     def __init__(
@@ -114,12 +93,12 @@ class Manager:
         Using a ClientConfig object:
         ```
         manager = Manager(
-            config=ClientConfig(base_api_url="https://...", should_verify_ssl=False)
+            config=ClientConfig(base_api_url="https://...", api_key="your-api-key")
         )
         ```
 
         Args:
-        -----
+        ----
             base_url: The url of your actual server endpoint,
                 e.g. base_url="https://avatar.company.co".
                 Backwards compatible with older placeholder for the api endpoint (``/api`` suffix).
@@ -127,14 +106,15 @@ class Manager:
 
             api_client: Optional pre-configured ApiClient instance.
                 Mutually exclusive with config, base_url, api_key.
-            api_key: Optional API key for authentication using api-key-v1 scheme.
-                When provided, authenticate() should not be called.
+            api_key: API key for authentication using api-key-v1 scheme.
+                Can also be set via AVATAR_API_KEY environment variable.
                 Mutually exclusive with config, api_client.
             config: Optional ClientConfig object containing all configuration settings.
+                Must include an api_key.
                 Mutually exclusive with base_url, api_key, api_client.
             should_verify_compatibility: Whether to verify client-server compatibility.
                 If None, defaults to config.VERIFY_COMPATIBILITY.
-                Applies to API key authentication during initialization.
+
         """
         # Mutual exclusivity checks - api_client is mutually exclusive with everything else
         if api_client is not None:
@@ -153,50 +133,55 @@ class Manager:
                     "Either pass a pre-configured ApiClient or configuration parameters, not both."
                 )
             self.auth_client = api_client
+        # ClientConfig is mutually exclusive with base_url and api_key
+        elif config is not None:
+            conflicting_params = []
+            if base_url is not None:
+                conflicting_params.append("base_url")
+            if api_key is not None:
+                conflicting_params.append("api_key")
+
+            if conflicting_params:
+                params_str = ", ".join(conflicting_params)
+                raise ValueError(
+                    f"Cannot provide both 'config' and other parameters ({params_str}). "
+                    "Either pass a ClientConfig object or individual parameters, not both."
+                )
+
+            # Use the provided ClientConfig directly
+            self.auth_client = ApiClient(config=config)
         else:
-            # ClientConfig is mutually exclusive with base_url and api_key
-            if config is not None:
-                conflicting_params = []
-                if base_url is not None:
-                    conflicting_params.append("base_url")
-                if api_key is not None:
-                    conflicting_params.append("api_key")
+            # Create ClientConfig from individual parameters with defaults
+            env_config = get_config()
+            # If base_url is provided, override the env_config
+            if base_url:
+                # Derive BASE_API_URL from BASE_URL
+                # This allows for backward compatibility with older placeholder for
+                # BASE_URL environment variable. This now also sets
+                # STORAGE_ENDPOINT_URL accordingly.
+                final_base_url = base_url
+                if base_url.endswith("/api"):
+                    # Deprecated usage of base_url, but still support base_url with /api suffix
+                    final_base_url = base_url.removesuffix("/api")
+                env_config = Config(BASE_URL=final_base_url)
 
-                if conflicting_params:
-                    params_str = ", ".join(conflicting_params)
-                    raise ValueError(
-                        f"Cannot provide both 'config' and other parameters ({params_str}). "
-                        "Either pass a ClientConfig object or individual parameters, not both."
-                    )
+            if api_key is not None:
+                # Override the API_KEY set from environment
+                env_config.API_KEY = api_key
 
-                # Use the provided ClientConfig directly
-                self.auth_client = ApiClient(config=config)
-            else:
-                # Create ClientConfig from individual parameters with defaults
-                env_config = get_config()
-                # If base_url is provided, override the env_config
-                if base_url:
-                    # Derive BASE_API_URL from BASE_URL
-                    # This allows for backward compatibility with older placeholder for
-                    # BASE_URL environment variable. This now also sets
-                    # STORAGE_ENDPOINT_URL accordingly.
-                    final_base_url = base_url
-                    if base_url.endswith("/api"):
-                        # Deprecated usage of base_url, but still support base_url with /api suffix
-                        final_base_url = base_url.removesuffix("/api")
-                    env_config = Config(BASE_URL=final_base_url)
+            client_config = ClientConfig.from_config(env_config)
 
-                if api_key is not None:
-                    # Override the API_KEY set from environment
-                    env_config.API_KEY = api_key
+            self.auth_client = ApiClient(config=client_config)
 
-                client_config = ClientConfig.from_config(env_config)
+        if not self.auth_client.is_using_api_key():
+            raise ValueError(
+                "An API key is required. Pass api_key='...' or set the "
+                "AVATAR_API_KEY environment variable."
+            )
 
-                self.auth_client = ApiClient(config=client_config)
-
-        # Perform compatibility check for API key authentication
-        if self.auth_client.is_using_api_key():
-            self._verify_compatibility_if_needed(should_verify_compatibility)
+        # Perform compatibility check and connection verification for API key authentication
+        self._verify_compatibility_if_needed(should_verify_compatibility)
+        self._verify_connection()
 
     def _verify_compatibility_if_needed(self, should_verify: bool | None = None) -> None:
         """Verify client-server compatibility if needed.
@@ -205,8 +190,8 @@ class Manager:
         ----
             should_verify: Whether to verify compatibility.
                 If None, defaults to config.VERIFY_COMPATIBILITY.
+
         """
-        # If the caller didn't provide a value, consult the config; otherwise respect caller.
         if should_verify is None:
             should_verify = config.VERIFY_COMPATIBILITY
 
@@ -231,62 +216,42 @@ class Manager:
             compat_error_message += "`pip install --upgrade octopize.avatar`.\n"
 
             compat_error_message += "To ignore, you can set "
-            compat_error_message += (
-                "should_verify_compatibility=False in Manager() or authenticate()."
-            )
-            warnings.warn(compat_error_message, DeprecationWarning)
+            compat_error_message += "should_verify_compatibility=False in Manager()."
+            warnings.warn(compat_error_message, DeprecationWarning, stacklevel=2)
             raise DeprecationWarning(compat_error_message)
 
-    def authenticate(
-        self, username: str, password: str, should_verify_compatibility: bool | None = None
-    ) -> None:
-        """Authenticate the user with the given username and password.
+    def _verify_connection(self) -> None:
+        """Verify that the API key is valid by calling an authenticated endpoint.
 
-        .. deprecated::
-            Username/password authentication is deprecated. After logging in, create an API key
-            and use it for future sessions. See the warning emitted on successful login for the
-            exact migration steps, or visit
-            https://python.docs.octopize.io/latest/user_guide.html
+        Raises
+        ------
+        ApiConnectionError
+            If the API is unreachable or the API key is invalid.
 
-        Note: This method should not be called if the Manager was initialized with an api_key.
-        API key authentication is already active and doesn't require calling authenticate().
         """
-        # Guard against calling authenticate when API key is already set
-        if self.auth_client.is_using_api_key():
-            raise ValueError(
-                "Cannot call authenticate() when Manager was initialized with api_key. "
-                "API key authentication is already active. "
-                "To use username/password authentication, create a new Manager without api_key."
-            )
-
-        # Verify compatibility before authentication
-        self._verify_compatibility_if_needed(should_verify_compatibility)
-
-        self.auth_client.authenticate(username, password)
-
-        warnings.warn(
-            DEPRECATED_API_KEY_WARNING,
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-    def forgotten_password(self, email: str) -> None:
-        """Send a forgotten password email to the user."""
-        self.auth_client.forgotten_password(email)
-
-    def reset_password(
-        self, email: str, new_password: str, new_password_repeated: str, token: str | UUID
-    ) -> None:
-        """Reset the password of the user."""
-        if isinstance(token, str):
-            token = UUID(token)
-        self.auth_client.reset_password(email, new_password, new_password_repeated, token)
+        try:
+            self.auth_client.users.get_me()
+        except httpx.ConnectError as e:
+            raise ApiConnectionError(
+                "Failed to connect to the Avatar API. "
+                "Please verify your base URL is correct and the server is reachable."
+            ) from e
+        except Exception as e:
+            error_msg = str(e)
+            if "authenticated" in error_msg.lower() or "401" in error_msg:
+                raise ApiConnectionError(
+                    "Failed to authenticate with the Avatar API. "
+                    "Please verify your API key is correct."
+                ) from e
+            raise ApiConnectionError(f"Failed to connect to the Avatar API: {error_msg}") from e
 
     def create_runner(
         self,
         set_name: str,
+        *,
         seed: int | None = None,
         max_distribution_plots: int | None = None,
+        output_format: Literal["csv", "parquet"] | None = None,
         pia_data_recipient: DataRecipient = DataRecipient.UNKNOWN,
         pia_data_type: DataType = DataType.UNKNOWN,
         pia_data_subject: DataSubject = DataSubject.UNKNOWN,
@@ -299,6 +264,7 @@ class Manager:
             display_name=set_name,
             seed=seed,
             max_distribution_plots=max_distribution_plots,
+            output_format=output_format,
             pia_data_recipient=pia_data_recipient,
             pia_data_type=pia_data_type,
             pia_data_subject=pia_data_subject,
@@ -352,6 +318,7 @@ class Manager:
         >>> # Re-run
         >>> runner2.run(ignore_warnings=True) # will create new results with a new id,
         >>> # you can still access old results with the old id
+
         """
         if not isinstance(set_name, (str, UUID)):
             raise TypeError(f"set_name must be a str or UUID, got {type(set_name).__name__}")
@@ -363,7 +330,7 @@ class Manager:
                 raise ValueError(
                     f"Invalid set_name format: '{set_name}'. "
                     "Expected a valid UUID string (e.g., 'a1b2c3d4-e5f6-7890-abcd-ef1234567890')"
-                )
+                ) from None
 
         set_name_str = str(set_name) if isinstance(set_name, UUID) else set_name
 
@@ -374,14 +341,13 @@ class Manager:
         runner.set_name = set_name_str
         runner.jobs.set_name = set_name_str
         runner.jobs.config = config
-        runner._populate_results_from_existing_jobs()
+        runner._populate_results_from_existing_jobs()  # noqa: SLF001
         return runner
 
     def get_last_results(self, count: int = 1) -> list[dict[str, str]]:
         """Get the last n results."""
-        all_jobs = self.auth_client.jobs.get_jobs().jobs
+        last_jobs = self.auth_client.jobs.get_jobs(limit=count).jobs
 
-        last_jobs = all_jobs[-count:]
         results = []
         for job in last_jobs:
             result = self.auth_client.results.get_results(job.name)
@@ -389,19 +355,50 @@ class Manager:
 
         return results
 
-    def get_last_jobs(self, count: int = 1) -> dict[str, JobResponse]:
-        """Get the last n results."""
-        all_jobs = self.auth_client.jobs.get_jobs().jobs
+    def get_last_jobs(self, count: int = 1, name: str | None = None) -> dict[str, JobResponse]:
+        """Get the last n jobs, optionally filtered by name.
 
-        last_jobs = all_jobs[-count:]
-        results = {}
-        for job in last_jobs:
-            results[job.name] = job
-        return results
+        Parameters
+        ----------
+        count
+            Number of most recent jobs to return.
+        name
+            If provided, only return jobs whose name matches exactly.
+
+        """
+        jobs = self.auth_client.jobs.get_jobs(limit=count, display_name=name).jobs
+        return {job.name: job for job in jobs}
 
     def get_health(self) -> dict[str, str]:
         """Get the health of the server."""
-        return self.auth_client.health.get_health()
+        health: dict[str, str] = self.auth_client.health.get_health()
+        return health
+
+    def get_jobs_by_name(self, name: str) -> list[JobResponse]:
+        """Return all jobs whose name matches exactly.
+
+        Parameters
+        ----------
+        name
+            The human-readable run name (e.g. ``"my_dataset"``).
+
+        """
+        return self.auth_client.jobs.get_jobs(display_name=name).jobs
+
+    def get_jobs_by_id(self, id: UUID | str) -> list[JobResponse]:
+        """Return all jobs belonging to the given run ID.
+
+        Parameters
+        ----------
+        id
+            The UUID of the run (as a ``UUID`` or its string representation).
+
+        """
+        return self.auth_client.jobs.get_jobs(set_name=str(id)).jobs
+
+    def get_last_set(self) -> list[JobResponse]:
+        """Return all jobs belonging to the most recently created run (set_name)."""
+        return self.auth_client.jobs.get_last_jobs().jobs
 
     def find_ids_by_name(self, set_name: str) -> list[tuple[str, list[JobResponse]]]:
         """Find all run UUIDs associated with a given set_name.
@@ -424,13 +421,13 @@ class Manager:
             - ``uuid``: UUID string of the run
             - ``jobs``: All jobs belonging to that run
 
-            Returns an empty list if no matching display name is found.
-        """
-        all_jobs = self.auth_client.jobs.get_jobs().jobs
+            Returns an empty list if no matching set_name is found.
 
-        matching_jobs = [
-            job for job in all_jobs if job.display_name == set_name and job.kind != JobKind.advice
-        ]
+        """
+        all_non_advice_kinds: list[JobKind] = [k for k in JobKind if k != JobKind.advice]
+        matching_jobs = self.auth_client.jobs.get_jobs(
+            display_name=set_name, kind=all_non_advice_kinds
+        ).jobs
 
         # Group jobs by set_name, preserving insertion order
         grouped: dict[str, list[JobResponse]] = {}
@@ -482,6 +479,7 @@ class Manager:
         >>> runner = manager.create_runner_from_name("my_dataset")
         >>> df = runner.shuffled("patients")
         >>> metrics = runner.privacy_metrics("patients")
+
         """
         results = self.find_ids_by_name(display_name)
         if not results:
@@ -492,10 +490,12 @@ class Manager:
 
     def create_runner_from_yaml(self, yaml_path: str, set_name: str) -> Runner:
         """Create a new runner from a yaml file.
+
         Parameters
         ----------
             yaml_path: The path to the yaml file.
             set_name: Name of the set of resources.
+
         """
         runner = self.create_runner(set_name=_increment_display_name_version(set_name))
         runner.from_yaml(yaml_path)
@@ -525,6 +525,7 @@ class Manager:
         ValueError
             If no run is found for the given name, or if multiple runs
             match and the caller must disambiguate by id.
+
         """
         matches = self.find_ids_by_name(name)
         if not matches:
@@ -554,10 +555,12 @@ class Manager:
         -------
         BulkDeleteResponse
             Response containing deleted and failed jobs.
+
         """
-        set_name = UUID(str(id))
-        all_jobs = self.auth_client.jobs.get_jobs().jobs
-        job_names = [job.name for job in all_jobs if job.set_name == set_name]
+        set_name_uuid = UUID(str(id))
+        job_names = [
+            job.name for job in self.auth_client.jobs.get_jobs(set_name=str(set_name_uuid)).jobs
+        ]
         return self.delete_jobs(job_names)
 
     def delete_jobs(self, job_names: list[str]) -> BulkDeleteResponse:
@@ -572,6 +575,7 @@ class Manager:
         -------
         BulkDeleteResponse
             Aggregated response containing all deleted and failed jobs across batches.
+
         """
         all_deleted: list[JobResponse] = []
         all_failed: list[str] = []

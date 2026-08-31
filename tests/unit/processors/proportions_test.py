@@ -159,7 +159,7 @@ def test_preprocess_target_variables_sum_zero() -> None:
 
 
 def test_postprocess_saferounding() -> None:
-    "Verify that the postprocessed variables sum up to reference variable."
+    """Verify that the postprocessed variables sum up to reference variable."""
     df = pd.DataFrame(
         {
             "variable_1": [101, 101],
@@ -188,7 +188,7 @@ def test_postprocess_saferounding() -> None:
 
 
 def test_decimals() -> None:
-    "Verify that the postprocessed variables have the specified number of decimals."
+    """Verify that the postprocessed variables have the specified number of decimals."""
     df = pd.DataFrame(
         {
             "variable_1": [101, 101],

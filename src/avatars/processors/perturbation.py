@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 import numpy as np
 import pandas as pd
 from toolz.dicttoolz import valfilter
@@ -13,52 +11,50 @@ class PerturbationProcessor:
     Specifies the perturbation level of specified variables, 0 means no perturbation.
     (default: ``np.ones(df.shape[1])``)
 
-    Arguments
-    ---------
+    Arguments:
         perturbation_level:
             variables and perturbation level
 
-    Keyword Arguments
-    -----------------
+    Keyword Arguments:
         seed:
             A seed to initialize the BitGenerator.
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> df = pd.DataFrame(np.zeros(3), columns=["column"], dtype="float")
-    >>> df
-       column
-    0     0.0
-    1     0.0
-    2     0.0
-    >>> processor = PerturbationProcessor(perturbation_level={"column": 0.3}, seed=1)
-    >>> processor.preprocess(df)
-       column
-    0     0.0
-    1     0.0
-    2     0.0
-    >>> avatar = pd.DataFrame(np.ones(3), columns=["column"], dtype="float")
-    >>> avatar
-       column
-    0     1.0
-    1     1.0
-    2     1.0
+    Examples:
+        >>> import numpy as np
+        >>> df = pd.DataFrame(np.zeros(3), columns=["column"], dtype="float")
+        >>> df
+           column
+        0     0.0
+        1     0.0
+        2     0.0
+        >>> processor = PerturbationProcessor(perturbation_level={"column": 0.3}, seed=1)
+        >>> processor.preprocess(df)
+           column
+        0     0.0
+        1     0.0
+        2     0.0
+        >>> avatar = pd.DataFrame(np.ones(3), columns=["column"], dtype="float")
+        >>> avatar
+           column
+        0     1.0
+        1     1.0
+        2     1.0
 
-    The post process reduces the gap between df and avatar
+        The post process reduces the gap between df and avatar
 
-    >>> processor.postprocess(df, avatar)
-       column
-    0     0.3
-    1     0.3
-    2     0.3
+        >>> processor.postprocess(df, avatar)
+           column
+        0     0.3
+        1     0.3
+        2     0.3
+
     """
 
     def __init__(
         self,
-        perturbation_level: Optional[Dict[str, float]] = None,
+        perturbation_level: dict[str, float] | None = None,
         *,
-        seed: Optional[int] = None,
+        seed: int | None = None,
     ):
         self.perturbation_level = perturbation_level
         self.generator = np.random.default_rng(seed)

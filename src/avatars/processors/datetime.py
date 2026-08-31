@@ -33,6 +33,7 @@ class DatetimeProcessor:
                    date_1              date_2
     0 2015-01-01 07:06:40 2015-01-01 09:53:20
     1 2018-09-24 15:46:40 2019-09-16 23:20:00
+
     """
 
     def preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -51,11 +52,11 @@ class DatetimeProcessor:
         return df
 
     def postprocess(self, source: pd.DataFrame, dest: pd.DataFrame) -> pd.DataFrame:
-        """Transform datetime columns from seconds since epoch back to datetime[ns] type."""
+        """Transform datetime columns from seconds since epoch back to their original dtype."""
         default_value = 0
 
         for name in self.datetime_variables:
-            # Replace NaN values with default_value, convert to datetime[ns] and replace with NaT
+            # Replace NaN values with default_value, convert to datetime and replace with NaT
             # afterwards
             is_nan = dest[name].isna()
             dest[name] = dest[name].fillna(default_value)
@@ -63,6 +64,10 @@ class DatetimeProcessor:
                 pd.to_datetime(dest[name].astype("int64") * 10**9, unit="ns"),
                 index=dest.index,
             )
+            # reassign the original resolution: pandas infers it from the input, so a source
+            # column parsed as datetime64[us] must not come back as datetime64[ns]
+            if pd.api.types.is_datetime64_dtype(source[name]):
+                converted = converted.astype(source[name].dtype)
             converted.loc[is_nan] = None
             dest[name] = converted
         return dest

@@ -22,10 +22,10 @@ __all__ = [
     "ExpectedMeanProcessor",
     "GeolocationNormalizationProcessor",
     "GroupModalitiesProcessor",
+    "InterRecordBoundedCumulatedDifferenceProcessor",
+    "InterRecordBoundedRangeDifferenceProcessor",
+    "InterRecordCumulatedDifferenceProcessor",
     "PerturbationProcessor",
     "ProportionProcessor",
     "ToCategoricalProcessor",
-    "InterRecordCumulatedDifferenceProcessor",
-    "InterRecordBoundedRangeDifferenceProcessor",
-    "InterRecordBoundedCumulatedDifferenceProcessor",
 ]

@@ -1,8 +1,8 @@
 """Original source: https://github.com/cgdeboer/iteround."""
 
 from collections import OrderedDict
-from typing import NamedTuple, Tuple
-from typing import OrderedDict as OrderedDictType
+from collections import OrderedDict as OrderedDictType
+from typing import NamedTuple
 
 import pytest
 
@@ -13,7 +13,7 @@ class Setup(NamedTuple):
     in_list: list[float]
     in_dict: dict[str, float]
     in_odict: OrderedDictType[str, float]
-    in_tuple: Tuple[float, float, float]
+    in_tuple: tuple[float, float, float]
     neg_in_list: list[float]
     huge_in_list: list[float]
 

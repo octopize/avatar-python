@@ -1,5 +1,6 @@
 """Tests for the crash handler module, specifically sensitive line redaction."""
 
+import sys
 import textwrap
 from pathlib import Path
 
@@ -102,89 +103,73 @@ class TestIsSensitiveVariableName:
 class TestFindSensitiveLines:
     """Tests for AST-based sensitive line detection."""
 
-    def test_finds_authenticate_call_with_positional_args(self) -> None:
-        """Detect authenticate() call and password variable assignment."""
+    def test_finds_manager_call_with_api_key_variable(self) -> None:
+        """Detect Manager(api_key=...) call and the api_key variable assignment."""
         source = textwrap.dedent("""
-            username = "user@example.com"
-            password = "secret123"
-            manager.authenticate(username, password)
+            base_url = "https://avatar.example.com"
+            api_key = "secret123"
+            manager = Manager(base_url=base_url, api_key=api_key)
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # Line 2: password assignment, Line 3: authenticate call
+        # Line 2: api_key assignment, Line 3: Manager(...) call
         assert 2 in sensitive_lines
         assert 3 in sensitive_lines
-        # Line 1 (username) should not be redacted
+        # Line 1 (base_url) should not be redacted
         assert 1 not in sensitive_lines
 
-    def test_finds_authenticate_call_with_keyword_args(self) -> None:
-        """Detect authenticate() with password= keyword argument."""
+    def test_finds_multiple_manager_calls(self) -> None:
+        """Detect multiple Manager(...) calls with different api_key variables."""
         source = textwrap.dedent("""
-            my_user = "user"
-            my_pass = "secret"
-            client.authenticate(username=my_user, password=my_pass)
+            key1 = "first_secret"
+            manager1 = Manager(api_key=key1)
+            key2 = "second_secret"
+            manager2 = Manager(api_key=key2)
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # Line 2: password variable assignment, Line 3: authenticate call
+        # All api_key assignments and Manager(...) calls should be redacted
+        assert 1 in sensitive_lines  # key1 assignment
+        assert 2 in sensitive_lines  # first Manager(...) call
+        assert 3 in sensitive_lines  # key2 assignment
+        assert 4 in sensitive_lines  # second Manager(...) call
+
+    def test_literal_api_key_only_redacts_call(self) -> None:
+        """When api_key is a literal, only the Manager(...) call is redacted."""
+        source = textwrap.dedent("""
+            base_url = "https://avatar.example.com"
+            manager = Manager(base_url=base_url, api_key="literal_key")
+        """).strip()
+
+        sensitive_lines = _find_sensitive_lines_from_source(source)
+
+        # Only the Manager(...) call should be redacted (line 2)
         assert 2 in sensitive_lines
-        assert 3 in sensitive_lines
-        # username variable should not be redacted
+        # base_url line should not be redacted
         assert 1 not in sensitive_lines
 
-    def test_finds_multiple_authenticate_calls(self) -> None:
-        """Detect multiple authenticate() calls with different password vars."""
-        source = textwrap.dedent("""
-            pw1 = "first_secret"
-            manager1.authenticate("user1", pw1)
-            pw2 = "second_secret"
-            manager2.authenticate("user2", pw2)
-        """).strip()
-
-        sensitive_lines = _find_sensitive_lines_from_source(source)
-
-        # All password assignments and authenticate calls should be redacted
-        assert 1 in sensitive_lines  # pw1 assignment
-        assert 2 in sensitive_lines  # first authenticate
-        assert 3 in sensitive_lines  # pw2 assignment
-        assert 4 in sensitive_lines  # second authenticate
-
-    def test_literal_password_only_redacts_call(self) -> None:
-        """When password is a literal, only the authenticate call is redacted."""
-        source = textwrap.dedent("""
-            username = "user"
-            manager.authenticate(username, "literal_password")
-        """).strip()
-
-        sensitive_lines = _find_sensitive_lines_from_source(source)
-
-        # Only the authenticate call should be redacted (line 2)
-        assert 2 in sensitive_lines
-        # Username line should not be redacted
-        assert 1 not in sensitive_lines
-
-    def test_password_from_env_var(self) -> None:
-        """Detect password assignment from os.environ.get()."""
+    def test_api_key_from_env_var(self) -> None:
+        """Detect api_key assignment from os.environ.get()."""
         source = textwrap.dedent("""
             import os
-            username = os.environ.get("USERNAME")
-            password = os.environ.get("PASSWORD")
-            manager.authenticate(username, password)
+            base_url = os.environ.get("AVATAR_URL")
+            api_key = os.environ.get("AVATAR_API_KEY")
+            manager = Manager(base_url=base_url, api_key=api_key)
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # password assignment and authenticate call should be redacted
-        assert 3 in sensitive_lines  # password = os.environ.get(...)
-        assert 4 in sensitive_lines  # authenticate call
-        # import and username should not be redacted
+        # api_key assignment and Manager(...) call should be redacted
+        assert 3 in sensitive_lines  # api_key = os.environ.get(...)
+        assert 4 in sensitive_lines  # Manager(...) call
+        # import and base_url should not be redacted
         assert 1 not in sensitive_lines
         assert 2 not in sensitive_lines
 
-    def test_no_authenticate_call(self) -> None:
-        """Sensitive variable names are redacted even without authenticate() call."""
+    def test_no_manager_call(self) -> None:
+        """Sensitive variable names are redacted even without a Manager(...) call."""
         source = textwrap.dedent("""
             password = "secret"
             print(password)
@@ -197,19 +182,19 @@ class TestFindSensitiveLines:
         # print statement should not be redacted
         assert 2 not in sensitive_lines
 
-    def test_multiline_authenticate_call(self) -> None:
-        """Detect multiline authenticate() calls."""
+    def test_multiline_manager_call(self) -> None:
+        """Detect multiline Manager(...) calls."""
         source = textwrap.dedent("""
-            password = "secret"
-            manager.authenticate(
-                username="user",
-                password=password
+            api_key = "secret"
+            manager = Manager(
+                base_url="https://avatar.example.com",
+                api_key=api_key
             )
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # password assignment should be redacted
+        # api_key assignment should be redacted
         assert 1 in sensitive_lines
         # All lines of the multiline call should be redacted
         assert 2 in sensitive_lines
@@ -218,15 +203,15 @@ class TestFindSensitiveLines:
         assert 5 in sensitive_lines
 
     def test_annotated_assignment(self) -> None:
-        """Detect type-annotated password assignments."""
+        """Detect type-annotated api_key assignments."""
         source = textwrap.dedent("""
-            password: str = "secret"
-            manager.authenticate("user", password)
+            api_key: str = "secret"
+            manager = Manager(api_key=api_key)
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # Both the annotated assignment and authenticate call should be redacted
+        # Both the annotated assignment and the Manager(...) call should be redacted
         assert 1 in sensitive_lines
         assert 2 in sensitive_lines
 
@@ -238,7 +223,7 @@ class TestFindSensitiveLines:
 
         assert len(sensitive_lines) == 0
 
-    def test_sensitive_variable_names_without_authenticate(self) -> None:
+    def test_sensitive_variable_names_without_manager_call(self) -> None:
         """Various sensitive variable names are redacted via fuzzy matching."""
         source = textwrap.dedent("""
             password = "secret1"
@@ -262,35 +247,40 @@ class TestFindSensitiveLines:
         # username is not sensitive
         assert 7 not in sensitive_lines
 
-    def test_authenticate_on_different_objects(self) -> None:
-        """Detect authenticate on any object (client, manager, etc.)."""
+    def test_manager_call_via_attribute_access(self) -> None:
+        """Detect Manager(...) calls reached through attribute access."""
         source = textwrap.dedent("""
-            secret = "password"
-            client.authenticate("user", secret)
-            api.authenticate("user", secret)
-            auth_client.authenticate("user", secret)
+            key = "secret"
+            manager = avatars.manager.Manager(api_key=key)
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # All authenticate calls and the secret assignment should be redacted
-        assert 1 in sensitive_lines  # secret assignment
-        assert 2 in sensitive_lines  # client.authenticate
-        assert 3 in sensitive_lines  # api.authenticate
-        assert 4 in sensitive_lines  # auth_client.authenticate
+        assert 1 in sensitive_lines  # key assignment
+        assert 2 in sensitive_lines  # avatars.manager.Manager(...) call
 
-    def test_same_variable_reused_for_password(self) -> None:
+    def test_manager_call_without_api_key_not_redacted(self) -> None:
+        """A Manager(...) call without an api_key argument is not redacted."""
+        source = textwrap.dedent("""
+            manager = Manager(base_url="https://avatar.example.com")
+        """).strip()
+
+        sensitive_lines = _find_sensitive_lines_from_source(source)
+
+        assert 1 not in sensitive_lines
+
+    def test_same_variable_reused_for_api_key(self) -> None:
         """Handle cases where the same variable is assigned multiple times."""
         source = textwrap.dedent("""
-            pw = get_password_from_keychain()
-            manager.authenticate("user1", pw)
-            pw = "new_password"
-            manager.authenticate("user2", pw)
+            key = get_api_key_from_keychain()
+            manager1 = Manager(api_key=key)
+            key = "new_key"
+            manager2 = Manager(api_key=key)
         """).strip()
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # All pw assignments and authenticate calls should be redacted
+        # All key assignments and Manager(...) calls should be redacted
         assert 1 in sensitive_lines
         assert 2 in sensitive_lines
         assert 3 in sensitive_lines
@@ -302,11 +292,9 @@ class TestFindSensitiveLines:
             import os
             from avatars.manager import Manager
 
-            username = os.environ.get("AVATAR_USERNAME", "")
-            password = os.environ.get("AVATAR_PASSWORD", "")
+            api_key = os.environ.get("AVATAR_API_KEY", "")
 
-            manager = Manager()
-            manager.authenticate(username, password)
+            manager = Manager(api_key=api_key)
 
             runner = manager.create_runner(set_name="test")
             runner.add_table("data", "data.csv")
@@ -314,24 +302,22 @@ class TestFindSensitiveLines:
 
         sensitive_lines = _find_sensitive_lines_from_source(source)
 
-        # password assignment (line 5) and authenticate call (line 8) should be redacted
-        assert 5 in sensitive_lines  # password = os.environ.get(...)
-        assert 8 in sensitive_lines  # manager.authenticate(...)
+        # api_key assignment (line 4) and Manager(...) call (line 6) should be redacted
+        assert 4 in sensitive_lines  # api_key = os.environ.get(...)
+        assert 6 in sensitive_lines  # manager = Manager(api_key=api_key)
 
         # These should NOT be redacted
         assert 1 not in sensitive_lines  # import os
         assert 2 not in sensitive_lines  # from avatars...
-        assert 4 not in sensitive_lines  # username = ...
-        assert 7 not in sensitive_lines  # manager = Manager()
-        assert 10 not in sensitive_lines  # runner = ...
-        assert 11 not in sensitive_lines  # runner.add_table...
+        assert 8 not in sensitive_lines  # runner = ...
+        assert 9 not in sensitive_lines  # runner.add_table...
 
 
 class TestCrashReportIntegration:
     """Integration tests verifying the full crash report redacts sensitive info."""
 
-    def test_get_full_file_content_redacts_password(self, tmp_path: Path) -> None:
-        """Verify get_full_file_content redacts password lines in a real file."""
+    def test_get_full_file_content_redacts_api_key(self, tmp_path: Path) -> None:
+        """Verify get_full_file_content redacts api_key lines in a real file."""
         # Create a temporary Python file with sensitive content
         test_file = tmp_path / "user_script.py"
         test_file.write_text(
@@ -339,12 +325,10 @@ class TestCrashReportIntegration:
                 import os
                 from avatars.manager import Manager
 
-                username = os.environ.get("AVATAR_USERNAME")
-                password = os.environ.get("AVATAR_PASSWORD")
+                base_url = os.environ.get("AVATAR_URL")
                 api_key = "super_secret_key_12345"
 
-                manager = Manager()
-                manager.authenticate(username, password)
+                manager = Manager(base_url=base_url, api_key=api_key)
 
                 runner = manager.create_runner(set_name="test")
             """).strip()
@@ -352,17 +336,16 @@ class TestCrashReportIntegration:
 
         content = get_full_file_content(str(test_file))
 
-        # Verify password-related lines are redacted
+        # Verify api_key-related lines are redacted
         assert REDACTED_PLACEHOLDER in content
 
         # Verify actual secrets are NOT in the output
-        assert "AVATAR_PASSWORD" not in content
         assert "super_secret_key_12345" not in content
-        assert "authenticate(username, password)" not in content
+        assert "Manager(base_url=base_url, api_key=api_key)" not in content
 
         # Verify non-sensitive content IS present
         assert "import os" in content
-        assert "AVATAR_USERNAME" in content
+        assert "AVATAR_URL" in content
         assert 'set_name="test"' in content
 
     def test_full_crash_report_redacts_sensitive_info(self, tmp_path: Path) -> None:
@@ -382,8 +365,6 @@ class TestCrashReportIntegration:
         try:
             exec(compile(script_content, str(test_file), "exec"))
         except ValueError:
-            import sys
-
             exc_type, exc_value, exc_tb = sys.exc_info()
 
             # Generate the crash report
@@ -429,8 +410,6 @@ class TestCrashReportIntegration:
         try:
             exec(compile(script_content, str(test_file), "exec"))
         except ValueError:
-            import sys
-
             exc_type, exc_value, exc_tb = sys.exc_info()
             report = generate_crash_report(exc_type, exc_value, exc_tb)  # type: ignore[arg-type]
 

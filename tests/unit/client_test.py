@@ -1,11 +1,11 @@
 import unittest
-from typing import Any, Type
+from typing import Any
 from unittest.mock import Mock, patch
 
 import httpx
 import pytest
 
-from avatars.base_client import TimeoutError
+from avatars.base_client import TimeoutError  # noqa: A004 - SDK's own TimeoutError under test
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
 from tests.unit.conftest import RequestHandle, api_client_factory, mock_httpx_client
@@ -87,7 +87,6 @@ class TestApiClientInitialization:
 
     def test_config_with_base_url_raises_error(self, minimal_config: ClientConfig) -> None:
         """Test that using config with base_url raises ValueError."""
-
         with pytest.raises(
             ValueError,
             match="Cannot provide both 'config' and other parameters \\(base_url\\)",
@@ -258,7 +257,7 @@ class TestClientRequest:
         assert "a plain text error" in msg
 
     @pytest.mark.parametrize("exc_cls", [httpx.ReadTimeout, httpx.WriteTimeout])
-    def test_reraise_timeout_as_custom_timeout(self, exc_cls: Type[Exception]) -> None:
+    def test_reraise_timeout_as_custom_timeout(self, exc_cls: type[Exception]) -> None:
         """Verify that we reraise a custom error on timeout after the last retrying attempt."""
         error_to_raise = exc_cls("whatever")
         client = mock_httpx_client()

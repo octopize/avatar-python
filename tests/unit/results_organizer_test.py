@@ -1,3 +1,5 @@
+from typing import Any
+
 import pandas as pd
 import pytest
 from IPython.display import HTML
@@ -7,7 +9,7 @@ from avatars.models import JobKind
 from avatars.results_organizer import ResultsOrganizer
 
 
-def assert_equals(expected, result):
+def assert_equals(expected: Any, result: Any) -> None:
     if isinstance(expected, pd.DataFrame):
         assert isinstance(result, pd.DataFrame)
         pd.testing.assert_frame_equal(result, expected)
@@ -26,7 +28,7 @@ def assert_equals(expected, result):
 
 
 @pytest.mark.parametrize(
-    "result_name, job_kind, result, metadata,expected_type",
+    ("result_name", "job_kind", "result", "metadata", "expected_type"),
     [
         (
             Results.SHUFFLED,
@@ -47,7 +49,7 @@ def assert_equals(expected, result):
         (
             Results.FIGURES,
             JobKind.standard,
-            HTML("<div>Figure</div>"),
+            HTML("<div>Figure</div>"),  # type: ignore[no-untyped-call]
             {"kind": PlotKind.CORRELATION},
             [HTML],
         ),

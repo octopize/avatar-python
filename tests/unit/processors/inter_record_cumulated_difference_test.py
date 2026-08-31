@@ -33,7 +33,7 @@ def preprocessed_df_with_cumulated() -> pd.DataFrame:
 def test_preprocess(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
-    "Verify that the preprocess is correct."
+    """Verify that the preprocess is correct."""
     processor = InterRecordCumulatedDifferenceProcessor(
         id_variable="id",
         target_variable="value",
@@ -49,7 +49,7 @@ def test_preprocess(
 def test_postprocess_with_keep_order(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
-    "Verify that the postprocess is correct."
+    """Verify that the postprocess is correct."""
     processor = InterRecordCumulatedDifferenceProcessor(
         id_variable="id",
         target_variable="value",
@@ -65,7 +65,7 @@ def test_postprocess_with_keep_order(
 def test_postprocess_without_keep_order(
     df_with_cumulated: pd.DataFrame, preprocessed_df_with_cumulated: pd.DataFrame
 ) -> None:
-    "Verify that the postprocess is correct."
+    """Verify that the postprocess is correct."""
     processor = InterRecordCumulatedDifferenceProcessor(
         id_variable="id",
         target_variable="value",

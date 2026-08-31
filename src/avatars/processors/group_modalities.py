@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 import pandas as pd
 
 from avatars.lib.split_columns_types import split_columns_types
@@ -11,8 +9,7 @@ class GroupModalitiesProcessor:
     Use the parameter `variables` if you want to apply a custom threshold to each variable.
     Use the parameter `min_unique` and `threshold` if you want to apply a generic threshold.
 
-    Keyword Arguments
-    -----------------
+    Keyword Arguments:
         variable_thresholds:
             dictionary of variables and thresholds to apply,
             see global_threshold below.
@@ -23,40 +20,40 @@ class GroupModalitiesProcessor:
         new_category:
             new modality name (default="other").
 
-    Examples
-    --------
-    >>> df = pd.DataFrame(
-    ...    {
-    ...        "variable_1": ["red", "blue", "blue", "green"],
-    ...        "variable_2": ["red", "blue", "blue", "red"],
-    ...        "variable_3": ["green", "green", "green", "green"],
-    ...    }
-    ... )
-    >>> df
-      variable_1 variable_2 variable_3
-    0        red        red      green
-    1       blue       blue      green
-    2       blue       blue      green
-    3      green        red      green
-    >>> processor = GroupModalitiesProcessor(
-    ...     min_unique=2,
-    ...     global_threshold=1,
-    ...     new_category="other"
-    ... )
-    >>> processor.preprocess(df)
-      variable_1 variable_2 variable_3
-    0      other        red      green
-    1       blue       blue      green
-    2       blue       blue      green
-    3      other        red      green
+    Examples:
+        >>> df = pd.DataFrame(
+        ...    {
+        ...        "variable_1": ["red", "blue", "blue", "green"],
+        ...        "variable_2": ["red", "blue", "blue", "red"],
+        ...        "variable_3": ["green", "green", "green", "green"],
+        ...    }
+        ... )
+        >>> df
+          variable_1 variable_2 variable_3
+        0        red        red      green
+        1       blue       blue      green
+        2       blue       blue      green
+        3      green        red      green
+        >>> processor = GroupModalitiesProcessor(
+        ...     min_unique=2,
+        ...     global_threshold=1,
+        ...     new_category="other"
+        ... )
+        >>> processor.preprocess(df)
+          variable_1 variable_2 variable_3
+        0      other        red      green
+        1       blue       blue      green
+        2       blue       blue      green
+        3      other        red      green
+
     """
 
     def __init__(
         self,
         *,
-        variable_thresholds: Optional[Dict[str, int]] = None,
-        min_unique: Optional[int] = None,
-        global_threshold: Optional[int] = None,
+        variable_thresholds: dict[str, int] | None = None,
+        min_unique: int | None = None,
+        global_threshold: int | None = None,
         new_category: str = "other",
     ):
         if (not min_unique and global_threshold) or (not global_threshold and min_unique):
@@ -103,7 +100,7 @@ class GroupModalitiesProcessor:
                 )
             columns_to_reduce = count_category[count_category >= self.min_unique].index.tolist()
             if self.global_threshold is not None:
-                self.variable_thresholds = {x: self.global_threshold for x in columns_to_reduce}
+                self.variable_thresholds = dict.fromkeys(columns_to_reduce, self.global_threshold)
 
         # Apply the modality transformation
         if self.variable_thresholds:  # TODO: fix me for mypy
@@ -116,7 +113,7 @@ class GroupModalitiesProcessor:
                 }
                 for key, value in count.items()
             }
-        df = df.replace(correspondence)  # type: ignore[arg-type]
+        df = df.replace(correspondence)
 
         return df
 

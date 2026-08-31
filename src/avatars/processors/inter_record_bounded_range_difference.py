@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 import pandas as pd
 
@@ -25,8 +23,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
     This processor is not suitable for data where any of the variables passed as args contain
     missing values.
 
-    Keyword Arguments
-    -----------------
+    Keyword Arguments:
         id_variable:
             variable indicating which individual each row belongs to
         target_start_variable:
@@ -44,45 +41,46 @@ class InterRecordBoundedRangeDifferenceProcessor:
         should_round_output:
             set to True to force post-processed values to be integer.
 
-    Examples
-    --------
-    >>> df = pd.DataFrame(
-    ...    {
-    ...       'quantity_start': [30, 100, 80, 70, 40, 70],
-    ...       'quantity_end': [10, 80, 70, 60, 30, 5],
-    ...       'b': [4, 3, 0, 0, 2, 4],
-    ...       'id': [1,1,1,2,2,2]
-    ...    }
-    ... )
-    >>> processor = InterRecordBoundedRangeDifferenceProcessor(
-    ...    id_variable='id',
-    ...    target_start_variable='quantity_start',
-    ...    target_end_variable='quantity_end',
-    ...    new_first_variable_name='quantity_s_first_val',
-    ...    new_difference_variable_name="quantity_diff_to_bound",
-    ...    new_range_variable="quantity_range",
-    ...    should_round_output=True
-    ... )
-    >>> preprocessed_df = processor.preprocess(df)
-    >>> print(preprocessed_df)
-       b  id  quantity_range  quantity_s_first_val  quantity_diff_to_bound
-    0  4   1       -0.800000                    30                0.000000
-    1  3   1       -0.210526                    30                1.000000
-    2  0   1       -0.133333                    30                0.000000
-    3  0   2       -0.153846                    70                0.000000
-    4  2   2       -0.285714                    70               -0.363636
-    5  4   2       -1.000000                    70                0.571429
+    Examples:
+        >>> df = pd.DataFrame(
+        ...    {
+        ...       'quantity_start': [30, 100, 80, 70, 40, 70],
+        ...       'quantity_end': [10, 80, 70, 60, 30, 5],
+        ...       'b': [4, 3, 0, 0, 2, 4],
+        ...       'id': [1,1,1,2,2,2]
+        ...    }
+        ... )
+        >>> processor = InterRecordBoundedRangeDifferenceProcessor(
+        ...    id_variable='id',
+        ...    target_start_variable='quantity_start',
+        ...    target_end_variable='quantity_end',
+        ...    new_first_variable_name='quantity_s_first_val',
+        ...    new_difference_variable_name="quantity_diff_to_bound",
+        ...    new_range_variable="quantity_range",
+        ...    should_round_output=True
+        ... )
+        >>> preprocessed_df = processor.preprocess(df)
+        >>> print(preprocessed_df)
+           b  id  quantity_range  quantity_s_first_val  quantity_diff_to_bound
+        0  4   1       -0.800000                    30                0.000000
+        1  3   1       -0.210526                    30                1.000000
+        2  0   1       -0.133333                    30                0.000000
+        3  0   2       -0.153846                    70                0.000000
+        4  2   2       -0.285714                    70               -0.363636
+        5  4   2       -1.000000                    70                0.571429
 
-    The postprocess allows you to transform some preprocessed data back into its original format.
+        The postprocess allows you to transform some preprocessed data back into its
+        original format.
 
-    >>> processor.postprocess(df, preprocessed_df)
-       quantity_start  quantity_end  b  id
-    0              30            10  4   1
-    1             100            80  3   1
-    2              80            70  0   1
-    3              70            60  0   2
-    4              40            30  2   2
-    5              70             5  4   2
+        >>> processor.postprocess(df, preprocessed_df)
+           quantity_start  quantity_end  b  id
+        0              30            10  4   1
+        1             100            80  3   1
+        2              80            70  0   1
+        3              70            60  0   2
+        4              40            30  2   2
+        5              70             5  4   2
+
     """
 
     def __init__(
@@ -94,7 +92,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
         new_first_variable_name: str,
         new_range_variable: str,
         new_difference_variable_name: str,
-        sort_by_variable: Optional[str] = None,
+        sort_by_variable: str | None = None,
         should_round_output: bool = True,
     ):
         self.id_variable = id_variable
@@ -120,7 +118,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
             msg += f" '{self.target_start_variable}', '{self.target_end_variable}' and "
             msg += f"'{self.sort_by_variable}' instead"
             raise ValueError(msg)
-        if df[variables_to_check].isnull().values.any():
+        if df[variables_to_check].isna().values.any():
             msg = "Expected no missing values for `id_variable`, `target_start_variable`, "
             msg += "`target_end_variable` and `sort_by_variable`, "
             msg += "got columns with nulls instead"
@@ -136,12 +134,10 @@ class InterRecordBoundedRangeDifferenceProcessor:
 
         # determine lb and ub
         working["lb"] = min(
-            min(working[self.target_start_variable]),
-            min(working[self.target_end_variable]),
+            *working[self.target_start_variable], *working[self.target_end_variable]
         )
         working["ub"] = max(
-            max(working[self.target_start_variable]),
-            max(working[self.target_end_variable]),
+            *working[self.target_start_variable], *working[self.target_end_variable]
         )
 
         # compute relative range to ub or lb
@@ -182,7 +178,7 @@ class InterRecordBoundedRangeDifferenceProcessor:
             self.target_end_variable
         ].shift()
         working = working.reset_index(drop=False)
-        working.loc[working["previous_val"].isnull(), "previous_val"] = working[
+        working.loc[working["previous_val"].isna(), "previous_val"] = working[
             self.target_start_variable
         ]  # for first record, set previous value as same value to avoid NaN
         working["increase"] = working[self.target_start_variable] >= working["previous_val"]
@@ -248,14 +244,8 @@ class InterRecordBoundedRangeDifferenceProcessor:
         working = working.sort_values(by=[self.id_variable])
 
         # determine lb and ub
-        lb = min(
-            min(source[self.target_start_variable]),
-            min(source[self.target_end_variable]),
-        )
-        ub = max(
-            max(source[self.target_start_variable]),
-            max(source[self.target_end_variable]),
-        )
+        lb = min(*source[self.target_start_variable], *source[self.target_end_variable])
+        ub = max(*source[self.target_start_variable], *source[self.target_end_variable])
 
         # identify whether the difference and range values have increased or decreased
         working["increase"] = working[self.new_difference_variable_name] >= 0

@@ -174,7 +174,7 @@ def test_extra_columns_are_kept_at_postprocess(df: pd.DataFrame) -> None:
 
     # Post-process df should have the additional variables from dest but not the additional
     # variables from source
-    should_have_columns = df.columns.to_list() + ["extra_variable_1"]
+    should_have_columns = [*df.columns.to_list(), "extra_variable_1"]
     should_have_columns.remove("extra_variable_2")
 
     assert postprocessed_df.columns.tolist() == should_have_columns

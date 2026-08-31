@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.1
+#       jupytext_version: 1.19.4
 # ---
 
 # %% [markdown]
@@ -20,7 +20,7 @@
 # %%
 import os
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -77,10 +77,11 @@ def plot_series(
     variable_to_plot: str,
     id_variable: str,
     time_variable: str,
+    *,
     proportion_to_plot: float = 1.0,
     n_series_to_plot: int | None = None,
     figsize: tuple[int, int] = (14, 8),
-) -> matplotlib.figure.Figure:
+) -> mpl.figure.Figure:
     """Plot given series."""
     if n_series_to_plot is None:
         n_series_to_plot = df[id_variable].unique().shape[0]

@@ -9,7 +9,7 @@ project_root = pathlib.Path(__file__).parent.parent.parent
 os.chdir(project_root)
 
 tutorials = project_root / "notebooks"
-tutorials_path = tutorials.resolve().glob("*.py")
+tutorials_path = list(tutorials.resolve().glob("*.py"))
 
 
 @pytest.mark.parametrize("script", tutorials_path, ids=lambda x: x.name)

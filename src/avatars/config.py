@@ -1,6 +1,7 @@
+from typing import Self
+
 from pydantic import AliasChoices, Field, HttpUrl, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing_extensions import Self
 
 UNCONFIGURED = "unconfigured"
 
@@ -39,6 +40,7 @@ def construct_urls(
     ------
     ValueError
         If BASE_URL is set together with BASE_API_URL or STORAGE_ENDPOINT_URL.
+
     """
     base_url_set = base_url is not None
     api_url_set = base_api_url is not None
@@ -89,17 +91,16 @@ class Config(BaseSettings):
         Whether to verify client-server compatibility on authentication.
         Default is True.
     API_KEY : str | None
-        Optional API key for authentication. When provided, this will be used
-        instead of username/password authentication. Can be set via the
+        API key for authentication. Can be set via the
         AVATAR_API_KEY environment variable.
 
     Notes
     -----
-
     Add the AVATAR_ prefix to environment variables to set these values from the environment.
 
     To override configuration values in tests or code, pass them as keyword arguments:
         config = Config(BASE_API_URL="https://test.com", VERIFY_COMPATIBILITY=False)
+
     """
 
     model_config = SettingsConfigDict(
@@ -131,6 +132,7 @@ class Config(BaseSettings):
         -------
         Self
             The validated Config instance with constructed URLs.
+
         """
         api_url, storage_url = construct_urls(
             base_url=self.BASE_URL,

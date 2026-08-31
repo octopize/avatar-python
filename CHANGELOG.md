@@ -2,6 +2,146 @@
 
 ## NEXT RELEASE
 
+## 1.29.0 - 2026/08/10
+
+## 1.28.0 - 2026/08/07
+
+### Features
+
+- **api**: inherit the previous client version's compatible API versions (#6564)
+
+### Bug Fixes
+
+- **client/python**: drop the stale changelog.rst from the release file list (#6594)
+
+## 1.27.0 - 2026/08/06
+
+### Features
+
+- **api**: add StorageLocation and validate volume URLs at resource ingest (#6479)
+- **core**: accept and impute NaN in time series value columns (#6476)
+- **api**: decouple client releases from API releases via the compatibility mapping bucket (#6442)
+- **avatar**: add n time steps handling in time series (fixes #6334) (#6353)
+
+### Bug Fixes
+
+- **api**: don't raise when stopping an unconnected dask client (#6560)
+- **avatar**: stop reporting an expected-missing holdout mapping as an error (#6557)
+- **api**: accept and return the /access?url= envelope again (#6533)
+- **api**: handle authlib OAuth errors in the SSO callback (#6515)
+- **api**: retry local Dask cluster start when its random port is taken (#6520)
+- **api**: resolve job results through StorageLocation before reading them (#6481)
+- **api**: resolve /access URLs to a StorageLocation instead of substring matching (#6480)
+- **api**: give the compatibility mapping opt-out a value that survives env_ignore_empty (#6484)
+- **avatar**: derive the signal-metrics processor chain from the holdout half too (#6473)
+- **api**: add ownership check to GET /api-keys/{id} (#6411)
+- **avatar**: embed the holdout half in the Cat2Vec space (#6460)
+- **api**: trust the public CAs when fetching the compatibility mapping (#6456)
+- **avatar**: account for the holdout half when building the metrics processors (#6448)
+- **api**: declare API 3.0.0 in the compatibility mapping and block silent major skips (#6441)
+- **avatar**: skip dtype check on dropped columns in time series (#6418)
+- **api**: add client 1.26.0 to compatibility mapping (#6380)
+
+## 1.26.0 - 2026/07/27
+
+### Features
+
+- **avatar**: add always-on per-stage wall-time instrumentation (#6315)
+- **client/python**: allow user to choose output format of files (#6275)
+- **avatar**: drop col with unseen values in projection metrics (#6229)
+
+### Bug Fixes
+
+- **client/python**: ruffs related fixes
+- **api**: defer Dask cluster startup until job creation (#6366)
+- **avatar**: validate InterRecordRangeDifference columns at verify stage (#6320)
+- **api**: retry transient Authentik failures and return 503 on refresh (#6300)
+- **avatar**: use input format as output format of files (#6267)
+
+## 1.25.0 - 2026/07/09
+
+### Breaking Changes
+
+- BREAKING **reportgenerator**: replace pdfgenerator (Markdown/LaTeX pipeline) with embedded Typst-only. (#6200)
+
+### Features
+
+- **core**: advice primary key even on single table context (#6199)
+- **api**: replace hardcoded INITIAL_CREDIT with per-tier initial_credits + cosmetic changes (#6228)
+- **api**: create 4 license tiers and feature restrictions (#6189)
+- **core**: remove avatar mention from technical report (#6142)
+- **avatar**: remove avatar mention by processed in PIA report (#6066)
+- **avatar**: stratify row order assignement with DA (#5899)
+- **avatar**: flag a processing type on columns (#6003)
+- **avatar**: add split for holdout (#5958)
+- **avatar**: extend link-method check to id-only tables in multitable schema (#5932)
+- **client/python**: allow skipping figure computation with Runner.compute_figures (#5979)
+- **avatar**: add parameter to toggle figure computation (#5959)
+
+### Bug Fixes
+
+- **core**: sort collections in mismatch error messages across avatar and core (#6286)
+- **api**: use job.name for job audit URNs (#6084)
+- **avatar**: fix PIA table header text color and remove spaces before colons in EN templates (#6236)
+- **core**: bump pandas to 3.0 and fix pandas-3 compatibility issues (#6208)
+- **avatar**: remove stale markdown code fences from FR AIPD sub-templates (#6230)
+- **avatar**: fix failing tests after #6167 (#6211)
+- **avatar**: raise error on id only TS (#6167)
+- **core**: cast datetime64[D] to us before fancy indexing (#6185)
+- **api**: update how dask worker is launched (#6177)
+- **core**: upgrade tslearn to >=0.7.0 for Python 3.13 compatibility (#6157)
+- **core**: escape Faker-only placeholders in SPECIFIC_ID patterns (#6159)
+- **avatar**: align pseudonymization report dict keys with template (#6154)
+- **avatar**: filter out pseudo columns for figures (#6143)
+- **client/python**: validate API key at Manager creation time (#6117)
+- **api**: raise a clear error message on job not found (#6096)
+- **avatar**: exclude temporary tables from results metadata (#6007)
+- **api**: store SSO OAuth state in the session middleware (#5315)
+
+## 1.24.0 - 2026/06/08
+
+### Breaking Changes
+
+- BREAKING **api**: remove unused file access JWT secret (#5693)
+
+### Features
+
+- **client/python**: allow to drop a column in add_table (#5915)
+- **avatar**: auto-detect ISO 8601 datetime columns in CSV files (#5898)
+- **core**: add pool design for fake data strategy and improve perf (#5662)
+
+### Bug Fixes
+
+- **api**: return LicenseError to user with generic message (#5956)
+- **avatar**: no errors if all columns are pseudonymized or frozen (#5895)
+- **avatar**: prepare core, avatar, and dp packages for pandas 3 migration (#5921)
+- **avatar**: annotate global_dict for mypy 2.x [var-annotated] (#5914)
+- **avatar**: update corrupted_unicode.csv fixture for chardet 7.x (#5920)
+- **core**: upgrade sphinx to 9.x and fix autodoc-typehints compatibility (#5917)
+- **api**: prevent bulk job deletion from raising errors and improve performance (#5865)
+- **api**: remove DB admin secrets from runtime API health checks (#5706)
+- **core**: do not plot 3d graph with less than 3 dimensions (#5851)
+- **avatar**: put back error on k>n (#5841)
+
+## 1.23.0 - 2026/05/20
+
+### Features
+
+- **api**: add filtering functions to get jobs (#5694)
+- **api**: sync job updates to product analytics via updated_at (#5579)
+
+### Bug Fixes
+
+- **client/python**: return job status when creating a runner from name (#5756)
+- **avatar**: support quoted newlines in csv readers (#5681)
+- **avatar**: reject empty csv uploads (#5679)
+- **api**: scan all Sentry envelopes for error event in flaky integration tests (#5650)
+- **core**: pin random seed in signal fixture to eliminate flaky test (#5651)
+
+## 1.22.0 - 2026/05/06
+
+## 1.21.0 - 2026/04/28
+
 ## 1.20.0 - 2026/04/02
 
 ## 1.19.0 - 2026/03/20

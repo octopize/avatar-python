@@ -1,5 +1,6 @@
 import os
 from datetime import UTC, datetime, timedelta
+from typing import ClassVar
 from unittest import mock
 from uuid import uuid4
 
@@ -7,14 +8,14 @@ import pytest
 
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
-from avatars.config import Config
-from avatars.manager import Manager, Runner, _increment_display_name_version
+from avatars.manager import Manager, _increment_display_name_version
 from avatars.models import (
     BulkDeleteRequest,
     BulkDeleteResponse,
     JobCreateRequest,
     JobKind,
 )
+from avatars.runner import Runner
 from tests.unit.conftest import (
     FakeApiClient,
     JobResponseFactory,
@@ -29,7 +30,7 @@ class TestManager:
     def setup_class(cls):
         api_client = FakeApiClient()
         cls.manager = Manager(
-            api_client=api_client,  # type: ignore[arg-type]
+            api_client=api_client,
         )
 
     def test_get_last_job(self) -> None:
@@ -37,7 +38,7 @@ class TestManager:
         for job in JobResponseFactory.batch(2):
             api_client.jobs.add_job(job)
         manager = Manager(
-            api_client=api_client,  # type: ignore[arg-type]
+            api_client=api_client,
         )
         results = manager.get_last_results(1)  # check the get result mock
         assert len(results) == 1
@@ -47,107 +48,20 @@ class TestManager:
         assert runner is not None
         assert isinstance(runner, Runner)
 
-    @pytest.mark.parametrize(
-        "incompatibility_status",
-        [
-            "incompatible",
-            "unknown",
-        ],
-    )
-    def test_should_verify_compatibility(self, incompatibility_status: str) -> None:
-        """Verify that the client raises a DeprecationWarning when the server is incompatible"""
-        with pytest.raises(DeprecationWarning, match="Client is not compatible with the server."):
-            with pytest.warns(DeprecationWarning):
-                self.manager.authenticate(
-                    username="username",
-                    password="password",
-                    should_verify_compatibility=True,
-                )
-
-    def test_should_not_verify_compatibility(self) -> None:
-        """Verify no compatibility error is raised when the check is disabled."""
-        with pytest.warns(
-            DeprecationWarning, match="Username/password authentication is deprecated"
-        ):
-            self.manager.authenticate(
-                username="username",
-                password="password",
-                should_verify_compatibility=False,
-            )
-
-    def test_verify_compatibility_uses_config_default(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        """Verify manager uses config default when should_verify_compatibility is not provided."""
-
-        # Patch config in the manager module where it's imported
-        test_config = Config(VERIFY_COMPATIBILITY=True)
-        monkeypatch.setattr("avatars.manager.config", test_config)
-
-        # When should_verify_compatibility is not provided, it should use config and raise
-        with pytest.raises(DeprecationWarning, match="Client is not compatible with the server."):
-            with pytest.warns(DeprecationWarning):
-                self.manager.authenticate(
-                    username="username",
-                    password="password",
-                )
-
-    def test_verify_compatibility_uses_config_false(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Verify manager uses config value when set to False."""
-
-        # Patch config in the manager module where it's imported
-        test_config = Config(VERIFY_COMPATIBILITY=False)
-        monkeypatch.setattr("avatars.manager.config", test_config)
-
-        # When should_verify_compatibility is not provided and config is False, should not raise
-        # a compatibility error — but should still warn about password auth deprecation.
-        with pytest.warns(
-            DeprecationWarning, match="Username/password authentication is deprecated"
-        ):
-            self.manager.authenticate(
-                username="username",
-                password="password",
-            )
-
-    def test_verify_compatibility_parameter_overrides_config(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        """Verify should_verify_compatibility parameter overrides the config."""
-
-        # Patch config in the manager module where it's imported
-        test_config = Config(VERIFY_COMPATIBILITY=True)
-        monkeypatch.setattr("avatars.manager.config", test_config)
-
-        # Even though config is True, explicit False parameter should override compatibility check.
-        # The deprecation warning about username/password should still be emitted.
-        with pytest.warns(
-            DeprecationWarning, match="Username/password authentication is deprecated"
-        ):
-            self.manager.authenticate(
-                username="username",
-                password="password",
-                should_verify_compatibility=False,
-            )
-
-    def test_authenticate_emits_deprecation_warning(self) -> None:
-        """Successful authenticate() must emit a DeprecationWarning with migration instructions."""
-        with pytest.warns(DeprecationWarning) as record:
-            self.manager.authenticate(
-                username="username",
-                password="password",
-                should_verify_compatibility=False,
-            )
-
-        messages = [str(w.message) for w in record]
-        combined = "\n".join(messages)
-        assert "Username/password authentication is deprecated" in combined
-        assert "create_api_key" in combined
-        assert "AVATAR_API_KEY" in combined
-        assert "python.docs.octopize.io" in combined
-
 
 class TestManagerInitialization:
     """Tests for Manager config parameter validation."""
+
+    @pytest.fixture(autouse=True)
+    def _skip_connection_verification(self):
+        """Stub out the live connection check.
+
+        These tests exercise config/URL construction, not real connectivity, so they
+        build Managers pointing at unreachable servers. Skipping ``_verify_connection``
+        avoids a network round-trip at construction time.
+        """
+        with mock.patch.object(Manager, "_verify_connection"):
+            yield
 
     @pytest.fixture
     def minimal_config(self) -> ClientConfig:
@@ -155,11 +69,12 @@ class TestManagerInitialization:
         return ClientConfig(
             base_api_url="https://custom.octopize.app/api",
             storage_endpoint_url="https://custom.octopize.app/storage",
+            api_key="test-api-key",
         )
 
     def test_can_create_with_config_only(self, minimal_config: ClientConfig) -> None:
         """Test that Manager can be created with only a ClientConfig object."""
-        manager = Manager(config=minimal_config)
+        manager = Manager(config=minimal_config, should_verify_compatibility=False)
         assert manager.auth_client is not None
         assert manager.auth_client.base_url == "https://custom.octopize.app/api"
         assert (
@@ -173,7 +88,11 @@ class TestManagerInitialization:
             os.environ,
             clear=True,
         ):
-            manager = Manager(base_url="https://api.example.com/api")
+            manager = Manager(
+                base_url="https://api.example.com/api",
+                api_key="test-key",
+                should_verify_compatibility=False,
+            )
             assert manager.auth_client is not None
             assert manager.auth_client.base_url == "https://api.example.com/api"
             assert (
@@ -187,7 +106,11 @@ class TestManagerInitialization:
             os.environ,
             clear=True,
         ):
-            manager = Manager(base_url="https://api.example.com")
+            manager = Manager(
+                base_url="https://api.example.com",
+                api_key="test-key",
+                should_verify_compatibility=False,
+            )
             assert manager.auth_client is not None
 
             # Make sure api url is correctly constructed
@@ -199,13 +122,19 @@ class TestManagerInitialization:
                 == "https://api.example.com/storage"
             )
 
+    def test_empty_constructor_requires_api_key(self) -> None:
+        """Test that Manager() with no api_key raises ValueError."""
+        with mock.patch.dict(os.environ, clear=True):
+            with pytest.raises(ValueError, match="An API key is required"):
+                Manager()
+
     def test_empty_constructor_uses_defaults(self) -> None:
         """Test that Manager() with no arguments uses default config values."""
         with mock.patch.dict(
             os.environ,
             clear=True,
         ):
-            manager = Manager()
+            manager = Manager(api_key="test-key", should_verify_compatibility=False)
             # Manager should create auth_client with default config values
             assert manager.auth_client is not None
             assert manager.auth_client.base_url == "https://www.octopize.app/api"
@@ -219,7 +148,8 @@ class TestManagerInitialization:
             clear=True,
         ):
             monkeypatch.setenv("AVATAR_BASE_URL", "https://env.example.com")
-            manager = Manager()
+            monkeypatch.setenv("AVATAR_API_KEY", "test-key")
+            manager = Manager(should_verify_compatibility=False)
             # Manager should create auth_client with config values from env vars
             assert manager.auth_client is not None
             assert manager.auth_client.base_url == "https://env.example.com/api"
@@ -240,7 +170,8 @@ class TestManagerInitialization:
             clear=True,
         ):
             monkeypatch.setenv("AVATAR_BASE_API_URL", "https://env.example.com/api")
-            manager = Manager()
+            monkeypatch.setenv("AVATAR_API_KEY", "test-key")
+            manager = Manager(should_verify_compatibility=False)
             assert manager.auth_client is not None
 
             # Verify that BASE_API_URL is set from env var
@@ -264,7 +195,8 @@ class TestManagerInitialization:
             clear=True,
         ):
             monkeypatch.setenv("AVATAR_STORAGE_ENDPOINT_URL", "https://env.example.com/storage")
-            manager = Manager()
+            monkeypatch.setenv("AVATAR_API_KEY", "test-key")
+            manager = Manager(should_verify_compatibility=False)
             assert manager.auth_client is not None
 
             # Verify that BASE_API_URL is set from env var
@@ -665,7 +597,7 @@ class TestManagerDeleteJobs:
 
     def setup_method(self) -> None:
         self.fake_api_client = FakeApiClient()
-        self.manager = Manager(api_client=self.fake_api_client)  # type: ignore[arg-type]
+        self.manager = Manager(api_client=self.fake_api_client)
 
     def test_delete_job_by_display_name(self) -> None:
         set_name = uuid4()
@@ -791,3 +723,89 @@ class TestManagerDeleteJobs:
         assert isinstance(result, BulkDeleteResponse)
         assert result.deleted_jobs == []
         assert result.failed_jobs == []
+
+
+class TestManagerJobHelpers:
+    """Tests for the new server-side-filtered job helper methods."""
+
+    fake_api_client: ClassVar[FakeApiClient]
+    manager: ClassVar[Manager]
+
+    @classmethod
+    def setup_class(cls):
+        cls.fake_api_client = FakeApiClient()
+        cls.manager = Manager(api_client=cls.fake_api_client)
+
+    def _make_job(self, display_name: str = "run", **kwargs):
+        job = JobResponseFactory.build(display_name=display_name, **kwargs)
+        self.fake_api_client.jobs.add_job(job)
+        return job
+
+    def test_get_last_jobs_returns_newest_first(self) -> None:
+        api_client = FakeApiClient()
+        now = datetime.now(UTC)
+        old_job = JobResponseFactory.build(display_name="old", created_at=now - timedelta(hours=2))
+        new_job = JobResponseFactory.build(display_name="new", created_at=now)
+        api_client.jobs.add_job(old_job)
+        api_client.jobs.add_job(new_job)
+        manager = Manager(api_client=api_client)
+
+        result = manager.get_last_jobs(count=1)
+
+        assert list(result.keys()) == [new_job.name]
+
+    def test_get_last_jobs_with_display_name_filter(self) -> None:
+        api_client = FakeApiClient()
+        now = datetime.now(UTC)
+        match_job = JobResponseFactory.build(display_name="target", created_at=now)
+        other_job = JobResponseFactory.build(display_name="other", created_at=now)
+        api_client.jobs.add_job(match_job)
+        api_client.jobs.add_job(other_job)
+        manager = Manager(api_client=api_client)
+
+        result = manager.get_last_jobs(count=5, name="target")
+
+        assert match_job.name in result
+        assert other_job.name not in result
+
+    def test_get_jobs_by_name(self) -> None:
+        api_client = FakeApiClient()
+        job_a = JobResponseFactory.build(display_name="my_run")
+        job_b = JobResponseFactory.build(display_name="other_run")
+        api_client.jobs.add_job(job_a)
+        api_client.jobs.add_job(job_b)
+        manager = Manager(api_client=api_client)
+
+        result = manager.get_jobs_by_name("my_run")
+
+        assert [j.name for j in result] == [job_a.name]
+
+    def test_get_jobs_by_id(self) -> None:
+        api_client = FakeApiClient()
+        target_set = uuid4()
+        job_match = JobResponseFactory.build(set_name=target_set)
+        job_other = JobResponseFactory.build(set_name=uuid4())
+        api_client.jobs.add_job(job_match)
+        api_client.jobs.add_job(job_other)
+        manager = Manager(api_client=api_client)
+
+        result = manager.get_jobs_by_id(target_set)
+
+        assert [j.name for j in result] == [job_match.name]
+
+    def test_get_last_set_returns_all_jobs_of_latest_set(self) -> None:
+        api_client = FakeApiClient()
+        now = datetime.now(UTC)
+        old_set = uuid4()
+        new_set = uuid4()
+        old_job = JobResponseFactory.build(set_name=old_set, created_at=now - timedelta(hours=1))
+        new_job_a = JobResponseFactory.build(set_name=new_set, created_at=now)
+        new_job_b = JobResponseFactory.build(set_name=new_set, created_at=now)
+        api_client.jobs.add_job(old_job)
+        api_client.jobs.add_job(new_job_a)
+        api_client.jobs.add_job(new_job_b)
+        manager = Manager(api_client=api_client)
+
+        result = manager.get_last_set()
+
+        assert {j.name for j in result} == {new_job_a.name, new_job_b.name}
