@@ -78,6 +78,28 @@ class TestJobLauncher:
         assert "standard" in launcher.jobs
         assert launcher.has_job(JobKind.standard)
 
+    def test_a_database_avatarization_brings_its_generation(self, launcher):
+        """The target is written by its own job, waiting for the avatarization alone."""
+        launcher.config.create_avatarization_parameters("test_table", k=20, ncp=30)
+        launcher.config.create_input_database(
+            source={"backing": "sql", "location": "prod"},
+            target={"backing": "sql", "location": "test"},
+        )
+
+        launcher.launch_job(JobKind.standard, str(uuid4()))
+
+        assert launcher.get_launched_jobs() == ["extract", "standard", "regenerate"]
+        assert launcher.has_job(JobKind.regenerate)
+        assert launcher.has_job(JobKind.extract)
+
+    def test_an_upload_has_no_generation(self, launcher):
+        launcher.config.create_avatarization_parameters("test_table", k=20, ncp=30)
+
+        launcher.launch_job(JobKind.standard, str(uuid4()))
+
+        assert not launcher.has_job(JobKind.regenerate)
+        assert not launcher.has_job(JobKind.extract)
+
     def test_launch_privacy_metrics_without_avatar_raises_error(self, launcher):
         """Test that privacy metrics without standard job or avatar data raises error."""
         launcher.config.get_yaml()

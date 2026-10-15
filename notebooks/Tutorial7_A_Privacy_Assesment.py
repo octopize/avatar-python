@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.4
+#       jupytext_version: 1.19.5
 # ---
 
 # %% [markdown]
@@ -71,7 +71,7 @@ df_randomized = df.copy()
 # Shuffle the target variable
 df_randomized["variety"] = df_randomized["variety"].sample(frac=1).values
 # Add random noise between -1 and 1 to numerical columns
-noise = np.random.uniform(-1, 1, size=df_randomized.iloc[:, 0:4].shape)
+noise = np.random.default_rng().uniform(-1, 1, size=df_randomized.iloc[:, 0:4].shape)
 df_randomized.iloc[:, 0:4] = df_randomized.iloc[:, 0:4] + noise
 
 
@@ -115,14 +115,15 @@ df_randomized.iloc[:, 0:4] = df_randomized.iloc[:, 0:4] + noise
 
 
 # %%
-def compute_metrics(avatar_data):
+def compute_metrics(name, avatar_data):
     runner = manager.create_runner(
         "iris_privacy_assessment", pia_data_recipient=DataRecipient.CONTRACTUAL_THIRDPARTY
     )
+    table_name = f"iris_{name}"
     # set avatar_data to allow metrics computation
-    runner.add_table("iris", data=df, avatar_data=avatar_data)
+    runner.add_table(table_name, data=df, avatar_data=avatar_data)
     runner.set_parameters(
-        "iris",
+        table_name,
         known_variables=["sepal.length", "sepal.width", "petal.length", "petal.width"],
         target="variety",
     )
@@ -134,22 +135,22 @@ def compute_metrics(avatar_data):
 # %%
 # Compute metrics for each anonymization method
 # We store the runners to access both privacy and signal metrics later
-runner_avat_dp = compute_metrics(df_dp_anonymized)
-runner_avat = compute_metrics(df_anonymized)
-runner_randomized = compute_metrics(df_randomized)
-runner_original = compute_metrics(df)
+runner_avat_dp = compute_metrics("avat_dp", df_dp_anonymized)
+runner_avat = compute_metrics("avat", df_anonymized)
+runner_randomized = compute_metrics("randomized", df_randomized)
+runner_original = compute_metrics("original", df)
 
 # Extract privacy metrics from each runner
-privacy_metrics_avat_dp = runner_avat_dp.privacy_metrics("iris")[0]
-privacy_metrics_avat = runner_avat.privacy_metrics("iris")[0]
-privacy_metrics_randomized = runner_randomized.privacy_metrics("iris")[0]
-privacy_metrics_original = runner_original.privacy_metrics("iris")[0]
+privacy_metrics_avat_dp = runner_avat_dp.privacy_metrics("iris_avat_dp")[0]
+privacy_metrics_avat = runner_avat.privacy_metrics("iris_avat")[0]
+privacy_metrics_randomized = runner_randomized.privacy_metrics("iris_randomized")[0]
+privacy_metrics_original = runner_original.privacy_metrics("iris_original")[0]
 
 # Extract signal metrics from each runner
-signal_metrics_avat_dp = runner_avat_dp.signal_metrics("iris")[0]
-signal_metrics_avat = runner_avat.signal_metrics("iris")[0]
-signal_metrics_randomized = runner_randomized.signal_metrics("iris")[0]
-signal_metrics_original = runner_original.signal_metrics("iris")[0]
+signal_metrics_avat_dp = runner_avat_dp.signal_metrics("iris_avat_dp")[0]
+signal_metrics_avat = runner_avat.signal_metrics("iris_avat")[0]
+signal_metrics_randomized = runner_randomized.signal_metrics("iris_randomized")[0]
+signal_metrics_original = runner_original.signal_metrics("iris_original")[0]
 
 
 # %% [markdown]

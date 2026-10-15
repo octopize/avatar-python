@@ -7,7 +7,7 @@ from avatars.models import JobStatus
 class TestAggregateJobStatus:
     """Unit tests for the aggregate_job_status function.
 
-    Priority: failure > pending/created > queued/default > finished
+    Priority: failure > cancelled > pending/created > queued/default > finished
     """
 
     @pytest.mark.parametrize(
@@ -37,6 +37,11 @@ class TestAggregateJobStatus:
             ([JobStatus.error, JobStatus.queued], JobStatus.error),
             # Pending beats queued
             ([JobStatus.pending, JobStatus.queued], JobStatus.pending),
+            # A failure beats a cancel: it is the news
+            ([JobStatus.cancelled, JobStatus.error], JobStatus.error),
+            # A cancel beats anything still running: the run will not deliver
+            ([JobStatus.pending, JobStatus.cancelled], JobStatus.cancelled),
+            ([JobStatus.cancelled, JobStatus.finished], JobStatus.cancelled),
             # First failure status wins when multiple failures
             (
                 [JobStatus.error, JobStatus.parent_error],
@@ -46,3 +51,11 @@ class TestAggregateJobStatus:
     )
     def test_returns_worst_status(self, statuses: list[JobStatus], expected: JobStatus) -> None:
         assert aggregate_job_status(statuses) == expected
+
+
+def test_a_cancelled_job_is_ready() -> None:
+    """Over, so a wait on it ends -- and not an error, because nothing failed."""
+    from avatars.constants import ERROR_STATUSES, READY_STATUSES  # noqa: PLC0415
+
+    assert JobStatus.cancelled in READY_STATUSES
+    assert JobStatus.cancelled not in ERROR_STATUSES

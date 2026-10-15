@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.4
+#       jupytext_version: 1.19.5
 # ---
 
 # %% [markdown]
@@ -26,7 +26,6 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from avatar_yaml.models.schema import LinkMethod
 
 from avatars.manager import Manager
 from avatars.models import JobKind
@@ -130,23 +129,43 @@ runner.add_table(
 # Note:
 # - A link is a relation between 1 parent table and 1 child table
 
-# %%
-runner.add_link(
-    parent_table_name="patient",
-    child_table_name="visit",
-    parent_field="p_id",
-    child_field="patient_id",
-    method=LinkMethod.LINEAR_SUM_ASSIGNMENT,
-)
-# Linear sum assignment consumes lots of ressource. Change the method if you have a large dataset.
+# %% [markdown]
+# ### Advise the links
+#
+# The server can advise the links for you. It chooses them from the primary key and the foreign keys you declared with `add_table`, not from the values in the tables:
+# - when only one table can be the parent of a foreign key, it is linked to that table;
+# - otherwise the name of the foreign key is compared with the name of each table and of its primary key: `patient_id` goes to the `patient` table, `doctor_id` to the `doctor` table.
+#
+# `advise_links()` adds the advised links to the runner and returns them, each with a confidence (`high`, `medium` or `low`). The foreign keys it could not link are listed in `unlinked_foreign_keys`, with the tables that can be their parent: link them yourself with `add_link`.
 
-runner.add_link(
-    parent_table_name="doctor",
-    child_table_name="visit",
-    parent_field="d_id",
-    child_field="doctor_id",
-    method=LinkMethod.LINEAR_SUM_ASSIGNMENT,
-)
+# %%
+links_advice = runner.advise_links()
+
+for link in links_advice.links:
+    print(
+        f"{link.parent_table}.{link.parent_field} -> {link.child_table}.{link.child_field}",
+        f"({link.method.value}, confidence: {link.confidence})",
+    )
+for key in links_advice.unlinked_foreign_keys:
+    print(f"Not linked: {key.table}.{key.field}, candidate parents: {key.candidate_tables}")
+
+# %% [markdown]
+# ### Set a link yourself
+#
+# An advised link uses the default method, `LINEAR_SUM_ASSIGNMENT`. To use another method, or to link a foreign key the server could not link, replace the link with `delete_link` and `add_link`. For example, for a large dataset:
+#
+# ```python
+# from avatar_yaml.models.schema import LinkMethod
+#
+# runner.delete_link(parent_table_name="doctor", child_table_name="visit")
+# runner.add_link(
+#     parent_table_name="doctor",
+#     child_table_name="visit",
+#     parent_field="d_id",
+#     child_field="doctor_id",
+#     method=LinkMethod.MINIMUM_DISTANCE_ASSIGNMENT,
+# )
+# ```
 
 # %%
 runner.advise_parameters()

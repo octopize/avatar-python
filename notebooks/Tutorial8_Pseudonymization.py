@@ -5,7 +5,11 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.4
+#       jupytext_version: 1.19.5
+#   kernelspec:
+#     display_name: env (3.14.7)
+#     language: python
+#     name: python3
 # ---
 
 # %% [markdown]
@@ -158,6 +162,17 @@ result_patient["zip_code"].head()
 # parameters:  "ssn": Uuid4Strategy(),
 
 result_patient["ssn"].head()
+
+# %% [markdown]
+# ## Privacy Metrics
+#
+# Privacy metrics are calculated based on the anonymization of the non-pseudonymized columns
+# in the table. Pseudonymized columns are excluded from the privacy metrics calculation, as
+# they contain artificial values and don't contribute to statistical privacy.
+
+# %%
+privacy = runner.privacy_metrics(table_name="patients")
+print(privacy)
 
 # %% [markdown]
 # ## Multi-Table Pseudonymization with Referential Integrity

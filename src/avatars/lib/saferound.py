@@ -17,7 +17,7 @@ class RoundingStrategy(Enum):
 
 
 class Number:
-    def __init__(self, order: int, value: float | int):
+    def __init__(self, order: int, value: float):
         self.value = float(value)
         self.order = order
         self.original = float(value)

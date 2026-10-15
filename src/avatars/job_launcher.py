@@ -5,6 +5,7 @@ from uuid import UUID
 
 from avatar_yaml import Config
 from avatar_yaml.models.advice import AdviceType
+from avatar_yaml.run_shape import REFERENCE_JOB
 
 from avatars.client import ApiClient
 from avatars.models import JobCreateRequest, JobCreateResponse, JobKind, JobResponse
@@ -28,6 +29,9 @@ class JobLauncher:
         self.config = config
         self.set_name: str = ""
         self.jobs: dict[str, JobCreateResponse] = {}
+        self.reference_job: str | None = None
+        """The run's reference job, when it has one: the Extraction and the Génération wait
+        for it, from their own set, and apply the map it leaves (ADR-0013)."""
 
     def register_existing_job(
         self, parameters_name: str, job_name: str, job_location: str = ""
@@ -54,7 +58,7 @@ class JobLauncher:
 
     def launch_job(
         self,
-        job_kind: JobKind,
+        job_kind: JobKind | str,
         set_name: str,
     ) -> None:
         """Launch a job with automatic dependency resolution and validation.
@@ -62,7 +66,7 @@ class JobLauncher:
         Parameters
         ----------
         job_kind
-            The kind of job to launch.
+            The kind of job to launch, or the name of the parameters it runs.
         set_name
             The set name (UUID) for the job.
 
@@ -82,8 +86,18 @@ class JobLauncher:
         depends_on = self._get_job_dependencies(job_kind)
         self._create_jobs(job_kind=job_kind, depends_on=depends_on)
 
-    def _create_jobs(self, job_kind: JobKind, depends_on: list[str]) -> None:
+    def _create_jobs(self, job_kind: JobKind | str, depends_on: list[str]) -> None:
         """Create all jobs based on the configuration and dependencies."""
+        # A database run's source is read by its own Extraction job first (ADR-0011): the
+        # avatarization waits for it and resumes from what it read, never opening the source.
+        if job_kind == JobKind.standard and self.config.writes_a_database():
+            extract_name = self.get_parameters_name(JobKind.extract)
+            extraction = self._create_job(
+                parameters_name=extract_name, depends_on=[*depends_on, *self._reference()]
+            )
+            self.jobs[extract_name] = extraction
+            depends_on = [extraction.Location]
+
         parameters_name = self.get_parameters_name(job_kind)
         created_job = self._create_job(parameters_name=parameters_name, depends_on=depends_on)
         self.jobs[parameters_name] = created_job
@@ -93,6 +107,24 @@ class JobLauncher:
             pia_parameters_name = self.get_parameters_name(job_kind, pia_report=True)
             pia_job = self._create_job(parameters_name=pia_parameters_name, depends_on=depends_on)
             self.jobs[pia_parameters_name] = pia_job
+
+        # A database run's target is written by its own Génération job (ADR-0011), which
+        # waits for the avatarization alone: the metrics never wait for the write, and a
+        # failed write is run again without recomputing the avatars.
+        if job_kind == JobKind.standard and self.config.writes_a_database():
+            regenerate_name = self.get_parameters_name(JobKind.regenerate)
+            self.jobs[regenerate_name] = self._create_job(
+                parameters_name=regenerate_name,
+                depends_on=[created_job.Location, *self._reference()],
+            )
+
+    def _reference(self) -> list[str]:
+        return [self.reference_job] if self.reference_job else []
+
+    def launch_reference_job(self, set_name: str) -> None:
+        """Launch the run's reference job, in its own set, waiting for nothing (ADR-0013)."""
+        self.set_name = set_name
+        self.jobs[REFERENCE_JOB] = self._create_job(parameters_name=REFERENCE_JOB)
 
     def get_parameters_name(self, job_kind: JobKind | str, pia_report: bool = False) -> str:
         """Get the parameters name for a given job kind.
@@ -117,12 +149,14 @@ class JobLauncher:
                 return self.config.get_parameters_advice_name(
                     name="advice", advisor_type=[AdviceType.PARAMETERS]
                 )
+            case JobKind.schema_discovery:
+                return "schema_discovery"
             case str():
                 return job_kind
             case _:
                 return job_kind.value
 
-    def _validate_job_prerequisites(self, job_kind: JobKind) -> None:
+    def _validate_job_prerequisites(self, job_kind: JobKind | str) -> None:
         """Validate that prerequisites are met before launching a job.
 
         Parameters
@@ -174,7 +208,7 @@ class JobLauncher:
             case _:
                 pass
 
-    def _get_job_dependencies(self, job_kind: JobKind) -> list[str]:
+    def _get_job_dependencies(self, job_kind: JobKind | str) -> list[str]:
         """Get the list of job dependencies for a given job kind.
 
         Parameters

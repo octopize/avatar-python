@@ -1,20 +1,22 @@
 import os
+import random
 import time
 import warnings
 import webbrowser
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from logging import getLogger
 from pathlib import Path
 from typing import Any, Literal
 
 import pandas as pd
-import tenacity
+import yaml
 from avatar_yaml import (
     AvatarizationFastDPParameters,
     AvatarizationOpenDPParameters,
     AvatarizationParameters,
     Config,
     PrivacyMetricsParameters,
+    TimeSeriesParameters,
 )
 from avatar_yaml.models.advice import AdviceType
 from avatar_yaml.models.avatar_metadata import (
@@ -33,16 +35,19 @@ from avatar_yaml.models.parameters import (
     ReportLanguage,
     ReportType,
 )
-from avatar_yaml.models.schema import ColumnType, LinkMethod, PseudonymizationStrategy
+from avatar_yaml.models.schema import (
+    ColumnType,
+    LinkMethod,
+    PseudonymizationStrategy,
+)
+from avatar_yaml.run_shape import REFERENCE_JOB, REFERENCE_SET, dump, reference_set
 from IPython.display import HTML, display
 
 from avatars import __version__
 from avatars.client import ApiClient
 from avatars.constants import (
     DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS,
-    DEFAULT_POLL_INTERVAL,
     DEFAULT_TYPE,
-    ERROR_STATUSES,
     JOB_EXECUTION_ORDER,
     MATCHERS,
     RESULTS_TO_STORE,
@@ -54,11 +59,62 @@ from avatars.constants import (
 from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
 from avatars.job_launcher import JobLauncher
+from avatars.job_polling import SYSTEM_CLOCK, Clock, wait_for_jobs
+from avatars.links_advice import TablesLinksAdvice, parse_tables_links_advice
 from avatars.metrics_summary import build_metrics_summary_df
 from avatars.models import BulkDeleteRequest, BulkDeleteResponse, JobKind, JobResponse, JobStatus
 from avatars.results_organizer import ResultsOrganizer
+from avatars.schema_plan import (
+    SchemaPlan,
+    SharedEntity,
+    config_creator,
+    qualified_table,
+)
+from avatars.schema_plan import connection as _connection
 
 logger = getLogger(__name__)
+
+_PER_TABLE_FIELDS = (
+    "tables",
+    "avatar_tables",
+    "avatarization",
+    "avatarization_open_dp",
+    "avatarization_fast_dp",
+    "time_series",
+    "privacy_metrics",
+    "signal_metrics",
+)
+"""The configuration fields keyed by table name, so a projection filters them all.
+
+Named once because missing one silently gives a cluster job another cluster's
+parameters -- and it would still run.
+"""
+
+
+@dataclass(frozen=True)
+class _ClusterJob:
+    """One avatarization job's worth of a database run."""
+
+    name: str
+    """Identifies the job: its parameters, its schema and its results."""
+
+    tables: list[str]
+    """The tables it works on, named as the schema declares them."""
+
+    copy: str | None
+    """Which database, for a run copying several. None for a single one."""
+
+    within: str
+    """The group's name inside that database's own plan."""
+
+
+def _base36(number: int) -> str:
+    digits = "0123456789abcdefghijklmnopqrstuvwxyz"
+    out = ""
+    while number:
+        number, rest = divmod(number, 36)
+        out = digits[rest] + out
+    return out or "0"
 
 
 class Runner:
@@ -121,8 +177,25 @@ class Runner:
         self.results: ResultsOrganizer = ResultsOrganizer()
         self.jobs = JobLauncher(api_client, self.config)
         self.results_urls: dict[str, dict[str, list[str]]] = {}
+        self._downloaded_results: set[tuple[str, Results]] = set()
         self._has_results_missing_warning_issued: bool = False
+        self._clock: Clock = SYSTEM_CLOCK
+        self._job_started_at: dict[str, float] = {}
         self.report_language = report_language
+        self._database_plan: SchemaPlan | None = None
+        self._launch: str | None = None
+        """This launch of the run, the same for every group's set, in each set's display name."""
+        self._copy_plans: dict[str, SchemaPlan] = {}
+        self._cluster_jobs: dict[str, _ClusterJob] = {}
+        """Group name -> what its run works on, when this run is several runs.
+
+        Empty for every other run, including a database run whose plan covers a
+        single group of related tables -- which is the ordinary case and is not
+        a fan-out.
+        """
+        self._cluster_launchers: dict[str, JobLauncher] = {}
+        self._reference_launcher: JobLauncher | None = None
+        """Group name -> the launcher of its run, once `run` has created them."""
 
         annotations = {
             "client_type": "python",
@@ -239,6 +312,98 @@ class Runner:
         self._create_advice_jobs(tables)
         self._apply_advice_parameters(tables)
 
+    def advise_links(self, *, apply: bool = True) -> TablesLinksAdvice:
+        """Advise the links between the tables, from the identifiers of each table.
+
+        Declare the primary key and the foreign keys of each table with ``add_table`` first.
+        The server advises one parent table for each foreign key that no link covers yet. It
+        chooses the links from the names of the tables and of their identifiers only, not from
+        their values; the advice job still reads and checks each table, as every advice does.
+
+        Parameters
+        ----------
+        apply
+            Add each advised link to the config with ``add_link``. Set it to False to review
+            the advice first, then add the links you keep yourself.
+
+        Returns
+        -------
+        TablesLinksAdvice
+            ``links``: the advised links, each with a ``confidence`` (``high``, ``medium`` or
+            ``low``). ``unlinked_foreign_keys``: the foreign keys that the server could not
+            link, each with the tables that can be its parent. Link them with ``add_link``.
+
+        """
+        if len(self.config.tables) < 2:
+            raise ValueError(
+                f"Expected at least two tables to advise links, got {len(self.config.tables)}."
+            )
+        advisor_type = [AdviceType.TABLES_LINKS]
+        self.config.create_advice(advisor_type=advisor_type)
+        # The tables are not linked yet: only an advice job accepts such a schema.
+        resource_response = self.client.resources.put_resources(
+            display_name=self.display_name,
+            yaml_string=self.config.get_advice_yaml(check_links_between_tables=False),
+        )
+        self.set_name = str(resource_response.set_name)
+        job_name = self.config.get_parameters_advice_name(name="advice", advisor_type=advisor_type)
+        self.jobs.launch_job(job_name, self.set_name)
+        self.results_urls.pop(job_name, None)
+        # Read apart from the stored advice, which holds the parameters advice of each table.
+        urls = self.get_specific_result_urls(job_name=job_name, result=Results.ADVICE)
+        advice = parse_tables_links_advice(
+            self.file_downloader.download_files_batch(urls).values()
+        )
+        if apply:
+            for link in advice.links:
+                self.add_link(
+                    parent_table_name=link.parent_table,
+                    parent_field=link.parent_field,
+                    child_table_name=link.child_table,
+                    child_field=link.child_field,
+                    method=link.method,
+                )
+        return advice
+
+    def reference_tables_report(self, table_name: str | None = None) -> dict[str, dict[str, Any]]:
+        """What the run's reference tables found, by reference table name.
+
+        A subject declared on the wrong key column **succeeds**: every person
+        gets an identity of their own in each table, and nothing fails. The
+        numbers are how to tell -- how many subjects each source contributed,
+        how many were seen in one source only, how many disagreed.
+
+        Parameters
+        ----------
+        table_name
+            The table the report is filed against. Omit it: the engine files
+            one report per run, against one of its tables, and this finds it.
+
+        Returns
+        -------
+        Reference table name -> ``subjects``, ``sources`` (``table``, ``rows``,
+        ``subjects`` each), ``in_one_source_only``, ``conflicting_subjects``,
+        ``conflicting_attributes`` and ``unresolved_rows``. Counts only -- no
+        subject key or value. Empty for a run that declared no subjects.
+
+        Examples
+        --------
+        >>> for name, outcome in runner.reference_tables_report().items():
+        ...     print(name, outcome["subjects"], outcome["in_one_source_only"])
+
+        """
+        if table_name is not None:
+            report = self.get_specific_result(
+                table_name, JobKind.standard, Results.REFERENCE_TABLES
+            )
+            return report if isinstance(report, dict) else {}
+        if not self.results.reference_tables:
+            # Fetched once, for whichever table holds it, rather than once per
+            # table: only one of them has a file to fetch.
+            job_name = self.jobs.get_parameters_name(JobKind.standard)
+            self._download_specific_result(job_name, Results.REFERENCE_TABLES)
+        return next((r for r in self.results.reference_tables.values() if r), {})
+
     def _setup_advice_config(self) -> None:
         """Create advice config and upload resources to server."""
         self.config.create_advice(advisor_type=[AdviceType.PARAMETERS])
@@ -252,15 +417,14 @@ class Runner:
 
     def _create_advice_jobs(self, tables: list[str]) -> None:
         """Download advice results for the specified tables."""
-        for table_name in tables:
-            if self.results.advice.get(table_name) is None:
-                # Only launch the advice job once, not per table
-                # but relaunch it if a table didn't get advice yet
-                if self.set_name is None:
-                    raise ValueError("Set name is not set. Cannot launch advice job.")
-                self.jobs.launch_job(JobKind.advice, self.set_name)
-                job_name = self.jobs.get_parameters_name(JobKind.advice)
-                self._download_specific_result(job_name, Results.ADVICE)
+        if all(self.results.advice.get(table_name) is not None for table_name in tables):
+            return
+        if self.set_name is None:
+            raise ValueError("Set name is not set. Cannot launch advice job.")
+        self._launch_job(JobKind.advice, self.set_name)
+        job_name = self.jobs.get_parameters_name(JobKind.advice)
+        self.results_urls.pop(job_name, None)
+        self._download_specific_result(job_name, Results.ADVICE)
 
     def _apply_advice_parameters(self, tables: list[str]) -> None:
         """Apply the downloaded advice parameters to each table."""
@@ -269,6 +433,10 @@ class Runner:
             advise_parameters = self.results.get_results(table_name, Results.ADVICE, job_name)
             if not isinstance(advise_parameters, dict):
                 raise ValueError("Expected advice parameters to be a dictionary")
+            if not advise_parameters:
+                # An advice run can carry column suggestions and no computed
+                # advice; there is then nothing to set here.
+                continue
 
             imputation_data: dict[str, Any] = {}
             if advise_parameters.get("imputation") is not None:
@@ -290,6 +458,537 @@ class Runner:
                 imputation_return_data_imputed=imputation_data.get("return_data_imputed", False),
                 table_name=table_name,
             )
+
+    def proposed_plan(self, database: str | None = None) -> SchemaPlan:
+        """The plan schema discovery proposes, ready to review.
+
+        Parameters
+        ----------
+        database
+            Which copy, for a run covering several. Omit for a single database.
+
+        Returns
+        -------
+        A :class:`SchemaPlan` whose proposals are all unreviewed -- read
+        `proposals()`, then `confirm`/`reject` your way through it.
+
+        Raises
+        ------
+        NotImplementedError
+            While schema discovery is not yet a job you can launch. The engine
+            discovers and classifies; nothing runs it as a step, so there is no
+            proposal to fetch. Until then, build a plan yourself::
+
+                plan = SchemaPlan().for_tables("customer", "order")
+                plan.pseudonymize("customer").purge("audit_log")
+
+        """
+        self.discover_schema()
+        job_name = f"schema_discovery{'' if database is None else '_' + database}"
+        proposal = self.results.advice.get(job_name)
+        if proposal is None:
+            raise ValueError(
+                "schema discovery produced no proposal for "
+                f"{database or 'this database'}. Check the discovery job's status."
+            )
+        return SchemaPlan.from_proposal(proposal)
+
+    def discover_schema(self) -> None:
+        """Read the declared source and propose what to do with each table.
+
+        The first phase of a database run: discovery proposes a treatment per
+        table and an action per column, and stops. Nothing is copied and
+        nothing is anonymized -- a person reads the proposal, corrects it, and
+        only then is there a run. See :meth:`proposed_plan`.
+
+        Runs once. Asking for the plan again returns the proposal already
+        fetched rather than reading the source a second time.
+        """
+        if self.results.advice.get("schema_discovery") is not None:
+            return
+
+        # The configuration at this point declares the database and no tables,
+        # which is the whole point: the run exists to find out what they are.
+        resource_response = self.client.resources.put_resources(
+            display_name=self.display_name,
+            yaml_string=self.config.get_yaml(),
+        )
+        self.set_name = str(resource_response.set_name)
+
+        self.jobs.launch_job(JobKind.schema_discovery, self.set_name)
+        job_name = self.jobs.get_parameters_name(JobKind.schema_discovery)
+        self._download_specific_result(job_name, Results.ADVICE)
+
+    def add_database(
+        self,
+        source: str,
+        target: str,
+        tables: list[str] | None = None,
+        plan: SchemaPlan | None = None,
+        shared_entities: list[SharedEntity] | None = None,
+    ) -> None:
+        """Copy a database to another, anonymized.
+
+        Parameters
+        ----------
+        source, target
+            **Named connections** your deployment holds. Ask your administrator
+            which are available. They must be different, and the same engine -- except that
+            the target may be a SQLite file whatever the source is: the copy builds its
+            tables there from the discovered schema.
+        tables
+            Which tables to copy. Omit for every table discovered.
+        plan
+            What happens to each table and column, from
+            :meth:`proposed_plan` and reviewed with :class:`SchemaPlan`.
+            Without one the run is a plain copy and nothing is anonymized.
+        shared_entities
+            What several tables share -- people, products, configuration data --
+            declared with :func:`avatars.shared_entity`, so each gets one
+            replacement everywhere.
+
+        Notes
+        -----
+        The target must already have the schema and hold no rows -- nothing here
+        creates or empties a database. Restore a schema-only dump into it first.
+
+        """
+        config_creator(self.config, "create_input_database")(
+            source=_connection(source),
+            target=_connection(target),
+            tables=tables,
+            reference_tables=[e.to_dict() for e in shared_entities] if shared_entities else None,
+            plan=plan.to_dict() if plan is not None else None,
+        )
+        self._plan_the_run(plan)
+
+    def _plan_the_run(self, plan: SchemaPlan | None) -> None:
+        """Work out how many jobs this plan is, and declare the tables.
+
+        A schema's tables have to form one connected graph -- the engine builds
+        a metagraph over them and requires it -- so a plan covering several
+        unrelated groups of tables is not one avatarization. It is one per
+        group, which is what ADR-0008 specifies: "a database job is split into
+        one multi-table job per PK/FK cluster", N jobs contributing to one
+        target database.
+
+        One group is the ordinary case and stays exactly as it was: one
+        avatarization, nothing named after a cluster.
+        """
+        if plan is None:
+            return
+
+        self._database_plan = plan.ensure_individual_level()
+        clusters = plan.clustered()
+        if len(clusters) > 1:
+            self._cluster_jobs = {
+                name: _ClusterJob(name=name, tables=tables, copy=None, within=name)
+                for name, tables in clusters.items()
+            }
+            self._pin_a_seed()
+
+        # Declared on this configuration whether or not the run fans out. It is
+        # what every table-keyed call on `Runner` reads -- `set_parameters`
+        # refuses a table it cannot find -- so declaring them only per cluster
+        # would leave the caller unable to set `k` for any of them. Each cluster
+        # configuration is a *projection* of this one; what is never emitted is
+        # this schema, which would hold every cluster's tables at once and be
+        # the disconnected graph the fan-out exists to avoid.
+        self._declare_planned_tables(plan)
+
+    def _plan_the_copies(self, plans: dict[str, SchemaPlan]) -> None:
+        """Declare the tables of every copy, and work out how many jobs it is.
+
+        Nothing declared them, so every cross-database run was refused on
+        upload with "Schema 'schema' does not have any individual_level table
+        defined" -- the same wall the single-database path hit.
+
+        **Names are qualified by copy.** Two databases both holding
+        ``customer`` are two tables, and the protocol stages them as
+        ``crm.customer`` and ``billing.customer``; a configuration naming
+        either of them ``customer`` describes neither.
+
+        **Every copy is at least one job.** No foreign key crosses a database,
+        so the tables of two copies are never one connected graph -- here the
+        fan-out is not a choice but the only shape that runs. The groups within
+        a copy are then its own, so the unit is (copy, group).
+
+        Shared entities still span everything: they are declared once, on the
+        run, and every job collects them from every database before resolving.
+        It is also why one seed across the jobs matters more here than for a
+        single database.
+        """
+        if not plans:
+            return
+
+        self._copy_plans = dict(plans)
+        for copy, plan in plans.items():
+            plan.ensure_individual_level()
+            for cluster, tables in plan.clustered().items():
+                name = f"{copy}_{cluster}"
+                self._cluster_jobs[name] = _ClusterJob(
+                    name=name,
+                    tables=[qualified_table(copy, table) for table in tables],
+                    copy=copy,
+                    within=cluster,
+                )
+            self._declare_planned_tables(plan.qualified_by(copy))
+        self._pin_a_seed()
+
+    def _pin_a_seed(self) -> None:
+        """Give the run one seed, so its several jobs agree about people.
+
+        A shared entity's replacement follows the order entities are collected
+        rather than the value, and each job resolves the reference tables for itself.
+        Same seed, same replacements; different seeds and Alice is a different
+        person in every group, with nothing downstream able to tell.
+
+        `ParametersSpec.seed` has a `default_factory` on the engine side, so
+        leaving it unset does not mean "no seed" -- it means a fresh one per
+        parameters document, which is exactly the failure. Generating one here
+        and saying so beats refusing a run over a field nobody asked about.
+        """
+        if self.config.seed is not None:
+            return
+        self.config.seed = random.SystemRandom().randrange(2**32)
+        logger.info(
+            "this run is %d jobs, one per group of related tables, and they have to agree "
+            "about every person -- so it is seeded with %d. Pass seed= to choose your own.",
+            len(self._cluster_jobs),
+            self.config.seed,
+        )
+
+    def _cluster_configs(self) -> dict[str, Config]:
+        """One complete configuration per job, each an ordinary multi-table run.
+
+        This is the shape of the fan-out: **one document set per group**, not
+        one set holding several schemas. Each configuration is exactly what a
+        multi-table run has always emitted -- a schema called ``schema``,
+        parameters called ``standard`` -- so nothing about the document shape
+        that today's multi-table jobs rely on changes, and every job kind
+        (metrics, report) keeps working per group without being renamed.
+
+        Each is a **projection** of the run's configuration: everything about
+        the run, narrowed to one group's tables. A projection rather than a
+        fresh build for two reasons -- it cannot forget a field somebody set,
+        and the links, column types and pseudonymization it needs are already
+        on those tables. Re-declaring them here appended the links a second
+        time, which is a different schema, not a tidier one.
+
+        What each one gets that the run's own configuration does not:
+
+        * only its own tables. A group is closed under foreign keys, so no link
+          crosses out of it and the links need no surgery;
+        * a plan scoped the same way, so the job reads, avatarizes and writes
+          its own tables and leaves the other groups' alone.
+        """
+        built: dict[str, Config] = {}
+        for job in self._cluster_jobs.values():
+            config = self.config.model_copy(deep=True)
+            keep = set(job.tables)
+            for field in _PER_TABLE_FIELDS:
+                current = getattr(config, field)
+                setattr(config, field, {k: v for k, v in current.items() if k in keep})
+            # Emitted afresh for this group's tables. The run's own schema
+            # holds every group's at once, which is the disconnected graph the
+            # fan-out exists to avoid.
+            config.original_schema = None
+            config.avatar_schema = None
+            self._scope_the_input(config, job)
+            built[job.name] = config
+        return built
+
+    def _scope_the_input(self, config: Config, job: _ClusterJob) -> None:
+        """Give the job the whole run's plan, every table labelled with its group (ADR-0012).
+
+        The set describes its whole database -- every group's tables, with their real
+        treatments -- and its Extraction says which group it runs. The engine leaves the other
+        groups' tables alone, as the former scoping did by marking them `ignore`. A set reads
+        one database: a copy of several is written as the set of the copy the group is in.
+
+        A group is labelled with the job's name, which is unique across the run: two
+        databases may both have a `group-customer`. A purged table belongs to no group --
+        nothing of it is modelled -- and is given to the first group of its database, so it
+        is emptied once rather than by every group or by none.
+
+        The shared entities are left exactly as the run declared them. They are what gives an
+        entity one replacement across the whole estate, so every set collects it from every
+        database it is found in, with the run's seed as the entity's own.
+        """
+        if config.input is None:
+            return
+        if config.input.database is not None and self._database_plan is not None:
+            config.input.database.plan = self._labelled(self._database_plan, None)
+        if config.input.databases is not None:
+            for copy in config.input.databases.copies:
+                plan = self._copy_plans.get(copy.name)
+                if plan is not None:
+                    copy.plan = self._labelled(plan, copy.name)
+        config.create_run(group=job.name, seed=config.seed)
+
+    def _labelled(self, plan: SchemaPlan, copy: str | None) -> dict[str, Any]:
+        """*plan* as a dict, each participating table labelled with the job that runs it."""
+        labelled = plan.to_dict()
+        jobs = [j for j in self._cluster_jobs.values() if j.copy == copy]
+        group_of = {
+            table: job.name for job in jobs for table in plan.clustered().get(job.within, [])
+        }
+        first = min((job.name for job in jobs), default=None)
+        for table in labelled.get("tables", []):
+            if table["name"] in group_of:
+                table["cluster"] = group_of[table["name"]]
+            elif table.get("treatment") == "purge" and first is not None:
+                table["cluster"] = first
+            else:
+                table.pop("cluster", None)
+        return labelled
+
+    def _declare_planned_tables(
+        self, plan: SchemaPlan | None, config: Config | None = None
+    ) -> None:
+        """Give the run a table per table the plan keeps.
+
+        Nothing else declares them. The engine streams each one onto storage
+        when the job runs, but the configuration is validated when it is
+        *uploaded*, long before that -- so a run with no declared tables was
+        refused outright with "Schema 'schema' does not have any
+        individual_level table defined", which is where every database run
+        stopped.
+
+        `individual_level` comes from the plan, where discovery proposed it
+        from the shape of the links and a reviewer may have corrected it. Rows
+        of a customer table are people; rows of an invoice table are not, and
+        calling both individual-level would change what the metrics mean.
+
+        Without a plan there is nothing to declare -- that is the discovery
+        phase, and the tables are not known yet.
+
+        *config* is the configuration to declare them on, which for a fanned-out
+        run is one cluster's rather than the run's own.
+        """
+        if plan is None:
+            return
+        config = config if config is not None else self.config
+
+        participating = set(plan.participating())
+        for name in plan.participating():
+            if name in config.tables:
+                continue
+            types = {column: ColumnType(kind) for column, kind in plan.column_types(name).items()}
+            # Only the keys pointing at a table this run has. One aimed at a
+            # table the plan excluded would be declared and unlinkable.
+            foreign_keys = [
+                link["column"]
+                for link in plan.links(name)
+                if link["references_table"] in participating
+            ]
+            # A link table keyed on its foreign keys -- `PRIMARY KEY (playlist_id,
+            # track_id)` -- has no single-column key, and the first column of the
+            # composite one is a foreign key, which a column cannot also be. It is
+            # declared the way a link table without a key is: two foreign keys,
+            # both linkable.
+            primary_key = plan.primary_key(name)
+            if primary_key in foreign_keys:
+                primary_key = None
+            config.create_table(
+                name,
+                individual_level=plan.is_individual_level(name),
+                provided_by_input=True,
+                types=types or None,
+                primary_key=primary_key,
+                # A column the plan drops is absent from the copy, so it is
+                # also a column nothing should model. Declared here because
+                # every column is streamed onto storage whatever the plan says
+                # -- the sink writes the table's whole column list -- so
+                # without this the values are read, avatarized and written.
+                # So is one that arrives empty: the avatarization leaves it out of
+                # the avatars, and a job reading them afterwards -- the Génération,
+                # the metrics -- would expect it there.
+                columns_to_drop=plan.dropped_columns(name) + plan.emptied_columns(name) or None,
+                foreign_keys=foreign_keys or None,
+            )
+
+        self._declare_planned_pseudonymization(plan, config)
+        self._declare_planned_links(plan, config)
+
+    def _declare_planned_pseudonymization(self, plan: SchemaPlan, config: Config) -> None:
+        """Carry each column's replacement strategy onto the schema.
+
+        The per-column half of the plan, and without it the plan's central
+        decision is silently dropped: the avatarization *resamples* a
+        categorical column, drawing its values from the real distribution, so
+        every real email stays in the copy against a different person. A live
+        run put six of eight source addresses in the target, two of them twice,
+        while the plan said "pseudonymize customer.email".
+
+        Only where the reviewer asked for it. A column the plan keeps is
+        avatarized with the rest of the table, which for a quantity is exactly
+        right -- an amount should be synthetic, not a real amount belonging to
+        somebody else.
+        """
+        for name in config.tables:
+            strategies = plan.pseudonymized_columns(name)
+            if strategies:
+                config.apply_pseudonymized_columns(name, strategies)
+
+    def _with_frozen_columns(self, table: str, excluded: list[str] | None) -> list[str] | None:
+        """Add the columns a reviewed plan froze to the ones the caller excluded.
+
+        A frozen column keeps its original values, and "excluded from the
+        avatarization" is how that is said to the engine -- so without this the
+        decision reaches nothing and the column is avatarized like any other.
+        That is the same failure as a dropped pseudonymization strategy: the
+        run reports success and the plan's decision is simply absent from the
+        result.
+
+        Added to what the caller passed rather than replacing it: somebody
+        excluding a column for their own reasons should not lose it, and
+        somebody reviewing a plan should not have to restate the exclusions.
+        """
+        plans = [self._database_plan, *self._copy_plans.values()]
+        frozen: list[str] = []
+        for plan in plans:
+            if plan is None:
+                continue
+            frozen.extend(plan.frozen_columns(table))
+            self._require_something_to_model(plan, table, frozen)
+        if not frozen:
+            return excluded
+        return list(dict.fromkeys([*(excluded or []), *frozen]))
+
+    @staticmethod
+    def _require_something_to_model(plan: SchemaPlan, table: str, frozen: list[str]) -> None:
+        """Refuse a table the avatarization would be left nothing to work on.
+
+        The engine refuses it too, from three layers down and without naming the
+        table: "Expected at least one column to be left after excluding
+        variables". Which is right -- excluding every column asks it to model
+        nothing -- but it arrives mid-run, from a processor, about a decision
+        made at review time.
+
+        It is reachable the moment freezing is: a lookup table of a key and one
+        label, with the label frozen, has nothing left. So it is said here,
+        naming the table and the two ways out.
+        """
+        if not frozen:
+            return
+        modellable = set(plan.anonymizable_columns(table)) - set(frozen)
+        if modellable:
+            return
+        treatment = plan.treatment_of(table)
+        described = (
+            "is set to copy, so every column of it is kept verbatim"
+            if treatment == "copy"
+            else f"has every column the avatarization could model frozen ({', '.join(frozen)})"
+        )
+        raise ValueError(
+            f"table {table!r} {described}, which leaves the avatarization nothing to "
+            "work on and is refused by the engine mid-run. Either anonymize one column "
+            f"of {table!r}, or leave the table out of the run with `ignore`."
+        )
+
+    def _declare_planned_links(self, plan: SchemaPlan, config: Config) -> None:
+        """Declare the foreign keys between the tables this run works on.
+
+        Not decoration. The engine builds a metagraph over a schema's tables
+        and requires it connected, so a cluster whose links are undeclared is
+        indistinguishable from unrelated tables -- and a copy written without
+        them breaks referential integrity in the target, which is the one thing
+        a working test database has to keep.
+
+        Links are declared after every table exists, because a link names two
+        of them, and only between tables this run actually has: a key pointing
+        at a table the plan excluded has nothing to point at here.
+        """
+        declared = set(config.tables)
+        for child in declared:
+            for link in plan.links(child):
+                parent = link["references_table"]
+                # A table referencing itself -- `employees.reports_to` -- is a
+                # cycle in the metagraph, which the API refuses. The column
+                # stays a key; only the link is not declared, as the web app does.
+                if parent not in declared or parent == child:
+                    continue
+                config.create_link(
+                    parent_table_name=parent,
+                    child_table_name=child,
+                    parent_field=link["references_column"],
+                    child_field=link["column"],
+                    method=self._link_method(plan, parent),
+                )
+
+    @staticmethod
+    def _link_method(plan: SchemaPlan, parent: str) -> LinkMethod:
+        """How children are matched to their parent rows after anonymization.
+
+        Row order, for every link, for now -- a deliberate decision while the
+        database path is being built rather than a discovered constraint. It is
+        the only method that works from a parent the avatarization leaves
+        nothing to do, and picking per link instead meant a lookup table whose
+        only real column is pseudonymized got the assignment method and the
+        engine refused the run:
+
+            Link from table 'country' to table 'customer' uses link method
+            'LINEAR_SUM_ASSIGNMENT' but parent table 'country' has no
+            anonymizable columns.
+
+        The trade-off is real and recorded on the enum member itself: keeping
+        the original order to assign a child to its parent is a privacy breach,
+        so this is a "for now" and not an answer. `LINEAR_SUM_ASSIGNMENT` is the
+        one to return here when a link method is chosen per link properly --
+        which needs to know whether the parent has anything to avatarize, which
+        `plan.anonymizable_columns(parent)` answers.
+        """
+        return LinkMethod.SENSITIVE_ORIGINAL_ORDER_ASSIGNMENT
+
+    def add_databases(
+        self,
+        copies: dict[str, tuple[str, str]] | None = None,
+        plans: dict[str, SchemaPlan] | None = None,
+        shared_entities: list[SharedEntity] | None = None,
+    ) -> None:
+        """Copy several databases together, sharing one identity per person.
+
+        Worth using for exactly one reason: the same people appear in more than
+        one database, and a test estate where they are different people in each
+        is useless. A single database wants :meth:`add_database`.
+
+        Parameters
+        ----------
+        copies
+            Name -> (source connection, target connection). The name is how a
+            subject refers to that database::
+
+                copies={"crm": ("crm_prod", "crm_test"),
+                        "billing": ("billing_prod", "billing_test")}
+        plans
+            Name -> the reviewed plan for that database.
+        shared_entities
+            Declared with :func:`avatars.shared_entity` using its ``across`` form,
+            so each is resolved once across every database.
+
+        Notes
+        -----
+        Every target is validated before any is written: a half-written estate
+        cannot be completed by retrying the missing half, because the identities
+        of the half that landed cannot be reproduced from a subset.
+
+        """
+        declared = copies or {}
+        given_plans = plans or {}
+        config_creator(self.config, "create_input_databases")(
+            copies=[
+                {
+                    "name": name,
+                    "source": _connection(source),
+                    "target": _connection(target),
+                    **({"plan": given_plans[name].to_dict()} if name in given_plans else {}),
+                }
+                for name, (source, target) in declared.items()
+            ],
+            reference_tables=[e.to_dict() for e in shared_entities] if shared_entities else None,
+        )
+        self._plan_the_copies(given_plans)
 
     def upload_file(
         self,
@@ -507,6 +1206,7 @@ class Runner:
 
         """
         imputation = imputation_method.value if imputation_method else None
+        exclude_variable_names = self._with_frozen_columns(table_name, exclude_variable_names)
         if exclude_variable_method:
             replacement_strategy = exclude_variable_method.value
         elif exclude_replacement_strategy:
@@ -635,6 +1335,8 @@ class Runner:
                 projection_type=projection_type,
                 nb_points=time_series_nb_points,
                 method=method,
+                exclude_variable_names=exclude_variable_names,
+                exclude_variable_method=replacement_strategy,
             )
 
         metrics_exclude_variable_names = (
@@ -686,13 +1388,17 @@ class Runner:
             See set_parameters for the full list of available parameters.
 
         """
-        avatarization = getattr(self.config, "avatarization", None)
-        avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
-        avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
-        if (
-            (avatarization.get(table_name) if avatarization else None) is None
-            and (avatarization_open_dp.get(table_name) if avatarization_open_dp else None) is None
-            and (avatarization_fast_dp.get(table_name) if avatarization_fast_dp else None) is None
+        per_table_params = (
+            "avatarization",
+            "avatarization_open_dp",
+            "avatarization_fast_dp",
+            "time_series",
+            "privacy_metrics",
+            "signal_metrics",
+        )
+        if not any(
+            (getattr(self.config, field, None) or {}).get(table_name) is not None
+            for field in per_table_params
         ):
             raise ValueError(
                 f"No existing parameters found for table '{table_name}'. "
@@ -840,6 +1546,9 @@ class Runner:
                     }
                 )
 
+            # Exclude variables parameters (time series entry takes precedence)
+            current_params.update(self._extract_exclude_parameters(ts_params))
+
         # Extract privacy metrics parameters
         if (
             self.config.privacy_metrics is not None
@@ -868,7 +1577,8 @@ class Runner:
         self,
         params: AvatarizationParameters
         | AvatarizationOpenDPParameters
-        | AvatarizationFastDPParameters,
+        | AvatarizationFastDPParameters
+        | TimeSeriesParameters,
     ) -> dict[str, Any]:
         """Extract exclude variables parameters from parameter object.
 
@@ -939,16 +1649,59 @@ class Runner:
         path
             The path to the yaml file. If None, the default config will be returned.
 
+        Raises
+        ------
+        ValueError
+            When this run is several document sets -- a database whose tables
+            fall into more than one group of related tables. There is no single
+            configuration to return; see :meth:`cluster_yamls`.
+
         """
+        if self._cluster_jobs:
+            raise ValueError(
+                f"this run is {len(self._cluster_jobs)} document sets, one per group of "
+                f"related tables ({', '.join(self._cluster_jobs)}), so there is no single "
+                "configuration to return. Use `cluster_yamls()` for one per group."
+            )
         return self.config.get_yaml(path)
+
+    def cluster_yamls(self, directory: str | None = None) -> dict[str, str]:
+        """One complete configuration per group of related tables.
+
+        Each is an ordinary multi-table configuration -- the same documents
+        under the same names a multi-table run has always emitted -- because
+        the fan-out is one *set* per group rather than one set holding several
+        schemas. Nothing about the shape today's multi-table jobs rely on
+        changes, and every job kind keeps working per group.
+
+        Empty for a run that is a single job, where :meth:`get_yaml` is the
+        answer.
+
+        Parameters
+        ----------
+        directory
+            Write each one to ``<directory>/<group>.yaml`` as well as
+            returning it.
+
+        """
+        yamls = {cluster: config.get_yaml() for cluster, config in self._cluster_configs().items()}
+        if directory is not None:
+            for cluster, yaml in yamls.items():
+                Path(directory, f"{cluster}.yaml").write_text(yaml)
+        return yamls
 
     def _handle_existing_results(self, ignore_warnings: bool = False) -> None:
         """Warn and clean up local state when re-running a runner that already has results."""
-        advice_job_name = self.jobs.get_parameters_name(JobKind.advice)
+        advice_job_names = {
+            self.jobs.get_parameters_name(JobKind.advice),
+            self.config.get_parameters_advice_name(
+                name="advice", advisor_type=[AdviceType.TABLES_LINKS]
+            ),
+        }
         has_run_before = (
             not self.results.is_results_empty()
-            or any(key != advice_job_name for key in self.results_urls)
-            or any(job != advice_job_name for job in self.jobs.get_launched_jobs())
+            or any(key not in advice_job_names for key in self.results_urls)
+            or any(job not in advice_job_names for job in self.jobs.get_launched_jobs())
         )
 
         if has_run_before:
@@ -965,6 +1718,7 @@ class Runner:
                     stacklevel=2,
                 )
             self.results_urls.clear()
+            self._downloaded_results.clear()
             self.results = ResultsOrganizer()
             self.jobs.jobs.clear()
 
@@ -1006,25 +1760,152 @@ class Runner:
             if self.config.report is None or ReportType.PIA not in self.config.report:
                 self.config.create_report(ReportType.PIA, language=self.report_language)
 
-        yaml = self.get_yaml()
+        # Execute jobs in order
+        jobs_to_run = sorted(jobs_to_run, key=JOB_EXECUTION_ORDER.index)
+
+        if self._cluster_jobs:
+            self._run_each_cluster(jobs_to_run)
+            return
 
         resource_response = self.client.resources.put_resources(
             display_name=self.display_name,
-            yaml_string=yaml,
+            yaml_string=self.get_yaml(),
         )
         # Update set_name with the actual UUID returned by the backend
         self.set_name = str(resource_response.set_name)
         self.jobs.set_name = self.set_name
-
-        # Execute jobs in order
-        jobs_to_run = sorted(jobs_to_run, key=JOB_EXECUTION_ORDER.index)
 
         for i, job_kind in enumerate(jobs_to_run):
             # Add small delay between job creations to avoid bursts in api calls
             # Skip delay for first job
             if i > 0:
                 time.sleep(DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS)
-            self.jobs.launch_job(job_kind, self.set_name)
+            self._launch_job(job_kind, self.set_name)
+
+    def _launch_job(self, job_kind: JobKind, set_name: str) -> None:
+        known = set(self.jobs.get_launched_jobs())
+        self.jobs.launch_job(job_kind, set_name)
+        started = self._clock.monotonic()
+        for name in self.jobs.get_launched_jobs():
+            if name not in known:
+                self._job_started_at[name] = started
+
+    def _run_each_cluster(self, jobs_to_run: list[JobKind]) -> None:
+        """One document set per group of related tables, each an ordinary run.
+
+        Uploaded and launched exactly the way a multi-table run is, once per
+        group, because that is what each of them is: the same documents under
+        the same names, over one group's tables. Nothing here is a special job
+        kind or a renamed parameter, so metrics and the report work per group
+        without knowing about any of this.
+
+        The groups are independent of each other, with no `depends_on` between
+        them: a group is closed under foreign keys, so two of them share no
+        table and neither ordering nor a fan-in is needed to keep the target's
+        referential integrity. They run at once, and one failing leaves the
+        others' work standing rather than cancelling them.
+
+        Each writes its own tables into the shared target and checks only its
+        own are empty there, because the schema it validates against is its own
+        -- so a sibling that has already written does not make this one refuse.
+        """
+        self._cluster_launchers = {}
+        # One token per launch, from the clock as the web app does: two launches of one
+        # configuration are two runs, and their sets must not be listed as one.
+        self._launch = _base36(time.time_ns() // 1_000_000)
+        # Every group's set is stored before any job starts, as the web app does. Pushing and
+        # launching group by group left a run half-launched when a later group's set was
+        # refused -- the first group's jobs already writing the target.
+        pushed: list[tuple[str, Config, str]] = []
+        for index, (cluster, config) in enumerate(self._cluster_configs().items()):
+            if index > 0:
+                time.sleep(DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS)
+            response = self.client.resources.put_resources(
+                # The web app's convention, so it lists the groups of one launch as one run:
+                # `name__launch--group`. A display name may hold only letters, digits, `_`
+                # and `-`; the API refuses anything else.
+                display_name=f"{self.display_name}__{self._launch}--{cluster}",
+                yaml_string=config.get_yaml(),
+            )
+            pushed.append((cluster, config, str(response.set_name)))
+        reference = self._launch_reference_job(pushed[0][1] if pushed else None)
+        for cluster, config, set_name in pushed:
+            launcher = JobLauncher(self.client, config)
+            launcher.set_name = set_name
+            launcher.reference_job = reference
+            for position, job_kind in enumerate(jobs_to_run):
+                if position > 0:
+                    time.sleep(DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS)
+                launcher.launch_job(job_kind, set_name)
+            self._cluster_launchers[cluster] = launcher
+        # No single set holds this run, so `set_name` stays as it was rather
+        # than naming one group and implying it is the whole thing. The set of
+        # each group is `cluster_sets()`.
+        logger.info(
+            "launched %d run(s), one per group of related tables: %s",
+            len(self._cluster_launchers),
+            ", ".join(
+                f"{cluster} ({len(self._cluster_jobs[cluster].tables)} table(s), set "
+                f"{launcher.set_name})"
+                for cluster, launcher in self._cluster_launchers.items()
+            ),
+        )
+
+    def _launch_reference_job(self, group: Config | None) -> str | None:
+        """Resolve the run's shared entities once, in a set of their own (ADR-0013).
+
+        A shared entity belongs to no group: it is collected from tables of every database the
+        run copies. Its set -- named like a group, ``name__launch--reference-tables``, so the
+        web lists it with the run -- holds the databases it is found in, the entities and the
+        reference job. Every group's Extraction and Génération wait for that job and apply the
+        map it leaves. None, and nothing launched, when the run declares no entity.
+        """
+        self._reference_launcher = None
+        if group is None:
+            return None
+        documents = reference_set([d for d in yaml.safe_load_all(group.get_yaml()) if d])
+        if not documents:
+            return None
+        response = self.client.resources.put_resources(
+            display_name=f"{self.display_name}__{self._launch}--{REFERENCE_SET}",
+            yaml_string=dump(documents),
+        )
+        launcher = JobLauncher(self.client, group)
+        launcher.launch_reference_job(str(response.set_name))
+        self._reference_launcher = launcher
+        logger.info("launched the run's reference job, set %s", launcher.set_name)
+        return launcher.jobs[REFERENCE_JOB].Location
+
+    def cluster_sets(self) -> dict[str, str]:
+        """Group of related tables -> the resource set its run created.
+
+        Each group is its own set, so its results are read the way any other
+        run's are::
+
+            for cluster, set_name in runner.cluster_sets().items():
+                manager.create_runner_from_id(set_name).get_all_results()
+
+        Empty until :meth:`run` has been called, and for a run that is a single
+        job -- where `runner.set_name` is the answer.
+        """
+        return {
+            cluster: str(launcher.set_name)
+            for cluster, launcher in self._cluster_launchers.items()
+        }
+
+    def clusters(self) -> dict[str, list[str]]:
+        """The groups of related tables this run works on, one job per group.
+
+        Empty unless the run fanned out. A database whose tables all reference
+        each other is one job, like any other run, and a plan reviewed down to
+        one group is too.
+
+        The names identify the runs, and say what is in them: discovery names
+        a group after the table the most links touch, so ``group-customer``
+        has its own document set (:meth:`cluster_sets`) and its own jobs,
+        reported by :meth:`statuses` as ``group-customer/standard`` and so on.
+        """
+        return {job.name: list(job.tables) for job in self._cluster_jobs.values()}
 
     def get_job(self, job_name: JobKind | str) -> JobResponse:
         """Get the job by name.
@@ -1036,6 +1917,76 @@ class Runner:
 
         """
         return self.jobs.get_job_status(job_name)
+
+    def statuses(self) -> dict[str, JobStatus]:
+        """Where every job this runner launched has got to.
+
+        A run is several jobs -- the anonymization, the metrics, the report, and
+        for a document run the extraction and the write-back as well -- and
+        until now there was no way to ask about more than one at a time. So
+        "did my run work?" meant calling :meth:`get_status` once per kind and
+        knowing which kinds to expect, and a job that failed while its siblings
+        finished was easy to miss entirely.
+
+        Ordered the way the work happens rather than the way the jobs were
+        registered: the dependent jobs are all created at once, so registration
+        order says nothing, and a reader scanning for the first failure wants
+        the sequence.
+
+        A database run covering several groups of related tables is several
+        runs, one per group, and every one of their jobs is reported here --
+        prefixed by the group, since each group has a job of each kind. See
+        :meth:`clusters` and :meth:`cluster_sets`.
+
+        Examples
+        --------
+        >>> runner.statuses()
+        {'standard': 'finished', 'signal_metrics': 'error'}
+        >>> runner.statuses()  # a database with two groups of related tables
+        {'group-customer/standard': 'finished', 'group-audit_log/standard': 'pending'}
+
+        """
+        if self._cluster_launchers:
+            reference = self._reference_launcher
+            return {
+                **(
+                    {
+                        f"{REFERENCE_SET}/{REFERENCE_JOB}": reference.get_job_status(
+                            REFERENCE_JOB
+                        ).status
+                    }
+                    if reference is not None
+                    else {}
+                ),
+                **{
+                    f"{cluster}/{kind}": launcher.get_job_status(kind).status
+                    for cluster, launcher in self._cluster_launchers.items()
+                    for kind in self._ordered(launcher.get_launched_jobs())
+                },
+            }
+        return {
+            str(kind): self.get_job(kind).status
+            for kind in self._ordered(self.jobs.get_launched_jobs())
+        }
+
+    @staticmethod
+    def _ordered(launched: list[str]) -> list[str]:
+        """The jobs of one run, in the order the work happens."""
+        order = [
+            JobKind.extract,
+            JobKind.standard,
+            JobKind.regenerate,
+            JobKind.signal_metrics,
+            JobKind.privacy_metrics,
+            JobKind.report,
+        ]
+        rank = {str(kind): index for index, kind in enumerate(order)}
+        return sorted(
+            launched,
+            # A kind this list does not name still appears, after the ones it
+            # does, rather than being dropped from the answer.
+            key=lambda kind: (rank.get(str(kind), len(order)), str(kind)),
+        )
 
     def get_status(
         self,
@@ -1112,6 +2063,57 @@ class Runner:
         job_ids = [self.jobs.get_job_id(name) for name in names]
         return self.client.jobs.bulk_delete_jobs(BulkDeleteRequest(job_names=job_ids))
 
+    def cancel(
+        self, job_names: JobKind | str | list[JobKind | str] | None = None
+    ) -> list[JobResponse]:
+        """Stop one or more jobs launched by this runner.
+
+        When called without arguments, every job of this runner that is still
+        going is cancelled. A job that has not started stops at once; a running
+        one is asked to stop and does so at its next safe point -- between
+        stages, batches, tables or documents -- so it comes back with its phase
+        set to ``"cancelling"`` and turns ``"cancelled"`` shortly after. The
+        jobs that were waiting on a cancelled job are cancelled with it.
+
+        A job that is already over is left alone rather than refused, so
+        cancelling a whole run does not fail on the parts that finished -- or
+        on the dependents the first cancel already took with it.
+
+        .. warning::
+           A database copy cancelled while writing keeps the tables it had
+           already written in the target: writes cannot be rolled back across
+           tables. The cancelled job's ``exception`` names them.
+
+        Parameters
+        ----------
+        job_names
+            A single job kind/name, a list of job kinds/names, or ``None`` for
+            every job this runner launched.
+
+        Returns
+        -------
+        list[JobResponse]
+            The jobs a cancel was sent for, as the server answered.
+
+        Examples
+        --------
+        >>> runner.cancel()                     # the whole run
+        >>> runner.cancel(JobKind.standard)     # one job, and what waits on it
+
+        """
+        if job_names is None:
+            names: list[JobKind | str] = list(self.jobs.get_launched_jobs())
+        elif not isinstance(job_names, list):
+            names = [job_names]
+        else:
+            names = job_names
+        cancelled: list[JobResponse] = []
+        for name in names:
+            if self.get_job(name).done:
+                continue
+            cancelled.append(self.client.jobs.cancel_job(self.jobs.get_job_id(name)))
+        return cancelled
+
     def _retrieve_job_result_urls(self, job_name: str) -> None:
         """Get the result of a job by name.
 
@@ -1121,36 +2123,10 @@ class Runner:
             The name of the job to get.
 
         """
+        wait_for_jobs([job_name], self.get_job, self._clock, self._job_started_at)
+        self._fetch_job_result_urls(job_name)
 
-        def check_job_status() -> JobResponse:
-            """Check job status and raise if in error state, otherwise return if not done."""
-            job = self.get_job(job_name)
-
-            if job.status in ERROR_STATUSES:
-                if job.exception:
-                    raise ValueError(f"Job {job_name} failed with exception: {job.exception}")
-                raise ValueError("internal error")
-
-            if not job.done:
-                # Raise to trigger retry
-                raise tenacity.TryAgain
-
-            return job
-
-        # Use tenacity to poll with exponential backoff capped at 20s
-        # Starts at 5s, 20% longer every time, maxes out at 20s
-        for attempt in tenacity.Retrying(
-            wait=tenacity.wait_exponential(
-                min=DEFAULT_POLL_INTERVAL,
-                max=4 * DEFAULT_POLL_INTERVAL,
-                exp_base=1.2,
-            ),
-            retry=tenacity.retry_if_exception_type(tenacity.TryAgain),
-            reraise=True,
-        ):
-            with attempt:
-                check_job_status()
-
+    def _fetch_job_result_urls(self, job_name: str) -> None:
         job_id = self.jobs.get_job_id(job_name)
         self.results_urls[job_name] = self.client.results.get_results(job_id)
 
@@ -1228,14 +2204,15 @@ class Runner:
         return self.results_urls[job_name][result]
 
     def _download_all_files(self) -> None:
-        for job_name in self.jobs.get_launched_jobs():
-            if not self.results_urls or job_name not in self.results_urls.keys():
-                self._retrieve_job_result_urls(job_name)
+        launched = self.jobs.get_launched_jobs()
+        waiting = [name for name in launched if name not in self.results_urls]
+        wait_for_jobs(waiting, self.get_job, self._clock, self._job_started_at)
+        for job_name in launched:
+            if job_name not in self.results_urls:
+                self._fetch_job_result_urls(job_name)
             for result in self.results_urls[job_name].keys():
-                for table_name in self.config.tables.keys():
-                    if result in Results:
-                        if Results(result) in RESULTS_TO_STORE:
-                            self.get_specific_result(table_name, job_name, Results(result))
+                if result in Results and Results(result) in RESULTS_TO_STORE:
+                    self._download_result_once(job_name, Results(result))
 
     def _download_specific_result(
         self,
@@ -1245,8 +2222,17 @@ class Runner:
         urls = self.get_specific_result_urls(job_name=job_name, result=result_name)
         # Use batch download to get all file credentials at once
         downloaded_results = self.file_downloader.download_files_batch(urls)
+        figures_metadatas = (
+            self._download_figures_metadatas(job_name)
+            if result_name == Results.FIGURES and downloaded_results
+            else []
+        )
         for url, result in downloaded_results.items():
-            metadata = self._get_metadata(url, result_name, job_name)
+            metadata: dict[str, Any] | None = None
+            if result_name == Results.FIGURES:
+                metadata = self.results.find_figure_metadata(figures_metadatas, url)
+            elif result_name == Results.METADATA:
+                metadata = {"kind": job_name}
             table_name = self.results.get_table_name(result_name, url, result, metadata)
             if table_name is not None:
                 self.results.set_results(
@@ -1255,24 +2241,17 @@ class Runner:
                     result_name=result_name,
                     metadata=metadata,
                 )
+        self._downloaded_results.add((job_name, result_name))
 
-    def _get_metadata(
-        self, url: str, result_name: Results, job_name: str
-    ) -> dict[str, Any] | None:
-        match result_name:
-            case Results.FIGURES:
-                return self._get_figure_metadata(url, job_name)
-            case Results.METADATA:
-                return {"kind": job_name}
-            case _:
-                return None
+    def _download_result_once(self, job_name: str, result_name: Results) -> None:
+        if (job_name, result_name) not in self._downloaded_results:
+            self._download_specific_result(job_name, result_name)
 
-    def _get_figure_metadata(self, url: str, job_name: str) -> dict[str, Any] | None:
-        figures_metadatas = self.file_downloader.download_file(
-            self.results_urls[job_name][Results.FIGURES_METADATA][0]
-        )
+    def _download_figures_metadatas(self, job_name: str) -> list[dict[str, Any]]:
+        url = self.results_urls[job_name][Results.FIGURES_METADATA][0]
+        figures_metadatas = self.file_downloader.download_file(url)
         if isinstance(figures_metadatas, list):
-            return self.results.find_figure_metadata(figures_metadatas, url)
+            return figures_metadatas
         raise TypeError(
             f"Expected a list, got {type(figures_metadatas)} instead for {url} metadata."
         )
@@ -1288,8 +2267,7 @@ class Runner:
             raise ValueError(f"Expected table '{table_name}' to be created.")
         if not self.jobs.has_job(job_name_str):
             raise ValueError(f"Expected job '{job_name}' to be created. Try running it first.")
-        if self.results.get_results(table_name, result, job_name_str) is None:
-            self._download_specific_result(job_name_str, result)
+        self._download_result_once(job_name_str, result)
         return self.results.get_results(table_name, result, job_name_str)
 
     def get_all_results(self) -> ResultsOrganizer:
@@ -1498,11 +2476,7 @@ class Runner:
             raise ValueError(
                 "render_privacy_metrics_summary is only available for multi-table jobs."
             )
-        if (
-            self.results.get_results("summary", Results.PRIVACY_METRICS_SUMMARY, "privacy_metrics")
-            is None
-        ):
-            self._download_specific_result("privacy_metrics", Results.PRIVACY_METRICS_SUMMARY)
+        self._download_result_once("privacy_metrics", Results.PRIVACY_METRICS_SUMMARY)
         results = self.results.get_results(
             "summary", Results.PRIVACY_METRICS_SUMMARY, "privacy_metrics"
         )
@@ -1525,8 +2499,7 @@ class Runner:
             raise ValueError(
                 "render_signal_metrics_summary is only available for multi-table jobs."
             )
-        if self.results.get_results("summary", Results.SIGNAL_METRICS_SUMMARY, "") is None:
-            self._download_specific_result("signal_metrics", Results.SIGNAL_METRICS_SUMMARY)
+        self._download_result_once("signal_metrics", Results.SIGNAL_METRICS_SUMMARY)
         results = self.results.get_results("summary", Results.SIGNAL_METRICS_SUMMARY, "")
         if not isinstance(results, dict):
             raise TypeError(f"Expected a dict, got {type(results)} instead.")

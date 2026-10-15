@@ -1,4 +1,4 @@
-__version__ = "1.29.0"
+__version__ = "1.30.0"
 
 # Re-export main public entry points for convenience so users can do for example:
 # Auto-install the crash handler for enhanced error reporting
@@ -17,6 +17,12 @@ from avatars.client import ApiClient
 from avatars.manager import Manager
 from avatars.models import JobStatus
 from avatars.runner import Runner
+from avatars.schema_plan import (
+    Proposal,
+    SchemaPlan,
+    SharedEntity,
+    shared_entity,
+)
 
 __all__ = [
     "ApiClient",
@@ -27,10 +33,14 @@ __all__ = [
     "JobStatus",
     "Manager",
     "PiiType",
+    "Proposal",
     "PseudonymizationStrategy",
     "Runner",
+    "SchemaPlan",
+    "SharedEntity",
     "SpecificIdLetterCase",
     "SpecificIdStrategy",
     "Uuid4Strategy",
     "__version__",
+    "shared_entity",
 ]

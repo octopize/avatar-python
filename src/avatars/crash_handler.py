@@ -249,23 +249,28 @@ def _find_sensitive_lines_from_source(source: str) -> set[int]:
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for target in node.targets:
-                if isinstance(target, ast.Name):
-                    # Redact if it's a tracked variable OR has a sensitive name
-                    if target.id in sensitive_variables or _is_sensitive_variable_name(target.id):
-                        sensitive_lines.add(node.lineno)
-                        if hasattr(node, "end_lineno") and node.end_lineno:
-                            for line in range(node.lineno, node.end_lineno + 1):
-                                sensitive_lines.add(line)
-        elif isinstance(node, ast.AnnAssign):
-            # Handle annotated assignments like `api_key: str = "secret"`
-            if isinstance(node.target, ast.Name) and node.value is not None:
-                if node.target.id in sensitive_variables or _is_sensitive_variable_name(
-                    node.target.id
+                if isinstance(target, ast.Name) and (
+                    target.id in sensitive_variables or _is_sensitive_variable_name(target.id)
                 ):
+                    # Redact if it's a tracked variable OR has a sensitive name
                     sensitive_lines.add(node.lineno)
                     if hasattr(node, "end_lineno") and node.end_lineno:
                         for line in range(node.lineno, node.end_lineno + 1):
                             sensitive_lines.add(line)
+        elif (
+            isinstance(node, ast.AnnAssign)
+            and isinstance(node.target, ast.Name)
+            and node.value is not None
+            and (
+                node.target.id in sensitive_variables
+                or _is_sensitive_variable_name(node.target.id)
+            )
+        ):
+            # Handle annotated assignments like `api_key: str = "secret"`
+            sensitive_lines.add(node.lineno)
+            if hasattr(node, "end_lineno") and node.end_lineno:
+                for line in range(node.lineno, node.end_lineno + 1):
+                    sensitive_lines.add(line)
 
     return sensitive_lines
 

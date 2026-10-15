@@ -1,8 +1,8 @@
 import os
 from datetime import UTC, datetime, timedelta
-from typing import ClassVar
+from typing import Any, ClassVar
 from unittest import mock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
@@ -14,9 +14,13 @@ from avatars.models import (
     BulkDeleteResponse,
     JobCreateRequest,
     JobKind,
+    JobResponse,
+    JobResponseList,
+    JobStatus,
 )
 from avatars.runner import Runner
 from tests.unit.conftest import (
+    FAKE_API_KEY,
     FakeApiClient,
     JobResponseFactory,
     create_fake_job,
@@ -69,7 +73,7 @@ class TestManagerInitialization:
         return ClientConfig(
             base_api_url="https://custom.octopize.app/api",
             storage_endpoint_url="https://custom.octopize.app/storage",
-            api_key="test-api-key",
+            api_key=FAKE_API_KEY,
         )
 
     def test_can_create_with_config_only(self, minimal_config: ClientConfig) -> None:
@@ -90,7 +94,7 @@ class TestManagerInitialization:
         ):
             manager = Manager(
                 base_url="https://api.example.com/api",
-                api_key="test-key",
+                api_key=FAKE_API_KEY,
                 should_verify_compatibility=False,
             )
             assert manager.auth_client is not None
@@ -108,7 +112,7 @@ class TestManagerInitialization:
         ):
             manager = Manager(
                 base_url="https://api.example.com",
-                api_key="test-key",
+                api_key=FAKE_API_KEY,
                 should_verify_compatibility=False,
             )
             assert manager.auth_client is not None
@@ -134,7 +138,7 @@ class TestManagerInitialization:
             os.environ,
             clear=True,
         ):
-            manager = Manager(api_key="test-key", should_verify_compatibility=False)
+            manager = Manager(api_key=FAKE_API_KEY, should_verify_compatibility=False)
             # Manager should create auth_client with default config values
             assert manager.auth_client is not None
             assert manager.auth_client.base_url == "https://www.octopize.app/api"
@@ -148,7 +152,7 @@ class TestManagerInitialization:
             clear=True,
         ):
             monkeypatch.setenv("AVATAR_BASE_URL", "https://env.example.com")
-            monkeypatch.setenv("AVATAR_API_KEY", "test-key")
+            monkeypatch.setenv("AVATAR_API_KEY", FAKE_API_KEY)
             manager = Manager(should_verify_compatibility=False)
             # Manager should create auth_client with config values from env vars
             assert manager.auth_client is not None
@@ -170,7 +174,7 @@ class TestManagerInitialization:
             clear=True,
         ):
             monkeypatch.setenv("AVATAR_BASE_API_URL", "https://env.example.com/api")
-            monkeypatch.setenv("AVATAR_API_KEY", "test-key")
+            monkeypatch.setenv("AVATAR_API_KEY", FAKE_API_KEY)
             manager = Manager(should_verify_compatibility=False)
             assert manager.auth_client is not None
 
@@ -195,7 +199,7 @@ class TestManagerInitialization:
             clear=True,
         ):
             monkeypatch.setenv("AVATAR_STORAGE_ENDPOINT_URL", "https://env.example.com/storage")
-            monkeypatch.setenv("AVATAR_API_KEY", "test-key")
+            monkeypatch.setenv("AVATAR_API_KEY", FAKE_API_KEY)
             manager = Manager(should_verify_compatibility=False)
             assert manager.auth_client is not None
 
@@ -238,7 +242,7 @@ class TestManagerInitialization:
             ValueError,
             match="Cannot provide both 'config' and other parameters \\(api_key\\)",
         ):
-            Manager(config=minimal_config, api_key="test-key")
+            Manager(config=minimal_config, api_key=FAKE_API_KEY)
 
     def test_config_with_api_client_raises_error(self, minimal_config: ClientConfig) -> None:
         """Test that using config with api_client raises ValueError."""
@@ -345,6 +349,26 @@ class TestFindSetNamesByDisplayName:
 
         assert len(results) == 1
         assert results[0][0] == str(set_name_standard)
+
+    def test_asks_the_server_for_no_kind(self):
+        """A kind this client knows and an older API does not must not reach the query."""
+        fake_client = FakeApiClient()
+        fake_client.jobs.add_job(
+            create_fake_job(
+                name="standard", set_name=uuid4(), kind=JobKind.standard, display_name="ds"
+            )
+        )
+        sent: list[dict[str, object]] = []
+        get_jobs = fake_client.jobs.get_jobs
+
+        def recording_get_jobs(**kwargs: Any) -> JobResponseList:
+            sent.append(kwargs)
+            return get_jobs(**kwargs)
+
+        fake_client.jobs.get_jobs = recording_get_jobs  # type: ignore[method-assign, assignment]
+
+        assert len(Manager(api_client=fake_client).find_ids_by_name("ds")) == 1
+        assert sent == [{"display_name": "ds"}]
 
     def test_sorts_by_newest_first(self):
         """Test that results are sorted by creation time (newest first)."""
@@ -592,6 +616,57 @@ class TestIncrementDisplayNameVersion:
         assert runner.display_name == "iris-v1"
 
 
+class TestManagerCancelJobs:
+    """Tests for Manager.cancel_job, Manager.cancel_job_by_id and Manager.cancel_jobs."""
+
+    def setup_method(self) -> None:
+        self.fake_api_client = FakeApiClient()
+        self.manager = Manager(api_client=self.fake_api_client)
+
+    def _run(
+        self, set_name: UUID, display_name: str = "my_run"
+    ) -> tuple[JobResponse, JobResponse]:
+        running = create_fake_job(
+            name="running",
+            set_name=set_name,
+            display_name=display_name,
+            status="pending",
+            done=False,
+        )
+        finished = create_fake_job(name="finished", set_name=set_name, display_name=display_name)
+        self.fake_api_client.jobs.add_job(running)
+        self.fake_api_client.jobs.add_job(finished)
+        return running, finished
+
+    def test_only_the_jobs_still_going_are_cancelled(self) -> None:
+        """A job that is over is left alone rather than refused."""
+        running, _ = self._run(uuid4())
+
+        result = self.manager.cancel_job("my_run")
+
+        assert [job.name for job in result] == [running.name]
+        assert result[0].status == JobStatus.cancelled
+        assert self.fake_api_client.jobs.cancel_calls == [running.name]
+
+    def test_cancel_by_id(self) -> None:
+        set_name = uuid4()
+        running, _ = self._run(set_name)
+
+        result = self.manager.cancel_job_by_id(set_name)
+
+        assert [job.name for job in result] == [running.name]
+
+    def test_an_ambiguous_name_is_refused(self) -> None:
+        for set_name, name in ((uuid4(), "a"), (uuid4(), "b")):
+            self.fake_api_client.jobs.add_job(
+                create_fake_job(name=name, set_name=set_name, display_name="shared")
+            )
+
+        with pytest.raises(ValueError, match="cancel_job_by_id"):
+            self.manager.cancel_job("shared")
+        assert self.fake_api_client.jobs.cancel_calls == []
+
+
 class TestManagerDeleteJobs:
     """Tests for Manager.delete_job, Manager.delete_job_by_id and Manager.delete_jobs."""
 
@@ -651,7 +726,7 @@ class TestManagerDeleteJobs:
             )
         )
 
-        with pytest.raises(ValueError) as exc_info:
+        with pytest.raises(ValueError, match="Multiple runs found for display name") as exc_info:
             self.manager.delete_job("shared_name")
 
         msg = str(exc_info.value)

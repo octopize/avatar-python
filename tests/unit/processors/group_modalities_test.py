@@ -94,3 +94,12 @@ def test_variables_with_multiple_threshold_parameters() -> None:
             global_threshold=10,
             min_unique=40,
         )
+
+
+def test_group_preprocess_no_column_to_reduce(categorical_df: pd.DataFrame) -> None:
+    """Check preprocess keeps the data when no column reaches min_unique."""
+    processor = GroupModalitiesProcessor(min_unique=100, global_threshold=1)
+
+    df_processed = processor.preprocess(categorical_df)
+
+    pd.testing.assert_frame_equal(categorical_df, df_processed)

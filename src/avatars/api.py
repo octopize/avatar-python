@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 3.6.0
+# API Version : 3.17.2
 
 
 import logging
@@ -9,20 +9,35 @@ from avatars.models import (
     ApiKey,
     BulkDeleteRequest,
     BulkDeleteResponse,
+    CapabilitiesResponse,
     CompatibilityResponse,
+    ConnectionDraft,
+    ConnectionList,
+    ConnectionPatch,
+    ConnectionPresetList,
+    ConnectionPresetRequest,
+    ConnectionProbe,
+    ConnectionSample,
+    ConnectionSampleRequest,
+    ConnectionSummary,
     CreateApiKeyRequest,
     CreditsInfo,
+    EngineList,
     EventLogResponse,
     FeaturesInfo,
     FileAccess,
     JobCreateRequest,
     JobCreateResponse,
+    JobFlowCreateRequest,
+    JobFlowCreateResponse,
     JobKind,
     JobResponse,
     JobResponseList,
     MeUser,
+    ObjectType,
     ResourceSetResponse,
     User,
+    Verb,
 )
 
 if TYPE_CHECKING:
@@ -158,6 +173,30 @@ class ApiKeys:
         return self.client.request(**kwargs)
 
 
+class Capabilities:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def get_capabilities(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> CapabilitiesResponse:
+        """What this deployment can do, and which connections the caller can use.
+
+        Cheap and cacheable per caller: it reads process-local registries and
+        settings, plus the caller's organization's connections, and changes when
+        somebody changes one of those rather than while a form is filled in.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/capabilities",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return CapabilitiesResponse(**self.client.request(**kwargs))
+
+
 class Compatibility:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
@@ -178,20 +217,278 @@ class Compatibility:
         return CompatibilityResponse(**self.client.request(**kwargs))
 
 
+class Connections:
+    def __init__(self, client: "ApiClient") -> None:
+        self.client = client
+
+    def list_connections(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionList:
+        """The connections the caller can use: the deployment's, then their organization's.
+
+        The same list `capabilities` reports. `{"connections": [...]}` rather than a
+        bare list, which is the shape the web client reads -- it rendered the bare
+        list as an empty picker.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/connections",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return ConnectionList(**self.client.request(**kwargs))
+
+    def list_engines(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> EngineList:
+        """The kinds of database a connection can be made to, and the form for each.
+
+        The web form is generated from this: which fields an engine takes, which of
+        them are secret, their defaults, and whether the kind is `sql` or
+        `documents`. A kind with `available: false` is described so it can be shown,
+        and cannot be stored yet. Adding an engine is a change here, not in a client.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/connections/engines",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return EngineList(**self.client.request(**kwargs))
+
+    def list_connection_presets(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionPresetList:
+        """The demo and sample connections this deployment offers to add.
+
+        Offered, not listed: none of them is in anybody's connections until they add
+        it with `POST /connections/presets`. Empty on a deployment that ships none.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/connections/presets",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return ConnectionPresetList(**self.client.request(**kwargs))
+
+    def add_connection_presets(
+        self,
+        request: ConnectionPresetRequest,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Add every connection of one kind this deployment offers: `demo` or `sample`.
+
+        To the caller's own connections by default (`scope: user`); `organization`
+        adds them for every member, and is an admin's call. Answers with the ones it
+        added: a name the caller can already use is left as it is, so adding twice
+        adds nothing the second time. 404 when the deployment offers none of that kind.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/connections/presets",  # noqa: F541
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return self.client.request(**kwargs)
+
+    def put_connection(
+        self,
+        request: ConnectionDraft,
+        name: str,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionSummary:
+        """Store, or replace whole, the connection *name*.
+
+        With the default `organization` scope it is for every member of the caller's
+        organization, and admins only. With `user` it is the caller's own: any member
+        may store one, and nobody else can see or use it.
+
+        201 when it is new, 200 when it replaced one. The DSN is checked -- it must
+        parse, and its scheme must be the declared engine -- encrypted, and never
+        returned: the answer carries its display form. A name the deployment
+        already uses is refused with 409, and 503 means this deployment has no
+        encryption key and cannot store connections at all.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "put",
+            "url": f"/connections/{name}",
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return ConnectionSummary(**self.client.request(**kwargs))
+
+    def patch_connection(
+        self,
+        request: ConnectionPatch,
+        name: str,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionSummary:
+        """Rename or relabel the connection *name* without re-entering its credentials.
+
+        Who may: an admin for the organization's, its owner for their own. 404 for a
+        connection the caller cannot see, 409 for one of the deployment's, 422 for a name that
+        is invalid or taken.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "patch",
+            "url": f"/connections/{name}",
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return ConnectionSummary(**self.client.request(**kwargs))
+
+    def delete_connection(
+        self,
+        name: str,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> Any:
+        """Forget the connection *name*: an admin for the organization's, its owner for their own.
+
+        Nothing that used it is touched: a job already submitted carries what it
+        needs. 404 when the organization has none by that name. One the deployment declares
+        cannot be removed from its configuration here; an admin takes it out of use for their
+        own organization instead (it is no longer listed or resolved for them, and nobody else is
+        affected), and a member who is not an admin is refused with 403.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "delete",
+            "url": f"/connections/{name}",
+            "timeout": timeout,
+        }
+
+        return self.client.request(**kwargs)
+
+    def test_draft_connection(
+        self,
+        request: ConnectionDraft,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionProbe:
+        """Open a connection that is not stored yet, and report what is there.
+
+        Held to the rules of storing it: admins for the organization's scope, any
+        member for their own.
+
+        So a mistyped host is found while the form is still open, rather than by
+        saving a credential nothing can use. The same probe as
+        `/connections/{name}/test`, under the same rules as storing it.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/connections/test",  # noqa: F541
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return ConnectionProbe(**self.client.request(**kwargs))
+
+    def test_connection(
+        self,
+        name: str,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionProbe:
+        """Open the connection called *name* and report what is there.
+
+        Synchronous: it is seconds of I/O, and the answer is only useful while
+        somebody is looking at the screen that asked for it. A job kind would cost a
+        resource document, a queue and a poll for that.
+
+        404 for a name the caller cannot use -- named rather than answered with
+        `reachable: false`, because a connection that does not exist is a different
+        problem from one that will not open. Every test is recorded in the event
+        log, by name and outcome.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/connections/{name}/test",
+            "timeout": timeout,
+        }
+
+        return ConnectionProbe(**self.client.request(**kwargs))
+
+    def sample_connection(
+        self,
+        request: ConnectionSampleRequest,
+        name: str,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> ConnectionSample:
+        """A few values of the named columns, so a join can be checked by eye.
+
+        The subject editor puts the keys of each picked table side by side --
+        ``person_id: 1001, 1002`` next to ``customer_ref: 1001, 1002`` -- because a
+        subject declared on the wrong column does not fail: every person gets an
+        identity of their own in each table, and the run succeeds.
+
+        This returns **production values**, like `DatabaseProtocol.sample` and for
+        the same reason: the person choosing the key has to see some, and is
+        already entitled to the data. So it is minimised rather than refused --
+        only the columns asked for, at most twenty values of each, never a whole
+        row -- and every read is recorded in the event log, by connection, tables
+        and row count. Never the values.
+
+        Opened and failed exactly as `/test` is: 404 for a name the caller cannot
+        use, a displayable `error` for one that will not open.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/connections/{name}/sample",
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return ConnectionSample(**self.client.request(**kwargs))
+
+
 class EventLogs:
     def __init__(self, client: "ApiClient") -> None:
         self.client = client
 
     def list_my_event_logs(
         self,
+        verb: list[Verb] | None = None,
+        object_type: list[ObjectType] | None = None,
+        created_from: str | None = None,
+        created_before: str | None = None,
+        starting_after: str | None = None,
+        limit: int | None = None,
         *,
         timeout: int | None = DEFAULT_TIMEOUT,
     ) -> list[EventLogResponse]:
-        """Return the audit trail for the authenticated user, most recent first."""
+        """Return one page of the audit trail of the authenticated user, most recent first.
+
+        The events are in the order of ``created_at`` desc, then ``id`` desc. A page holds
+        at most ``limit`` events. To get the next page, send the same filters with
+        ``starting_after`` set to the ``id`` of the last event of the page. A page with
+        fewer than ``limit`` events is the last page.
+        """
         kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/event-logs",  # noqa: F541
             "timeout": timeout,
+            "params": dict(
+                verb=verb,
+                object_type=object_type,
+                created_from=created_from,
+                created_before=created_before,
+                starting_after=starting_after,
+                limit=limit,
+            ),
         }
 
         return [EventLogResponse(**item) for item in self.client.request(**kwargs)]
@@ -253,12 +550,19 @@ class Jobs:
         kind: list[JobKind] | None = None,
         display_name: str | None = None,
         set_name: str | None = None,
+        names: list[str] | None = None,
         limit: int | None = None,
         include_deleted: bool | None = None,
         *,
         timeout: int | None = DEFAULT_TIMEOUT,
     ) -> JobResponseList:
+        """List the jobs of the current user, newest first.
 
+        All filters apply together. With `names`, the response contains only the jobs of the
+        current user that have one of these names. A name that matches no job is absent from
+        the response, and the request does not fail. `limit` applies after the filters.
+        A request with more than 100 distinct names returns status 400.
+        """
         kwargs: dict[str, Any] = {
             "method": "get",
             "url": f"/jobs",  # noqa: F541
@@ -267,6 +571,7 @@ class Jobs:
                 kind=kind,
                 display_name=display_name,
                 set_name=set_name,
+                names=names,
                 limit=limit,
                 include_deleted=include_deleted,
             ),
@@ -289,6 +594,34 @@ class Jobs:
         }
 
         return JobCreateResponse(**self.client.request(**kwargs))
+
+    def create_job_flow(
+        self,
+        request: JobFlowCreateRequest,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> JobFlowCreateResponse:
+        """Launch everything a set describes, as one request.
+
+        The set is the declaration: each of its parameters documents is a job, and
+        which documents exist already says what should run. So a caller says
+        "launch this set" rather than naming the jobs, their order and what each
+        waits for -- which every client otherwise has to know, and agree about.
+
+        One request rather than one per job, because a flow is one intention. A
+        caller that had three jobs created and the fourth refused held a half-built
+        run with no way to say that none of it should have started; and creating
+        them one at a time was enough requests to meet this API's own rate limit,
+        since a database run launches one flow per group of related tables.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/jobs/flow",  # noqa: F541
+            "timeout": timeout,
+            "json_data": request,
+        }
+
+        return JobFlowCreateResponse(**self.client.request(**kwargs))
 
     def get_last_jobs(
         self,
@@ -325,10 +658,37 @@ class Jobs:
         *,
         timeout: int | None = DEFAULT_TIMEOUT,
     ) -> JobResponse:
-        """Delete a single job by name."""
+        """Delete a single job by name, cancelling it first if it is still running."""
         kwargs: dict[str, Any] = {
             "method": "delete",
             "url": f"/jobs/{job_name}",
+            "timeout": timeout,
+        }
+
+        return JobResponse(**self.client.request(**kwargs))
+
+    def cancel_job(
+        self,
+        job_name: str,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> JobResponse:
+        """Stop a job: at once if it has not started, at its next safe point if it has.
+
+        A job no worker has picked up comes back ``cancelled``. A running one comes
+        back as it was, with its phase set to ``cancelling``, and turns ``cancelled``
+        once it stops -- between stages, batches, tables or documents, never inside
+        one. It can still finish if it was past its last such point.
+
+        A database copy stopped while writing leaves the tables it had finished in
+        the target: writes cannot be rolled back across tables. The job's
+        ``exception`` names them.
+
+        The jobs waiting on it are cancelled too. 409 for a job that is already over.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/jobs/{job_name}/cancel",
             "timeout": timeout,
         }
 
@@ -340,7 +700,10 @@ class Jobs:
         *,
         timeout: int | None = DEFAULT_TIMEOUT,
     ) -> BulkDeleteResponse:
-        """Delete multiple jobs in a single request. Maximum 100 jobs at once."""
+        """Delete multiple jobs in a single request. Maximum 100 jobs at once.
+
+        A job that is still running is cancelled before it is deleted.
+        """
         kwargs: dict[str, Any] = {
             "method": "post",
             "url": f"/jobs/bulk-delete",  # noqa: F541

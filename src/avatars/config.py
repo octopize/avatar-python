@@ -5,8 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 UNCONFIGURED = "unconfigured"
 
-DEFAULT_API_URL = "https://www.octopize.app/api"
-DEFAULT_STORAGE_URL = "https://www.octopize.app/storage"
+PRODUCTION_BASE_URL = "https://www.octopize.app"
+DEFAULT_API_URL = f"{PRODUCTION_BASE_URL}/api"
+DEFAULT_STORAGE_URL = f"{PRODUCTION_BASE_URL}/storage"
 
 DEFAULT_CRASH_REPORT_PATH = "crash_report.txt"
 
@@ -77,7 +78,7 @@ class Config(BaseSettings):
     ----------
     BASE_API_URL : str
         The base URL of the Avatar API server.
-        Default is "http://www.octopize.app/api" for SaaS server.
+        Default is "https://www.octopize.app/api" for SaaS server.
     TIMEOUT : int
         Timeout in seconds for API requests.
         Default is 5 seconds.
@@ -86,7 +87,7 @@ class Config(BaseSettings):
         Default is True.
     STORAGE_ENDPOINT_URL : str
         The storage endpoint URL for file uploads/downloads.
-        Default is "http://www.octopize.app/storage" for SaaS server.
+        Default is "https://www.octopize.app/storage" for SaaS server.
     VERIFY_COMPATIBILITY : bool
         Whether to verify client-server compatibility on authentication.
         Default is True.

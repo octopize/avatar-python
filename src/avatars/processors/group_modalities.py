@@ -103,7 +103,7 @@ class GroupModalitiesProcessor:
                 self.variable_thresholds = dict.fromkeys(columns_to_reduce, self.global_threshold)
 
         # Apply the modality transformation
-        if self.variable_thresholds:  # TODO: fix me for mypy
+        if self.variable_thresholds:
             count = {x: df[x].value_counts().to_dict() for x in self.variable_thresholds.keys()}
             correspondence = {
                 key: {
@@ -113,7 +113,7 @@ class GroupModalitiesProcessor:
                 }
                 for key, value in count.items()
             }
-        df = df.replace(correspondence)
+            df = df.replace(correspondence)
 
         return df
 

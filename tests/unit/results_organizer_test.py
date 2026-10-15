@@ -102,6 +102,17 @@ def test_set_then_get_results_advice():
     assert_equals({"parameters": {"k": 10}}, retrieved)
 
 
+def test_set_then_get_results_metadata_from_json_list():
+    organizer = ResultsOrganizer()
+
+    organizer.set_results(
+        Results.METADATA, [{"key": "value"}], "run_metadata", {"kind": JobKind.standard}
+    )
+    retrieved = organizer.get_results("run_metadata", Results.METADATA, JobKind.standard)
+
+    assert_equals({"key": "value"}, retrieved)
+
+
 def test_unescape_table_name():
     organizer = ResultsOrganizer()
     escaped_name = "table_dot_name_slash_test"

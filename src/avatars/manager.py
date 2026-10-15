@@ -14,10 +14,10 @@ from avatar_yaml.models.avatar_metadata import (
 from avatar_yaml.models.parameters import ReportLanguage
 
 from avatars import __version__
-from avatars.base_client import ApiConnectionError
+from avatars.base_client import ApiConnectionError, ApiResponseError
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
-from avatars.config import Config, config, get_config
+from avatars.config import PRODUCTION_BASE_URL, Config, config, get_config
 from avatars.models import (
     BulkDeleteRequest,
     BulkDeleteResponse,
@@ -26,6 +26,23 @@ from avatars.models import (
     JobResponse,
 )
 from avatars.runner import Runner
+
+_ERROR_STATUS_PATTERN = re.compile(r"Error status (\d{3})")
+_MISCONFIGURED_URL_STATUSES = frozenset({301, 302, 307, 308, 404})
+
+
+def _is_same_host_https_redirect(response: httpx.Response) -> bool:
+    if not response.has_redirect_location:
+        return False
+    source = response.request.url
+    target = source.join(response.headers["location"])
+    return (
+        source.scheme == "http"
+        and target.scheme == "https"
+        and target.host == source.host
+        and source.port is None
+        and target.port is None
+    )
 
 
 def _increment_display_name_version(name: str) -> str:
@@ -102,7 +119,7 @@ class Manager:
             base_url: The url of your actual server endpoint,
                 e.g. base_url="https://avatar.company.co".
                 Backwards compatible with older placeholder for the api endpoint (``/api`` suffix).
-                If not provided, defaults to "https://octopize.app".
+                If not provided, defaults to "https://www.octopize.app".
 
             api_client: Optional pre-configured ApiClient instance.
                 Mutually exclusive with config, base_url, api_key.
@@ -198,7 +215,11 @@ class Manager:
         if not should_verify:
             return
 
-        response = self.auth_client.compatibility.is_client_compatible()
+        try:
+            response = self.auth_client.compatibility.is_client_compatible()
+        except Exception as e:
+            self._raise_on_misconfigured_url(e)
+            raise
 
         incompatible_statuses = [
             CompatibilityStatus.incompatible,
@@ -243,7 +264,39 @@ class Manager:
                     "Failed to authenticate with the Avatar API. "
                     "Please verify your API key is correct."
                 ) from e
+            self._raise_on_misconfigured_url(e)
             raise ApiConnectionError(f"Failed to connect to the Avatar API: {error_msg}") from e
+
+    def _raise_on_misconfigured_url(self, error: Exception) -> None:
+        """Re-raise a response that says the configured URL is not an Avatar API.
+
+        Parameters
+        ----------
+        error
+            The error raised while calling the API.
+
+        Raises
+        ------
+        ApiConnectionError
+            If the server answered a redirect or a 404.
+
+        """
+        match = _ERROR_STATUS_PATTERN.search(str(error))
+        if not match or int(match.group(1)) not in _MISCONFIGURED_URL_STATUSES:
+            return
+
+        configured_url = str(self.auth_client.base_url).rstrip("/").removesuffix("/api")
+        if isinstance(error, ApiResponseError) and _is_same_host_https_redirect(error.response):
+            https_url = httpx.URL(configured_url).copy_with(scheme="https")
+            raise ApiConnectionError(
+                f"{configured_url} redirects to HTTPS. Use base_url='{https_url}'. "
+                "Requests over http:// send your API key without encryption."
+            ) from error
+        raise ApiConnectionError(
+            f"{configured_url} does not serve the Avatar API (HTTP {match.group(1)}). "
+            f"The Octopize SaaS platform is at {PRODUCTION_BASE_URL}. "
+            "Your tenant might be at another address."
+        ) from error
 
     def create_runner(
         self,
@@ -424,10 +477,14 @@ class Manager:
             Returns an empty list if no matching set_name is found.
 
         """
-        all_non_advice_kinds: list[JobKind] = [k for k in JobKind if k != JobKind.advice]
-        matching_jobs = self.auth_client.jobs.get_jobs(
-            display_name=set_name, kind=all_non_advice_kinds
-        ).jobs
+        # Advice jobs are dropped here rather than by naming every other kind in the query: a
+        # kind this client knows and the server does not (a newer client on an older API)
+        # would make the server refuse the whole request.
+        matching_jobs = [
+            job
+            for job in self.auth_client.jobs.get_jobs(display_name=set_name).jobs
+            if job.kind != JobKind.advice
+        ]
 
         # Group jobs by set_name, preserving insertion order
         grouped: dict[str, list[JobResponse]] = {}
@@ -562,6 +619,92 @@ class Manager:
             job.name for job in self.auth_client.jobs.get_jobs(set_name=str(set_name_uuid)).jobs
         ]
         return self.delete_jobs(job_names)
+
+    def cancel_job(self, name: str) -> list[JobResponse]:
+        """Stop every job of a run identified by its name that is still going.
+
+        Looks the run up the way :meth:`delete_job` does, and refuses an
+        ambiguous name the same way. A job that has not started stops at once;
+        a running one stops at its next safe point and turns ``"cancelled"``
+        shortly after. See :meth:`Runner.cancel` for what a cancelled database
+        copy leaves in its target.
+
+        Parameters
+        ----------
+        name
+            The human-readable name given to the run.
+
+        Returns
+        -------
+        list[JobResponse]
+            The jobs a cancel was sent for, as the server answered.
+
+        Raises
+        ------
+        ValueError
+            If no run is found for the given name, or if several runs match and
+            the caller must disambiguate with :meth:`cancel_job_by_id`.
+
+        """
+        matches = self.find_ids_by_name(name)
+        if not matches:
+            raise ValueError(f"No jobs found for display name '{name}'")
+        if len(matches) > 1:
+            commands = "\n".join(
+                f'  manager.cancel_job_by_id(UUID("{set_name}"))' for set_name, _ in matches
+            )
+            raise ValueError(
+                f"Multiple runs found for display name '{name}'.\n"
+                "Cancel the desired run by set name:\n"
+                f"{commands}"
+            )
+        _, jobs = matches[0]
+        return self.cancel_jobs([job.name for job in jobs])
+
+    def cancel_job_by_id(self, id: UUID | str) -> list[JobResponse]:
+        """Stop every job of the run *id* that is still going.
+
+        Parameters
+        ----------
+        id
+            The UUID (or its string representation) of the run.
+
+        Returns
+        -------
+        list[JobResponse]
+            The jobs a cancel was sent for, as the server answered.
+
+        """
+        set_name_uuid = UUID(str(id))
+        job_names = [
+            job.name for job in self.auth_client.jobs.get_jobs(set_name=str(set_name_uuid)).jobs
+        ]
+        return self.cancel_jobs(job_names)
+
+    def cancel_jobs(self, job_names: list[str]) -> list[JobResponse]:
+        """Stop the named jobs, leaving alone the ones that are already over.
+
+        Each job's state is read just before its cancel is sent: cancelling one
+        job cancels the jobs waiting on it, so a job listed after its parent is
+        often over by the time its turn comes, and asking again would be refused.
+
+        Parameters
+        ----------
+        job_names
+            The names of the jobs to cancel.
+
+        Returns
+        -------
+        list[JobResponse]
+            The jobs a cancel was sent for, as the server answered.
+
+        """
+        cancelled: list[JobResponse] = []
+        for job_name in job_names:
+            if self.auth_client.jobs.get_job_status(job_name).done:
+                continue
+            cancelled.append(self.auth_client.jobs.cancel_job(job_name))
+        return cancelled
 
     def delete_jobs(self, job_names: list[str]) -> BulkDeleteResponse:
         """Delete multiple jobs by name, batching in groups of up to 100.

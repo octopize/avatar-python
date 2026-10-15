@@ -2,6 +2,135 @@
 
 ## NEXT RELEASE
 
+## 1.30.0 - 2026/10/15
+
+### Breaking Changes
+
+- BREAKING **infra/helm**: run the SeaweedFS admin server and s3_lifecycle worker (#7319)
+- BREAKING remove the local storage mode of the API (#7225)
+- BREAKING **infra/deploy-tool**: make --verbosity uniform across every command (#6607)
+
+### Features
+
+- **api**: create and run database jobs, with the connections they name (#7460)
+- **avatar**: copy a database through Extraction, anonymisation and Génération jobs (#7458)
+- **client/python**: advise the links between the tables (#7351)
+- **api**: remove the IS_STORAGE_LIFECYCLE_ENFORCED guard (#7321)
+- **api**: filter the job list by names (#7378)
+- **core**: implement tables_links advice to suggest foreign key relationships (#7341)
+- **api**: set the dataset retention window per user or per organization (#7255)
+- **avatar**: cut an augmented linked avatarization into chunks (#7289)
+- **api**: store the raised job exception in jobs.internal_exception (#7176)
+- **avatar**: cut a linked schema with pseudonymized columns (#7158)
+- **avatar**: enable multitable chunking in production (#7103)
+- **api**: allow dots in resource set display names (#7182)
+- **api**: page and filter the event logs (#7199)
+- **client/python**: build one docs version per run instead of all versions (#7200)
+- **avatar**: let the broadcasts cut a link pass (#7163)
+- **avatar**: close a link chunk only once it holds a child row (#7162)
+- **avatar**: hold Cat2VecInverseTransform to Avatarize's chunks with Replay() (#7036)
+- **avatar**: make Shuffle batchable (#7016)
+- **avatar**: merge each state in the order of its own row position (#7032)
+- **avatar**: cut every state by the rows whose key columns match the chunk (#7031)
+- **avatar**: mint a row position for every row a write adds (#7030)
+- **avatar**: load every table with a row position column that never ships (#7029)
+- **avatar**: fit the preprocess over every chunk before applying it (#7027)
+- **avatar**: run metrics on a sample of each table in multi-table run (#6960)
+- **avatar**: make minimum distance and row order trully batchable (not only lsa) (#6983)
+- **avatar**: refuse a standing cut that the table has already left (#6984)
+- **avatar**: state the measured population for each metric family (#6952)
+- **avatar**: cut every single-table run at random, and draw the metrics phase boundary (#6951)
+- **avatar**: compute metrics on a representative sample (#6950)
+- **avatar**: carry the halves that a cut metrics table holds (#6949)
+- **avatar**: implement spatial chunking for IICT assignment (#6930)
+- **avatar**: add a Random partitioning, and flush a chunk's results per table (#6934)
+- **avatar**: report the exact dimensionality of a table's data (#6923)
+- **avatar**: fit one projection model per link so IICT stops fitting in memory (#6828)
+- **avatar**: log which chunk of which table a stage runs on (#6898)
+- **avatar**: cut a linked schema one link at a time (#6792)
+- **client/python**: add exclude_variables for TS (#6819)
+- **avatar**: make PowerTransform batchable (#6738)
+- **avatar**: use Cat2Vec inverse transform reference cloud (#6730)
+- **avatar**: add entity-grouped and stratified partitioners with global row indices (#6776)
+- **avatar**: fit Cat2Vec once across chunks — count, fit and apply stages (ADR 0003) (#6702)
+- **avatar**: add updated_at fiekld in org and license table (#6658)
+- **avatar**: add stage-level partitioning contract and invert the batch loop (#6653)
+- **avatar**: support freeze (exclude_variables) for time series columns (#6531)
+
+### Bug Fixes
+
+- **client/python**: give each Tutorial 7 privacy assessment its own table name (#7472)
+- **avatar**: pair the avatars of a time series through its anchor in a metrics run (#7387)
+- **avatar**: resample avatar time series to the points of the originals (#7357)
+- **avatar**: route the normalized avatar of a time series with its entities (#7354)
+- **avatar**: draw each figure from the originals and avatars of one chunk (#7365)
+- **avatar**: cap the projection of a cut link at the 64 dimensions its key holds (#7305)
+- **avatar**: exclude pseudonymized columns from the dimension gate (#7310)
+- **avatar**: record the origins of the copies Split puts into each table (#7304)
+- **avatar**: read the origin of each child copy off its row id in IICTAssign (#7113)
+- **avatar**: write one augmentation mapping entry per avatar in a cut linked run (#7267)
+- **avatar**: read the augmentation mapping of a chunk cut back off the origin ledger (#7186)
+- **avatar**: measure skewed columns on the Box-Cox values the avatarization models (#7262)
+- **avatar**: avatarize each time series group with its own k (#7223)
+- **avatar**: cut a table back to the chunks it held, by row id (#7122)
+- **core**: plot categorical columns that mix int and str values (#7181)
+- **avatar**: keep dtypes and index of a state released to disk (#7209)
+- **avatar**: find the reportgenerator binary in local integration tests (#7217)
+- **core**: report a failed value type cast as InvalidTypeCast (#7180)
+- **core**: reject an invalid gmm_n_components before fitting (#7179)
+- **api**: start the Dask cluster off the event loop (#7203)
+- **client/python**: tell the user to use https when the API redirects from http (#7038)
+- **avatar**: keep the columns of an empty chunk (#7161)
+- **core**: join an empty child on the dtype of the parent key (#7160)
+- **avatar**: gather the states of a spatial view by row id (#7108)
+- **avatar**: count augmented copies as the original's own avatars in enriched privacy metrics (#7147)
+- **avatar**: store data augmentation mapping under correct table name (#7174)
+- **avatar**: retry a CSV whose rows break the sniffed delimiter after the first block (#7078)
+- **avatar**: fall back to a comma when the sniffed CSV delimiter is not ASCII (#7077)
+- **avatar**: sniff the CSV dialect with the settled encoding, across a cut character (#7057)
+- **api**: refuse to revoke an unknown API key with 403, not 500 (#7058)
+- **client/python**: ship only the package source in the sdist (#7105)
+- **api**: charge credits at job results instead of creation (#7020)
+- **core**: list a column's modalities in the order of their values (#6947)
+- **core**: avoid null concatenation crash in aggregate_statistics (#6982)
+- **avatar**: set a pyarrow column from any array, not only a pandas one (#6987)
+- **avatar**: stop deriving a TS identity from a row position (#6959)
+- **api**: stop logging the database password at setup (#6990)
+- **avatar**: handle missing processor in Batch context (#6965)
+- **avatar**: carry a broadcast one level, not down the whole hierarchy (#6945)
+- **core**: count a table's dimensions in one place again (#6940)
+- **core**: report the contribution score per modality, with the right labels (#6848)
+- **avatar**: stop the IICT projection test writing a deleted VState (#6933)
+- **avatar**: batch VerifyTable and VerifyLinks (#6896)
+- **avatar**: average privacy meta-metric over individual tables only (#6851)
+- **client/python**: return an explicit error when the API URL is misconfigured (#6850)
+- **api**: depend on polars[rtcompat] instead of picking it per build host (#6687)
+- **client/python**: reject an empty api key instead of sending no auth header (#6788)
+- **avatar**: include batch index in coordinator stage logs (#6784)
+- **avatar**: read all tables in Pseudonimization stage (#6785)
+- **avatar**: keep a CATEGORY column's dtype across a spill round trip (#6737)
+- **avatar**: remove frozen columns from avatars data TS + PM (#6685)
+- **client/python**: drop the pandas upper bound (#6684)
+- **avatar**: don't read time series params in advisor (#6679)
+- **avatar**: cast holdout to declared types (#6657)
+- **avatar**: escape name of table_name when needed (#6654)
+- **avatar**: handle escaped table names in PreProcessMT (#6655)
+- **api**: Ensure modalities are populated for numeric-encoded categor… (#6273)
+- **api**: return the ProjectorError message instead of "internal error" (#6478)
+
+### Added
+
+- Database runs: `Runner.add_database(source, target, plan=..., shared_entities=...)`
+  copies a database into another, anonymized, and `Runner.add_databases(...)` does
+  it for several databases that share people or other entities. A run is planned
+  with `Runner.proposed_plan()` and reviewed with `SchemaPlan`; something several
+  tables or databases share is declared with `shared_entity(...)`, so it gets one
+  replacement everywhere.
+
+### Performance
+
+- **client**: wait for each job on its own adaptive schedule. The client checks a new job every 0.25 s. The wait between checks grows with the age of the job, up to 20 s. Short jobs are no longer delayed by a fixed 5 s sleep.
+
 ## 1.29.0 - 2026/08/10
 
 ## 1.28.0 - 2026/08/07

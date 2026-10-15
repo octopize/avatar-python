@@ -1,6 +1,7 @@
 """Unit tests for API key authentication."""
 
 import os
+import warnings
 from typing import Any
 from unittest import mock
 from unittest.mock import MagicMock
@@ -11,7 +12,7 @@ import pytest
 from avatars.base_client import ApiConnectionError, ContextData
 from avatars.client import ApiClient
 from avatars.manager import Manager
-from tests.unit.conftest import FakeApiClient, FakeIncompatibleCompatibility
+from tests.unit.conftest import FAKE_API_KEY, FakeApiClient, FakeIncompatibleCompatibility
 
 
 def make_manager(**kwargs: Any) -> Manager:
@@ -24,7 +25,7 @@ class TestApiClientApiKeyAuth:
 
     def test_api_key_in_constructor_sets_header(self) -> None:
         """Verify that passing api_key to constructor sets Authorization header."""
-        api_key = "test-api-key-456"
+        api_key = FAKE_API_KEY
         client = ApiClient(
             base_url="http://localhost:8000/api",
             api_key=api_key,
@@ -37,7 +38,7 @@ class TestApiClientApiKeyAuth:
 
     def test_api_key_auth_passes_check_auth(self) -> None:
         """Verify that API key authentication passes check_auth."""
-        api_key = "test-api-key-check-auth"
+        api_key = FAKE_API_KEY
         client = ApiClient(
             base_url="http://localhost:8000/api",
             api_key=api_key,
@@ -61,7 +62,7 @@ class TestManagerApiKeyAuth:
 
     def test_manager_with_api_key_creates_client(self) -> None:
         """Verify that Manager with api_key creates ApiClient with api_key."""
-        api_key = "manager-api-key-123"
+        api_key = FAKE_API_KEY
         fake_client = FakeApiClient()
         fake_client.set_api_key(api_key)
 
@@ -76,7 +77,7 @@ class TestManagerApiKeyAuth:
 
     def test_manager_mutual_exclusivity_api_client_and_api_key(self) -> None:
         """Verify that providing both api_client and api_key raises ValueError."""
-        api_key = "test-api-key"
+        api_key = FAKE_API_KEY
         fake_client = FakeApiClient()
 
         with pytest.raises(
@@ -90,7 +91,7 @@ class TestManagerApiKeyAuth:
 
     def test_manager_create_runner_with_api_key(self) -> None:
         """Verify that Manager with api_key can create runners."""
-        api_key = "manager-runner-api-key"
+        api_key = FAKE_API_KEY
         fake_client = FakeApiClient()
         fake_client.set_api_key(api_key)
 
@@ -104,10 +105,10 @@ class TestManagerApiKeyAuth:
 
     def test_manager_with_api_key_checks_compatibility(self) -> None:
         """Verify that Manager with api_key checks compatibility and raises when incompatible."""
-        api_key = "manager-runner-api-key"
+        api_key = FAKE_API_KEY
         fake_client = FakeApiClient()
         fake_client.set_api_key(api_key)
-        fake_client.compatibility = FakeIncompatibleCompatibility()  # type: ignore
+        fake_client.compatibility = FakeIncompatibleCompatibility()  # type: ignore[assignment,no-untyped-call]
 
         with pytest.raises(
             DeprecationWarning,
@@ -129,7 +130,7 @@ class TestApiKeyFormatting:
 
     def test_api_key_header_format(self) -> None:
         """Verify the API key header uses 'api-key-v1' scheme."""
-        api_key = "my-secret-key"
+        api_key = FAKE_API_KEY
         client = ApiClient(
             base_url="http://localhost:8000/api",
             api_key=api_key,
@@ -141,7 +142,8 @@ class TestApiKeyFormatting:
 
     def test_api_key_with_special_characters(self) -> None:
         """Verify API key works with special characters."""
-        api_key = "key-with-dashes_and_underscores.123"
+        secret = "key-with_dashes.and_underscores".ljust(43, "0")
+        api_key = f"octopize_apikey.11111111-2222-4333-8444-555555555555.{secret}"
         client = ApiClient(
             base_url="http://localhost:8000/api",
             api_key=api_key,
@@ -150,6 +152,40 @@ class TestApiKeyFormatting:
 
         expected_header = f"api-key-v1 {api_key}"
         assert client._headers["Authorization"] == expected_header
+
+    def test_unexpected_api_key_length_warns(self) -> None:
+        """Verify a truncated API key is flagged instead of silently failing at the server."""
+        truncated = FAKE_API_KEY[:-5]
+
+        with pytest.warns(UserWarning, match="91 characters long, expected 96"):
+            client = ApiClient(
+                base_url="http://localhost:8000/api",
+                api_key=truncated,
+                verify_auth=False,
+            )
+
+        assert client._headers["Authorization"] == f"api-key-v1 {truncated}"
+
+    def test_expected_api_key_length_does_not_warn(self) -> None:
+        """Verify a well-formed API key produces no warning."""
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            ApiClient(
+                base_url="http://localhost:8000/api",
+                api_key=FAKE_API_KEY,
+                verify_auth=False,
+            )
+
+    def test_empty_api_key_sets_no_auth_header(self) -> None:
+        """Verify an empty API key is not reported as configured api key authentication."""
+        client = ApiClient(
+            base_url="http://localhost:8000/api",
+            api_key="",
+            verify_auth=False,
+        )
+
+        assert not client.is_using_api_key()
+        assert "Authorization" not in client._headers
 
 
 class TestManagerConnectionVerification:

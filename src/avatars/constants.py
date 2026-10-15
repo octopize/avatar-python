@@ -3,7 +3,6 @@ import re
 from enum import StrEnum
 from typing import (
     IO,
-    TYPE_CHECKING,
     Any,
     BinaryIO,
 )
@@ -11,12 +10,17 @@ from typing import (
 import pandas as pd
 from avatar_yaml.models.schema import ColumnType
 
-if TYPE_CHECKING:
-    from IPython.display import HTML
+# Imported at runtime, not under TYPE_CHECKING: ``TypeResults`` below is a PEP 695
+# alias, and Sphinx >=9 evaluates alias values while documenting them, which raises
+# NameError on a type-checking-only import. ipython is a hard runtime dependency.
+from IPython.display import HTML
 
 from avatars.models import JobKind, JobStatus
 
 DEFAULT_TIMEOUT = 5
+
+# Server format: octopize_apikey.<uuid4>.<token_urlsafe(32)> (api/domain/api_key.py).
+EXPECTED_API_KEY_LENGTH = 96
 
 FileLike = BinaryIO | IO[Any] | io.IOBase
 FileLikes = list[FileLike]
@@ -31,7 +35,11 @@ JOB_EXECUTION_ORDER = [
 
 ERROR_STATUSES = [JobStatus.parent_error, JobStatus.error, JobStatus.lost, JobStatus.orphaned]
 
-READY_STATUSES = [JobStatus.finished, *ERROR_STATUSES]
+# Stopped on request: over, like the error statuses, and not one of them -- the
+# job did not fail, somebody asked it to stop (see ``Runner.cancel``).
+CANCELLED_STATUSES = [JobStatus.cancelled]
+
+READY_STATUSES = [JobStatus.finished, *ERROR_STATUSES, *CANCELLED_STATUSES]
 
 _FAILURE_STATUSES: frozenset[JobStatus] = frozenset(
     {JobStatus.error, JobStatus.parent_error, JobStatus.lost, JobStatus.orphaned}
@@ -41,7 +49,11 @@ _QUEUED_STATUSES: frozenset[JobStatus] = frozenset({JobStatus.queued, JobStatus.
 
 
 def aggregate_job_status(statuses: list[JobStatus]) -> JobStatus:
-    """Return the 'worst' status from a list — failure > pending > queued > finished.
+    """Return the 'worst' status from a list — failure > cancelled > pending > queued > finished.
+
+    Cancelled ranks below a failure, which is news, and above anything still
+    running: a run with a cancelled job in it will not deliver what it set out
+    to, however its other jobs end.
 
     Parameters
     ----------
@@ -57,6 +69,9 @@ def aggregate_job_status(statuses: list[JobStatus]) -> JobStatus:
     """
     for s in statuses:
         if s in _FAILURE_STATUSES:
+            return s
+    for s in statuses:
+        if s in CANCELLED_STATUSES:
             return s
     for s in statuses:
         if s in _PENDING_STATUSES:
@@ -77,7 +92,9 @@ DEFAULT_RATE_LIMIT_MIN_WAIT_SECONDS = 1.0
 
 # For creating and polling jobs
 DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS = 0.5
-DEFAULT_POLL_INTERVAL = 5
+POLL_INTERVAL_FACTOR = 0.15
+MIN_POLL_INTERVAL_SECONDS = 0.25
+MAX_POLL_INTERVAL_SECONDS = 20.0
 
 
 class Results(StrEnum):
@@ -97,6 +114,8 @@ class Results(StrEnum):
     FIGURES_METADATA = "figures_metadata"
     PRIVACY_METRICS_SUMMARY = "privacy_metrics_summary"
     SIGNAL_METRICS_SUMMARY = "signal_metrics_summary"
+    REFERENCE_TABLES = "reference_tables"
+    """What a database run's subjects joined: counts per source, never keys or values."""
 
 
 class PlotKind(StrEnum):
@@ -149,6 +168,7 @@ RESULTS_TO_STORE = [
     Results.FIGURES,
     Results.PRIVACY_METRICS_SUMMARY,
     Results.SIGNAL_METRICS_SUMMARY,
+    Results.REFERENCE_TABLES,
 ]
 
 type TypeResults = dict[str, Any] | pd.DataFrame | str | list[dict[str, Any]] | HTML | None
@@ -159,7 +179,6 @@ MATCHERS: dict[re.Pattern[str], ColumnType] = {
     re.compile(r"bool"): ColumnType.BOOL,
     re.compile(r"datetime"): ColumnType.DATETIME,
     re.compile(r"datetime64\[ns, UTC\]"): ColumnType.DATETIME_TZ,
-    # FIXME: implement bool ColumnType
 }
 
 DEFAULT_TYPE = ColumnType.CATEGORY
@@ -176,4 +195,5 @@ mapping_result_to_file_name = {
     Results.REPORT: "report.md",
     Results.PRIVACY_METRICS_SUMMARY: "privacy_metrics_summary.json",
     Results.SIGNAL_METRICS_SUMMARY: "signal_metrics_summary.json",
+    Results.REFERENCE_TABLES: "reference_tables.json",
 }

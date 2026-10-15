@@ -5,7 +5,10 @@ from unittest.mock import Mock, patch
 import httpx
 import pytest
 
-from avatars.base_client import TimeoutError  # noqa: A004 - SDK's own TimeoutError under test
+from avatars.base_client import (
+    ApiResponseError,
+    TimeoutError,  # noqa: A004 - SDK's own TimeoutError under test
+)
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
 from tests.unit.conftest import RequestHandle, api_client_factory, mock_httpx_client
@@ -185,6 +188,16 @@ class TestClientRequest:
 
         assert result == {"message": "ok"}
 
+    def test_an_empty_204_answer_is_an_empty_result_not_a_parse_error(self) -> None:
+        """A delete answers 204 with a JSON content type and no body."""
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(204, headers={"content-type": "application/json"})
+
+        api_client = api_client_factory(handler)
+
+        assert api_client.request("DELETE", "/connections/crm") == {}
+
     def test_retries_on_ssl_eof_error(self, caplog: Any) -> None:
         """Verify that the client retries on httpx.RequestError.
 
@@ -221,10 +234,10 @@ class TestClientRequest:
         """Verify that the client handles error in JSON format with unrecognized structure."""
         api_client = prepare_api_client_for(httpx.Response(403, json={"whatever": "a json error"}))
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ApiResponseError, match="Got error in HTTP request") as exc_info:
             api_client.send_request(method="GET", url="/health")
 
-        assert exc_info.type is Exception
+        assert exc_info.value.response.status_code == 403
         msg = exc_info.value.args[0]
         assert "Got error in HTTP request" in msg
         assert "Error status 403 - Internal error: {'whatever': 'a json error'}" in msg
@@ -235,10 +248,10 @@ class TestClientRequest:
             httpx.Response(403, json={"message": "a json error in message"})
         )
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ApiResponseError, match="Got error in HTTP request") as exc_info:
             api_client.send_request(method="GET", url="/health")
 
-        assert exc_info.type is Exception
+        assert exc_info.value.response.status_code == 403
         msg = exc_info.value.args[0]
         assert "Got error in HTTP request" in msg
         assert "Error status 403 - a json error in message" in msg
@@ -247,10 +260,10 @@ class TestClientRequest:
         """Verify that the client handles error not in JSON format."""
         api_client = prepare_api_client_for(httpx.Response(403, text="a plain text error"))
 
-        with pytest.raises(Exception) as exc_info:
+        with pytest.raises(ApiResponseError, match="Got error in HTTP request") as exc_info:
             api_client.send_request(method="GET", url="/health")
 
-        assert exc_info.type is Exception
+        assert exc_info.value.response.status_code == 403
         msg = exc_info.value.args[0]
         assert "Got error in HTTP request" in msg
         assert "Error status 403" in msg

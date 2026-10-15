@@ -27,10 +27,20 @@ from avatars.models import (
     JobKind,
     JobResponse,
     JobResponseList,
+    JobStatus,
     ResourceSetResponse,
 )
 
 RequestHandle = Callable[[httpx.Request], httpx.Response]
+
+FAKE_API_KEY = "octopize_apikey.00000000-0000-4000-8000-000000000000." + "a" * 43
+
+_SEED = 42
+
+
+def _seeded(rng: np.random.Generator | None) -> np.random.Generator:
+    return np.random.default_rng(_SEED) if rng is None else rng
+
 
 setup_logging()
 
@@ -121,13 +131,15 @@ def no_sleep():
         yield
 
 
-def mock_httpx_client(handler: RequestHandle | None = None) -> httpx.Client:
+def mock_httpx_client(
+    handler: RequestHandle | None = None, base_url: str = "http://localhost:8000"
+) -> httpx.Client:
     """Generate a HTTPX client with a MockTransport."""
     if handler is None:
         handler = lambda request: httpx.Response(200, json={})  # noqa: E731
 
     transport = httpx.MockTransport(handler)
-    return httpx.Client(base_url="http://localhost:8000", transport=transport)  # nosec
+    return httpx.Client(base_url=base_url, transport=transport)  # nosec
 
 
 def api_client_factory(handler: RequestHandle | None = None) -> ApiClient:
@@ -155,6 +167,7 @@ class FakeJobs:
         )
         self._jobs: dict[str, JobResponse] = {}
         self.bulk_delete_calls: list[BulkDeleteRequest] = []
+        self.cancel_calls: list[str] = []
 
     def add_job(self, job: JobResponse) -> None:
         """Pre-populate a job into the fake store (for test setup)."""
@@ -227,6 +240,18 @@ class FakeJobs:
             raise ValueError(f"Job '{job_name}' not found")
         return self._jobs.pop(job_name)
 
+    def cancel_job(self, job_name: str) -> JobResponse:
+        """Answer as the server does for a job no worker has started: cancelled at once."""
+        self.cancel_calls.append(job_name)
+        if job_name not in self._jobs:
+            raise ValueError(f"Job '{job_name}' not found")
+        job = self._jobs[job_name]
+        if job.done:
+            raise ValueError(f"Job '{job_name}' cannot be cancelled: it is already over")
+        cancelled = job.model_copy(update={"status": JobStatus.cancelled, "done": True})
+        self._jobs[job_name] = cancelled
+        return cancelled
+
     def bulk_delete_jobs(self, request: BulkDeleteRequest) -> BulkDeleteResponse:
         self.bulk_delete_calls.append(request)
         deleted: list[JobResponse] = []
@@ -239,11 +264,12 @@ class FakeJobs:
         return BulkDeleteResponse(deleted_jobs=deleted, failed_jobs=failed)
 
 
-def privacy_metrics_factory(table_name: str) -> str:
+def privacy_metrics_factory(table_name: str, rng: np.random.Generator | None = None) -> str:
+    rng = _seeded(rng)
     return json.dumps(
         {
-            "local_cloaking": np.random.uniform(0, 100),
-            "hidden_rate": np.random.uniform(0, 100),
+            "local_cloaking": rng.uniform(0, 100),
+            "hidden_rate": rng.uniform(0, 100),
             "metadata": {
                 "table_name": table_name,
                 "computation_type": "standalone",
@@ -253,11 +279,12 @@ def privacy_metrics_factory(table_name: str) -> str:
     )
 
 
-def signal_metrics_factory(table_name: str) -> str:
+def signal_metrics_factory(table_name: str, rng: np.random.Generator | None = None) -> str:
+    rng = _seeded(rng)
     return json.dumps(
         {
-            "hellinger_mean": np.random.uniform(0, 100),
-            "hellinger_std": np.random.uniform(0, 100),
+            "hellinger_mean": rng.uniform(0, 100),
+            "hellinger_std": rng.uniform(0, 100),
             "metadata": {
                 "table_name": table_name,
                 "computation_type": "standalone",
@@ -268,10 +295,12 @@ def signal_metrics_factory(table_name: str) -> str:
 
 
 def run_metadata_factory() -> str:
-    return """{
-        'created_at': '2025-07-08T12:09:23.820284+00:00',
-        'finished_at': '2025-07-08T12:09:24.362366+00:00'
-        }"""
+    return json.dumps(
+        {
+            "created_at": "2025-07-08T12:09:23.820284+00:00",
+            "finished_at": "2025-07-08T12:09:24.362366+00:00",
+        }
+    )
 
 
 def figures_metadata_factory(table_name: str) -> str:
@@ -288,12 +317,14 @@ def figures_factory() -> str:
     return """<div>Test</div>"""
 
 
-def meta_privacy_metrics_factory() -> str:
-    return json.dumps({"meta_privacy": {np.random.uniform(1, 100)}})
+def meta_privacy_metrics_factory(rng: np.random.Generator | None = None) -> str:
+    rng = _seeded(rng)
+    return json.dumps({"meta_privacy": {rng.uniform(1, 100)}})
 
 
-def meta_signal_metrics_factory() -> str:
-    return json.dumps({"meta_signal": {np.random.uniform(1, 100)}})
+def meta_signal_metrics_factory(rng: np.random.Generator | None = None) -> str:
+    rng = _seeded(rng)
+    return json.dumps({"meta_signal": {rng.uniform(1, 100)}})
 
 
 def string_table_factory() -> str:
@@ -415,10 +446,17 @@ class FakeResults:
 class FakeResources:
     def __init__(self):
         self._stored_resources: dict[str, str] = {}
+        self._stored_names: list[str] = []
+        """Every display name that was uploaded, in order.
+
+        The API validates these -- letters, digits, `_` and `-` only -- so a
+        test that wants to know what was sent has to be able to see it.
+        """
 
     def put_resources(self, display_name, yaml_string) -> ResourceSetResponse:
         set_name = uuid4()
         self._stored_resources[str(set_name)] = yaml_string
+        self._stored_names.append(str(display_name))
         return ResourceSetResponse(set_name=set_name, display_name=display_name)
 
     def get_resources(self, set_name: str) -> str:
@@ -555,17 +593,17 @@ class FakeApiClient(ApiClient):
 
         """
         self.tables = tables or []
-        self.jobs = FakeJobs()  # type: ignore
-        self.results = FakeResults(tables=self.tables)  # type: ignore
-        self.resources = FakeResources()  # type: ignore
-        self.users = FakeUsers()  # type: ignore
-        self.health = FakeHealth()  # type: ignore
+        self.jobs = FakeJobs()  # type: ignore[no-untyped-call]
+        self.results = FakeResults(tables=self.tables)  # type: ignore[assignment]
+        self.resources = FakeResources()  # type: ignore[assignment,no-untyped-call]
+        self.users = FakeUsers()  # type: ignore[assignment,no-untyped-call]
+        self.health = FakeHealth()  # type: ignore[assignment,no-untyped-call]
         self.base_url = "http://localhost:8000"
-        self.auth = FakeAuth()  # type: ignore
-        self.compatibility = FakeCompatibility()  # type: ignore
+        self.auth = FakeAuth()  # type: ignore[no-untyped-call]
+        self.compatibility = FakeCompatibility()  # type: ignore[assignment,no-untyped-call]
         self.timeout = 100
         # Initialize attributes needed for API key authentication
-        self._api_key: str | None = "test-api-key"
+        self._api_key: str | None = FAKE_API_KEY
         self._headers: dict[str, str] = {"Authorization": "api-key-v1 test-api-key"}
         # Initialize fake storage
         self.storage = FakeStorage()

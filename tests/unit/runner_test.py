@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
-from typing import get_args
-from unittest.mock import MagicMock, call
+from typing import Any, get_args
+from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 import pandas as pd
@@ -18,13 +18,31 @@ from avatar_yaml.models.parameters import (
 )
 from avatar_yaml.models.schema import ColumnType
 
-from avatars.constants import Results
+from avatars.constants import PlotKind, Results
 from avatars.manager import Manager
 from avatars.models import BulkDeleteResponse, JobKind, JobResponse, JobStatus
 from avatars.runner import Runner
 from tests.unit.conftest import FakeApiClient, JobResponseFactory, create_fake_job
+from tests.unit.job_polling_test import FakeClock
 
 FIXTURES_PATH = Path(__file__).parent.parent.parent / "fixtures"
+
+LINKS_ADVICE: dict[str, Any] = {
+    "fakeurl/parent.advice.json": {
+        "table_name": "parent",
+        "advice": {
+            "links": [
+                {
+                    "field": "id",
+                    "to": {"table": "child", "field": "id2"},
+                    "method": "linear_sum_assignment",
+                    "confidence": "high",
+                }
+            ],
+            "unlinked_foreign_keys": [],
+        },
+    },
+}
 
 
 class TestRunner:
@@ -351,6 +369,40 @@ class TestRunner:
         assert runner.results.avatars_projections != {}
         assert runner.results.figures != {}
 
+    def test_figures_metadata_is_downloaded_once_per_batch(self):
+        figure_urls = [f"https://storage/job/figure_{i}.html" for i in range(3)]
+        metadata_url = "https://storage/job/figures_metadata.json"
+        self.runner.results_urls["standard"] = {
+            Results.FIGURES: figure_urls,
+            Results.FIGURES_METADATA: [metadata_url],
+        }
+        downloader = MagicMock()
+        downloader.download_files_batch.return_value = dict.fromkeys(figure_urls, "<html></html>")
+        downloader.download_file.return_value = [
+            {"filename": Path(url).name, "table_name": "table"} for url in figure_urls
+        ]
+        results = MagicMock()
+        self.runner.file_downloader = downloader
+        self.runner.results = results
+
+        with patch.object(self.runner, "get_specific_result_urls", return_value=figure_urls):
+            self.runner._download_specific_result("standard", Results.FIGURES)
+
+        downloader.download_file.assert_called_once_with(metadata_url)
+        assert results.find_figure_metadata.call_args_list == [
+            call(downloader.download_file.return_value, url) for url in figure_urls
+        ]
+
+    def test_figures_metadata_is_not_downloaded_without_figures(self):
+        downloader = MagicMock()
+        downloader.download_files_batch.return_value = {}
+        self.runner.file_downloader = downloader
+
+        with patch.object(self.runner, "get_specific_result_urls", return_value=[]):
+            self.runner._download_specific_result("standard", Results.FIGURES)
+
+        downloader.download_file.assert_not_called()
+
     def test_get_all_results_multitable(self):
         manager = Manager(api_client=FakeApiClient(tables=["parent", "child"]))
         runner = manager.create_runner("test")
@@ -377,6 +429,182 @@ class TestRunner:
         assert runner.results.original_projections != {}
         assert runner.results.avatars_projections != {}
         assert runner.results.figures != {}
+
+    def _run_multitable(self, client: FakeApiClient) -> Runner:
+        runner = Manager(api_client=client).create_runner("test")
+        runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
+        runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
+        runner.add_link("parent", "id", "child", "id2")
+        runner.set_parameters("parent", k=1)
+        runner.set_parameters("child", k=1)
+        runner.run()
+        return runner
+
+    def test_get_all_results_downloads_each_job_result_once(self):
+        runner = self._run_multitable(FakeApiClient(tables=["parent", "child"]))
+
+        with patch.object(
+            runner, "_download_specific_result", wraps=runner._download_specific_result
+        ) as download:
+            runner.get_all_results()
+            runner.get_all_results()
+
+        downloaded = [c.args for c in download.call_args_list]
+        assert len(downloaded) == len(set(downloaded))
+        assert (JobKind.standard.value, Results.FIGURES) in downloaded
+        assert (JobKind.standard.value, Results.METADATA) in downloaded
+        assert runner.results.run_metadata.keys() == {
+            JobKind.standard.value,
+            JobKind.signal_metrics.value,
+            JobKind.privacy_metrics.value,
+        }
+
+    def test_get_all_results_twice_does_not_duplicate_entries(self):
+        client = FakeApiClient(tables=["parent", "child"])
+        runner = self._run_multitable(client)
+        runner.get_all_results()
+
+        with patch.object(
+            client.results,
+            "get_permissions_to_download_batch",
+            wraps=client.results.get_permissions_to_download_batch,
+        ) as batch:
+            runner.get_all_results()
+            for table_name in ["parent", "child"]:
+                runner.privacy_metrics(table_name)
+                runner.signal_metrics(table_name)
+                runner.get_specific_result(table_name, JobKind.standard, Results.FIGURES)
+
+        batch.assert_not_called()
+        assert runner.results.figures == {"parent": {PlotKind.PROJECTION_2D: [ANY]}}
+        assert {t: len(m) for t, m in runner.results.privacy_metrics.items()} == {
+            "parent": 1,
+            "child": 1,
+        }
+        assert {t: len(m) for t, m in runner.results.signal_metrics.items()} == {
+            "parent": 1,
+            "child": 1,
+        }
+
+    def test_get_specific_result_without_entry_does_not_download_again(self):
+        runner = self._run_multitable(FakeApiClient(tables=["parent", "child"]))
+
+        with patch.object(
+            runner, "_download_specific_result", wraps=runner._download_specific_result
+        ) as download:
+            first = runner.get_specific_result("child", JobKind.standard, Results.FIGURES)
+            second = runner.get_specific_result("child", JobKind.standard, Results.FIGURES)
+
+        assert first is None
+        assert second is None
+        download.assert_called_once_with(JobKind.standard.value, Results.FIGURES)
+
+    def test_run_again_downloads_fresh_results(self):
+        runner = self._run_multitable(FakeApiClient(tables=["parent", "child"]))
+        runner.shuffled("parent")
+
+        runner.run(ignore_warnings=True)
+        with patch.object(
+            runner, "_download_specific_result", wraps=runner._download_specific_result
+        ) as download:
+            runner.shuffled("parent")
+
+        download.assert_called_once_with(JobKind.standard.value, Results.SHUFFLED)
+
+    def test_advise_parameters_launches_one_job_when_advice_is_missing(self):
+        client = FakeApiClient(tables=["parent"])
+        runner = Manager(api_client=client).create_runner("test")
+        runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
+        runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
+        runner.add_link("parent", "id", "child", "id2")
+
+        with patch.object(runner.jobs, "launch_job", wraps=runner.jobs.launch_job) as launch:
+            runner.advise_parameters()
+
+        launch.assert_called_once()
+
+    def test_advise_parameters_again_downloads_fresh_advice(self):
+        client = FakeApiClient(tables=["parent"])
+        runner = Manager(api_client=client).create_runner("test")
+        runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
+        runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
+        runner.add_link("parent", "id", "child", "id2")
+        runner.advise_parameters("parent")
+
+        client.tables.append("child")
+        runner.advise_parameters("child")
+
+        assert runner.config.avatarization["child"].k is not None
+
+    def _unlinked_runner(self) -> tuple[Runner, FakeApiClient]:
+        client = FakeApiClient(tables=["parent", "child"])
+        runner = Manager(api_client=client).create_runner("test")
+        runner.add_table("parent", data=self.df_parent, primary_key="id", individual_level=True)
+        runner.add_table("child", data=self.df_child, primary_key="id", foreign_keys=["id2"])
+        return runner, client
+
+    def _advise_links(self, runner: Runner, *, apply: bool = True):
+        with patch.object(
+            runner.file_downloader, "download_files_batch", return_value=LINKS_ADVICE
+        ):
+            return runner.advise_links(apply=apply)
+
+    def test_advise_links_adds_the_advised_links(self):
+        runner, client = self._unlinked_runner()
+
+        with patch.object(
+            client.resources, "put_resources", wraps=client.resources.put_resources
+        ) as put:
+            advice = self._advise_links(runner)
+
+        assert [(link.parent_table, link.child_table) for link in advice.links] == [
+            ("parent", "child")
+        ]
+        links = runner.config.tables["parent"].links
+        assert links is not None
+        assert [(link.field, link.to.table, link.to.field) for link in links] == [
+            ("id", "child", "id2")
+        ]
+        yaml = put.call_args.kwargs["yaml_string"]
+        assert "check_links_between_tables: false" in yaml
+        assert "AvatarParameters" not in yaml
+        assert "advice_tables_links" in runner.jobs.get_launched_jobs()
+        # The schema of the later jobs keeps its link check.
+        assert "check_links_between_tables" not in runner.get_yaml()
+
+    def test_advise_links_without_apply_leaves_the_config_unchanged(self):
+        runner, _ = self._unlinked_runner()
+
+        advice = self._advise_links(runner, apply=False)
+
+        assert len(advice.links) == 1
+        assert runner.config.tables["parent"].links is None
+
+    def test_advise_links_needs_two_tables(self):
+        runner = Manager(api_client=FakeApiClient(tables=["test"])).create_runner("test")
+        runner.add_table("test", data=self.df1)
+
+        with pytest.raises(ValueError, match="at least two tables"):
+            runner.advise_links()
+
+    def test_advise_parameters_after_advise_links_launches_its_own_job(self):
+        runner, _ = self._unlinked_runner()
+        self._advise_links(runner)
+
+        runner.advise_parameters()
+
+        assert runner.config.avatarization["parent"].k is not None
+        assert runner.config.avatarization["child"].k is not None
+
+    def test_run_after_advise_links_does_not_warn(self, recwarn):
+        runner, _ = self._unlinked_runner()
+        self._advise_links(runner)
+        runner.set_parameters("parent", k=3)
+        runner.set_parameters("child", k=3)
+
+        runner.run(jobs_to_run=[JobKind.standard])
+
+        assert not [w for w in recwarn if "already has results" in str(w.message)]
 
     def test_from_yaml(self):
         runner = self.manager.create_runner("test")
@@ -542,12 +770,10 @@ class TestRunner:
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
 
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(
+            ValueError, match="No existing parameters found for table 'test_table'"
+        ):
             runner.update_parameters("test_table", k=5)
-            assert (
-                str(excinfo.value) == "No existing parameters found for table 'test_table'. "
-                "Use set_parameters to create new parameters."
-            )
 
     def test_update_parameters_from_standard_to_dp(self):
         """Test updating from standard avatarization to DP avatarization."""
@@ -743,6 +969,29 @@ class TestRunner:
         assert alignment["method"] == "mean"  # Updated
         assert alignment["nb_points"] == 10  # Updated
 
+    def test_update_parameters_time_series_only_table(self):
+        """Test updating a table configured only with time series parameters (no k/epsilon)."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1, time_series_time="col1")
+        # Set initial parameters without any avatarization method (k, open_dp/fast_dp epsilon)
+        runner.set_parameters(
+            "test_table", time_series_nf=2, time_series_projection_type=ProjectionType.FPCA
+        )
+        assert runner.config.avatarization.get("test_table") is None
+
+        # Update should not raise even though no avatarization entry exists for this table
+        runner.update_parameters(
+            "test_table", time_series_method=AlignmentMethod.MEAN, time_series_nb_points=10
+        )
+
+        projection = runner.config.time_series["test_table"].projection
+        alignment = runner.config.time_series["test_table"].alignment
+        assert projection is not None
+        assert alignment is not None
+        assert projection["nf"] == 2  # Preserved
+        assert alignment["method"] == "mean"
+        assert alignment["nb_points"] == 10
+
     def test_update_parameters_with_privacy_metrics(self):
         """Test updating privacy metrics parameters."""
         runner = self.manager.create_runner("test")
@@ -869,6 +1118,32 @@ class TestRunner:
         assert current_params["time_series_nb_points"] == 10
         assert current_params["time_series_method"] == AlignmentMethod.MAX
 
+    def test_set_parameters_time_series_exclude_variables(self):
+        """Test that exclude_variable_names is applied to the time series parameters."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1, time_series_time="col1")
+        runner.set_parameters(
+            "test_table",
+            k=3,
+            time_series_nf=5,
+            time_series_projection_type=ProjectionType.FPCA,
+            exclude_variable_names=["col2"],
+            exclude_variable_method=ExcludeVariablesMethod.COORDINATE_SIMILARITY,
+        )
+
+        ts_exclude = runner.config.time_series["test_table"].exclude_variables
+        assert ts_exclude is not None
+        assert ts_exclude["variable_names"] == ["col2"]
+        assert ts_exclude["replacement_strategy"] == ExcludeVariablesMethod.COORDINATE_SIMILARITY
+
+        # Extract parameters and verify the time series entry is reflected
+        current_params = runner._extract_current_parameters("test_table")
+        assert current_params["exclude_variable_names"] == ["col2"]
+        assert (
+            current_params["exclude_variable_method"]
+            == ExcludeVariablesMethod.COORDINATE_SIMILARITY
+        )
+
     def test_get_not_created_job(self):
         """Test getting a job that was not created."""
         runner = self.manager.create_runner("test")
@@ -906,6 +1181,63 @@ class TestRunner:
             match=f"""Job {JobKind.standard.value} failed with exception:""",
         ):
             runner.get_all_results()
+
+    def test_get_all_results_polls_each_job_on_its_own_schedule(self):
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        clock = FakeClock()
+        runner._clock = clock
+        runner.run()
+        done_at = {"standard": 0.5, "privacy_metrics": 0.25}
+        checks: dict[str, list[float]] = {}
+
+        def get_job(job_name: str) -> JobResponse:
+            checks.setdefault(job_name, []).append(clock.elapsed)
+            is_done = clock.elapsed >= done_at.get(job_name, 0)
+            return create_fake_job(
+                name=job_name,
+                status=JobStatus.finished if is_done else JobStatus.pending,
+                done=is_done,
+            )
+
+        with patch.object(runner, "get_job", side_effect=get_job):
+            runner.get_all_results()
+
+        assert checks["standard"] == pytest.approx([0, 0.25, 0.5])
+        assert checks["privacy_metrics"] == pytest.approx([0, 0.25])
+        assert clock.elapsed == pytest.approx(0.5)
+
+    def test_run_records_the_launch_time_of_each_job_from_the_runner_clock(self):
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        clock = FakeClock()
+        clock.current = 100.0
+        runner._clock = clock
+        runner.run()
+
+        launched = runner.jobs.get_launched_jobs()
+        assert launched
+        assert runner._job_started_at == dict.fromkeys(launched, 100.0)
+
+    def test_retrieve_job_result_urls_waits_with_the_runner_clock(self):
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1)
+        runner.set_parameters("test_table", k=3)
+        clock = FakeClock()
+        runner._clock = clock
+        runner.run()
+        responses = [
+            create_fake_job(status=JobStatus.pending, done=False),
+            create_fake_job(status=JobStatus.finished, done=True),
+        ]
+
+        with patch.object(runner, "get_job", side_effect=responses):
+            runner._retrieve_job_result_urls(JobKind.standard.value)
+
+        assert clock.sleeps == pytest.approx([0.25])
+        assert JobKind.standard.value in runner.results_urls
 
     def test_get_results_on_invalid_table(self):
         """Test getting results that do not exist."""
@@ -1112,6 +1444,53 @@ class TestRunner:
         with pytest.raises(ValueError, match="Expected job 'standard' to be created"):
             self.runner.delete(JobKind.standard)
 
+    def _fresh_runner(self) -> Runner:
+        # Its own client: other tests in this class replace methods on the shared one.
+        return Manager(api_client=FakeApiClient()).create_runner("test")
+
+    @staticmethod
+    def _still_running(runner: Runner) -> None:
+        """The fake creates jobs already finished; these tests need them going."""
+        jobs = runner.client.jobs._jobs  # type: ignore[attr-defined]
+        for name, job in jobs.items():
+            jobs[name] = job.model_copy(update={"status": JobStatus.pending, "done": False})
+
+    def test_cancel_all_jobs_no_args(self):
+        """Every job still going is cancelled; the server's answers are returned."""
+        runner = self._fresh_runner()
+        runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        runner.set_parameters("test_table", k=5)
+        runner.run(jobs_to_run=[JobKind.standard, JobKind.privacy_metrics])
+        self._still_running(runner)
+
+        result = runner.cancel()
+
+        assert len(result) == 2
+        assert {job.status for job in result} == {JobStatus.cancelled}
+
+    def test_cancel_leaves_a_job_that_is_over_alone(self):
+        """Cancelling a whole run must not fail on the parts that already ended."""
+        runner = self._fresh_runner()
+        runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        runner.set_parameters("test_table", k=5)
+        runner.run(jobs_to_run=[JobKind.standard])
+        self._still_running(runner)
+        runner.cancel(JobKind.standard)
+
+        assert runner.cancel(JobKind.standard) == []
+
+    def test_waiting_on_a_cancelled_job_stops_with_a_clear_error(self):
+        """A cancelled job is over and wrote nothing: waiting on it must not hang."""
+        runner = self._fresh_runner()
+        runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
+        runner.set_parameters("test_table", k=5)
+        runner.run(jobs_to_run=[JobKind.standard])
+        self._still_running(runner)
+        runner.cancel(JobKind.standard)
+
+        with pytest.raises(ValueError, match="was cancelled"):
+            runner.get_specific_result_urls(JobKind.standard)
+
     def test_delete_all_jobs_no_args(self):
         """Test that delete() with no arguments deletes all launched jobs."""
         self.runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
@@ -1256,3 +1635,66 @@ class TestReconstructRunner:
 
         with pytest.raises(Exception, match="Error status 404"):
             manager.create_runner_from_id(set_name)
+
+
+class TestStatuses:
+    """Where every job in a run has got to, in one call.
+
+    A run is several jobs, and there was no way to ask about more than one:
+    "did my run work?" meant calling `get_status` once per kind and knowing
+    which kinds to expect, so a job that failed while its siblings finished was
+    easy to miss. Three tutorials called a `get_status(per_table=False)` that
+    has never existed, which is what that gap looked like from outside.
+    """
+
+    def _runner(self, *jobs: tuple[JobKind, str]) -> tuple[Runner, FakeApiClient]:
+        fake_client = FakeApiClient()
+        manager = Manager(api_client=fake_client)
+        runner = manager.create_runner("run")
+        for kind, status in jobs:
+            job = create_fake_job(
+                name=f"job-{kind.value}",
+                set_name=uuid4(),
+                kind=kind,
+                status=status,
+                parameters_name=kind.value,
+            )
+            fake_client.jobs.add_job(job)
+            # The launcher records the response it got back, not just a name.
+            runner.jobs.jobs[kind.value] = job  # type: ignore[assignment]
+        return runner, fake_client
+
+    def test_it_reports_every_launched_job(self):
+        runner, _ = self._runner(
+            (JobKind.standard, "finished"),
+            (JobKind.privacy_metrics, "error"),
+        )
+
+        statuses = runner.statuses()
+
+        assert set(statuses) == {"standard", "privacy_metrics"}
+        assert statuses["privacy_metrics"] == JobStatus.error
+
+    def test_it_orders_them_the_way_the_work_happens(self):
+        """Not the order they were registered: the dependent jobs are created
+        at once, so registration order says nothing, and a reader scanning for
+        the first failure wants the sequence.
+        """
+        runner, _ = self._runner(
+            (JobKind.report, "queued"),
+            (JobKind.privacy_metrics, "queued"),
+            (JobKind.standard, "finished"),
+            (JobKind.signal_metrics, "queued"),
+        )
+
+        assert list(runner.statuses()) == [
+            "standard",
+            "signal_metrics",
+            "privacy_metrics",
+            "report",
+        ]
+
+    def test_a_run_that_launched_nothing_reports_nothing(self):
+        runner, _ = self._runner()
+
+        assert runner.statuses() == {}

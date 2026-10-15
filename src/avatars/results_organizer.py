@@ -26,6 +26,15 @@ class ResultsOrganizer(BaseModel):
     avatars_projections: dict[str, pd.DataFrame] = {}
     figures: dict[str, dict[str, list[HTML]]] = {}
     advice: dict[str, dict[str, Any]] = {}
+    reference_tables: dict[str, dict[str, Any]] = {}
+    """Table -> reference table name -> what building it found, in counts.
+
+    One report per run, filed by the engine against one of the run's tables,
+    so only that table has an entry. Each value is ``{"subjects", "sources",
+    "in_one_source_only", "conflicting_subjects", "conflicting_attributes",
+    "unresolved_rows"}`` as the engine wrote it. No subject key or value is in
+    it: the engine never writes one there.
+    """
     run_metadata: dict[str, dict[str, Any]] = {}
     privacy_metrics_summary: dict[str, Any] = {}
     signal_metrics_summary: dict[str, Any] = {}
@@ -49,6 +58,10 @@ class ResultsOrganizer(BaseModel):
                 return self.figures.get(table_name)
             case Results.ADVICE:
                 return self.advice.get(table_name, {})
+            case Results.REFERENCE_TABLES:
+                # None, not `{}`, for a report that has not been fetched:
+                # `get_specific_result` downloads only when this returns None.
+                return self.reference_tables.get(table_name)
             case Results.METADATA:
                 return self.run_metadata.get(job_name, {})
             case Results.PRIVACY_METRICS_SUMMARY:
@@ -100,9 +113,17 @@ class ResultsOrganizer(BaseModel):
                 if isinstance(result, list):
                     for item in result:
                         if item["table_name"] == table_name:
-                            self.advice[table_name] = item["advice"]
+                            self.advice[table_name] = item["advice"] or {}
                             break
+            case Results.REFERENCE_TABLES:
+                # Wrapped in a list like every JSON result, and tolerated bare.
+                payload = result[0] if isinstance(result, list) and result else result
+                if isinstance(payload, dict):
+                    tables = payload.get("tables")
+                    self.reference_tables[table_name] = tables if isinstance(tables, dict) else {}
             case Results.METADATA:
+                if isinstance(result, list) and result:
+                    result = result[0]
                 if isinstance(result, dict) and metadata is not None:
                     self.run_metadata[metadata["kind"]] = result
             case Results.PRIVACY_METRICS_SUMMARY:
@@ -167,9 +188,15 @@ class ResultsOrganizer(BaseModel):
                     table_name = metadata.get("table_name", "")
             case Results.PRIVACY_METRICS_SUMMARY | Results.SIGNAL_METRICS_SUMMARY:
                 table_name = "summary"
+            case Results.METADATA:
+                table_name = "run_metadata"
             case Results.ADVICE:
                 if isinstance(result, list) and result:
                     table_name = result[0].get("table_name", "")
+            case Results.REFERENCE_TABLES:
+                # From the filename: `<table>.reference_tables.json`, whose
+                # contents name reference tables, not the table holding them.
+                table_name = Path(url).stem.removesuffix(".reference_tables")
         return table_name
 
     def unescape_table_name(self, table_name: str) -> str:

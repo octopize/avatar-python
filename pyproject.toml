@@ -1,12 +1,12 @@
 [project]
 name = "octopize.avatar"
-version = "1.29.0"
+version = "1.30.0"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
 packages = [{ include = "avatars" }]
 readme = "README.md"
-requires-python = ">=3.12, <3.14"
+requires-python = ">=3.12"
 
 dependencies = [
     "fsspec>=2024.12.0",
@@ -28,7 +28,7 @@ dependencies = [
     "botocore <=1.40.17",
     "pandas>=2.3.1",
     "pyarrow>=18.0.0",
-    "octopize-avatar-yaml==0.1.42",
+    "octopize-avatar-yaml==0.1.45",
 ]
 
 [dependency-groups]
@@ -45,9 +45,8 @@ dev = [
     "pandas>=2.2.3",
     "matplotlib>=3.10.1",
     "furo>=2024.8.6",
-    "sphinx>=8,<9",
-    "roman-numerals-py<4",
-    "sphinx-multiversion>=0.2.4",
+    "sphinx>=8,<10",
+    "roman-numerals-py<5",
     "autodoc-pydantic>=2.2.0",
     "nbconvert>=7.16.6",
     "myst-parser>=4",
@@ -56,7 +55,7 @@ generator = [
     "typer>=0.15.2",
     "structlog>=24.2.0",
     "Jinja2>=3.1.6",
-    "datamodel-code-generator<=0.71.0",
+    "datamodel-code-generator<=0.83.0",
     "openapi-pydantic>=0.5.1",
 ]
 notebook = [
@@ -102,6 +101,9 @@ extend-exclude = ["generator/templates/*.jinja2"]
 # Allow prints in notebooks - END
 # Generator is a dev tool — relax security and naming rules
 "generator/**.py" = ["S", "N"]
+# The bare Exception raised for HTTP and authentication errors is part of the public SDK
+# surface; replacing it with dedicated exception types is an API change.
+"src/avatars/base_client.py" = ["TRY002"]
 
 [tool.pytest.ini_options]
 addopts = [
@@ -127,6 +129,9 @@ filterwarnings = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/avatars"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/avatars", "README.md", "CHANGELOG.md"]
 
 [tool.uv]
 # Rolling 14-day dependency cooldown: ignore releases from the last 14 days.

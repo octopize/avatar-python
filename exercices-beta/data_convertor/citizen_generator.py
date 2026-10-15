@@ -211,7 +211,7 @@ def get_marital_status_by_age(age: int) -> str:
     """Get marital status correlated with age."""
     if age < 25:
         return random.choices(
-            ["Célibataire", "Marié", "PA", "Inconnu"], @
+            ["Célibataire", "Marié", "PA", "Inconnu"],
             weights=[0.85, 0.10, 0.03, 0.02],
         )[0]
     elif age < 35:

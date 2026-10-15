@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 3.6.0
+# API Version : 3.17.2
 
 
 import httpx
@@ -110,7 +110,9 @@ class ApiClient(BaseClient):
         # Importing here to prevent circular import
         from avatars.api import (  # noqa: PLC0415
             ApiKeys,
+            Capabilities,
             Compatibility,
+            Connections,
             EventLogs,
             Health,
             Jobs,
@@ -122,7 +124,9 @@ class ApiClient(BaseClient):
         from avatars.data_upload import DataUploader  # noqa: PLC0415
 
         self.api_keys = ApiKeys(self)
+        self.capabilities = Capabilities(self)
         self.compatibility = Compatibility(self)
+        self.connections = Connections(self)
         self.event_logs = EventLogs(self)
         self.health = Health(self)
         self.jobs = Jobs(self)

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import os
+import warnings
 from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Sequence
-from contextlib import ExitStack, contextmanager
+from contextlib import ExitStack, contextmanager, suppress
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -26,6 +27,7 @@ from avatars.constants import (
     DEFAULT_NETWORK_RETRY_INTERVAL,
     DEFAULT_RATE_LIMIT_MAX_RETRIES,
     DEFAULT_RATE_LIMIT_MIN_WAIT_SECONDS,
+    EXPECTED_API_KEY_LENGTH,
     FileLike,
     FileLikes,
 )
@@ -124,12 +126,20 @@ def _reraise_on_timeout(retry_state: tenacity.RetryCallState, *, data: ContextDa
         raise e  # type: ignore[misc] # Exception must be derived from BaseException
 
 
-class TimeoutError(Exception):
+class TimeoutError(Exception):  # noqa: A001
     pass
 
 
 class ApiConnectionError(Exception):
     """Raised when the client cannot connect or authenticate with the Avatar API."""
+
+
+class ApiResponseError(Exception):
+    """Raised when the API answers with an error status."""
+
+    def __init__(self, message: str, response: Response) -> None:
+        super().__init__(message)
+        self.response = response
 
 
 class RateLimitError(Exception):
@@ -213,10 +223,7 @@ class ContextData:
         raise Exception("Expected a HTTP response, got None instead")
 
     def has_header(self, header: str) -> bool:
-        if self.http_response and header in self.http_response.headers:
-            return True
-
-        return False
+        return bool(self.http_response and header in self.http_response.headers)
 
     def get_header(self, header: str) -> Any:
         return ensure_valid(self.http_response).headers[header]
@@ -228,6 +235,9 @@ class ContextData:
             self.http_request.headers.update(headers)
 
     def content_type(self) -> ContentType:
+        if not self.has_header("content-type"):
+            return ContentType.UNSUPPORTED
+
         return ContentType(self.get_header("content-type").split(";")[0].strip())
 
     def is_created(self) -> bool:
@@ -263,9 +273,8 @@ class ContextData:
         msg = ""
 
         if isinstance(content, dict):
-            if "detail" in content:
-                if "message" in content["detail"]:
-                    msg = content["detail"]["message"]
+            if "detail" in content and "message" in content["detail"]:
+                msg = content["detail"]["message"]
         elif isinstance(content, str):
             msg = content
         else:
@@ -278,7 +287,8 @@ class ContextData:
 
         as_json: dict[str, Any] = {}
 
-        if self.is_content_json():
+        # A 204 (a delete) says JSON and sends nothing: that is an empty answer, not a parse error.
+        if self.is_content_json() and resp.content:
             as_json = resp.json()
 
         return as_json
@@ -322,23 +332,18 @@ class ContextData:
         """
         content: StreamedContent = None
         buffer = BytesIO()
-        opened = False
 
-        if isinstance(destination, str):
-            opened = True
-            destination_data = open(destination, "wb")
-        else:
-            destination_data = destination or buffer
+        with ExitStack() as stack:
+            if isinstance(destination, str):
+                destination_data = stack.enter_context(open(destination, "wb"))
+            else:
+                destination_data = destination or buffer
 
-        self.stream_response_content(destination_data)
+            self.stream_response_content(destination_data)
 
-        if isinstance(destination_data, IOBase):
-            logger.info(f"base_client: flushing {destination=}")
-            destination_data.flush()
-
-        if opened:
-            logger.info(f"base_client: closing {destination=}")
-            destination_data.close()
+            if isinstance(destination_data, IOBase):
+                logger.info(f"base_client: flushing {destination=}")
+                destination_data.flush()
 
         buffer.seek(0, os.SEEK_SET)
 
@@ -542,10 +547,8 @@ class ClientContext:
 
             # Also check the Retry-After header as fallback
             if "retry-after" in resp.headers:
-                try:
+                with suppress(ValueError, TypeError):
                     retry_after = int(resp.headers["retry-after"])
-                except (ValueError, TypeError):
-                    pass
 
             logger.debug(
                 "rate limit response received",
@@ -594,9 +597,10 @@ class ClientContext:
             # Raise "Not authenticated" error if applicable
             self.check_authenticated(resp, content)
 
-        raise Exception(
+        raise ApiResponseError(
             f"Got error in HTTP request: {self.data.method} {self.data.url}."
-            f" Error status {resp.status_code} - {error_msg}"
+            f" Error status {resp.status_code} - {error_msg}",
+            response=resp,
         )
 
 
@@ -663,14 +667,30 @@ class BaseClient:
 
         # Set API key auth header if provided
         if self._api_key:
+            self.warn_on_unexpected_api_key_length(self._api_key)
             self.set_header("Authorization", f"api-key-v1 {self._api_key}")
+
+    @staticmethod
+    def warn_on_unexpected_api_key_length(api_key: str) -> None:
+        """Warn when an API key is not the length the server issues."""
+        if len(api_key) == EXPECTED_API_KEY_LENGTH:
+            return
+
+        warnings.warn(
+            f"The API key is {len(api_key)} characters long, expected "
+            f"{EXPECTED_API_KEY_LENGTH}. A key looks like "
+            "'octopize_apikey.<uuid>.<secret>'; a truncated or partially copied key "
+            "will be rejected by the server as an invalid API key.",
+            UserWarning,
+            stacklevel=3,
+        )
 
     def set_header(self, key: str, value: str) -> None:
         self._headers[key] = value
 
     def is_using_api_key(self) -> bool:
         """Check if the client is configured to use API key authentication."""
-        return self._api_key is not None
+        return bool(self._api_key)
 
     def prepare_files(
         self, stack: ExitStack, headers: dict[str, Any], keyword_args: dict[str, Any]
@@ -688,7 +708,7 @@ class BaseClient:
 
             for f in files:
                 if isinstance(f, (str, Path)) and Path(f).is_file():
-                    prepared_files.append(stack.enter_context(open(f, "rb")))
+                    prepared_files.append(stack.enter_context(open(f, "rb")))  # noqa: SIM115
                 else:
                     raise ValueError(f"Expected streamable file-like object, got {f} instead")
 
