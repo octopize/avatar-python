@@ -58,6 +58,7 @@ from avatars.constants import (
 )
 from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
+from avatars.input_files import InputFile, missing_file_message
 from avatars.job_launcher import JobLauncher
 from avatars.job_polling import SYSTEM_CLOCK, Clock, wait_for_jobs
 from avatars.links_advice import TablesLinksAdvice, parse_tables_links_advice
@@ -238,7 +239,7 @@ class Runner:
     def add_table(
         self,
         table_name: str,
-        data: str | pd.DataFrame,
+        data: str | pd.DataFrame | InputFile,
         *,
         primary_key: str | None = None,
         foreign_keys: list[str] | None = None,
@@ -246,7 +247,7 @@ class Runner:
         types: dict[str, ColumnType] | None = None,
         columns_to_drop: list[str] | None = None,
         individual_level: bool | None = None,
-        avatar_data: str | pd.DataFrame | None = None,
+        avatar_data: str | pd.DataFrame | InputFile | None = None,
     ) -> None:
         """Add a table to the config and upload the data in the server.
 
@@ -255,7 +256,13 @@ class Runner:
         table_name
             The name of the table.
         data
-            The data to add to the table. Can be a path to a file or a pandas DataFrame.
+            The data to add to the table. Can be a path to a file, a pandas DataFrame, or a
+            file already in your storage, as ``manager.list_input_files()`` lists
+            them. A stored file is not uploaded again: its name is checked against the
+            listing of your storage, and a name that is not there raises a
+            ``ValueError`` before anything is uploaded. An upload is stored under the
+            table name, ``<table_name>.parquet`` for a DataFrame or the extension of
+            the path, and overwrites a file of that name already in your storage.
         primary_key
             The primary key of the table.
         foreign_keys
@@ -273,7 +280,8 @@ class Runner:
             is a table where each row corresponds to an individual (ex: patient, customer, etc.).
             Default behavior is True.
         avatar_data
-            The avatar table if there is one. Can be a path to a file or a pandas DataFrame.
+            The avatar table if there is one. Can be a path to a file, a pandas DataFrame
+            or a file already in your storage.
 
         """
         if types is None:
@@ -939,27 +947,54 @@ class Runner:
     def upload_file(
         self,
         table_name: str,
-        data: str | pd.DataFrame,
-        avatar_data: str | pd.DataFrame | None = None,
+        data: str | pd.DataFrame | InputFile,
+        avatar_data: str | pd.DataFrame | InputFile | None = None,
     ) -> tuple[str, str | None]:
-        """Upload a file to the server.
+        """Upload the data of a table to the server, and return the stored file names.
 
         Parameters
         ----------
+        table_name
+            The name of the table, which names the uploaded file. A file of that name
+            already in your storage is overwritten.
         data
-            The data to upload. Can be a path to a file or a pandas DataFrame.
-        file_name
-            The name of the file.
+            The data to upload. Can be a path to a file or a pandas DataFrame. A file
+            already in your storage (an ``InputFile``) is not uploaded: its own name is
+            returned once the listing of your storage confirms it is there.
+        avatar_data
+            The avatar table if there is one, of the same kinds.
+
+        Raises
+        ------
+        ValueError
+            A stored file named by ``data`` or ``avatar_data`` is not in your storage.
 
         """
-        extension = ".parquet" if isinstance(data, pd.DataFrame) else Path(data).suffix
-        file = table_name + extension
-        self.client.upload_file(data=data, key=file)
+        self._check_stored(data, avatar_data)
+        file = self._stored_file(data, name=table_name)
         avatar_file = None
         if avatar_data is not None:
-            avatar_file = table_name + "_avatars" + extension
-            self.client.upload_file(data=avatar_data, key=avatar_file)
+            avatar_file = self._stored_file(avatar_data, name=table_name + "_avatars")
         return file, avatar_file
+
+    def _check_stored(self, *data: str | pd.DataFrame | InputFile | None) -> None:
+        """Refuse a stored file that is not in your storage, before anything is uploaded."""
+        named = [table_data for table_data in data if isinstance(table_data, InputFile)]
+        if not named:
+            return
+        stored = self.client.list_input_files()
+        for file in named:
+            if file.name not in stored:
+                raise ValueError(missing_file_message(file.name, stored))
+
+    def _stored_file(self, data: str | pd.DataFrame | InputFile, *, name: str) -> str:
+        """The name of the stored file that holds ``data``, uploaded under ``name`` if needed."""
+        if isinstance(data, InputFile):
+            return data.name
+        extension = ".parquet" if isinstance(data, pd.DataFrame) else Path(data).suffix
+        file = name + extension
+        self.client.upload_file(data=data, key=file)
+        return file
 
     def _get_types(
         self, data: pd.DataFrame, types: dict[str, ColumnType] | None = None

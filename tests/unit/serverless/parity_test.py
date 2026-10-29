@@ -43,6 +43,7 @@ TOP_LEVEL_MEMBERS = [
     "should_verify_ssl",
     "upload_file",
     "download_file",
+    "list_input_files",
     "is_using_api_key",
     "send_request",
 ]

@@ -7,7 +7,7 @@ dependency resolution, ``results.json``, the access envelope, download,
 ``ResultsOrganizer`` -- is covered in one pass.
 """
 
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -42,7 +42,6 @@ def a_summary() -> LicenseSummary:
         max_rows=100_000,
         max_columns=2**31 - 1,
         expires_at=datetime(2027, 3, 31, tzinfo=UTC),
-        engine_build_ends=date(2028, 4, 26),
     )
 
 
@@ -114,6 +113,20 @@ class TestUploadDownload:
 
     def test_upload_url_points_at_the_input_volume(self, client: ServerlessClient) -> None:
         assert client.results.get_upload_url() == client.workdir.input_url
+
+    def test_the_input_volume_lists_what_was_uploaded(self, client: ServerlessClient) -> None:
+        client.upload_file(IRIS, "iris.parquet")
+        (client.workdir.input_dir / "notes").mkdir()
+
+        files = client.list_input_files()
+
+        assert list(files) == ["iris.parquet"]
+        assert (
+            files["iris.parquet"].size
+            == (client.workdir.input_dir / "iris.parquet").stat().st_size
+        )
+        assert files["iris.parquet"].uploaded_at is not None
+        assert files["iris.parquet"].expires_at is None
 
     def test_download_reads_text_and_binary_the_way_the_server_client_does(
         self, client: ServerlessClient
@@ -519,7 +532,6 @@ class TestLicenseSummary:
         assert "100,000 rows per dataset" in text
         assert "Columns      no limit" in text
         assert "2027-03-31 00:00 UTC" in text
-        assert "stops on 2028-04-26" in text
         assert "j-1" in text
 
     def test_the_manager_gives_it_in_serverless_mode(

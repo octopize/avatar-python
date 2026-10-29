@@ -52,6 +52,12 @@ class TestManager:
         assert runner is not None
         assert isinstance(runner, Runner)
 
+    def test_storage_lists_the_input_files(self) -> None:
+        manager = Manager(api_client=FakeApiClient(tables=["wbcd"]))
+        files = manager.list_input_files()
+        assert list(files) == ["wbcd.csv"]
+        assert files["wbcd.csv"].size == 1024
+
 
 class TestManagerInitialization:
     """Tests for Manager config parameter validation."""

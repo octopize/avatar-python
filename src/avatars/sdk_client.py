@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
 
 import pandas as pd
 
+from avatars.input_files import InputFiles
 from avatars.models import (
     BulkDeleteRequest,
     BulkDeleteResponse,
@@ -135,6 +136,13 @@ class DownloadFile(Protocol):
 
 
 @runtime_checkable
+class ListInputFiles(Protocol):
+    """``client.list_input_files``: the files of the input directory, newest first."""
+
+    def __call__(self) -> InputFiles: ...
+
+
+@runtime_checkable
 class SdkClient(Protocol):
     """What ``Runner``, ``Manager`` and their collaborators require of a client.
 
@@ -144,11 +152,12 @@ class SdkClient(Protocol):
     mere implementation of ``JobsApi`` rather than that class itself. An
     implementation is free to satisfy them with ordinary instance attributes.
 
-    ``upload_file``/``download_file`` are read-only too, and spelled as call
-    protocols rather than ``Callable[...]`` because callers pass their arguments by
-    keyword. Read-only matters here: on ``ApiClient`` they are instance attributes
-    bound from the ``DataUploader``, while on a test double or the serverless client
-    they are ordinary methods, and only a read-only member accepts both.
+    ``upload_file``/``download_file``/``list_input_files`` are read-only too, and
+    spelled as call protocols rather than ``Callable[...]`` because callers pass
+    their arguments by keyword. Read-only matters here: on ``ApiClient`` they are
+    instance attributes bound from the ``DataUploader``, while on a test double or
+    the serverless client they are ordinary methods, and only a read-only member
+    accepts both.
     """
 
     base_url: str
@@ -159,6 +168,9 @@ class SdkClient(Protocol):
 
     @property
     def download_file(self) -> DownloadFile: ...
+
+    @property
+    def list_input_files(self) -> ListInputFiles: ...
 
     @property
     def resources(self) -> ResourcesApi: ...

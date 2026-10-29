@@ -19,7 +19,7 @@ around and renders the error.
 import json
 import shutil
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
@@ -29,6 +29,7 @@ import yaml
 from avatar_yaml.models.common import ModelKind
 from structlog import get_logger
 
+from avatars.input_files import InputFiles, input_files_listing
 from avatars.models import (
     BulkDeleteRequest,
     BulkDeleteResponse,
@@ -88,8 +89,6 @@ class LicenseSummary:
     max_rows: int
     max_columns: int
     expires_at: datetime
-    # The day the engine build stops computing, whatever the licence; None if never.
-    engine_build_ends: date | None
 
     def __str__(self) -> str:
         def limit(value: int, unit: str) -> str:
@@ -103,10 +102,6 @@ class LicenseSummary:
             ("Rows", limit(self.max_rows, "rows")),
             ("Columns", limit(self.max_columns, "columns")),
             ("Expires", f"{self.expires_at:%Y-%m-%d %H:%M} UTC"),
-            (
-                "Engine build",
-                f"stops on {self.engine_build_ends}" if self.engine_build_ends else "no end date",
-            ),
             ("Licence id", self.jti),
         ]
         return "\n".join(f"{label:<13}{value}" for label, value in rows)
@@ -454,6 +449,18 @@ class ServerlessClient:
         if path.suffix in (".pdf", ".docx", ".parquet"):
             return path.read_bytes()
         return path.read_text(encoding="utf-8")
+
+    def list_input_files(self) -> InputFiles:
+        """The files of the input volume, newest first, as ``DataUploader`` lists them.
+
+        A local directory has no retention rule, so no file carries an expiry.
+        """
+        entries = [
+            {"name": str(path), "size": path.stat().st_size, "mtime": path.stat().st_mtime}
+            for path in self.workdir.input_dir.iterdir()
+            if path.is_file()
+        ]
+        return input_files_listing(self.workdir.input_url, entries)
 
     # -- resources ----------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.5
+#       jupytext_version: 1.19.6
 # ---
 
 # %% [markdown]
@@ -79,10 +79,21 @@ print(f"With k={k}, the hidden_rate (privacy) is : {hidden_rate}")
 print(f"With k={k}, the local_cloaking (privacy) is : {local_cloaking}")
 print(f"With k={k}, the hellinger_distance (utility) is : {hellinger_distance}")
 
+# %% [markdown]
+# ## Reusing a file already in your storage
+#
+# The first runner uploaded the table as `iris.parquet`. A file uploaded once stays in your storage until its retention window ends, so the next runners can reuse it: `manager.list_input_files()` lists the stored files, newest first, and `add_table` takes one of them in place of the data. Nothing is uploaded again.
+
+# %%
+files = manager.list_input_files()
+
+for file in files.values():
+    print(file.name, file.size, file.uploaded_at, file.expires_at)
+
 # %%
 # Create a new runner to run with a different k
 runner_k30 = manager.create_runner("iris_k30")
-runner_k30.add_table("iris", "../fixtures/iris.csv")
+runner_k30.add_table("iris", files["iris.parquet"])
 
 # Set k
 k = 30
@@ -195,7 +206,7 @@ imputation_method = ImputeMethod.MEAN
 
 # %%
 runner = manager.create_runner("iris_multi_params")
-runner.add_table("iris", "../fixtures/iris.csv")
+runner.add_table("iris", files["iris.parquet"])
 
 runner.set_parameters(
     "iris",
@@ -227,7 +238,7 @@ runner.render_plot("iris", PlotKind.PROJECTION_3D)
 # %%
 runner = manager.create_runner("iris_automated")
 
-runner.add_table("iris", "../fixtures/iris.csv")
+runner.add_table("iris", files["iris.parquet"])
 runner.advise_parameters()
 
 # See the automated parameters
@@ -263,7 +274,7 @@ runner.run()
 
 # %%
 runner_privacy = manager.create_runner("iris_multi_params")
-runner_privacy.add_table("iris", "../fixtures/iris.csv")
+runner_privacy.add_table("iris", files["iris.parquet"])
 
 runner_privacy.set_parameters(
     "iris",

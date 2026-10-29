@@ -1,4 +1,4 @@
-__version__ = "1.31.0"
+__version__ = "1.32.0"
 
 # Re-export main public entry points for convenience so users can do for example:
 # Auto-install the crash handler for enhanced error reporting
@@ -14,6 +14,7 @@ from avatar_yaml import Uuid4Strategy as Uuid4Strategy
 
 from avatars import crash_handler as _crash_handler  # noqa: F401
 from avatars.client import ApiClient
+from avatars.input_files import InputFile
 from avatars.manager import Manager
 from avatars.models import JobStatus
 from avatars.runner import Runner
@@ -29,6 +30,7 @@ __all__ = [
     "ConstantStrategy",
     "FakeDataStrategy",
     "HashSha256Strategy",
+    "InputFile",
     "IntegerStrategy",
     "JobStatus",
     "Manager",

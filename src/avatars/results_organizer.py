@@ -177,12 +177,15 @@ class ResultsOrganizer(BaseModel):
                 result_filename = mapping_result_to_file_name[result_name]
                 table_name = Path(url).stem.split(f".{result_filename}")[0]
             case Results.SIGNAL_METRICS | Results.PRIVACY_METRICS:
-                if isinstance(result, list) and result:
+                if not isinstance(result, list):
+                    raise ValueError("Expected result to be a list for METRICS")
+                if result:
                     table_name = result[0]["metadata"]["table_name"]
                 else:
-                    raise ValueError(
-                        "Expected result to be a list with at least one item for METRICS"
-                    )
+                    # A table with every column pseudonymized or excluded gets an
+                    # empty file, `<table>.privacy.json` or `<table>.signal.json`.
+                    result_filename = mapping_result_to_file_name[result_name]
+                    table_name = Path(url).name.removesuffix(f".{result_filename}")
             case Results.FIGURES:
                 if metadata and isinstance(metadata, dict):
                     table_name = metadata.get("table_name", "")

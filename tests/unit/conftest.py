@@ -14,6 +14,7 @@ from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic import BaseModel
 
 from avatars.client import ApiClient
+from avatars.input_files import InputFile, InputFiles
 from avatars.log import setup_logging
 from avatars.models import (
     BulkDeleteRequest,
@@ -561,6 +562,30 @@ class FakeStorage:
         return path in self._files
 
 
+class FakeDataUploader:
+    """Fake input storage: one stored CSV file per table of the fake server."""
+
+    def __init__(self, tables: list[str]) -> None:
+        self.files = [stored_input_file(f"{table}.csv") for table in tables]
+
+    def add_file(self, name: str) -> None:
+        """Put a file in the storage, as an earlier upload would."""
+        self.files.append(stored_input_file(name))
+
+    def list_input_files(self) -> InputFiles:
+        return InputFiles(self.files, retention_days=30)
+
+
+def stored_input_file(name: str) -> InputFile:
+    """A file of the fake input storage, uploaded on 2026-01-01 and kept 30 days."""
+    return InputFile(
+        name=name,
+        size=1024,
+        uploaded_at=datetime(2026, 1, 1, tzinfo=UTC),
+        expires_at=datetime(2026, 1, 31, tzinfo=UTC),
+    )
+
+
 class FakeApiClient(ApiClient):
     """Fake API client for unit testing.
 
@@ -612,6 +637,9 @@ class FakeApiClient(ApiClient):
         self._headers: dict[str, str] = {"Authorization": "api-key-v1 test-api-key"}
         # Initialize fake storage
         self.storage = FakeStorage()
+        self.input_storage = FakeDataUploader(self.tables)
+        self.data_uploader = self.input_storage  # type: ignore[assignment]
+        self.list_input_files = self.input_storage.list_input_files
         self.should_verify_ssl = True
 
     def set_header(self, key: str, value: str) -> None:

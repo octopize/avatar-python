@@ -113,6 +113,37 @@ def test_set_then_get_results_metadata_from_json_list():
     assert_equals({"key": "value"}, retrieved)
 
 
+@pytest.mark.parametrize(
+    ("result_name", "url"),
+    [
+        (Results.PRIVACY_METRICS, "fakeurl/prescription_seances.privacy.json"),
+        (Results.SIGNAL_METRICS, "fakeurl/prescription_seances.signal.json"),
+    ],
+    ids=["privacy_metrics", "signal_metrics"],
+)
+def test_get_table_name_of_empty_metrics_file_comes_from_the_filename(result_name, url):
+    """A table with every column pseudonymized or excluded gets an empty metrics file."""
+    organizer = ResultsOrganizer()
+
+    assert organizer.get_table_name(result_name, url, []) == "prescription_seances"
+
+
+def test_get_table_name_of_metrics_prefers_the_metadata():
+    organizer = ResultsOrganizer()
+    result = [{"hidden_rate": 0.1, "metadata": {"table_name": "patients"}}]
+
+    assert organizer.get_table_name(Results.PRIVACY_METRICS, "fakeurl/x.privacy.json", result) == (
+        "patients"
+    )
+
+
+def test_get_table_name_of_metrics_rejects_a_non_list():
+    organizer = ResultsOrganizer()
+
+    with pytest.raises(ValueError, match="list"):
+        organizer.get_table_name(Results.SIGNAL_METRICS, "fakeurl/x.signal.json", {"a": 1})
+
+
 def test_unescape_table_name():
     organizer = ResultsOrganizer()
     escaped_name = "table_dot_name_slash_test"

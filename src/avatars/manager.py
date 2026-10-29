@@ -19,6 +19,7 @@ from avatars.base_client import ApiConnectionError, ApiResponseError
 from avatars.client import ApiClient
 from avatars.client_config import ClientConfig
 from avatars.config import PRODUCTION_BASE_URL, Config, config, get_config
+from avatars.input_files import InputFiles
 from avatars.models import (
     BulkDeleteRequest,
     BulkDeleteResponse,
@@ -450,8 +451,8 @@ class Manager:
         """What the serverless licence in force grants.
 
         Who it is for, the organization, the tier, the features, the maximum rows and
-        columns per dataset, the expiry date, the day the engine build stops computing,
-        and the licence id to quote to support. ``print()`` it for a readable summary.
+        columns per dataset, the expiry date, and the licence id to quote to support.
+        ``print()`` it for a readable summary.
 
         Raises
         ------
@@ -470,6 +471,14 @@ class Manager:
         if self.auth_client.licensee is None:
             raise ValueError("No licence is in force for this Manager.")
         return self.auth_client.licensee
+
+    def list_input_files(self) -> InputFiles:
+        """List the files already in your storage, newest first.
+
+        Give one to ``runner.add_table`` in place of the data to reuse it without
+        uploading it again.
+        """
+        return self.auth_client.list_input_files()
 
     def create_runner(
         self,

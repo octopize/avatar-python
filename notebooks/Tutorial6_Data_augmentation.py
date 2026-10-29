@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.5
+#       jupytext_version: 1.19.6
 # ---
 
 # %% [markdown]
@@ -145,10 +145,19 @@ runner.render_plot("wbcd", PlotKind.CLASS_PROJECTION_2D, open_in_browser=False)
 # - You want to test model performance with larger datasets
 # - You need to generate synthetic data while preserving privacy
 
+# %% [markdown]
+# The first runner uploaded the table as `wbcd.parquet`. A file uploaded once stays in your storage until its retention window ends, so the next runners reuse it: `manager.list_input_files()` lists the stored files, and `add_table` takes one of them in place of the data. The column types are given again, as for a file path.
+
+# %%
+files = manager.list_input_files()
+
+for file in files.values():
+    print(file.name, file.size, file.uploaded_at, file.expires_at)
+
 # %%
 runner_augmented_factorial = manager.create_runner("data_augmentation_factorial")
 
-runner_augmented_factorial.add_table("wbcd", df, types=dtypes)
+runner_augmented_factorial.add_table("wbcd", files["wbcd.parquet"], types=dtypes)
 
 # Configure to balance all classes to the majority
 runner_augmented_factorial.set_parameters(
@@ -208,7 +217,7 @@ print(shuffle["Class"].value_counts(normalize=True))
 # %%
 runner_full_process = manager.create_runner("data_augmentation_full_process")
 
-runner_full_process.add_table("wbcd", df, types=dtypes)
+runner_full_process.add_table("wbcd", files["wbcd.parquet"], types=dtypes)
 
 # Configure to balance all classes to the majority
 runner_full_process.set_parameters(

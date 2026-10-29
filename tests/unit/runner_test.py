@@ -21,6 +21,7 @@ from avatar_yaml.models.parameters import (
 from avatar_yaml.models.schema import ColumnType
 
 from avatars.constants import PlotKind, Results
+from avatars.input_files import InputFile
 from avatars.manager import Manager
 from avatars.models import BulkDeleteResponse, JobKind, JobResponse, JobStatus
 from avatars.runner import Runner
@@ -117,6 +118,62 @@ class TestRunner:
         )
         assert "test_table" in self.runner.config.tables.keys()
         assert "test_table" in self.runner.config.avatar_tables.keys()
+
+    def test_add_table_from_a_stored_file_uploads_nothing(self):
+        client = FakeApiClient()
+        client.input_storage.add_file("stored_patients.csv")
+        runner = Manager(api_client=client).create_runner("test")
+        with patch.object(client, "upload_file") as upload_file:
+            runner.add_table("patients", data=InputFile("stored_patients.csv"), primary_key="id")
+
+        upload_file.assert_not_called()
+        table = runner.config.tables["patients"]
+        assert table.data is not None
+        assert table.data.file == "stored_patients.csv"
+        assert table.data.volume == "input"
+
+    def test_add_table_with_a_stored_avatar_file(self):
+        client = FakeApiClient()
+        client.input_storage.add_file("patients_avatars.parquet")
+        runner = Manager(api_client=client).create_runner("test")
+        with patch.object(client, "upload_file") as upload_file:
+            runner.add_table(
+                "patients", data=self.df1, avatar_data=InputFile("patients_avatars.parquet")
+            )
+
+        upload_file.assert_called_once_with(data=self.df1, key="patients.parquet")
+        avatar_table = runner.config.avatar_tables["patients"]
+        assert avatar_table.avatars_data is not None
+        assert avatar_table.avatars_data.file == "patients_avatars.parquet"
+
+    def test_add_table_refuses_a_stored_file_that_is_not_there(self):
+        client = FakeApiClient(tables=["visits"])
+        runner = Manager(api_client=client).create_runner("test")
+        with (
+            patch.object(client, "upload_file") as upload_file,
+            pytest.raises(
+                ValueError,
+                match="No file named 'patients.csv' in your storage. Stored files: visits.csv",
+            ),
+        ):
+            runner.add_table("patients", data=InputFile("patients.csv"))
+
+        upload_file.assert_not_called()
+        assert "patients" not in runner.config.tables
+
+    def test_add_table_refuses_a_stored_avatar_file_that_is_not_there(self):
+        client = FakeApiClient()
+        runner = Manager(api_client=client).create_runner("test")
+        with (
+            patch.object(client, "upload_file") as upload_file,
+            pytest.raises(ValueError, match="No file named 'patients_avatars.parquet'"),
+        ):
+            runner.add_table(
+                "patients", data=self.df1, avatar_data=InputFile("patients_avatars.parquet")
+            )
+
+        upload_file.assert_not_called()
+        assert "patients" not in runner.config.tables
 
     def test_run_raises_error_when_no_avatar_table(self):
         self.runner.add_table("test_table", data=self.df1)
@@ -487,6 +544,37 @@ class TestRunner:
             "parent": 1,
             "child": 1,
         }
+
+    @pytest.mark.parametrize(
+        ("job_kind", "result_name", "getter"),
+        [
+            (JobKind.privacy_metrics, Results.PRIVACY_METRICS, "privacy_metrics"),
+            (JobKind.signal_metrics, Results.SIGNAL_METRICS, "signal_metrics"),
+        ],
+        ids=["privacy_metrics", "signal_metrics"],
+    )
+    def test_metrics_of_a_table_with_an_empty_metrics_file(self, job_kind, result_name, getter):
+        """A table with every column pseudonymized or excluded gets an empty metrics file.
+
+        It must not stop the other tables' metrics from being read.
+        """
+        client = FakeApiClient(tables=["parent", "child"])
+        runner = self._run_multitable(client)
+        download_file = client.download_file
+        silenced = f"child.{result_name.replace('_metrics', '')}.json"
+
+        def download_with_one_silenced_table(file_access):
+            if Path(file_access.url).name == silenced:
+                return "[]"
+            return download_file(file_access)  # type: ignore[no-untyped-call]
+
+        with patch.object(client, "download_file", side_effect=download_with_one_silenced_table):
+            parent_metrics = getattr(runner, getter)("parent")
+            child_metrics = getattr(runner, getter)("child")
+
+        assert len(parent_metrics) == 1
+        assert parent_metrics[0]["metadata"]["table_name"] == "parent"
+        assert child_metrics == []
 
     def test_get_specific_result_without_entry_does_not_download_again(self):
         runner = self._run_multitable(FakeApiClient(tables=["parent", "child"]))

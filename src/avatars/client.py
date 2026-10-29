@@ -143,6 +143,7 @@ class ApiClient(BaseClient):
         self.data_uploader = data_uploader
         self.upload_file = data_uploader.upload_file
         self.download_file = data_uploader.download_file
+        self.list_input_files = data_uploader.list_input_files
 
         logger.debug("ApiClient initialized", base_api_url=str(config.base_api_url))
 

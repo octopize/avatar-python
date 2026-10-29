@@ -6,6 +6,7 @@ import pandas as pd
 from pydantic_core import Url
 from structlog import get_logger
 
+from avatars.input_files import InputFiles, input_files_listing
 from avatars.models import FileAccess
 from avatars.sdk_client import SdkClient
 from avatars.storage import get_filesystem, get_parent
@@ -37,7 +38,8 @@ class DataUploader:
         data :
             a path to a file or a pandas dataframe to upload
         key :
-            name of the file where it should be uploaded
+            name of the file where it should be uploaded; a file of that name already
+            in the storage is overwritten
 
         """
         if isinstance(data, str):
@@ -81,6 +83,28 @@ class DataUploader:
         fsspec_fs.makedirs(parent, exist_ok=True)
 
         return fsspec_fs.write_bytes(user_specific_path, content)  # type: ignore[no-any-return]
+
+    def list_input_files(self) -> InputFiles:
+        """List the files of your input directory, newest first.
+
+        A listed file can be given to ``Runner.add_table`` in place of the data, so
+        the table reads it from the storage and nothing is uploaded again.
+        """
+        directory = self.api_client.results.get_upload_url()
+        access_url = f"{self.api_client.base_url}/access?url=" + directory
+        credentials = self.api_client.results.get_permission_to_download(access_url).credentials
+        fsspec_fs = get_filesystem(
+            aws_access_key_id=credentials.access_key_id,
+            aws_secret_access_key=credentials.secret_access_key,
+            storage_path=directory,
+            storage_endpoint_url=self.storage_endpoint_url,
+            should_verify_ssl=self.should_verify_ssl,
+        )
+        try:
+            entries = fsspec_fs.ls(directory, detail=True, refresh=True)
+        except FileNotFoundError:
+            entries = []
+        return input_files_listing(directory, entries)
 
     def download_file(self, file_access: FileAccess) -> str | bytes:
         """Download content from the storage to a file.

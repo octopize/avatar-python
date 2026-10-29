@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.19.5
+#       jupytext_version: 1.19.6
 # ---
 
 # %% [markdown]
@@ -52,13 +52,22 @@ runner.run([JobKind.standard])
 df_anonymized = runner.shuffled("iris")
 
 # %% [markdown]
+# The first runner uploaded the table as `iris.parquet`. A file uploaded once stays in your storage until its retention window ends, so the other runners of this tutorial reuse it: `manager.list_input_files()` lists the stored files, and `add_table` takes one of them in place of the data.
+
+# %%
+files = manager.list_input_files()
+
+for file in files.values():
+    print(file.name, file.size, file.uploaded_at, file.expires_at)
+
+# %% [markdown]
 # ## Anonymize with AvatarFastDP
 #
 # [Learn more about AvatarFastDP](https://docs.octopize.io/docs/principles/method/tabular/differential_privacy#avatarfastdp)
 
 # %%
 runner_dp = manager.create_runner("iris_avat_dp")
-runner_dp.add_table("iris", data=df)
+runner_dp.add_table("iris", data=files["iris.parquet"])
 runner_dp.set_parameters("iris", fast_dp_epsilon=5)
 runner_dp.run([JobKind.standard])
 df_dp_anonymized = runner_dp.shuffled("iris")
@@ -121,7 +130,7 @@ def compute_metrics(name, avatar_data):
     )
     table_name = f"iris_{name}"
     # set avatar_data to allow metrics computation
-    runner.add_table(table_name, data=df, avatar_data=avatar_data)
+    runner.add_table(table_name, data=files["iris.parquet"], avatar_data=avatar_data)
     runner.set_parameters(
         table_name,
         known_variables=["sepal.length", "sepal.width", "petal.length", "petal.width"],

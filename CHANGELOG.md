@@ -2,6 +2,16 @@
 
 ## NEXT RELEASE
 
+## 1.32.0 - 2026/10/29
+
+### Features
+
+- **client/python**: reuse a file already in your storage (#7680)
+
+### Bug Fixes
+
+- **client/python**: read the metrics of a table with metric file empty
+
 ## 1.31.0 - 2026/10/29
 
 ### Features
@@ -32,6 +42,12 @@
 
 ### Added
 
+- Reuse a file already in your storage: `manager.list_input_files()` lists the
+  files of your input directory, newest first, with their size, upload time and expiry.
+  `runner.add_table("patients", files["patients.csv"])` declares the table from the stored
+  file and uploads nothing. `InputFile("patients.csv")` names a stored file by hand;
+  `add_table` refuses a name that is not in your storage. A new upload under the name
+  of a stored file overwrites it.
 - Time series: `Runner.set_parameters(..., time_series_unalignment=UnalignmentStrategy.SKIP)`
   keeps the aligned number of points for every avatar series. `UnalignmentStrategy.UNIFORM`,
   the default, gives each avatar series its own number of points. Without an alignment

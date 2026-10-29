@@ -25,9 +25,10 @@ spawn the worker processes serverless exists to avoid.
 
 import os
 import shutil
+import sys
 import warnings
-from dataclasses import dataclass, replace
-from datetime import UTC, date, datetime
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Protocol
 
 from structlog import get_logger
@@ -123,8 +124,6 @@ class EngineLimits:
     license_type: str
     expires_at: "datetime"
     jti: str
-    # The day the engine build stops computing; None for a build that never does.
-    engine_build_ends: "date | None" = None
 
     @classmethod
     def from_license(cls, info: LicenseInfo) -> "EngineLimits":
@@ -150,7 +149,6 @@ class EngineLimits:
             max_rows=self.max_allowed_lines_per_dataset,
             max_columns=self.max_allowed_dimensions_per_dataset,
             expires_at=self.expires_at,
-            engine_build_ends=self.engine_build_ends,
         )
 
 
@@ -176,44 +174,27 @@ def activate_license(license_key: str | None) -> EngineLimits:
     require_engine()
 
     try:
-        from avatar.licensing.build_expiry import build_expires_at  # noqa: PLC0415
         from avatar.licensing.runtime import activate  # noqa: PLC0415
     except ImportError as exc:
         raise EngineNotInstalledError(
             RuntimeError("the installed avatar engine has no licensing module")
         ) from exc
 
-    build_ends = build_expires_at()
-    build_end_date = (
-        datetime.fromtimestamp(build_ends, UTC).date() if build_ends != float("inf") else None
-    )
-    limits = replace(
-        EngineLimits.from_license(activate(license_key)), engine_build_ends=build_end_date
-    )
+    limits = EngineLimits.from_license(activate(license_key))
     logger.info(
         "serverless licence activated",
         # The licence id, not the person: logs travel further than the notebook.
         expires_at=limits.expires_at.date().isoformat(),
         jti=limits.jti,
-        engine_build_ends=build_end_date.isoformat() if build_end_date else None,
     )
-    if build_end_date is not None:
-        days_left = (build_end_date - datetime.now(UTC).date()).days
-        if days_left <= BUILD_END_WARNING_DAYS:
-            warnings.warn(
-                f"This Avatar engine build stops computing on {build_end_date} "
-                f"({days_left} days). Ask Octopize for a newer engine bundle.",
-                stacklevel=2,
-            )
     return limits
 
 
-# How long before the engine build's end date the SDK starts to warn.
-BUILD_END_WARNING_DAYS = 60
-
-
 # Where the engine wheel puts the report renderer, relative to site-packages.
-BUNDLED_REPORT_GENERATOR = "avatar/_bin/reportgenerator"
+# With .exe on Windows, as engine/build.py names it there.
+BUNDLED_REPORT_GENERATOR = "avatar/_bin/reportgenerator" + (
+    ".exe" if sys.platform == "win32" else ""
+)
 
 
 def bundled_report_generator() -> str | None:
