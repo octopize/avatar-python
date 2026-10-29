@@ -7,14 +7,14 @@ from avatar_yaml import Config
 from avatar_yaml.models.advice import AdviceType
 from avatar_yaml.run_shape import REFERENCE_JOB
 
-from avatars.client import ApiClient
 from avatars.models import JobCreateRequest, JobCreateResponse, JobKind, JobResponse
+from avatars.sdk_client import SdkClient
 
 
 class JobLauncher:
     """Orchestrates job creation with dependency management and prerequisite validation."""
 
-    def __init__(self, client: ApiClient, config: Config) -> None:
+    def __init__(self, client: SdkClient, config: Config) -> None:
         """Initialize the JobLauncher.
 
         Parameters

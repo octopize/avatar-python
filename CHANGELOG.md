@@ -2,6 +2,47 @@
 
 ## NEXT RELEASE
 
+## 1.31.0 - 2026/10/29
+
+### Features
+
+- **client/python**: choose the unalignment strategy of a time series (#7606)
+- **api**: export deployment facts in configs.csv on every sync (#7580)
+- **avatar**: order the entities of a multitable cut by a permutation, not by a hash of the key (#7521)
+- **avatar**: add a skip unalignment strategy for time series (fixes #6377) (#7525)
+- **api**: bill Clever Cloud add-on owners each month (#7486)
+- **api**: provision Clever Cloud add-ons (#7484)
+- **core**: add Table and Link to lsg (#7536)
+- **avatar**: gather linked rows instead of merging whole tables (#7475)
+
+### Bug Fixes
+
+- **api**: keep a PA table in step with avatar when it enters the export (#7683)
+- **avatar**: refuse a relative difference on exclude or id
+- **api**: generate product analytics migrations that CAN run on SQLite (#7630)
+- **avatar**: describe the missing-value indicators in the current state (#7619)
+- **avatar**: reformulate holdout-based Hellinger signal metric (#7013)
+- **api**: drop every COMMENT ON from product analytics migrations (#7605)
+- **api**: name a member's own connections per member, so each member can add the demos (#7578)
+- **api**: log a rejected SSO refresh token as a warning (#7595)
+- **api**: connect to the Dask cluster at startup, not on the first job (#7519)
+- **avatar**: empty a target through the database connector, and keep demo targets new for every run (#7518)
+- **api**: stop a deleted running job before removing its files (#7514)
+- **avatar**: turn the state guard on from the job's environment (#7503)
+
+### Added
+
+- Time series: `Runner.set_parameters(..., time_series_unalignment=UnalignmentStrategy.SKIP)`
+  keeps the aligned number of points for every avatar series. `UnalignmentStrategy.UNIFORM`,
+  the default, gives each avatar series its own number of points. Without an alignment
+  method, it uses the `mean` method, which is the default of the engine.
+- `FeatureScope` has two more values, `database` and `documents`, which licences can
+  grant. No job requires them yet.
+- Serverless mode: `Manager(serverless=True, license_key=...)` runs jobs in the
+  current Python process, with no server, through the compiled Avatar engine. It
+  needs an Octopize licence, and the engine bundle that Octopize supplies.
+  `manager.license_info()` shows what the licence grants, and until when.
+
 ## 1.30.0 - 2026/10/15
 
 ### Breaking Changes

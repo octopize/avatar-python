@@ -81,6 +81,7 @@ class TestManagerInitialization:
         manager = Manager(config=minimal_config, should_verify_compatibility=False)
         assert manager.auth_client is not None
         assert manager.auth_client.base_url == "https://custom.octopize.app/api"
+        assert isinstance(manager.auth_client, ApiClient)
         assert (
             manager.auth_client.data_uploader.storage_endpoint_url
             == "https://custom.octopize.app/storage"
@@ -99,6 +100,7 @@ class TestManagerInitialization:
             )
             assert manager.auth_client is not None
             assert manager.auth_client.base_url == "https://api.example.com/api"
+            assert isinstance(manager.auth_client, ApiClient)
             assert (
                 manager.auth_client.data_uploader.storage_endpoint_url
                 == "https://api.example.com/storage"
@@ -121,6 +123,7 @@ class TestManagerInitialization:
             assert manager.auth_client.base_url == "https://api.example.com/api"
 
             # Make sure storage endpoint URL is correctly constructed
+            assert isinstance(manager.auth_client, ApiClient)
             assert (
                 manager.auth_client.data_uploader.storage_endpoint_url
                 == "https://api.example.com/storage"
@@ -157,6 +160,7 @@ class TestManagerInitialization:
             # Manager should create auth_client with config values from env vars
             assert manager.auth_client is not None
             assert manager.auth_client.base_url == "https://env.example.com/api"
+            assert isinstance(manager.auth_client, ApiClient)
             assert (
                 manager.auth_client.data_uploader.storage_endpoint_url
                 == "https://env.example.com/storage"
@@ -182,6 +186,7 @@ class TestManagerInitialization:
             assert manager.auth_client.base_url == "https://env.example.com/api"
 
             # but STORAGE_ENDPOINT_URL is not inferred from BASE_API_URL
+            assert isinstance(manager.auth_client, ApiClient)
             assert (
                 manager.auth_client.data_uploader.storage_endpoint_url
                 == "https://www.octopize.app/storage"
@@ -207,6 +212,7 @@ class TestManagerInitialization:
             assert manager.auth_client.base_url == "https://www.octopize.app/api"
 
             # but STORAGE_ENDPOINT_URL is not inferred from BASE_API_URL
+            assert isinstance(manager.auth_client, ApiClient)
             assert (
                 manager.auth_client.data_uploader.storage_endpoint_url
                 == "https://env.example.com/storage"

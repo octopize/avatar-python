@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.30.0"
+version = "1.31.0"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
@@ -28,7 +28,7 @@ dependencies = [
     "botocore <=1.40.17",
     "pandas>=2.3.1",
     "pyarrow>=18.0.0",
-    "octopize-avatar-yaml==0.1.45",
+    "octopize-avatar-yaml==0.1.46",
 ]
 
 [dependency-groups]
@@ -117,6 +117,9 @@ addopts = [
 testpaths = ["tests/unit"]
 # Recommended by pytest
 pythonpath = "src"
+markers = [
+    "serverless: needs the Avatar engine installed; skipped without it",
+]
 filterwarnings = [
     "error",
     "ignore:datetime.datetime.utcnow:DeprecationWarning:botocore",

@@ -70,6 +70,7 @@ class TestManagerApiKeyAuth:
             api_client=fake_client,
         )
 
+        assert isinstance(manager.auth_client, ApiClient)
         assert hasattr(manager.auth_client, "_api_key")
         assert manager.auth_client._api_key == api_key
         assert "Authorization" in manager.auth_client._headers

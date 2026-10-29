@@ -194,6 +194,7 @@ class FakeJobs:
         kind: list[JobKind] | None = None,
         display_name: str | None = None,
         set_name: str | None = None,
+        names: list[str] | None = None,
         limit: int | None = None,
         include_deleted: bool | None = None,
     ) -> JobResponseList:
@@ -208,6 +209,8 @@ class FakeJobs:
             jobs = [j for j in jobs if str(j.set_name) == str(set_name)]
         if kind is not None:
             jobs = [j for j in jobs if j.kind in kind]
+        if names is not None:
+            jobs = [j for j in jobs if j.name in names]
         jobs = sorted(jobs, key=lambda j: j.created_at, reverse=True)
         if limit is not None:
             jobs = jobs[:limit]
@@ -220,14 +223,16 @@ class FakeJobs:
         latest_set_name = max(jobs, key=lambda j: j.created_at).set_name
         return JobResponseList(jobs=[j for j in jobs if j.set_name == latest_set_name])
 
-    def get_job_status(self, name: str) -> JobResponse:
-        if name in self._jobs:
-            return self._jobs[name]
+    # Parameter is `job_name`, matching the generated client -- the fake has to be
+    # signature-faithful or it stops satisfying avatars.sdk_client.JobsApi.
+    def get_job_status(self, job_name: str) -> JobResponse:
+        if job_name in self._jobs:
+            return self._jobs[job_name]
         return JobResponseFactory().build(
-            name=name,
+            name=job_name,
             set_name=uuid4(),
-            parameters_name=name,
-            display_name=name,
+            parameters_name=job_name,
+            display_name=job_name,
             created_at="2023-10-01T00:00:00Z",
             kind=JobKind.standard,
             status="finished",

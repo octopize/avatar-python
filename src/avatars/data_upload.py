@@ -6,8 +6,8 @@ import pandas as pd
 from pydantic_core import Url
 from structlog import get_logger
 
-from avatars.client import ApiClient
 from avatars.models import FileAccess
+from avatars.sdk_client import SdkClient
 from avatars.storage import get_filesystem, get_parent
 
 logger = get_logger(__name__)
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 class DataUploader:
     def __init__(
         self,
-        api_client: ApiClient,
+        api_client: SdkClient,
         storage_endpoint_url: str,
         should_verify_ssl: bool = True,
     ) -> None:

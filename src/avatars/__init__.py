@@ -1,4 +1,4 @@
-__version__ = "1.30.0"
+__version__ = "1.31.0"
 
 # Re-export main public entry points for convenience so users can do for example:
 # Auto-install the crash handler for enhanced error reporting

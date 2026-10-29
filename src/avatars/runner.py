@@ -34,6 +34,7 @@ from avatar_yaml.models.parameters import (
     ProjectionType,
     ReportLanguage,
     ReportType,
+    UnalignmentStrategy,
 )
 from avatar_yaml.models.schema import (
     ColumnType,
@@ -44,7 +45,6 @@ from avatar_yaml.run_shape import REFERENCE_JOB, REFERENCE_SET, dump, reference_
 from IPython.display import HTML, display
 
 from avatars import __version__
-from avatars.client import ApiClient
 from avatars.constants import (
     DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS,
     DEFAULT_TYPE,
@@ -71,6 +71,7 @@ from avatars.schema_plan import (
     qualified_table,
 )
 from avatars.schema_plan import connection as _connection
+from avatars.sdk_client import SdkClient
 
 logger = getLogger(__name__)
 
@@ -120,7 +121,7 @@ def _base36(number: int) -> str:
 class Runner:
     def __init__(
         self,
-        api_client: ApiClient,
+        api_client: SdkClient,
         display_name: str,
         *,
         seed: int | None = None,
@@ -851,41 +852,10 @@ class Runner:
             if plan is None:
                 continue
             frozen.extend(plan.frozen_columns(table))
-            self._require_something_to_model(plan, table, frozen)
+            _require_something_to_model(plan, table, frozen)
         if not frozen:
             return excluded
         return list(dict.fromkeys([*(excluded or []), *frozen]))
-
-    @staticmethod
-    def _require_something_to_model(plan: SchemaPlan, table: str, frozen: list[str]) -> None:
-        """Refuse a table the avatarization would be left nothing to work on.
-
-        The engine refuses it too, from three layers down and without naming the
-        table: "Expected at least one column to be left after excluding
-        variables". Which is right -- excluding every column asks it to model
-        nothing -- but it arrives mid-run, from a processor, about a decision
-        made at review time.
-
-        It is reachable the moment freezing is: a lookup table of a key and one
-        label, with the label frozen, has nothing left. So it is said here,
-        naming the table and the two ways out.
-        """
-        if not frozen:
-            return
-        modellable = set(plan.anonymizable_columns(table)) - set(frozen)
-        if modellable:
-            return
-        treatment = plan.treatment_of(table)
-        described = (
-            "is set to copy, so every column of it is kept verbatim"
-            if treatment == "copy"
-            else f"has every column the avatarization could model frozen ({', '.join(frozen)})"
-        )
-        raise ValueError(
-            f"table {table!r} {described}, which leaves the avatarization nothing to "
-            "work on and is refused by the engine mid-run. Either anonymize one column "
-            f"of {table!r}, or leave the table out of the run with `ignore`."
-        )
 
     def _declare_planned_links(self, plan: SchemaPlan, config: Config) -> None:
         """Declare the foreign keys between the tables this run works on.
@@ -914,32 +884,8 @@ class Runner:
                     child_table_name=child,
                     parent_field=link["references_column"],
                     child_field=link["column"],
-                    method=self._link_method(plan, parent),
+                    method=_link_method(plan, parent),
                 )
-
-    @staticmethod
-    def _link_method(plan: SchemaPlan, parent: str) -> LinkMethod:
-        """How children are matched to their parent rows after anonymization.
-
-        Row order, for every link, for now -- a deliberate decision while the
-        database path is being built rather than a discovered constraint. It is
-        the only method that works from a parent the avatarization leaves
-        nothing to do, and picking per link instead meant a lookup table whose
-        only real column is pseudonymized got the assignment method and the
-        engine refused the run:
-
-            Link from table 'country' to table 'customer' uses link method
-            'LINEAR_SUM_ASSIGNMENT' but parent table 'country' has no
-            anonymizable columns.
-
-        The trade-off is real and recorded on the enum member itself: keeping
-        the original order to assign a child to its parent is a privacy breach,
-        so this is a "for now" and not an answer. `LINEAR_SUM_ASSIGNMENT` is the
-        one to return here when a link method is chosen per link properly --
-        which needs to know whether the parent has anything to avatarize, which
-        `plan.anonymizable_columns(parent)` answers.
-        """
-        return LinkMethod.SENSITIVE_ORIGINAL_ORDER_ASSIGNMENT
 
     def add_databases(
         self,
@@ -1085,6 +1031,7 @@ class Runner:
         time_series_projection_type: ProjectionType | None = None,
         time_series_nb_points: int | None = None,
         time_series_method: AlignmentMethod | None = None,
+        time_series_unalignment: UnalignmentStrategy | None = None,
         known_variables: list[str] | None = None,
         target: str | None = None,
         quantile_threshold: int | None = None,
@@ -1147,6 +1094,11 @@ class Runner:
             ``AlignmentMethod.MIN``, ``AlignmentMethod.MEAN``.
         time_series_nb_points
             In time series context, number of points to generate for time series.
+        time_series_unalignment
+            In time series context, how the avatar series come back from the aligned number
+            of points. Options: ``UnalignmentStrategy.UNIFORM`` (default) gives each avatar
+            series its own number of points, ``UnalignmentStrategy.SKIP`` keeps the aligned
+            number of points for every avatar series.
         known_variables
             List of known variables to be used for privacy metrics.
             These are variables that could be easily known by an attacker.
@@ -1324,8 +1276,14 @@ class Runner:
             or time_series_projection_type
             or time_series_nb_points
             or time_series_method
+            or time_series_unalignment
         ):
             method = time_series_method.value if time_series_method else None
+            unalignment = time_series_unalignment.value if time_series_unalignment else None
+            if unalignment and method is None:
+                # avatar-yaml 0.1.46 writes a missing method as `method: null`, which the engine
+                # refuses. `mean` is the method that the engine takes by default.
+                method = AlignmentMethod.MEAN.value
             projection_type = (
                 time_series_projection_type.value if time_series_projection_type else None
             )
@@ -1337,6 +1295,7 @@ class Runner:
                 method=method,
                 exclude_variable_names=exclude_variable_names,
                 exclude_variable_method=replacement_strategy,
+                unalignment=unalignment,
             )
 
         metrics_exclude_variable_names = (
@@ -1539,9 +1498,14 @@ class Runner:
             if ts_params.alignment:
                 current_params.update(
                     {
-                        "time_series_nb_points": ts_params.alignment["nb_points"] or None,
+                        "time_series_nb_points": ts_params.alignment.get("nb_points") or None,
                         "time_series_method": AlignmentMethod(ts_params.alignment["method"])
-                        if ts_params.alignment["method"]
+                        if ts_params.alignment.get("method")
+                        else None,
+                        "time_series_unalignment": UnalignmentStrategy(
+                            ts_params.alignment["unalignment"]
+                        )
+                        if ts_params.alignment.get("unalignment")
                         else None,
                     }
                 )
@@ -1961,32 +1925,13 @@ class Runner:
                 **{
                     f"{cluster}/{kind}": launcher.get_job_status(kind).status
                     for cluster, launcher in self._cluster_launchers.items()
-                    for kind in self._ordered(launcher.get_launched_jobs())
+                    for kind in _ordered(launcher.get_launched_jobs())
                 },
             }
         return {
             str(kind): self.get_job(kind).status
-            for kind in self._ordered(self.jobs.get_launched_jobs())
+            for kind in _ordered(self.jobs.get_launched_jobs())
         }
-
-    @staticmethod
-    def _ordered(launched: list[str]) -> list[str]:
-        """The jobs of one run, in the order the work happens."""
-        order = [
-            JobKind.extract,
-            JobKind.standard,
-            JobKind.regenerate,
-            JobKind.signal_metrics,
-            JobKind.privacy_metrics,
-            JobKind.report,
-        ]
-        rank = {str(kind): index for index, kind in enumerate(order)}
-        return sorted(
-            launched,
-            # A kind this list does not name still appears, after the ones it
-            # does, rather than being dropped from the answer.
-            key=lambda kind: (rank.get(str(kind), len(order)), str(kind)),
-        )
 
     def get_status(
         self,
@@ -2640,3 +2585,77 @@ class Runner:
             return
         with open(filename, "w", encoding="utf-8") as file:
             file.write(file_content.data)
+
+
+def _require_something_to_model(plan: SchemaPlan, table: str, frozen: list[str]) -> None:
+    """Refuse a table the avatarization would be left nothing to work on.
+
+    The engine refuses it too, from three layers down and without naming the
+    table: "Expected at least one column to be left after excluding
+    variables". Which is right -- excluding every column asks it to model
+    nothing -- but it arrives mid-run, from a processor, about a decision
+    made at review time.
+
+    It is reachable the moment freezing is: a lookup table of a key and one
+    label, with the label frozen, has nothing left. So it is said here,
+    naming the table and the two ways out.
+    """
+    if not frozen:
+        return
+    modellable = set(plan.anonymizable_columns(table)) - set(frozen)
+    if modellable:
+        return
+    treatment = plan.treatment_of(table)
+    described = (
+        "is set to copy, so every column of it is kept verbatim"
+        if treatment == "copy"
+        else f"has every column the avatarization could model frozen ({', '.join(frozen)})"
+    )
+    raise ValueError(
+        f"table {table!r} {described}, which leaves the avatarization nothing to "
+        "work on and is refused by the engine mid-run. Either anonymize one column "
+        f"of {table!r}, or leave the table out of the run with `ignore`."
+    )
+
+
+def _link_method(plan: SchemaPlan, parent: str) -> LinkMethod:
+    """How children are matched to their parent rows after anonymization.
+
+    Row order, for every link, for now -- a deliberate decision while the
+    database path is being built rather than a discovered constraint. It is
+    the only method that works from a parent the avatarization leaves
+    nothing to do, and picking per link instead meant a lookup table whose
+    only real column is pseudonymized got the assignment method and the
+    engine refused the run:
+
+        Link from table 'country' to table 'customer' uses link method
+        'LINEAR_SUM_ASSIGNMENT' but parent table 'country' has no
+        anonymizable columns.
+
+    The trade-off is real and recorded on the enum member itself: keeping
+    the original order to assign a child to its parent is a privacy breach,
+    so this is a "for now" and not an answer. `LINEAR_SUM_ASSIGNMENT` is the
+    one to return here when a link method is chosen per link properly --
+    which needs to know whether the parent has anything to avatarize, which
+    `plan.anonymizable_columns(parent)` answers.
+    """
+    return LinkMethod.SENSITIVE_ORIGINAL_ORDER_ASSIGNMENT
+
+
+def _ordered(launched: list[str]) -> list[str]:
+    """The jobs of one run, in the order the work happens."""
+    order = [
+        JobKind.extract,
+        JobKind.standard,
+        JobKind.regenerate,
+        JobKind.signal_metrics,
+        JobKind.privacy_metrics,
+        JobKind.report,
+    ]
+    rank = {str(kind): index for index, kind in enumerate(order)}
+    return sorted(
+        launched,
+        # A kind this list does not name still appears, after the ones it
+        # does, rather than being dropped from the answer.
+        key=lambda kind: (rank.get(str(kind), len(order)), str(kind)),
+    )

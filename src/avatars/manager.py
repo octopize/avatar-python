@@ -1,6 +1,7 @@
 import re
 import warnings
-from typing import Literal
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
 from uuid import UUID
 
 import httpx
@@ -26,6 +27,12 @@ from avatars.models import (
     JobResponse,
 )
 from avatars.runner import Runner
+from avatars.sdk_client import SdkClient
+
+if TYPE_CHECKING:
+    from avatars.serverless.client import LicenseSummary
+    from avatars.serverless.config import ServerlessConfig
+
 
 _ERROR_STATUS_PATTERN = re.compile(r"Error status (\d{3})")
 _MISCONFIGURED_URL_STATUSES = frozenset({301, 302, 307, 308, 404})
@@ -65,6 +72,90 @@ def _increment_display_name_version(name: str) -> str:
     return name + "-v1"
 
 
+def _build_serverless_client(
+    *,
+    base_url: str | None,
+    api_client: ApiClient | None,
+    api_key: str | None,
+    config: ClientConfig | None,
+    license_key: str | None,
+    workdir: "str | Path | None",
+    serverless_config: "ServerlessConfig | None",
+) -> SdkClient:
+    """Assemble the in-process client, or explain why we cannot.
+
+    Deliberately the only place in the SDK that touches the engine's licence
+    call. What the licence permits is decided inside the engine; this reads the
+    answer and hands the resulting caps to the executor.
+    """
+    conflicting = [
+        name
+        for name, value in (
+            ("base_url", base_url),
+            ("api_client", api_client),
+            ("api_key", api_key),
+            ("config", config),
+        )
+        if value is not None
+    ]
+    if conflicting:
+        raise ValueError(
+            f"Cannot combine serverless=True with {', '.join(conflicting)}. "
+            "Serverless mode talks to no server, so there is nothing to point at "
+            "or authenticate against."
+        )
+    if serverless_config is not None and (license_key is not None or workdir is not None):
+        raise ValueError(
+            "Cannot provide both 'serverless_config' and 'license_key'/'workdir'. "
+            "Set those fields on the ServerlessConfig instead."
+        )
+
+    # Imported here, not at module scope: `avatars` must stay importable without
+    # the engine, and this subpackage reaches it.
+    from avatars.serverless.client import ServerlessClient  # noqa: PLC0415
+    from avatars.serverless.config import (  # noqa: PLC0415
+        ServerlessConfig as _ServerlessConfig,
+    )
+    from avatars.serverless.config import new_seeding_salt  # noqa: PLC0415
+    from avatars.serverless.engine import (  # noqa: PLC0415
+        EngineJobExecutor,
+        activate_license,
+        engine_version,
+    )
+    from avatars.serverless.store import ServerlessStore  # noqa: PLC0415
+    from avatars.serverless.workdir import Workdir  # noqa: PLC0415
+
+    if serverless_config is not None:
+        settings = serverless_config
+    else:
+        # Built field by field rather than by unpacking, so that an omitted
+        # argument leaves the environment-derived default standing instead of
+        # overwriting it with None.
+        settings = _ServerlessConfig()
+        if license_key is not None:
+            settings.license_key = license_key
+        if workdir is not None:
+            # Assigned, so the field's validator does not run: expand the home here.
+            settings.workdir = Path(workdir).expanduser()
+
+    directory = Workdir(settings.workdir).ensure()
+    store = ServerlessStore(directory.index_path)
+
+    license_key = settings.resolve_license_key()
+    limits = activate_license(license_key)
+    seeding_salt = store.seeding_salt(default=new_seeding_salt())
+
+    return ServerlessClient(
+        settings=settings,
+        workdir=directory,
+        store=store,
+        # A licence that activated is a key that exists, so it is a str here.
+        executor=EngineJobExecutor(settings, limits, seeding_salt, license_key or ""),
+        engine_version=engine_version(),
+        licensee=limits.summary(),
+    )
+
+
 class Manager:
     """High-level convenience facade for interacting with the Avatar API.
 
@@ -85,7 +176,10 @@ class Manager:
     Attributes
     ----------
     auth_client:
-        The underlying :class:`avatars.client.ApiClient` used to perform all HTTP requests.
+        The client all requests go through. Against a server this is a
+        :class:`avatars.client.ApiClient`; in serverless mode it is a
+        :class:`avatars.serverless.client.ServerlessClient`. It is typed as the
+        :class:`avatars.sdk_client.SdkClient` protocol both satisfy.
 
     """
 
@@ -97,6 +191,10 @@ class Manager:
         api_key: str | None = None,
         config: ClientConfig | None = None,
         should_verify_compatibility: bool | None = None,
+        serverless: bool = False,
+        license_key: str | None = None,
+        workdir: "str | Path | None" = None,
+        serverless_config: "ServerlessConfig | None" = None,
     ) -> None:
         """Initialize the manager with a base url or config.
 
@@ -132,9 +230,59 @@ class Manager:
             should_verify_compatibility: Whether to verify client-server compatibility.
                 If None, defaults to config.VERIFY_COMPATIBILITY.
 
+            serverless: Run the Avatar engine in this process instead of calling a
+                server. Needs the Avatar engine, from the engine bundle that Octopize
+                supplies.
+                Mutually exclusive with base_url, api_key, api_client and config.
+            license_key: The serverless licence. If omitted, it is looked for in
+                AVATAR_LICENSE_KEY, then <workdir>/license.key, then
+                ~/.avatar/license.key. Only meaningful with serverless=True.
+            workdir: Where serverless keeps inputs, results and its job index.
+                Defaults to ~/.avatar/serverless. Only meaningful with serverless=True.
+            serverless_config: Full serverless settings, for anything beyond a licence
+                and a workdir (executor, batch size, report renderer).
+                Mutually exclusive with license_key and workdir.
+
+        Examples:
+        --------
+        Against a server::
+
+            manager = Manager(base_url="https://avatar.company.co", api_key="...")
+
+        With no server at all, inside a notebook::
+
+            manager = Manager(serverless=True, license_key="...")
+
         """
+        if serverless:
+            self.auth_client: SdkClient = _build_serverless_client(
+                base_url=base_url,
+                api_client=api_client,
+                api_key=api_key,
+                config=config,
+                license_key=license_key,
+                workdir=workdir,
+                serverless_config=serverless_config,
+            )
+        # A serverless-only argument passed without serverless=True is almost
+        # certainly a user who believes they are offline while in fact talking to
+        # octopize.app. Refuse rather than silently ignore it.
+        elif (license_key, workdir, serverless_config) != (None, None, None):
+            supplied = [
+                name
+                for name, value in (
+                    ("license_key", license_key),
+                    ("workdir", workdir),
+                    ("serverless_config", serverless_config),
+                )
+                if value is not None
+            ]
+            raise ValueError(
+                f"{', '.join(supplied)} only applies to serverless mode. "
+                "Pass serverless=True, or remove it."
+            )
         # Mutual exclusivity checks - api_client is mutually exclusive with everything else
-        if api_client is not None:
+        elif api_client is not None:
             conflicting_params = []
             if base_url is not None:
                 conflicting_params.append("base_url")
@@ -297,6 +445,31 @@ class Manager:
             f"The Octopize SaaS platform is at {PRODUCTION_BASE_URL}. "
             "Your tenant might be at another address."
         ) from error
+
+    def license_info(self) -> "LicenseSummary":
+        """What the serverless licence in force grants.
+
+        Who it is for, the organization, the tier, the features, the maximum rows and
+        columns per dataset, the expiry date, the day the engine build stops computing,
+        and the licence id to quote to support. ``print()`` it for a readable summary.
+
+        Raises
+        ------
+        ValueError
+            When this Manager talks to a server: there, the limits come from the
+            platform account, not from a licence.
+
+        """
+        from avatars.serverless.client import ServerlessClient  # noqa: PLC0415
+
+        if not isinstance(self.auth_client, ServerlessClient):
+            raise ValueError(
+                "license_info() is for serverless mode, Manager(serverless=True). With a "
+                "server, the limits come from your platform account."
+            )
+        if self.auth_client.licensee is None:
+            raise ValueError("No licence is in force for this Manager.")
+        return self.auth_client.licensee
 
     def create_runner(
         self,

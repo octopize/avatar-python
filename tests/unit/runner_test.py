@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import pandas as pd
 import pytest
+import yaml
 from avatar_yaml import FakeDataStrategy, HashSha256Strategy, PiiType, PseudonymizationStrategy
 from avatar_yaml.models.parameters import (
     AlignmentMethod,
@@ -15,6 +16,7 @@ from avatar_yaml.models.parameters import (
     ProjectionType,
     ReportLanguage,
     ReportType,
+    UnalignmentStrategy,
 )
 from avatar_yaml.models.schema import ColumnType
 
@@ -969,6 +971,24 @@ class TestRunner:
         assert alignment["method"] == "mean"  # Updated
         assert alignment["nb_points"] == 10  # Updated
 
+    def test_set_parameters_time_series_unalignment_without_method(self):
+        """An unalignment without a method takes the default method of the engine."""
+        runner = self.manager.create_runner("test")
+        runner.add_table("test_table", data=self.df1, time_series_time="col1")
+        runner.set_parameters("test_table", k=3, time_series_unalignment=UnalignmentStrategy.SKIP)
+
+        # The engine reads the YAML, thus the test reads it too.
+        [parameters] = [
+            doc
+            for doc in yaml.safe_load_all(runner.get_yaml())
+            if doc and doc["kind"] == "AvatarParameters"
+        ]
+        alignment = parameters["spec"]["time_series"]["test_table"]["alignment"]
+        assert alignment["method"] == "mean"
+        assert alignment["unalignment"] == "skip"
+        # avatar-yaml 0.1.46 writes an unset nb_points as null, which the engine accepts.
+        assert alignment.get("nb_points") is None
+
     def test_update_parameters_time_series_only_table(self):
         """Test updating a table configured only with time series parameters (no k/epsilon)."""
         runner = self.manager.create_runner("test")
@@ -1107,6 +1127,7 @@ class TestRunner:
             time_series_projection_type=ProjectionType.FPCA,
             time_series_nb_points=10,
             time_series_method=AlignmentMethod.MAX,
+            time_series_unalignment=UnalignmentStrategy.SKIP,
         )
 
         # Extract parameters
@@ -1117,6 +1138,7 @@ class TestRunner:
         assert current_params["time_series_projection_type"] == ProjectionType.FPCA
         assert current_params["time_series_nb_points"] == 10
         assert current_params["time_series_method"] == AlignmentMethod.MAX
+        assert current_params["time_series_unalignment"] == UnalignmentStrategy.SKIP
 
     def test_set_parameters_time_series_exclude_variables(self):
         """Test that exclude_variable_names is applied to the time series parameters."""
@@ -1448,20 +1470,13 @@ class TestRunner:
         # Its own client: other tests in this class replace methods on the shared one.
         return Manager(api_client=FakeApiClient()).create_runner("test")
 
-    @staticmethod
-    def _still_running(runner: Runner) -> None:
-        """The fake creates jobs already finished; these tests need them going."""
-        jobs = runner.client.jobs._jobs  # type: ignore[attr-defined]
-        for name, job in jobs.items():
-            jobs[name] = job.model_copy(update={"status": JobStatus.pending, "done": False})
-
     def test_cancel_all_jobs_no_args(self):
         """Every job still going is cancelled; the server's answers are returned."""
         runner = self._fresh_runner()
         runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
         runner.set_parameters("test_table", k=5)
         runner.run(jobs_to_run=[JobKind.standard, JobKind.privacy_metrics])
-        self._still_running(runner)
+        _still_running(runner)
 
         result = runner.cancel()
 
@@ -1474,7 +1489,7 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
         runner.set_parameters("test_table", k=5)
         runner.run(jobs_to_run=[JobKind.standard])
-        self._still_running(runner)
+        _still_running(runner)
         runner.cancel(JobKind.standard)
 
         assert runner.cancel(JobKind.standard) == []
@@ -1485,7 +1500,7 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1, avatar_data=self.df1)
         runner.set_parameters("test_table", k=5)
         runner.run(jobs_to_run=[JobKind.standard])
-        self._still_running(runner)
+        _still_running(runner)
         runner.cancel(JobKind.standard)
 
         with pytest.raises(ValueError, match="was cancelled"):
@@ -1541,6 +1556,13 @@ class TestRunner:
         assert isinstance(HashSha256Strategy(), get_args(PseudonymizationStrategy))
         cfg = FakeDataStrategy(pii_type=PiiType.EMAIL)
         assert cfg.pii_type == PiiType.EMAIL
+
+
+def _still_running(runner: Runner) -> None:
+    """The fake creates jobs already finished; these tests need them going."""
+    jobs = runner.client.jobs._jobs  # type: ignore[attr-defined]
+    for name, job in jobs.items():
+        jobs[name] = job.model_copy(update={"status": JobStatus.pending, "done": False})
 
 
 class TestReconstructRunner:

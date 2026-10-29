@@ -5,13 +5,13 @@ from typing import Any
 import pandas as pd
 from IPython.display import HTML
 
-from avatars.client import ApiClient
 from avatars.constants import TypeResults
 from avatars.models import FileAccess
+from avatars.sdk_client import SdkClient
 
 
 class FileDownloader:
-    def __init__(self, api_client: ApiClient):
+    def __init__(self, api_client: SdkClient):
         self.client = api_client
 
     def _download_with_credentials(self, file_access: FileAccess) -> str | bytes:
