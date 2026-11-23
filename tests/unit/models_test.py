@@ -38,3 +38,19 @@ def test_me_user_accepts_the_responses_of_other_api_versions(
     me = MeUser.model_validate(_me_payload(**environment))
 
     assert me.environment.license_type == expected
+
+
+@pytest.mark.parametrize(
+    ("organization", "expected"),
+    [
+        pytest.param({}, None, id="api-without-organization-name"),
+        pytest.param({"organization_name": None}, None, id="null"),
+        pytest.param({"organization_name": "Acme"}, "Acme", id="known-value"),
+    ],
+)
+def test_me_user_reads_the_organization_name(
+    organization: dict[str, Any], expected: str | None
+) -> None:
+    me = MeUser.model_validate({**_me_payload(), **organization})
+
+    assert me.organization_name == expected

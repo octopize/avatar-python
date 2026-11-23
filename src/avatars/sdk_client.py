@@ -48,8 +48,11 @@ from avatars.models import (
     JobResponse,
     JobResponseList,
     MeUser,
+    PresignedUrl,
     ResourceSetResponse,
+    StoredFile,
 )
+from avatars.storage_transport import StorageTransportChoice
 
 if TYPE_CHECKING:
     from avatars.client import ApiClient
@@ -96,6 +99,12 @@ class ResultsApi(Protocol):
     def get_permission_to_download(self, url: str) -> FileAccess: ...
 
     def get_permissions_to_download_batch(self, urls: list[str]) -> list[FileAccess]: ...
+
+    def get_presigned_url(self, url: str, method: str | None = ...) -> PresignedUrl: ...
+
+    def get_presigned_urls_batch(self, urls: list[str]) -> list[PresignedUrl]: ...
+
+    def get_input_files(self) -> list[StoredFile]: ...
 
     def get_upload_url(self) -> Any: ...
 
@@ -162,6 +171,9 @@ class SdkClient(Protocol):
 
     base_url: str
     should_verify_ssl: bool
+
+    @property
+    def storage_transport(self) -> StorageTransportChoice: ...
 
     @property
     def upload_file(self) -> UploadFile: ...

@@ -14,6 +14,8 @@ from avatars.constants import (
     mapping_result_to_file_name,
 )
 
+_PROPOSAL_FACTS = ("contract_findings", "schema_drift", "ready")
+
 
 class ResultsOrganizer(BaseModel):
     model_config = {"arbitrary_types_allowed": True}
@@ -113,7 +115,11 @@ class ResultsOrganizer(BaseModel):
                 if isinstance(result, list):
                     for item in result:
                         if item["table_name"] == table_name:
-                            self.advice[table_name] = item["advice"] or {}
+                            # A proposal's findings, kept beside its plan for `SchemaPlan`.
+                            self.advice[table_name] = {
+                                **(item["advice"] or {}),
+                                **{key: item[key] for key in _PROPOSAL_FACTS if key in item},
+                            }
                             break
             case Results.REFERENCE_TABLES:
                 # Wrapped in a list like every JSON result, and tolerated bare.

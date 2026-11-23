@@ -7,6 +7,7 @@ dependency resolution, ``results.json``, the access envelope, download,
 ``ResultsOrganizer`` -- is covered in one pass.
 """
 
+import os
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
@@ -127,6 +128,22 @@ class TestUploadDownload:
         )
         assert files["iris.parquet"].uploaded_at is not None
         assert files["iris.parquet"].expires_at is None
+
+    def test_the_raw_listing_is_newest_first_as_the_route_promises(
+        self, client: ServerlessClient
+    ) -> None:
+        """``results.get_input_files`` mirrors ``GET /input_files``, name order and all."""
+        for name, age_in_days in (("oldest.csv", 3), ("newest.csv", 0), ("middle.csv", 1)):
+            path = client.workdir.input_dir / name
+            path.write_text("a\n")
+            # A fixed instant, so the three ages stay a fixed distance apart and the
+            # order under test cannot depend on the clock moving between iterations.
+            modified = 1_700_000_000 - age_in_days * 86400
+            os.utime(path, (modified, modified))
+
+        listed = client.results.get_input_files()
+
+        assert [file.name for file in listed] == ["newest.csv", "middle.csv", "oldest.csv"]
 
     def test_download_reads_text_and_binary_the_way_the_server_client_does(
         self, client: ServerlessClient
@@ -390,7 +407,9 @@ class TestHandshake:
         assert client.is_using_api_key() is True
 
     def test_get_me_answers_without_a_directory(self, client: ServerlessClient) -> None:
-        assert client.users.get_me().email == "serverless@localhost"
+        me = client.users.get_me()
+        assert me.email == "serverless@localhost"
+        assert me.organization_name is None
 
     def test_get_me_is_the_licensee_with_the_same_ids_every_session(
         self, workdir, store, executor
@@ -408,6 +427,7 @@ class TestHandshake:
         assert first.environment.max_allowed_lines_per_dataset == 100_000
         assert first.environment.license_type == "starter"
         assert first.email == "alice@acme.test"
+        assert first.organization_name == a_summary().organization
         assert (first.id, first.organization_id) == (second.id, second.organization_id)
 
     def test_each_job_records_the_licence_it_ran_under(self, workdir, store, executor) -> None:

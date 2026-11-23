@@ -2,6 +2,85 @@
 
 ## NEXT RELEASE
 
+## 1.33.0 - 2026/11/23
+
+### Breaking Changes
+
+- BREAKING give the SeaweedFS admin server and its worker a shared signing key (#7860)
+- BREAKING remove the OpenDP avatarization method and the dp package (#7734)
+- BREAKING **infra/helm**: run Authentik 2026.8.5 in the Helm chart (#7713)
+
+### Features
+
+- **avatar**: measure a link on a composite key in the metrics flows (#7857)
+- **avatar**: keep the composite key of the avatars unique at configuration (#7793)
+- **avatar**: copy each parent's final key into its children after every treatment (#7707)
+- **avatar**: carry a link on a composite key with stand-in keys (#7705)
+- **avatar**: declare a composite key on a table and a link on it (#7704)
+- **client/python**: read a database proposal's findings and drift as items (#8046)
+- **api**: accept Iceberg connections and give each connection's kind (#8045)
+- **avatar**: check a database's data contract and its approved schema (#8043)
+- **avatar**: read and write a lakehouse at pinned snapshots (#8042)
+- **api**: return the organization name from /users/me (#8103)
+- **avatar**: avatarize a wide table in column groups (#7996)
+- **api**: list a caller's input files, and sign the removal of one (#7895)
+- **client/python**: transfer files through pre-signed URLs (#7466)
+- **api**: hand clients pre-signed storage URLs instead of S3 credentials (#7465)
+- **api**: bill the Clever Cloud add-on at the first usage of a month (#8036)
+- **api**: export a user's organization change to product analytics (#7823)
+- **api**: put the rest of the job and tenant lifecycle on the bus (#7750)
+- **api**: create users and disable organizations through commands (#7743)
+- **api**: run the job manager on an in-memory message bus (#7742)
+- **avatar**: keep part of an uploaded dataset with a row filter on its schema (#7527)
+- **api**: decide what a failed job records by the kind of its error (#7741)
+- **avatar**: raise two kinds of errors, told by kind (#7740)
+- **avatar**: draw primary key pseudonyms when the primary key is renamed (#7751)
+- **core**: draw primary key values from a pseudonymization strategy (#7746)
+- **api**: say in /capabilities whether the deployment offers databases (#7809)
+- **api**: move a user to the organization group at login
+- **api**: move a user to the organization of its Authentik group at login (#7725)
+- **api**: move a user to another organization with user_tool.py (#7658)
+
+### Bug Fixes
+
+- **core**: return INVALID_DATA for any unparsable datetime value (#8118)
+- **avatar**: refuse two links from one parent to the same child table (#8114)
+- **avatar**: stop leaking a dask lock timer per progress update (#8109)
+- **api**: accept an existing bucket in create_bucket with exists_ok (#8068)
+- **api**: delete the storage identity of a deleted user (#8053)
+- **avatar**: check a config on its final shape, once (#7944)
+- **avatar**: keep a run from saying Preparing after its avatars exist (#7933)
+- **api**: return 401 for an API key whose user does not exist (#7931)
+- **avatar**: put the unshuffled time series in the order of its anchor rows (#7866)
+- **avatar**: refuse pseudonymization strategies that break a PK (#7738)
+- **api**: refuse SSO login and token refresh for a disabled organization
+- **api**: declare lost the jobs the computing cluster no longer knows (#7757)
+- **api**: keep a moved user's access to the results of old organization (#7727)
+
+### Features
+
+- **api**: a connection to an Iceberg REST table catalog, built from the catalog's URL, warehouse, namespace and credential; every listed connection, in `GET /connections` and `GET /capabilities`, says whether it is a database, a lakehouse or a document store (#7958)
+- **avatar**: the Extraction refuses a source that no longer agrees with its data contract, naming every contract finding, before a row is read (#7953)
+- **avatar**: a Schema discovery run again with an approved schema lists its schema drift in the proposed schema (`schema_drift`), and leaves the tables and columns the source no longer has out of it (#7953)
+- **avatar**: each contract finding and each item of schema drift is a structured item (a `kind`, the table, the column and the types concerned, and an English `message`), in the proposed schema and in a refused Extraction's result: before it fails, the Extraction files them as `extraction_refusal` in its job's results (#7953)
+- **api**: a connection test's `code` says `catalog_host_not_allowed` for a table catalog on a host the operator did not list (#7953)
+- **client/python**: refuse to launch a database run from a proposed schema with a contract finding or schema drift, with `ProposalNotReadyError` naming each and holding them as `contract_findings` and `schema_drift`; `SchemaPlan.contract_findings` and `SchemaPlan.schema_drift` give the structured items; a run whose Extraction refused its source raises `ExtractionRefusedError` holding the items the Extraction filed, which `Runner.extraction_refusal()` also reads (#7953)
+- **client/python**: `users.get_me()` returns `organization_name`, the name of the organization of the user. It is `None` with an API that does not send it, and in a serverless session without a licence (#8102)
+- **client/python**: transfer files through pre-signed URLs, so no S3 credential reaches the client and no storage endpoint has to be reachable for a transfer (one is still required in the configuration, so falling back to credentials never needs the client reconfigured). The deployment chooses: the client reads `storage_transport` from `/capabilities` on its first transfer and follows it. Pass `use_presigned_urls` (or set `AVATAR_USE_PRESIGNED_URLS`) to decide for yourself instead. A server too old to answer, or too old to sign, leaves the client on credentials. `list_input_files` reads `/input_files` on that transport, since a listing names no object for a signature to cover (#7466)
+
+### Breaking Changes
+
+- BREAKING **avatar**: the Extraction refuses a source with schema drift from its approved schema: a table or a column at the source the approved schema does not have, one it has that the source no longer has, or a changed type, in a table whose rows reach the target. A table the approved schema does not name was copied before. Run the Schema discovery again and approve what changed (#7953)
+- BREAKING **client/python**: remove the OpenDP avatarization method. `Runner.set_parameters` no longer accepts `open_dp_epsilon`. Use `fast_dp_epsilon` or `k`.
+- BREAKING **avatar-yaml**: remove the `avatarization_open_dp` section and `AvatarizationOpenDPParameters`. A YAML with `avatarization_open_dp` now raises an error. Use `avatarization_fast_dp` or `avatarization`.
+
+### Bug Fixes
+
+- **client/python**: a database run of one group is named `name__launch--group`, as each group of a run of several is, so the run it writes into an Iceberg target's snapshots (`avatar.run-id`) is its launch name, `name__launch`, and not its set
+- **avatar-yaml**: a database run's YAML keeps the plan's primary keys and links, as the schema's key columns and links, and reads them back (#7953)
+- **client/python**: a serverless job reads the kind of an engine error, so a dataset over the licence cap and a feature outside the licence keep the server's wording with an engine that tells its errors by kind
+- **avatar**: refuse at upload a set that the creation of a dependent job would refuse, and name each table in an error as it is written in the set (#7894)
+
 ## 1.32.0 - 2026/10/29
 
 ### Features

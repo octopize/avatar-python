@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 3.20.2
+# API Version : 3.27.0
 
 
 import logging
@@ -35,7 +35,9 @@ from avatars.models import (
     JobResponseList,
     MeUser,
     ObjectType,
+    PresignedUrl,
     ResourceSetResponse,
+    StoredFile,
     User,
     Verb,
 )
@@ -608,11 +610,10 @@ class Jobs:
         "launch this set" rather than naming the jobs, their order and what each
         waits for -- which every client otherwise has to know, and agree about.
 
-        One request rather than one per job, because a flow is one intention. A
-        caller that had three jobs created and the fourth refused held a half-built
-        run with no way to say that none of it should have started; and creating
-        them one at a time was enough requests to meet this API's own rate limit,
-        since a database run launches one flow per group of related tables.
+        One request rather than one per job, because a flow is one intention, and
+        creating the jobs one at a time was enough requests to meet this API's own
+        rate limit, since a database run launches one flow per group of related
+        tables. A refusal of a later job leaves the jobs before it created.
         """
         kwargs: dict[str, Any] = {
             "method": "post",
@@ -932,6 +933,27 @@ class Results:
 
         return [FileAccess(**item) for item in self.client.request(**kwargs)]
 
+    def get_input_files(
+        self,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> list[StoredFile]:
+        """The files already in the caller's own input directory, newest first.
+
+        The sibling of `/upload_url` for reading rather than writing. A listing
+        names no object, so it cannot be pre-signed: a client on the pre-signed
+        transport has no S3 credential to list with, and this is how it sees what
+        it has uploaded. The directory is the caller's own, derived from their
+        identity, so there is nothing to authorize and nothing to pass in.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/input_files",  # noqa: F541
+            "timeout": timeout,
+        }
+
+        return [StoredFile(**item) for item in self.client.request(**kwargs)]
+
     def get_upload_url(
         self,
         *,
@@ -945,6 +967,46 @@ class Results:
         }
 
         return self.client.request(**kwargs)
+
+    def get_presigned_url(
+        self,
+        url: str,
+        method: str | None = None,
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> PresignedUrl:
+        """Get a pre-signed URL for one file in the caller's own storage area."""
+        kwargs: dict[str, Any] = {
+            "method": "get",
+            "url": f"/access/presigned",  # noqa: F541
+            "timeout": timeout,
+            "params": dict(
+                url=url,
+                method=method,
+            ),
+        }
+
+        return PresignedUrl(**self.client.request(**kwargs))
+
+    def get_presigned_urls_batch(
+        self,
+        urls: list[str],
+        *,
+        timeout: int | None = DEFAULT_TIMEOUT,
+    ) -> list[PresignedUrl]:
+        """Get pre-signed download URLs for several files at once.
+
+        Files that fail the ownership check are silently skipped rather than
+        causing the entire batch to fail, matching ``/access/batch``.
+        """
+        kwargs: dict[str, Any] = {
+            "method": "post",
+            "url": f"/access/presigned/batch",  # noqa: F541
+            "timeout": timeout,
+            "json_data": urls,
+        }
+
+        return [PresignedUrl(**item) for item in self.client.request(**kwargs)]
 
 
 class Users:

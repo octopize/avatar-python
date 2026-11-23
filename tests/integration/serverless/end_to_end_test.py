@@ -245,10 +245,10 @@ class TestLicenceIsEnforcedAgainstTheRealEngine:
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Two jobs on two threads overlap, and each enforces the licence's row cap."""
-        from avatar.processing import avatarize  # noqa: PLC0415
+        from avatar import runtime  # noqa: PLC0415
 
         key = make_license(max_lines=10)
-        real_process = avatarize.process
+        real_process = runtime.process
         # Each job waits here for the other: both are inside the engine at once, or the
         # barrier times out and both jobs fail with something other than the row cap.
         both_running = threading.Barrier(2, timeout=30)
@@ -257,7 +257,7 @@ class TestLicenceIsEnforcedAgainstTheRealEngine:
             both_running.wait()
             real_process(*args, **kwargs)
 
-        monkeypatch.setattr(avatarize, "process", process_when_both_run)
+        monkeypatch.setattr(runtime, "process", process_when_both_run)
         runners = []
         for name in ("a", "b"):
             runner = Manager(

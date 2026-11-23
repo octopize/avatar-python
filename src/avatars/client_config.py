@@ -34,6 +34,10 @@ class ClientConfig(BaseModel):
         Default is None (must be provided for ApiClient).
     api_key : str | None
         API key for authentication.
+    use_presigned_urls : bool | None
+        Transfer files through pre-signed URLs minted by the API instead of S3
+        credentials handed to this process.
+        Default is None, which lets the server decide.
 
     """
 
@@ -44,6 +48,7 @@ class ClientConfig(BaseModel):
     timeout: int | None = None
     should_verify_ssl: bool = True
     api_key: str | None = None
+    use_presigned_urls: bool | None = None
 
     @classmethod
     def from_config(cls, config: Config) -> ClientConfig:
@@ -66,6 +71,7 @@ class ClientConfig(BaseModel):
             should_verify_ssl=config.SHOULD_VERIFY_SSL,
             storage_endpoint_url=config.STORAGE_ENDPOINT_URL,
             api_key=config.API_KEY,
+            use_presigned_urls=config.USE_PRESIGNED_URLS,
         )
 
     @model_validator(mode="after")

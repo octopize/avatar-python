@@ -19,7 +19,7 @@ around and renders the error.
 import json
 import shutil
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
@@ -45,7 +45,9 @@ from avatars.models import (
     JobResponseList,
     JobStatus,
     MeUser,
+    PresignedUrl,
     ResourceSetResponse,
+    StoredFile,
     UserRole,
 )
 from avatars.sdk_client import SdkClient
@@ -59,6 +61,7 @@ from avatars.serverless.executor import (
 )
 from avatars.serverless.store import JobRecord, ServerlessStore, SetRecord
 from avatars.serverless.workdir import INPUT_VOLUME, RESULTS_VOLUME, Workdir
+from avatars.storage_transport import StorageTransportChoice
 
 logger = get_logger(__name__)
 
@@ -263,6 +266,42 @@ class ServerlessResults:
     def get_permissions_to_download_batch(self, urls: list[str]) -> list[FileAccess]:
         return [self.get_permission_to_download(url) for url in urls]
 
+    def get_presigned_url(self, url: str, method: str | None = None) -> PresignedUrl:
+        # Declared so that one client type satisfies the SDK's protocol, and never
+        # reached: ``storage_transport`` on this client is credentials, so neither
+        # the uploader nor the downloader asks for a signature.
+        raise NotAvailableOfflineError("results.get_presigned_url()")
+
+    def get_presigned_urls_batch(self, urls: list[str]) -> list[PresignedUrl]:
+        raise NotAvailableOfflineError("results.get_presigned_urls_batch()")
+
+    def get_input_files(self) -> list[StoredFile]:
+        # Unlike the signing methods, this one has an honest answer offline: the
+        # input directory is a directory on this disk.
+        directory = Path(to_local_path(self._client.workdir.input_url))
+        if not directory.is_dir():
+            return []
+
+        by_age: list[tuple[float, StoredFile]] = []
+        for entry in directory.iterdir():
+            if not entry.is_file():
+                continue
+            stat = entry.stat()
+            by_age.append(
+                (
+                    stat.st_mtime,
+                    StoredFile(
+                        name=entry.name,
+                        size=stat.st_size,
+                        last_modified=datetime.fromtimestamp(stat.st_mtime, tz=UTC),
+                    ),
+                )
+            )
+
+        # Newest first, as the route this stands in for answers.
+        by_age.sort(key=lambda pair: pair[0], reverse=True)
+        return [file for _, file in by_age]
+
     def get_results(self, job_name: str) -> dict[str, list[str]]:
         """The result URLs for a job, in the shape ``/results/{job}`` returns.
 
@@ -369,6 +408,10 @@ class ServerlessClient:
 
         self.base_url = SERVERLESS_BASE_URL
         self.should_verify_ssl = True
+        # Nothing is signed and nothing is uploaded: the files are already on
+        # this machine. Stated rather than left out so the SDK's file movers
+        # can ask any client the same question.
+        self.storage_transport = StorageTransportChoice(configured=False)
 
         self.resources = ServerlessResources(self)
         self.jobs = ServerlessJobs(self)
@@ -390,6 +433,7 @@ class ServerlessClient:
         self.user = MeUser(
             id=_stable_id("user", email),
             organization_id=_stable_id("organization", organization),
+            organization_name=licensee.organization if licensee else None,
             email=email,
             role=UserRole.user,
             environment=EnvironmentInfo(

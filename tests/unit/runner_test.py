@@ -219,28 +219,16 @@ class TestRunner:
         assert len(runner.config.privacy_metrics.keys()) == 1
         assert len(runner.config.signal_metrics.keys()) == 1
 
-    def test_set_parameters_with_dp(self):
-        runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data=self.df1)
-        runner.set_parameters("test_table", open_dp_epsilon=3, ncp=2)
-        assert len(runner.config.avatarization.keys()) == 0
-        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
-        assert avatarization_open_dp is not None
-        assert len(avatarization_open_dp.keys()) == 1
-        assert len(runner.config.privacy_metrics.keys()) == 1
-        assert len(runner.config.signal_metrics.keys()) == 1
-
     def test_set_parameters_dp_overwrite_avatarization(self):
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table", k=3, ncp=2)
-        runner.set_parameters("test_table", open_dp_epsilon=3, ncp=2)
+        runner.set_parameters("test_table", fast_dp_epsilon=3, ncp=2)
         assert runner.config.avatarization.get("test_table") is None
-        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
-        assert avatarization_open_dp is not None
-        assert avatarization_open_dp["test_table"] is not None
-        assert avatarization_open_dp["test_table"].epsilon == 3
-        assert avatarization_open_dp["test_table"].ncp == 2
+        avatarization_fast_dp = runner.config.avatarization_fast_dp
+        assert avatarization_fast_dp["test_table"] is not None
+        assert avatarization_fast_dp["test_table"].epsilon == 3
+        assert avatarization_fast_dp["test_table"].ncp == 2
         assert runner.config.privacy_metrics["test_table"].ncp == 2
         assert runner.config.signal_metrics["test_table"].ncp == 2
 
@@ -267,9 +255,6 @@ class TestRunner:
         runner.add_table("test_table", data=self.df1)
         runner.set_parameters("test_table")
         assert len(runner.config.avatarization.keys()) == 0
-        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
-        if avatarization_open_dp is not None:
-            assert len(avatarization_open_dp.keys()) == 0
         avatarization_fast_dp = getattr(runner.config, "avatarization_fast_dp", None)
         if avatarization_fast_dp is not None:
             assert len(avatarization_fast_dp.keys()) == 0
@@ -873,15 +858,14 @@ class TestRunner:
         runner.set_parameters("test_table", k=3, ncp=2)
 
         # Update to use DP instead of k
-        runner.update_parameters("test_table", open_dp_epsilon=0.5, k=None)
+        runner.update_parameters("test_table", fast_dp_epsilon=0.5, k=None)
 
         # Verify that we switched from standard to DP avatarization
         assert "test_table" not in runner.config.avatarization
-        avatarization_open_dp = getattr(runner.config, "avatarization_open_dp", None)
-        assert avatarization_open_dp is not None
-        assert "test_table" in avatarization_open_dp
-        assert avatarization_open_dp["test_table"].epsilon == 0.5
-        assert avatarization_open_dp["test_table"].ncp == 2  # Should preserve other params
+        avatarization_fast_dp = runner.config.avatarization_fast_dp
+        assert "test_table" in avatarization_fast_dp
+        assert avatarization_fast_dp["test_table"].epsilon == 0.5
+        assert avatarization_fast_dp["test_table"].ncp == 2  # Should preserve other params
 
     def test_update_parameters_add_exclude_variables(self):
         """Test adding exclude variables to existing parameters."""
@@ -1081,7 +1065,7 @@ class TestRunner:
         """Test updating a table configured only with time series parameters (no k/epsilon)."""
         runner = self.manager.create_runner("test")
         runner.add_table("test_table", data=self.df1, time_series_time="col1")
-        # Set initial parameters without any avatarization method (k, open_dp/fast_dp epsilon)
+        # Set initial parameters without any avatarization method (k, fast_dp epsilon)
         runner.set_parameters(
             "test_table", time_series_nf=2, time_series_projection_type=ProjectionType.FPCA
         )
@@ -1183,26 +1167,6 @@ class TestRunner:
         assert (
             signal_exclude["replacement_strategy"] == ExcludeVariablesMethod.COORDINATE_SIMILARITY
         )
-
-    def test_extract_current_parameters_open_dp_avatarization(self):
-        """Test extracting parameters with OpenDP avatarization."""
-        runner = self.manager.create_runner("test")
-        runner.add_table("test_table", data=self.df1)
-        runner.set_parameters(
-            "test_table",
-            open_dp_epsilon=0.5,
-            ncp=2,
-            use_categorical_reduction=True,
-        )
-
-        # Extract parameters
-        current_params = runner._extract_current_parameters("test_table")
-
-        # Verify extracted parameters match what was set
-        assert current_params["open_dp_epsilon"] == 0.5
-        assert current_params["ncp"] == 2
-        assert current_params["use_categorical_reduction"]
-        assert "k" not in current_params
 
     def test_extract_current_parameters_time_series(self):
         """Test extracting parameters with time series configuration."""
@@ -1446,7 +1410,6 @@ class TestRunner:
 
         # Should create avatarization_fast_dp, not standard avatarization
         assert len(runner.config.avatarization.keys()) == 0
-        assert len(runner.config.avatarization_open_dp.keys()) == 0
         assert "test_table" in runner.config.avatarization_fast_dp
 
         # Verify parameter values (only epsilon is exposed)

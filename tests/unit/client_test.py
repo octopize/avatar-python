@@ -174,7 +174,7 @@ class TestApiClientInitialization:
 
 
 class TestClientRequest:
-    @pytest.fixture(scope="session")
+    @pytest.fixture
     def json_ok_response(self) -> RequestHandle:
         def handler(request: httpx.Request) -> httpx.Response:
             return httpx.Response(200, json={"message": "ok"})

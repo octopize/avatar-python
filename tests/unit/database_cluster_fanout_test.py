@@ -365,6 +365,36 @@ def test_one_group_of_tables_is_not_a_fan_out() -> None:
     }
 
 
+def test_a_run_of_one_group_is_named_by_its_launch_and_keeps_its_seed() -> None:
+    """`name__launch--group`, as a group of a run of several is: the API's run is the launch."""
+    runner = _runner()
+    plan = SchemaPlan(
+        [
+            {"name": "customer", "cluster": "group-customer", "individual_level": True},
+            {"name": "invoice", "cluster": "group-customer"},
+        ]
+    )
+    runner.add_database(source="crm_prod", target="crm_test", plan=plan)
+    for table in plan.participating():
+        runner.set_parameters(table, k=5)
+
+    runner.run()
+
+    [name] = cast("FakeResources", runner.client.resources)._stored_names
+    assert re.fullmatch(r"crm__[0-9a-z]{7,12}--group-customer", name), name
+    assert runner.config.seed is None, "no seed: the engine picks one"
+
+
+def test_a_database_run_with_no_plan_is_named_by_its_launch() -> None:
+    runner = _runner()
+    runner.add_database(source="crm_prod", target="crm_test")
+
+    runner.run(jobs_to_run=[])
+
+    [name] = cast("FakeResources", runner.client.resources)._stored_names
+    assert re.fullmatch(r"crm__[0-9a-z]{7,12}", name), name
+
+
 def test_each_sets_display_name_is_one_the_api_accepts() -> None:
     """A display name may hold only letters, digits, `_` and `-`.
 

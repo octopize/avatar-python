@@ -1,5 +1,5 @@
 import os
-from urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import parse_qs, urljoin, urlparse, urlunparse
 
 import fsspec
 import structlog
@@ -10,6 +10,15 @@ logger = structlog.get_logger(__name__)
 
 
 DEFAULT_FIND_LIMIT = 1000
+
+
+def storage_url_of(url: str) -> str:
+    """The storage URL inside an ``/access?url=`` envelope, or the URL unchanged.
+
+    ``/results`` hands back envelopes and the API accepts either form, so a
+    client holding one has to be able to recognise the other.
+    """
+    return parse_qs(urlparse(url).query).get("url", [url])[0]
 
 
 def get_parent(uri: str) -> str:

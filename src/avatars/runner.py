@@ -8,11 +8,11 @@ from logging import getLogger
 from pathlib import Path
 from typing import Any, Literal
 
+import httpx
 import pandas as pd
 import yaml
 from avatar_yaml import (
     AvatarizationFastDPParameters,
-    AvatarizationOpenDPParameters,
     AvatarizationParameters,
     Config,
     PrivacyMetricsParameters,
@@ -45,6 +45,7 @@ from avatar_yaml.run_shape import REFERENCE_JOB, REFERENCE_SET, dump, reference_
 from IPython.display import HTML, display
 
 from avatars import __version__
+from avatars.base_client import ApiResponseError
 from avatars.constants import (
     DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS,
     DEFAULT_TYPE,
@@ -60,11 +61,12 @@ from avatars.crash_handler import register_runner
 from avatars.file_downloader import FileDownloader
 from avatars.input_files import InputFile, missing_file_message
 from avatars.job_launcher import JobLauncher
-from avatars.job_polling import SYSTEM_CLOCK, Clock, wait_for_jobs
+from avatars.job_polling import SYSTEM_CLOCK, Clock, JobFailedError, wait_for_jobs
 from avatars.links_advice import TablesLinksAdvice, parse_tables_links_advice
 from avatars.metrics_summary import build_metrics_summary_df
 from avatars.models import BulkDeleteRequest, BulkDeleteResponse, JobKind, JobResponse, JobStatus
 from avatars.results_organizer import ResultsOrganizer
+from avatars.schema_items import ExtractionRefusal, ExtractionRefusedError
 from avatars.schema_plan import (
     SchemaPlan,
     SharedEntity,
@@ -80,7 +82,6 @@ _PER_TABLE_FIELDS = (
     "tables",
     "avatar_tables",
     "avatarization",
-    "avatarization_open_dp",
     "avatarization_fast_dp",
     "time_series",
     "privacy_metrics",
@@ -412,6 +413,56 @@ class Runner:
             job_name = self.jobs.get_parameters_name(JobKind.standard)
             self._download_specific_result(job_name, Results.REFERENCE_TABLES)
         return next((r for r in self.results.reference_tables.values() if r), {})
+
+    def extraction_refusal(
+        self, job_name: JobKind | str = JobKind.extract
+    ) -> ExtractionRefusal | None:
+        """Why the Extraction refused its source, as its job filed it.
+
+        Waiting on a run raises :class:`~avatars.schema_items.ExtractionRefusedError` with these
+        items already; this reads them again, for a runner rebuilt from its set.
+
+        Parameters
+        ----------
+        job_name
+            The Extraction job. Omit it for the run's own.
+
+        Returns
+        -------
+        The items, by kind, or None when the job filed none: it was not refused.
+
+        """
+        name = self.jobs.get_parameters_name(job_name)
+        if not self.jobs.has_job(name):
+            raise ValueError(f"Expected job '{name}' to be created. Try running it first.")
+        return self._refusal_of(name)
+
+    def _refusal_of(self, job_name: str) -> ExtractionRefusal | None:
+        """The refusal *job_name* filed, or None when it filed none.
+
+        A job that failed before it wrote any result has no results file: the API answers 404.
+        """
+        try:
+            urls = self.client.results.get_results(self.jobs.get_job_id(job_name))
+        except ApiResponseError as error:
+            if error.response.status_code == httpx.codes.NOT_FOUND:
+                return None
+            raise
+        found = urls.get(Results.EXTRACTION_REFUSAL) or []
+        if not found:
+            return None
+        return ExtractionRefusal.from_result(self.file_downloader.download_file(found[0]))
+
+    def _wait_for(self, job_names: list[str]) -> None:
+        """Wait on *job_names*; a run refused by its Extraction raises with the items it filed."""
+        try:
+            wait_for_jobs(job_names, self.get_job, self._clock, self._job_started_at)
+        except JobFailedError as failed:
+            extraction = self.jobs.get_parameters_name(JobKind.extract)
+            for name in dict.fromkeys([failed.job_name, extraction]):
+                if self.jobs.has_job(name) and (refusal := self._refusal_of(name)) is not None:
+                    raise ExtractionRefusedError(failed, refusal) from failed
+            raise
 
     def _setup_advice_config(self) -> None:
         """Create advice config and upload resources to server."""
@@ -1060,7 +1111,6 @@ class Runner:
         imputation_k: int | None = None,
         imputation_training_fraction: float | None = None,
         imputation_return_data_imputed: bool | None = None,
-        open_dp_epsilon: float | None = None,
         fast_dp_epsilon: float | None = None,
         time_series_nf: int | None = None,
         time_series_projection_type: ProjectionType | None = None,
@@ -1113,8 +1163,6 @@ class Runner:
             when using KNN or FAST_KNN.
         imputation_return_data_imputed:
             Whether to return the data with imputed values.
-        open_dp_epsilon
-            Epsilon value for differential privacy using OpenDP implementation.
         fast_dp_epsilon
             Epsilon value for fastDP avatarization.
         time_series_nf
@@ -1205,20 +1253,10 @@ class Runner:
             replacement_strategy = exclude_replacement_strategy.value
         else:
             replacement_strategy = None
-        if k and open_dp_epsilon:
-            raise ValueError(
-                "Expected either k or open_dp_epsilon to be set, not both. "
-                "If you want to use OpenDP avatarization, set open_dp_epsilon and remove k."
-            )
         if k and fast_dp_epsilon:
             raise ValueError(
                 "Expected either k or fast_dp_epsilon to be set, not both. "
                 "If you want to use fastDP avatarization, set fast_dp_epsilon and remove k."
-            )
-        if open_dp_epsilon and fast_dp_epsilon:
-            raise ValueError(
-                "Expected either open_dp_epsilon or fast_dp_epsilon to be set, not both. "
-                "Choose either OpenDP (open_dp_epsilon) or FastDP (fast_dp_epsilon)."
             )
         if k == 2:
             warnings.warn(
@@ -1231,9 +1269,6 @@ class Runner:
         # reset the parameters if they were already set
         if self.config.avatarization and self.config.avatarization.get(table_name):
             del self.config.avatarization[table_name]
-        avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
-        if avatarization_open_dp and avatarization_open_dp.get(table_name):
-            del avatarization_open_dp[table_name]
         avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
         if avatarization_fast_dp and avatarization_fast_dp.get(table_name):
             del avatarization_fast_dp[table_name]
@@ -1248,27 +1283,6 @@ class Runner:
             self.config.create_avatarization_parameters(
                 table_name=table_name,
                 k=k,
-                ncp=ncp,
-                use_categorical_reduction=use_categorical_reduction,
-                imputation_method=imputation,
-                imputation_k=imputation_k,
-                imputation_training_fraction=imputation_training_fraction,
-                imputation_return_data_imputed=imputation_return_data_imputed,
-                column_weights=column_weights,
-                exclude_variable_names=exclude_variable_names,
-                exclude_variable_method=replacement_strategy,
-                data_augmentation_strategy=data_augmentation_strategy,
-                data_augmentation_target_column=data_augmentation_target_column,
-                data_augmentation_should_anonymize_original_table=data_augmentation_should_anonymize_original_table,
-                avatarization_processors_parameters=processors,
-                pseudonymized_columns=pseudonymized_columns,
-            )
-
-        elif open_dp_epsilon:
-            # OpenDP avatarization (MST method)
-            self.config.create_avatarization_open_dp_parameters(
-                table_name=table_name,
-                epsilon=open_dp_epsilon,
                 ncp=ncp,
                 use_categorical_reduction=use_categorical_reduction,
                 imputation_method=imputation,
@@ -1384,7 +1398,6 @@ class Runner:
         """
         per_table_params = (
             "avatarization",
-            "avatarization_open_dp",
             "avatarization_fast_dp",
             "time_series",
             "privacy_metrics",
@@ -1432,7 +1445,6 @@ class Runner:
             # Standard avatarization parameters
             params: (
                 AvatarizationParameters
-                | AvatarizationOpenDPParameters
                 | AvatarizationFastDPParameters
                 | PrivacyMetricsParameters
                 | None
@@ -1441,23 +1453,6 @@ class Runner:
                 current_params.update(
                     {
                         "k": params.k,
-                        "column_weights": params.column_weights,
-                        "use_categorical_reduction": params.use_categorical_reduction,
-                        "ncp": params.ncp,
-                    }
-                )
-                current_params.update(self._extract_exclude_parameters(params))
-        elif (
-            hasattr(self.config, "avatarization_open_dp")
-            and self.config.avatarization_open_dp is not None
-            and table_name in self.config.avatarization_open_dp.keys()
-        ):
-            # OpenDP avatarization parameters (end-to-end DP)
-            params = self.config.avatarization_open_dp[table_name]
-            if isinstance(params, AvatarizationOpenDPParameters):
-                current_params.update(
-                    {
-                        "open_dp_epsilon": params.epsilon or None,
                         "column_weights": params.column_weights,
                         "use_categorical_reduction": params.use_categorical_reduction,
                         "ncp": params.ncp,
@@ -1574,10 +1569,7 @@ class Runner:
 
     def _extract_exclude_parameters(
         self,
-        params: AvatarizationParameters
-        | AvatarizationOpenDPParameters
-        | AvatarizationFastDPParameters
-        | TimeSeriesParameters,
+        params: AvatarizationParameters | AvatarizationFastDPParameters | TimeSeriesParameters,
     ) -> dict[str, Any]:
         """Extract exclude variables parameters from parameter object.
 
@@ -1750,6 +1742,10 @@ class Runner:
 
         """
         self._handle_existing_results(ignore_warnings=ignore_warnings)
+        # Before anything is stored or launched: the Extraction would refuse it after the start.
+        for plan in (self._database_plan, *self._copy_plans.values()):
+            if plan is not None:
+                plan.require_launchable()
 
         # Create report configurations if report job is requested and report configurations
         # are not already set (could happen when creating a runner from an existing config)
@@ -1767,7 +1763,7 @@ class Runner:
             return
 
         resource_response = self.client.resources.put_resources(
-            display_name=self.display_name,
+            display_name=self._set_display_name(),
             yaml_string=self.get_yaml(),
         )
         # Update set_name with the actual UUID returned by the backend
@@ -1780,6 +1776,20 @@ class Runner:
             if i > 0:
                 time.sleep(DEFAULT_DELAY_BETWEEN_CONSECUTIVE_JOBS)
             self._launch_job(job_kind, self.set_name)
+
+    def _set_display_name(self) -> str:
+        """The display name of this run's one set: ``name__launch--group`` for a database run.
+
+        Named like one group of a launch, as a run of several groups is, so the API gives every
+        database run its launch name as the run. The seed is left as it is.
+        """
+        if not self.config.writes_a_database():
+            return self.display_name
+        self._launch = _base36(time.time_ns() // 1_000_000)
+        launch = f"{self.display_name}__{self._launch}"
+        groups = self._database_plan.clustered() if self._database_plan is not None else {}
+        group = next(iter(groups), None)
+        return f"{launch}--{group}" if group else launch
 
     def _launch_job(self, job_kind: JobKind, set_name: str) -> None:
         known = set(self.jobs.get_launched_jobs())
@@ -2103,7 +2113,7 @@ class Runner:
             The name of the job to get.
 
         """
-        wait_for_jobs([job_name], self.get_job, self._clock, self._job_started_at)
+        self._wait_for([job_name])
         self._fetch_job_result_urls(job_name)
 
     def _fetch_job_result_urls(self, job_name: str) -> None:
@@ -2186,7 +2196,7 @@ class Runner:
     def _download_all_files(self) -> None:
         launched = self.jobs.get_launched_jobs()
         waiting = [name for name in launched if name not in self.results_urls]
-        wait_for_jobs(waiting, self.get_job, self._clock, self._job_started_at)
+        self._wait_for(waiting)
         for job_name in launched:
             if job_name not in self.results_urls:
                 self._fetch_job_result_urls(job_name)
@@ -2314,15 +2324,10 @@ class Runner:
             raise ValueError(f"Expected table '{table_name}' to be created. Try running it first.")
 
         # Print avatarization parameters
-        avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
         avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
         if self.config.avatarization and table_name in self.config.avatarization:
             print(f"--- Avatarization parameters for {table_name}: ---")  # noqa: T201
             print(asdict(self.config.avatarization[table_name]))  # noqa: T201
-            print("\n")  # noqa: T201
-        elif avatarization_open_dp and table_name in avatarization_open_dp:
-            print(f"--- Avatarization OpenDP parameters for {table_name}: ---")  # noqa: T201
-            print(asdict(avatarization_open_dp[table_name]))  # noqa: T201
             print("\n")  # noqa: T201
         elif avatarization_fast_dp and table_name in avatarization_fast_dp:
             print(f"--- Avatarization FastDP parameters for {table_name}: ---")  # noqa: T201

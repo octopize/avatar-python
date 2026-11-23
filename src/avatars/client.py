@@ -1,5 +1,5 @@
 # This file has been generated - DO NOT MODIFY
-# API Version : 3.20.2
+# API Version : 3.27.0
 
 
 import httpx
@@ -9,6 +9,7 @@ from avatars import __version__
 from avatars.base_client import BaseClient
 from avatars.client_config import ClientConfig
 from avatars.constants import DEFAULT_TIMEOUT
+from avatars.storage_transport import StorageTransportChoice
 
 MAX_FILE_LENGTH = 1024 * 1024 * 1024  # 1 GB
 
@@ -25,6 +26,7 @@ class ApiClient(BaseClient):
         verify_auth: bool = True,
         http_client: httpx.Client | None = None,
         api_key: str | None = None,
+        use_presigned_urls: bool | None = None,
         config: ClientConfig | None = None,
     ) -> None:
         """Client to communicate with the Avatar API.
@@ -43,6 +45,12 @@ class ApiClient(BaseClient):
             Bypass client-side authentication verification, by default True
         api_key : optional
             API key for authentication using api-key-v1 scheme. By default None
+        use_presigned_urls : optional
+            Transfer files through pre-signed URLs minted by the API rather than
+            through S3 credentials handed to this process. By default None, which
+            asks the server which transport it wants and uses credentials when it
+            is too old to answer. True requires a server that serves
+            /access/presigned.
         config : optional
             ClientConfig object containing all configuration.
             Mutually exclusive individual parameters (except http_client).
@@ -59,6 +67,8 @@ class ApiClient(BaseClient):
                 conflicting_params.append("should_verify_ssl")
             if api_key is not None:
                 conflicting_params.append("api_key")
+            if use_presigned_urls is not None:
+                conflicting_params.append("use_presigned_urls")
 
             if conflicting_params:
                 params_str = ", ".join(conflicting_params)
@@ -90,6 +100,7 @@ class ApiClient(BaseClient):
                 should_verify_ssl=(should_verify_ssl if should_verify_ssl is not None else True),
                 storage_endpoint_url=final_storage_url,
                 api_key=api_key,
+                use_presigned_urls=use_presigned_urls,
             )
 
         if config.base_api_url is None:
@@ -134,6 +145,13 @@ class ApiClient(BaseClient):
         self.resources = Resources(self)
         self.results = Results(self)
         self.users = Users(self)
+
+        # Shared by the uploader and the downloader so one client asks the
+        # server about its transport once, not once per direction.
+        self.storage_transport = StorageTransportChoice(
+            config.use_presigned_urls,
+            self.capabilities.get_capabilities,
+        )
 
         data_uploader = DataUploader(
             self,

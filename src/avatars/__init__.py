@@ -1,4 +1,4 @@
-__version__ = "1.32.0"
+__version__ = "1.33.0"
 
 # Re-export main public entry points for convenience so users can do for example:
 # Auto-install the crash handler for enhanced error reporting
@@ -18,8 +18,10 @@ from avatars.input_files import InputFile
 from avatars.manager import Manager
 from avatars.models import JobStatus
 from avatars.runner import Runner
+from avatars.schema_items import ExtractionRefusedError
 from avatars.schema_plan import (
     Proposal,
+    ProposalNotReadyError,
     SchemaPlan,
     SharedEntity,
     shared_entity,
@@ -28,6 +30,7 @@ from avatars.schema_plan import (
 __all__ = [
     "ApiClient",
     "ConstantStrategy",
+    "ExtractionRefusedError",
     "FakeDataStrategy",
     "HashSha256Strategy",
     "InputFile",
@@ -36,6 +39,7 @@ __all__ = [
     "Manager",
     "PiiType",
     "Proposal",
+    "ProposalNotReadyError",
     "PseudonymizationStrategy",
     "Runner",
     "SchemaPlan",

@@ -41,6 +41,7 @@ SUB_APIS: list[tuple[str, type]] = [
 TOP_LEVEL_MEMBERS = [
     "base_url",
     "should_verify_ssl",
+    "storage_transport",
     "upload_file",
     "download_file",
     "list_input_files",

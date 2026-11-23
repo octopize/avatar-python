@@ -116,6 +116,8 @@ class Results(StrEnum):
     SIGNAL_METRICS_SUMMARY = "signal_metrics_summary"
     REFERENCE_TABLES = "reference_tables"
     """What a database run's subjects joined: counts per source, never keys or values."""
+    EXTRACTION_REFUSAL = "extraction_refusal"
+    """Why an Extraction refused its source: its contract findings and its schema drift."""
 
 
 class PlotKind(StrEnum):

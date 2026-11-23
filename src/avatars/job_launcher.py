@@ -172,13 +172,8 @@ class JobLauncher:
         """
         match job_kind:
             case JobKind.standard:
-                avatarization_open_dp = getattr(self.config, "avatarization_open_dp", None)
                 avatarization_fast_dp = getattr(self.config, "avatarization_fast_dp", None)
-                if (
-                    not self.config.avatarization
-                    and not avatarization_open_dp
-                    and not avatarization_fast_dp
-                ):
+                if not self.config.avatarization and not avatarization_fast_dp:
                     raise ValueError(
                         "Expected k or epsilon to be set to run an avatarization job, "
                         "You have to set a k or epsilon parameter using `runner.set_parameter()`."

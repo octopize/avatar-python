@@ -3,7 +3,7 @@
 Everything requiring judgement lives on the other side of this line -- in
 ``executor.py``, ``store.py``, ``client.py`` -- so that it can be tested without the
 ``serverless`` extra installed. What is left here is deliberately thin: build a
-config, build a context, call ``process``.
+config and a run request, call ``avatar.runtime.run``, as the API does.
 
 The engine surface this depends on is small and must stay frozen, because an
 obfuscation pass that renames any of it breaks serverless silently at import:
@@ -11,16 +11,9 @@ obfuscation pass that renames any of it breaks serverless silently at import:
 * ``avatar.config.Config``
 * ``avatar.models.config.load_configs``
 * ``avatar.models.results.INTERNAL_RESULT_KINDS``
-* ``avatar.processing.avatarize.process``
-* ``avatar.processing.context.Context``
-* ``avatar.processing.dependency.create_dependent_config``
-* ``avatar.processing.environment.Environment``
-* ``avatar.processing.progress.SimpleProgressTracker``
-* ``avatar.task.executor_type.ExecutorType``
-
-``process`` rather than ``external_process``: the latter hardcodes
-``Environment(config=job.config)``, which defaults to the Dask executor and would
-spawn the worker processes serverless exists to avoid.
+* ``avatar.runtime.RunRequest``
+* ``avatar.runtime.prepare_dependent_run``
+* ``avatar.runtime.run``
 """
 
 import os
@@ -251,38 +244,29 @@ class EngineJobExecutor:
             )
 
     def execute(self, run: PlannedRun) -> None:
+        from avatar import runtime  # noqa: PLC0415
         from avatar.config import Config as EngineConfig  # noqa: PLC0415
         from avatar.licensing.runtime import activate  # noqa: PLC0415
         from avatar.models.config import load_configs  # noqa: PLC0415
-        from avatar.processing.avatarize import process  # noqa: PLC0415
-        from avatar.processing.context import Context  # noqa: PLC0415
-        from avatar.processing.dependency import create_dependent_config  # noqa: PLC0415
-        from avatar.processing.environment import Environment  # noqa: PLC0415
-        from avatar.processing.progress import SimpleProgressTracker  # noqa: PLC0415
-        from avatar.task.executor_type import ExecutorType  # noqa: PLC0415
 
         activate(self.license_key)
 
-        model_config, report_paths = create_dependent_config(
+        document, report_paths = runtime.prepare_dependent_run(
             load_configs(run.yaml_path.read_text()),
             run.parameters_name,
             run.parent_parameters,
             run.grandparent_parameters,
         )
 
-        engine_config = EngineConfig(**self._config_kwargs(run))
-        environment = Environment(
-            exec_type=ExecutorType(self.settings.executor),
-            config=engine_config,
-        )
-        context = Context(
-            config=model_config,
+        request = runtime.RunRequest(
+            environment=EngineConfig(**self._config_kwargs(run)),
+            document=document,
             parameters_name=run.parameters_name,
             report_paths=report_paths,
         )
 
         logger.info("serverless job starting", job=run.parameters_name)
-        process(environment, context, progress_tracker=SimpleProgressTracker())
+        runtime.run(request)
         logger.info("serverless job finished", job=run.parameters_name)
 
     def _config_kwargs(self, run: PlannedRun) -> dict[str, Any]:

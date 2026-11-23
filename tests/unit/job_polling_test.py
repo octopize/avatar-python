@@ -8,7 +8,7 @@ from avatars.constants import (
     MIN_POLL_INTERVAL_SECONDS,
     POLL_INTERVAL_FACTOR,
 )
-from avatars.job_polling import next_poll_wait, wait_for_jobs
+from avatars.job_polling import JobFailedError, next_poll_wait, wait_for_jobs
 from avatars.models import JobKind, JobResponse, JobStatus
 from tests.unit.conftest import create_fake_job
 
@@ -230,8 +230,11 @@ class TestWaitForJobs:
     def test_error_status_with_exception_raises_value_error(self, status: JobStatus):
         self.api.add_job("a", done_at=0, final_status=status, exception="boom")
 
-        with pytest.raises(ValueError, match="Job a failed with exception: boom"):
+        with pytest.raises(JobFailedError, match="Job a failed with exception: boom") as raised:
             wait_for_jobs(["a"], self.api.fetch, self.clock, self.api.started_at)
+
+        assert isinstance(raised.value, ValueError)
+        assert (raised.value.job_name, raised.value.job.status) == ("a", status)
 
     def test_error_status_without_exception_raises_internal_error(self):
         self.api.add_job("a", done_at=0, final_status=JobStatus.error)

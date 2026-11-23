@@ -56,6 +56,8 @@ class JobExecutor(Protocol):
 # wording. Keyed by class name so this module needs no engine import.
 #
 # Mirrors services/api/src/api/domain/job_exception_handling.py -- change both together.
+# An engine that tells its errors by kind (``avatar.errors.AvatarError``) is read by
+# that kind first; the class names stay for engines that predate it.
 _LICENCE_CODE = re.compile(r"AVTR-LIC-\d{3}")
 _SIZE_LIMIT_EXCEPTIONS = frozenset({"TooManyLinesError", "TooManyDimensionsError"})
 
@@ -63,8 +65,9 @@ _SIZE_LIMIT_EXCEPTIONS = frozenset({"TooManyLinesError", "TooManyDimensionsError
 def map_engine_exception(job_name: str, exc: BaseException) -> tuple[JobStatus, str]:
     """The status and user-facing message a failed job should record."""
     name = type(exc).__name__
+    kind = getattr(getattr(exc, "kind", None), "value", None)
 
-    if name == "LicenseError":
+    if kind == "feature_not_allowed" or name == "LicenseError":
         # Verbatim from api/service/job.py -- see the module note above -- plus the
         # stable AVTR-LIC code when there is one: a job stopped because the build or the
         # licence expired is not a feature the licence lacks, and support needs the code.
@@ -74,11 +77,15 @@ def map_engine_exception(job_name: str, exc: BaseException) -> tuple[JobStatus, 
         code = _LICENCE_CODE.search(str(exc))
         return JobStatus.error, f"{message} ({code.group(0)})" if code else message
 
-    if name in _SIZE_LIMIT_EXCEPTIONS:
+    if kind == "dataset_too_large" or name in _SIZE_LIMIT_EXCEPTIONS:
         return JobStatus.error, (
             f"This dataset is too large for your current license. {exc} "
             "Upgrade your plan to process larger datasets."
         )
+
+    if kind is not None:
+        # An engine error told by its kind carries a message written for the user.
+        return JobStatus.error, str(exc)
 
     if name == "CustomFileNotFoundError":
         return JobStatus.error, f"file {exc} not found, try to upload it first"

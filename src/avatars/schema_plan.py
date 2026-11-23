@@ -32,6 +32,8 @@ from typing import Any
 
 from avatar_yaml import PiiType, PseudonymizationStrategy
 
+from avatars.schema_items import ContractFindingItem, SchemaDriftItem, items_of
+
 # What the engine calls things. Confined to this module on purpose: a caller
 # should not have to learn the vocabulary to review a plan.
 _TREATMENT = "treatment"
@@ -55,6 +57,24 @@ class UnknownColumnError(ValueError):
 
 class KeyColumnError(ValueError):
     """Raised when a review asks for a treatment on a primary or foreign key."""
+
+
+class ProposalNotReadyError(ValueError):
+    """Raised when a run is launched from a proposed schema the source does not agree with.
+
+    :attr:`contract_findings` and :attr:`schema_drift` hold each item, to show by its kind.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        contract_findings: list[ContractFindingItem] | None = None,
+        schema_drift: list[SchemaDriftItem] | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.contract_findings = list(contract_findings or [])
+        self.schema_drift = list(schema_drift or [])
 
 
 class Proposal:
@@ -118,16 +138,79 @@ class SchemaPlan:
     proposed is unconfirmed, which is the point of it existing.
     """
 
-    def __init__(self, tables: list[dict[str, Any]] | None = None) -> None:
+    def __init__(
+        self,
+        tables: list[dict[str, Any]] | None = None,
+        *,
+        contract_findings: list[ContractFindingItem] | None = None,
+        schema_drift: list[SchemaDriftItem] | None = None,
+    ) -> None:
         self._tables: list[dict[str, Any]] = tables if tables is not None else []
+        self._contract_findings = list(contract_findings or [])
+        self._schema_drift = list(schema_drift or [])
 
     # -- getting one -------------------------------------------------------- #
 
     @classmethod
     def from_proposal(cls, proposal: dict[str, Any]) -> SchemaPlan:
-        """Wrap what discovery proposed."""
+        """Wrap the schema discovery proposed, with what it found the source disagrees with."""
         tables = proposal.get("tables") or []
-        return cls([dict(table) for table in tables])
+        return cls(
+            [dict(table) for table in tables],
+            contract_findings=items_of(ContractFindingItem, proposal.get("contract_findings")),
+            schema_drift=items_of(SchemaDriftItem, proposal.get("schema_drift")),
+        )
+
+    @property
+    def contract_findings(self) -> list[ContractFindingItem]:
+        """Each finding of the source's data contract; empty for a source with no contract."""
+        return list(self._contract_findings)
+
+    @property
+    def schema_drift(self) -> list[SchemaDriftItem]:
+        """Each item of schema drift from the approved schema the discovery ran with, if any."""
+        return list(self._schema_drift)
+
+    def require_launchable(self) -> None:
+        """Refuse a plan whose proposed schema has a contract finding or schema drift.
+
+        Raises
+        ------
+        ProposalNotReadyError
+            Naming every finding and every item of schema drift, which it also holds as
+            structured items. Change the data contract or the source for a finding; for schema
+            drift, run the schema discovery again with the approved schema and approve what
+            changed.
+
+        """
+        parts: list[str] = []
+        if self._contract_findings:
+            parts.append(
+                "the source does not agree with its data contract: "
+                + "; ".join(_message(item) for item in self._contract_findings)
+            )
+        if self._schema_drift:
+            parts.append(
+                "the source has schema drift from the approved schema: "
+                + "; ".join(_message(item) for item in self._schema_drift)
+            )
+        if parts:
+            raise ProposalNotReadyError(
+                "this plan cannot be run, because "
+                + " -- ".join(parts)
+                + ". Change the data contract or the source, or run the schema discovery again "
+                "with the approved schema and approve what changed.",
+                contract_findings=self._contract_findings,
+                schema_drift=self._schema_drift,
+            )
+
+    def _with_facts(self, tables: list[dict[str, Any]]) -> SchemaPlan:
+        """A plan of *tables* that keeps what the proposed schema found about the source."""
+        return SchemaPlan(
+            tables,
+            contract_findings=self._contract_findings,
+            schema_drift=self._schema_drift,
+        )
 
     def for_tables(self, *names: str) -> SchemaPlan:
         """Start a plan from scratch, for callers not using discovery."""
@@ -489,7 +572,7 @@ class SchemaPlan:
                 f"this plan has no cluster {cluster!r}; it has: {', '.join(known) or 'none'}"
             )
         keep = set(known[cluster])
-        scoped = SchemaPlan(deepcopy(self._tables))
+        scoped = self._with_facts(deepcopy(self._tables))
         elsewhere = [name for name in scoped.tables if name not in keep]
         return scoped.ignore(*elsewhere) if elsewhere else scoped
 
@@ -500,7 +583,7 @@ class SchemaPlan:
         reads well and means "the same plan, treated differently" needs saying
         explicitly.
         """
-        return SchemaPlan(deepcopy(self._tables))
+        return self._with_facts(deepcopy(self._tables))
 
     def qualified_by(self, copy: str) -> SchemaPlan:
         """This plan with every table name prefixed by the database it is in.
@@ -515,13 +598,13 @@ class SchemaPlan:
         at, and a copy's key points inside that same copy -- no foreign key
         crosses a database.
         """
-        qualified = SchemaPlan(deepcopy(self._tables))
-        for table in qualified._tables:
+        tables = deepcopy(self._tables)
+        for table in tables:
             table["name"] = qualified_table(copy, str(table["name"]))
             for link in table.get("links") or []:
                 if isinstance(link, dict) and link.get("references_table"):
                     link["references_table"] = qualified_table(copy, str(link["references_table"]))
-        return qualified
+        return self._with_facts(tables)
 
     def participating(self) -> list[str]:
         """The tables the run actually works on.
@@ -946,3 +1029,12 @@ class SharedEntity:
 
     def __repr__(self) -> str:
         return f"SharedEntity({self._spec.get('name')!r})"
+
+
+def _message(item: ContractFindingItem | SchemaDriftItem) -> str:
+    """The item in English, as the server words it; its kind and names when it has no words."""
+    message = getattr(item, "message", None)
+    if isinstance(message, str) and message:
+        return message
+    column = getattr(item, "column", None)
+    return f"{getattr(item, 'kind', '?')} {item.table}{'' if column is None else '.' + column}"

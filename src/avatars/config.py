@@ -94,6 +94,11 @@ class Config(BaseSettings):
     API_KEY : str | None
         API key for authentication. Can be set via the
         AVATAR_API_KEY environment variable.
+    USE_PRESIGNED_URLS : bool | None
+        Transfer files through pre-signed URLs minted by the API rather than
+        through S3 credentials handed to the client. No storage credential
+        reaches this process when enabled.
+        Default is None, which lets the server decide.
 
     Notes
     -----
@@ -120,6 +125,10 @@ class Config(BaseSettings):
     VERIFY_COMPATIBILITY: bool = True
     API_KEY: str | None = None
     CRASH_REPORT_PATH: str = DEFAULT_CRASH_REPORT_PATH
+    # Transfer files through pre-signed URLs minted by the API instead of
+    # S3 credentials handed to this process. None, the default, asks the server
+    # which one it wants. See avatars.storage_transport.
+    USE_PRESIGNED_URLS: bool | None = None
 
     @model_validator(mode="after")
     def construct_urls_from_base(self) -> Self:

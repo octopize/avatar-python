@@ -3,6 +3,7 @@ import json
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
@@ -29,8 +30,11 @@ from avatars.models import (
     JobResponse,
     JobResponseList,
     JobStatus,
+    Method,
+    PresignedUrl,
     ResourceSetResponse,
 )
+from avatars.storage_transport import StorageTransportChoice
 
 RequestHandle = Callable[[httpx.Request], httpx.Response]
 
@@ -366,10 +370,22 @@ def advice_factory(table_name: str) -> str:
     )
 
 
+def _fake_signature(url: str, method: str) -> str:
+    """Where a pre-signed grant points, by default: nowhere reachable."""
+    return f"https://storage.invalid/{url.removeprefix('s3://')}?X-Amz-Signature=fake"
+
+
 class FakeResults:
-    def __init__(self, tables: list[str] | None = None):
+    def __init__(
+        self,
+        tables: list[str] | None = None,
+        sign: Callable[[str, str], str] = _fake_signature,
+    ):
         self.tables = tables or []
         self._upload_url_base = "s3://test-bucket/uploads"
+        # How a grant is turned into a URL. An attribute rather than a method so
+        # a test can aim it at a real server without patching the class.
+        self.sign = sign
 
     def get_permission_to_download(self, url):
         return FileAccess(
@@ -390,6 +406,18 @@ class FakeResults:
             )
             for url in urls
         ]
+
+    def get_presigned_url(self, url: str, method: str | None = None, **_: Any) -> PresignedUrl:
+        http_method = "PUT" if method == "put" else "GET"
+        return PresignedUrl(
+            url=url,
+            presigned_url=self.sign(url, http_method),
+            method=Method(http_method),
+            expires_in=3600,
+        )
+
+    def get_presigned_urls_batch(self, urls: list[str], **_: Any) -> list[PresignedUrl]:
+        return [self.get_presigned_url(url) for url in urls]
 
     def get_results(self, job_name):
         results: dict[str, list[str]] = {}
@@ -613,6 +641,7 @@ class FakeApiClient(ApiClient):
     def __init__(
         self,
         tables: list[str] | None = None,
+        sign: Callable[[str, str], str] = _fake_signature,
     ):
         """Initialize FakeApiClient.
 
@@ -620,11 +649,15 @@ class FakeApiClient(ApiClient):
         ----------
         tables : list[str] | None
             List of table names to simulate in results.
+        sign : Callable[[str, str], str]
+            Turns a (storage URL, HTTP method) pair into the pre-signed URL the
+            fake API hands back. Point it at a test HTTP server to exercise the
+            pre-signed transport for real.
 
         """
         self.tables = tables or []
         self.jobs = FakeJobs()  # type: ignore[no-untyped-call]
-        self.results = FakeResults(tables=self.tables)  # type: ignore[assignment]
+        self.results = FakeResults(tables=self.tables, sign=sign)  # type: ignore[assignment]
         self.resources = FakeResources()  # type: ignore[assignment,no-untyped-call]
         self.users = FakeUsers()  # type: ignore[assignment,no-untyped-call]
         self.health = FakeHealth()  # type: ignore[assignment,no-untyped-call]
@@ -641,6 +674,8 @@ class FakeApiClient(ApiClient):
         self.data_uploader = self.input_storage  # type: ignore[assignment]
         self.list_input_files = self.input_storage.list_input_files
         self.should_verify_ssl = True
+        # Credentials unless a test says otherwise: nothing here asks a server.
+        self.storage_transport = StorageTransportChoice(configured=False)
 
     def set_header(self, key: str, value: str) -> None:
         """Set a header in the client."""

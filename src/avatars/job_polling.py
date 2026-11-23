@@ -92,8 +92,9 @@ def wait_for_jobs(
 
     Raises
     ------
-    ValueError
-        If a job has an error status. Other errors of ``fetch_job`` are not caught.
+    JobFailedError
+        If a job has an error status, a :class:`ValueError`. Other errors of ``fetch_job``
+        are not caught.
 
     """
     pending = list(dict.fromkeys(job_names))
@@ -124,11 +125,33 @@ def wait_for_jobs(
     return finished
 
 
+class JobFailedError(ValueError):
+    """Raised when a job has an error status.
+
+    Attributes
+    ----------
+    job_name
+        The name the job was waited on by.
+    job
+        Its last response.
+
+    """
+
+    def __init__(self, message: str, *, job_name: str, job: JobResponse) -> None:
+        super().__init__(message)
+        self.job_name = job_name
+        self.job = job
+
+
 def _raise_if_failed(job_name: str, job: JobResponse) -> None:
     if job.status in ERROR_STATUSES:
         if job.exception:
-            raise ValueError(f"Job {job_name} failed with exception: {job.exception}")
-        raise ValueError("internal error")
+            raise JobFailedError(
+                f"Job {job_name} failed with exception: {job.exception}",
+                job_name=job_name,
+                job=job,
+            )
+        raise JobFailedError("internal error", job_name=job_name, job=job)
     if job.status in CANCELLED_STATUSES:
         # Over, with nothing to fetch: waiting on would never end, and asking for
         # results would fail on files that were never written.

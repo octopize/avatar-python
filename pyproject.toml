@@ -1,6 +1,6 @@
 [project]
 name = "octopize.avatar"
-version = "1.32.0"
+version = "1.33.0"
 description = "Python client for Octopize's avatar API"
 authors = [{ name = "Octopize", email = "pypi-octopize@octopize.io" }]
 license = "Apache-2.0"
@@ -28,7 +28,7 @@ dependencies = [
     "botocore <=1.40.17",
     "pandas>=2.3.1",
     "pyarrow>=18.0.0",
-    "octopize-avatar-yaml==0.1.46",
+    "octopize-avatar-yaml==0.1.47",
 ]
 
 [dependency-groups]
@@ -55,7 +55,7 @@ generator = [
     "typer>=0.15.2",
     "structlog>=24.2.0",
     "Jinja2>=3.1.6",
-    "datamodel-code-generator<=0.83.0",
+    "datamodel-code-generator<=0.89.0",
     "openapi-pydantic>=0.5.1",
 ]
 notebook = [

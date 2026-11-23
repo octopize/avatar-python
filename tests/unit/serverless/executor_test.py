@@ -20,6 +20,21 @@ def raise_as(name: str, message: str) -> Exception:
     return exception_type(message)
 
 
+class _Kind:
+    """What the mapper reads of an engine ``ErrorKind``: its value."""
+
+    def __init__(self, value: str) -> None:
+        self.value = value
+
+
+def raise_with_kind(kind: str, message: str) -> Exception:
+    """An exception told by its kind, as the engine's ``AvatarError`` is."""
+    exception_type: type[Exception] = type("AvatarError", (Exception,), {})
+    exc = exception_type(message)
+    exc.kind = _Kind(kind)  # type: ignore[attr-defined]
+    return exc
+
+
 class TestLicenceErrors:
     def test_wording_matches_the_api_verbatim(self) -> None:
         status, message = map_engine_exception("standard", raise_as("LicenseError", "nope"))
@@ -51,6 +66,32 @@ class TestSizeLimits:
         assert message.startswith("This dataset is too large for your current license.")
         assert "1000 > 100" in message
         assert message.endswith("Upgrade your plan to process larger datasets.")
+
+
+class TestErrorsToldByKind:
+    def test_a_too_large_dataset_is_a_licence_limit(self) -> None:
+        status, message = map_engine_exception(
+            "standard", raise_with_kind("dataset_too_large", "Table iris has 150 rows")
+        )
+        assert status == JobStatus.error
+        assert message.startswith("This dataset is too large for your current license.")
+        assert "150 rows" in message
+
+    def test_a_feature_outside_the_licence_keeps_the_api_wording(self) -> None:
+        _, message = map_engine_exception(
+            "standard", raise_with_kind("feature_not_allowed", "time_series is not allowed")
+        )
+        assert message == (
+            "Error in job 'standard': Your license does not allow you to access these features."
+        )
+
+    def test_any_other_kind_shows_the_message_of_the_engine(self) -> None:
+        status, message = map_engine_exception(
+            "standard",
+            raise_with_kind("missing_file", "file a.csv not found, try to upload it first"),
+        )
+        assert status == JobStatus.error
+        assert message == "file a.csv not found, try to upload it first"
 
 
 class TestFileErrors:

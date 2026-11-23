@@ -3,11 +3,18 @@ import json
 from typing import Any
 
 import pandas as pd
+import structlog
 from IPython.display import HTML
 
+from avatars import presigned_transfer
+from avatars.base_client import ApiResponseError
 from avatars.constants import TypeResults
+from avatars.data_upload import decode_result
 from avatars.models import FileAccess
 from avatars.sdk_client import SdkClient
+from avatars.storage import storage_url_of
+
+logger = structlog.get_logger(__name__)
 
 
 class FileDownloader:
@@ -19,9 +26,29 @@ class FileDownloader:
         return self.client.download_file(file_access=file_access)
 
     def _download_file_to_str(self, url: str) -> str | bytes:
-        """Get credentials for a URL and download the file."""
+        """Fetch one file, through whichever transport this client uses."""
+        transport = self.client.storage_transport
+        if transport.is_presigned():
+            try:
+                return self._download_presigned(url)
+            except ApiResponseError as error:
+                if not transport.falls_back_on(error):
+                    raise
+
         file_access = self.client.results.get_permission_to_download(url)
         return self._download_with_credentials(file_access)
+
+    def _download_presigned(self, url: str) -> str | bytes:
+        """Ask the API to sign a read of one file, then fetch the signed URL.
+
+        ``url`` may be a bare storage URL or the ``/access?url=`` envelope
+        ``/results`` hands out; the API unwraps it either way.
+        """
+        grant = self.client.results.get_presigned_url(url=url)
+        content = presigned_transfer.download(
+            grant.presigned_url, should_verify_ssl=self.client.should_verify_ssl
+        )
+        return decode_result(grant.url, content)
 
     def _str_to_json(self, str_data: str) -> list[dict[str, Any]]:
         if not str_data.strip().startswith("["):
@@ -82,25 +109,68 @@ class FileDownloader:
         return self._str_to_results(str_data, f".{extension}", path)
 
     def download_files_batch(self, urls: list[str]) -> dict[str, TypeResults]:
-        """Download multiple files from the given URLs using batch credential fetching.
-        Returns a dictionary mapping URLs to their downloaded content.
+        """Download several files at once, keyed by the URL the caller passed in.
+
+        A URL the API declined to hand back is absent from the result rather than
+        raising, so one stale result does not cost a caller the rest of the job.
         """
         if not urls:
             return {}
 
-        # Get credentials for all files at once
-        file_accesses = self.client.results.get_permissions_to_download_batch(urls)
+        return {
+            url: self._str_to_results(data, f".{url.rsplit('.', maxsplit=1)[-1]}")
+            for url, data in self._fetch_batch(urls).items()
+        }
 
-        # Create a mapping of URL to FileAccess for easy lookup
-        url_to_access = {access.url: access for access in file_accesses}
+    def _fetch_batch(self, urls: list[str]) -> dict[str, str | bytes]:
+        """Fetch each URL's bytes, through whichever transport is configured.
 
-        # Download each file using the pre-fetched credentials
-        results = {}
+        The only thing that differs between the two transports; how bytes become
+        a DataFrame is decided once, by the caller.
+        """
+        fetched = self._fetch_batch_through_transport(urls)
+
+        if missing := [url for url in urls if url not in fetched]:
+            # Either the API declined to sign them, or they came back under a
+            # name this client did not ask for. The second is a bug and would
+            # otherwise be indistinguishable from the first.
+            logger.warning(
+                "some files were not returned by the API and have been skipped",
+                count=len(missing),
+                urls=missing,
+            )
+        return fetched
+
+    def _fetch_batch_through_transport(self, urls: list[str]) -> dict[str, str | bytes]:
+        """Fetch a batch, retrying with credentials if the server cannot sign."""
+        transport = self.client.storage_transport
+        if transport.is_presigned():
+            try:
+                return self._fetch_batch_presigned(urls)
+            except ApiResponseError as error:
+                if not transport.falls_back_on(error):
+                    raise
+
+        return self._fetch_batch_with_credentials(urls)
+
+    def _fetch_batch_presigned(self, urls: list[str]) -> dict[str, str | bytes]:
+        grants = {grant.url: grant for grant in self.client.results.get_presigned_urls_batch(urls)}
+        fetched: dict[str, str | bytes] = {}
         for url in urls:
-            if url in url_to_access:
-                str_data = self._download_with_credentials(url_to_access[url])
-                extension = url.split(".")[-1]
-                results[url] = self._str_to_results(str_data, f".{extension}")
-            # Skip files that failed permission check (not in url_to_access)
+            grant = grants.get(url) or grants.get(storage_url_of(url))
+            if grant is None:
+                continue
+            content = presigned_transfer.download(
+                grant.presigned_url, should_verify_ssl=self.client.should_verify_ssl
+            )
+            fetched[url] = decode_result(grant.url, content)
+        return fetched
 
-        return results
+    def _fetch_batch_with_credentials(self, urls: list[str]) -> dict[str, str | bytes]:
+        accesses = {
+            access.url: access
+            for access in self.client.results.get_permissions_to_download_batch(urls)
+        }
+        return {
+            url: self._download_with_credentials(accesses[url]) for url in urls if url in accesses
+        }
